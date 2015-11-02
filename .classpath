@@ -1,0 +1,19 @@
+<classpath>
+  <classpathentry output="target/scala-2.11/classes" kind="src" path="src/main/scala-2.11"/>
+  <classpathentry output="target/scala-2.11/classes" kind="src" path="src/main/scala"/>
+  <classpathentry output="target/scala-2.11/classes" kind="src" path="src/main/java"/>
+  <classpathentry output="target/scala-2.11/test-classes" kind="src" path="src/test/scala-2.11"/>
+  <classpathentry output="target/scala-2.11/test-classes" kind="src" path="src/test/scala"/>
+  <classpathentry output="target/scala-2.11/test-classes" kind="src" path="src/test/java"/>
+  <classpathentry kind="con" path="org.scala-ide.sdt.launching.SCALA_CONTAINER"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.9.jar"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/org.apache.poi/poi/jars/poi-3.9.jar"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.5.jar"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/com.github.wookietreiber/scala-chart_2.11/jars/scala-chart_2.11-0.5.0.jar"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/org.jfree/jfreechart/jars/jfreechart-1.0.19.jar"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/org.jfree/jcommon/jars/jcommon-1.0.23.jar"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/org.scala-lang.modules/scala-swing_2.11/bundles/scala-swing_2.11-1.0.2.jar"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/com.itextpdf/itextpdf/jars/itextpdf-5.5.6.jar"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="output" path="bin"/>
+</classpath>
