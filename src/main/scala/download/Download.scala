@@ -10,37 +10,73 @@ import org.joda.time.format.DateTimeFormat
 
 /**
  * Folder with monthly data
+ * 
+ * Structure of the excel files generated from ELIA website :
+ * 
+ * Wind Data :
+ * Begins at row # 4
+ *  - column 0 :DateTime -> TEXTCELL     
+ *  - column 1 :Day-ahead Forecast [MW]	 -> TEXTCELL    
+ *  - column 2 :Real-time Measured [MW]	 -> TEXTCELL    
+ *  - column 3 :Monitored Capacity [MW]	 -> TEXTCELL    
+ *  - column 4 :Decremental bid requested on wind farm(s) [yes/no] -> TEXTCELL    
+ * 
+ * Solar Data (http://www.elia.be/fr/grid-data/production/Solar-power-generation-data/Graph) :
+ * Begins at row # 4
+ *  - column 0 :DateTime	 -> TEXTCELL    
+ *  - column 1 :Day-Ahead forecast [MW]	 -> NUMERICCELL    
+ *  - column 2 :Intraday forecast [MW]	 -> NUMERICCELL 
+ *  - column 3 :Real-time Upscaled Measurement [MW]		 -> NUMERICCELL 
+ *  - column 4 :Corrected Upscaled Measurement [MW]		 -> NUMERICCELL 
+ *  - column 5 :Monitored Capacity [MWp]	 -> NUMERICCELL 
+ *  
  */
-class WindData {
-
-  val windData = createWindData
-  val n = windData.size
-  val times = windData.map(_.time).toList
-  val actuals = windData.map(_.actual).toList
-
-  def createWindData: List[EliaData] = {
-    val folder = new File("/Users/Elise/Documents/workspace/data/windData")
+class EliaEntry(val time : DateTime, val forecast : Double, val actual : Double, val capacity : Double) {
+  val capacityFactor = actual/capacity  
+}
+abstract class EliaData(folderLocation : String, startRow : Int) {
+   val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+   
+  val data : List[EliaEntry] = createData
+  val n = data.size
+  val times = data.map(_.time).toList
+  val actuals = data.map(_.actual).toList
+  val meanFactor = data.map(_.capacityFactor).sum / n
+  
+  def createData : List[EliaEntry] = {
+    val folder = new File(folderLocation)
     val files = folder.listFiles()
     val res = {
-      for (f <- files) yield {
+      for (f <- files; if(!f.getAbsolutePath.contains(".DS_Store"))) yield {
         val inp = new FileInputStream(f)
         val wb = new HSSFWorkbook(inp)
         val sheet = wb.getSheetAt(0)
-        for (r <- 4 to sheet.getLastRowNum; if (sheet.getRow(r).getCell(0) != null))
-          yield createWindEntry(sheet.getRow(r))
+        for (r <- startRow to sheet.getLastRowNum; if (sheet.getRow(r).getCell(0) != null))
+          yield createEntry(sheet.getRow(r))
       }
     }
     res.flatten.toList
   }
-
-  def createWindEntry(row: HSSFRow): EliaData = {
-    val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
-    new EliaData(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
-      toDouble(row, 1), toDouble(row, 2), toDouble(row, 3))
-  }
+  def createEntry(row : HSSFRow) : EliaEntry
+  
   def toDouble(row: HSSFRow, col: Int): Double = {
     if (row.getCell(col) == null) 0.0
     else if (row.getCell(col).getStringCellValue.isEmpty()) 0.0
     else row.getCell(col).getStringCellValue.toDouble
+  }
+}
+class WindData extends EliaData("/Users/Elise/Documents/workspace/data/windData",4) {
+  def createEntry(row: HSSFRow): EliaEntry = {
+    new EliaEntry(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
+      toDouble(row, 1), toDouble(row, 2), toDouble(row, 3))
+  }
+}
+
+class SolarData extends EliaData("/Users/Elise/Documents/workspace/data/solarData",4) {
+  def createEntry(row: HSSFRow): EliaEntry = {
+    new EliaEntry(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
+      row.getCell(1).getNumericCellValue,
+      row.getCell(3).getNumericCellValue,
+      row.getCell(5).getNumericCellValue)
   }
 }
