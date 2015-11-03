@@ -9,9 +9,10 @@ object Launcher {
     println("Solar : " + solar.meanFactor + " (" + solar.n + "observations)")
 
     val helper = new PlotHelper
-    helper.plotTime(wind.times, wind.data.map(_.capacity), "", "")
+    //helper.plotTime(solar.times, solar.data.map(_.capacity), "", "")
     //helper.plotXY(wind.windData.map(_.capacityFactor), "Capacity Factor",  wind.windData.map(_.capacity), "Total installed", "")
-    //helper.histogram(wind.data.map(_.capacityFactor), 100, "")
+    helper.histogram(wind.data.map(_.capacityFactor), 100, "CAPACITY FACTOR WIND")
+    helper.histogram(solar.data.map(_.capacityFactor), 100, "CAPACITY FACTOR SOLAR")
   }
   
 }
