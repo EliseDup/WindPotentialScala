@@ -12,10 +12,12 @@ import org.joda.time.format.DateTimeFormat
  * Folder with monthly data
  */
 class WindData {
-  
+
   val windData = createWindData
   val n = windData.size
-  
+  val times = windData.map(_.time).toList
+  val actuals = windData.map(_.actual).toList
+
   def createWindData: List[EliaData] = {
     val folder = new File("/Users/Elise/Documents/workspace/data/windData")
     val files = folder.listFiles()
@@ -33,13 +35,12 @@ class WindData {
 
   def createWindEntry(row: HSSFRow): EliaData = {
     val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
-    println(row.getCell(0).getStringCellValue)
-     new EliaData(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
+    new EliaData(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
       toDouble(row, 1), toDouble(row, 2), toDouble(row, 3))
   }
   def toDouble(row: HSSFRow, col: Int): Double = {
     if (row.getCell(col) == null) 0.0
-    else if(row.getCell(col).getStringCellValue.isEmpty()) 0.0
+    else if (row.getCell(col).getStringCellValue.isEmpty()) 0.0
     else row.getCell(col).getStringCellValue.toDouble
   }
 }
