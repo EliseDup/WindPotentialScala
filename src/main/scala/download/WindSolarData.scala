@@ -33,8 +33,10 @@ import org.joda.time.format.DateTimeFormat
  */
 class EliaEntry(val time : DateTime, val forecast : Double, val actual : Double, val capacity : Double) {
   val capacityFactor = actual/capacity  
+  val generation = actual / 4.0
 }
-abstract class EliaData(folderLocation : String, startRow : Int) {
+abstract class EliaData(folderName : String, startRow : Int) {
+    val folderLocation = "/Users/Elise/Documents/workspace/data/" + folderName
    val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
    
   val data : List[EliaEntry] = createData
@@ -65,14 +67,14 @@ abstract class EliaData(folderLocation : String, startRow : Int) {
     else row.getCell(col).getStringCellValue.toDouble
   }
 }
-class WindData extends EliaData("/Users/Elise/Documents/workspace/data/windData",4) {
+class WindData extends EliaData("windData",4) {
   def createEntry(row: HSSFRow): EliaEntry = {
     new EliaEntry(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
       toDouble(row, 1), toDouble(row, 2), toDouble(row, 3))
   }
 }
 
-class SolarData extends EliaData("/Users/Elise/Documents/workspace/data/solarData",4) {
+class SolarData extends EliaData("solarData",4) {
   def createEntry(row: HSSFRow): EliaEntry = {
     new EliaEntry(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
       row.getCell(1).getNumericCellValue,

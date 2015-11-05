@@ -17,7 +17,10 @@ import org.jfree.chart.JFreeChart
 import org.jfree.data.statistics.HistogramDataset
 
 class PlotHelper {
-
+  
+def plotTime(t: List[DateTime], values: List[Double]) {
+  plotTime(t,values,"","")
+}
   def plotTime(t: List[DateTime], values: List[Double], label: String, title: String) {
     assert(t.size == values.size)
     val series = new TimeSeries(label)
@@ -27,7 +30,9 @@ class PlotHelper {
     val chart = ChartFactory.createTimeSeriesChart("", "Date", label, dataset, true, true, false)
     createFrame(chart)
   }
-
+  def plotXY(x: List[Double], y: List[Double]) {
+    plotXY(x, "", y, "", "")
+  }
   def plotXY(x: List[Double], labelX: String, y: List[Double], labelY: String, title: String) {
     assert(x.size == y.size)
     val series = new XYSeries(title)
@@ -38,22 +43,22 @@ class PlotHelper {
       true, true, false)
     createFrame(chart)
   }
-  
-  def histogram(values : List[Double], n : Int, title : String){
-     val dataSet = new HistogramDataset()
-     dataSet.addSeries(title, values.toArray, n)
-     val chart = ChartFactory.createHistogram("",
-                null,
-                null,
-                dataSet,
-                PlotOrientation.VERTICAL,
-                true,
-                true,
-                false)
-                createFrame(chart)
+
+  def histogram(values: List[Double], n: Int, title: String) {
+    val dataSet = new HistogramDataset()
+    dataSet.addSeries(title, values.toArray, n)
+    val chart = ChartFactory.createHistogram("",
+      null,
+      null,
+      dataSet,
+      PlotOrientation.VERTICAL,
+      true,
+      true,
+      false)
+    createFrame(chart)
   }
-  
-  def createFrame(chart : JFreeChart){
+
+  def createFrame(chart: JFreeChart) {
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
     val frame = new ApplicationFrame("")
