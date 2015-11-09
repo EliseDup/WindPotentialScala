@@ -7,13 +7,14 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.joda.time.format.DateTimeFormat
 
 // Load in KW for a quarter, convert for kWh
-class LoadEntry(val time: DateTime, val load: Double){
+class LoadEntry(val time: DateTime, val load: Double) extends Serializable{
   val consumption = load / 4.0
+  override def toString()= "Load on "+ time + " : " + load + "[kW]"
 }
 
-class LoadData {
-  val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
-  val dayFormat = DateTimeFormat.forPattern("dd/MM/yyyy")
+class LoadData extends Serializable{
+  @transient val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+  @transient val dayFormat = DateTimeFormat.forPattern("dd/MM/yyyy")
 
   val data: List[LoadEntry] = createData
   // replacer tous les 0 par un moyenne ?

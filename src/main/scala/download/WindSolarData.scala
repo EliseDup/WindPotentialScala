@@ -7,6 +7,8 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.io.FileInputStream
 import org.apache.poi.ss.usermodel.Workbook
 import org.joda.time.format.DateTimeFormat
+import org.joda.time.Days
+import org.joda.time.Months
 
 /**
  * Folder with monthly data
@@ -31,25 +33,47 @@ import org.joda.time.format.DateTimeFormat
  *  - column 5 :Monitored Capacity [MWp]	 -> NUMERICCELL
  *
  */
-class EliaEntry(val time: DateTime, val forecast: Double, val actual: Double, val capacity: Double) {
+class EliaEntry(val time: DateTime, val forecast: Double, val actual: Double, val capacity: Double) extends Serializable {
   val capacityFactor = actual / capacity
+  override def toString() = "Date :" + time + ", forecast [kW] :" + forecast + ", actual [kW]" + actual + ", installed capacity [kW]:" + capacity
 }
-abstract class EliaData(val name : String, folderName: String, startRow: Int) {
-  val folderLocation = "/Users/Elise/Documents/workspace/data/" + folderName
-  val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+abstract class EliaData(val name: String, folderName: String, startRow: Int) extends Serializable {
+
+  @transient val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
 
   val data: List[EliaEntry] = createData
   val n = data.size
   val times = data.map(_.time).toList
   val actuals = data.map(_.actual).toList
   val meanFactor = data.map(_.capacityFactor).sum / n
-  
-  
-  // Annual production :
-  val prod2014 = data.filter(_.time.getYear()==2014).map(_.actual).sum/4.0
+
+  def dataYear(y: Int) = data.filter(_.time.getYear() == y)
+  val nDays = Days.daysBetween(data(0).time, data(n - 1).time).getDays()
+  val nMonths = Months.monthsBetween(data(0).time, data(n - 1).time).getMonths()
+
+  val dailyAverages = {
+    (for (i <- 0 until nDays) yield {
+      val day = data(0).time.withTimeAtStartOfDay.plusDays(i)
+      val d = data.filter(i => sameDay(day,i.time))
+      new EliaEntry(day, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum)
+    }).toList
+  }
+  val monthlyAverages = {
+    (for (i <- 0 until nMonths) yield {
+      val month = data(0).time.withTimeAtStartOfDay.withDayOfMonth(1).plusMonths(i)
+      val d = data.filter(i => sameMonth(month,i.time))
+      new EliaEntry(month, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum)
+    }).toList
+  }
+  def sameDay(d1: DateTime, d2: DateTime): Boolean = {
+    d1.getYear == d2.getYear && d1.dayOfYear == d2.dayOfYear
+  }
+  def sameMonth(d1: DateTime, d2: DateTime): Boolean = {
+    d1.getYear == d2.getYear && d1.monthOfYear == d2.monthOfYear
+  }
 
   def createData: List[EliaEntry] = {
-    val folder = new File(folderLocation)
+    val folder = new File(folderName)
     val files = folder.listFiles()
     val res = {
       for (f <- files; if (!f.getAbsolutePath.contains(".DS_Store"))) yield {

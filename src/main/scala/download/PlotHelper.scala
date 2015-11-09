@@ -15,6 +15,7 @@ import org.jfree.data.xy.XYSeriesCollection
 import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.JFreeChart
 import org.jfree.data.statistics.HistogramDataset
+import org.jfree.data.category.DefaultCategoryDataset
 
 class PlotHelper {
   
@@ -51,6 +52,30 @@ def plotTime(t: List[DateTime], values: List[Double]) {
       null,
       null,
       dataSet,
+      PlotOrientation.VERTICAL,
+      true,
+      true,
+      false)
+    createFrame(chart)
+  }
+  
+  def repartition(values : List[Double], n : Int, title : String){
+    val min = values.min
+val max = values.max
+    val dataset = new DefaultCategoryDataset()
+    // Ajouter le nombre de données dans le nième intervalles en min et max
+    val inter = (max-min)/n
+    var total = 0.0
+    for(i <- 0 until n){
+      val size = values.filter(j => j>=i*inter && j<(i+1)*inter).size
+      total = total + size/4.0
+      dataset.addValue(size/4.0, "", (i+1)*inter)
+    }
+    println("total # hours : " + total)
+    val chart = ChartFactory.createBarChart(title,
+      null,
+      null,
+      dataset,
       PlotOrientation.VERTICAL,
       true,
       true,
