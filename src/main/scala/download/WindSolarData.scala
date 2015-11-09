@@ -48,8 +48,8 @@ abstract class EliaData(val name: String, folderName: String, startRow: Int) ext
   val meanFactor = data.map(_.capacityFactor).sum / n
 
   def dataYear(y: Int) = data.filter(_.time.getYear() == y)
-  val nDays = Days.daysBetween(data(0).time, data(n - 1).time).getDays()
-  val nMonths = Months.monthsBetween(data(0).time, data(n - 1).time).getMonths()
+  val nDays = Days.daysBetween(data(0).time, data(n - 1).time).getDays() + 1
+  val nMonths = Months.monthsBetween(data(0).time, data(n - 1).time).getMonths() + 1
 
   val dailyAverages = {
     (for (i <- 0 until nDays) yield {

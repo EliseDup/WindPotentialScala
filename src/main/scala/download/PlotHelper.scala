@@ -71,7 +71,6 @@ val max = values.max
       total = total + size/4.0
       dataset.addValue(size/4.0, "", (i+1)*inter)
     }
-    println("total # hours : " + total)
     val chart = ChartFactory.createBarChart(title,
       null,
       null,
@@ -82,7 +81,7 @@ val max = values.max
       false)
     createFrame(chart)
   }
-
+  
   def createFrame(chart: JFreeChart) {
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
@@ -90,5 +89,17 @@ val max = values.max
     frame.setContentPane(chartPanel)
     frame.pack()
     frame.setVisible(true)
+  }
+  
+  def barChart(dataset : DefaultCategoryDataset){
+    val chart = ChartFactory.createBarChart("",
+      null,
+      null,
+      dataset,
+      PlotOrientation.VERTICAL,
+      true,
+      true,
+      false)
+    createFrame(chart)
   }
 }
