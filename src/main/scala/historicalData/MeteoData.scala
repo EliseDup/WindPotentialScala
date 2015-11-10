@@ -53,6 +53,10 @@ class MeteoData(val city : String, val start: DateTime, val end: DateTime) exten
   @transient val dayFormat = DateTimeFormat.forPattern("yyyy/MM/dd")
 
   val data = createMeteoData
+  val times = data.map(_.time)
+  val temp = data.map(_.temp)
+  val windSpeed = data.map(_.windSpeed)
+  
   def createMeteoData: List[MeteoEntry] = {
     (for (i <- 0 until nDay) yield createMeteoDay(i)).flatten.toList
   }

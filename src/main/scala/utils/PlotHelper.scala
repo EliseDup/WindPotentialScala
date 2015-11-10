@@ -55,7 +55,10 @@ class PlotHelper {
       false)
     createFrame(chart)
   }
-
+  
+def repartition(values: List[Double], n: Int) {
+  repartition(values,n,"")
+}
   def repartition(values: List[Double], n: Int, title: String) {
     val min = values.min
     val max = values.max
