@@ -1,4 +1,4 @@
-package download
+package historicalData
 
 import org.joda.time.DateTime
 import java.io.File
