@@ -1,8 +1,7 @@
-package meteo
+package historicalData
 
 import org.joda.time.DateTime
 import org.joda.time.Days
-import java.text.DateFormat
 import org.joda.time.format.DateTimeFormat
 import scala.io.Source.{ fromInputStream }
 import java.net._
@@ -59,6 +58,7 @@ class MeteoData(val city : String, val start: DateTime, val end: DateTime) exten
   }
   def createMeteoDay(i: Int): List[MeteoEntry] = {
     val day = start.plusDays(i).toString(dayFormat)
+    println(day)
     val urlString = "http://www.wunderground.com/history/airport/EBBR/" +
       day +
       "/DailyHistory.html?req_city="+
