@@ -13,8 +13,6 @@ class LoadEntry(val time: DateTime, val load: Double) extends Serializable{
 }
 
 class LoadData extends Serializable{
-  @transient val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
-  @transient val dayFormat = DateTimeFormat.forPattern("dd/MM/yyyy")
 
   val data: List[LoadEntry] = createData
   // replacer tous les 0 par un moyenne ?

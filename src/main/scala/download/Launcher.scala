@@ -3,6 +3,7 @@ package download
 import java.io.ObjectInputStream
 import java.io.FileInputStream
 import org.jfree.data.category.DefaultCategoryDataset
+import utils.PlotHelper
 
 object Launcher {
   

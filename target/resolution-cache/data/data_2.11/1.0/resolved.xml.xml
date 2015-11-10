@@ -4,7 +4,7 @@
 		module="data_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20151102164549"
+		publication="20151110113724"
 	>
 		<description>
 		data
@@ -39,5 +39,6 @@
 		<dependency org="org.jfree" name="jfreechart" rev="1.0.14" conf="compile->default(compile)"/>
 		<dependency org="com.github.wookietreiber" name="scala-chart_2.11" rev="latest.integration" conf="compile->default(compile)"/>
 		<dependency org="com.itextpdf" name="itextpdf" rev="5.5.6" conf="compile->default(compile)"/>
+		<dependency org="com.typesafe.play" name="play-json_2.11" rev="2.3.4" conf="compile->default(compile)"/>
 	</dependencies>
 </ivy-module>
