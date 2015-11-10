@@ -15,7 +15,7 @@ object MeteoDataLoader {
     val end = new DateTime(2015, 10, 31, 0, 0)
     val city = "Bruxelles"
     
-    Helper.saveObject("meteo",new MeteoData(city, start, end))
+    Helper.saveResult("meteo",new MeteoData(city, start, end))
       
   }
 }
