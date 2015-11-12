@@ -35,7 +35,9 @@ import org.joda.time.Months
  */
 class EliaEntry(val time: DateTime, val forecast: Double, val actual: Double, val capacity: Double) extends Serializable {
   val capacityFactor = actual / capacity
-  override def toString() = "Date :" + time + ", forecast [kW] :" + forecast + ", actual [kW]" + actual + ", installed capacity [kW]:" + capacity
+  // Given we have a power measurement every 15 minutes, the energy produced [MWh] is Power/4
+  val energy = actual / 4.0
+  override def toString() = "Date :" + time + ", forecast [MW] :" + forecast + ", actual [MW]" + actual + ", installed capacity [MW]:" + capacity
 }
 abstract class EliaData(val name: String, folderName: String, startRow: Int) extends Serializable {
 
@@ -48,20 +50,22 @@ abstract class EliaData(val name: String, folderName: String, startRow: Int) ext
   val meanFactor = data.map(_.capacityFactor).sum / n
 
   def dataYear(y: Int) = data.filter(_.time.getYear() == y)
+  def dataYearMonth(y: Int, m: Int) = data.filter(t => t.time.getYear() == y && t.time.getMonthOfYear() == m)
+  
   val nDays = Days.daysBetween(data(0).time, data(n - 1).time).getDays() + 1
   val nMonths = Months.monthsBetween(data(0).time, data(n - 1).time).getMonths() + 1
 
   val dailyAverages = {
     (for (i <- 0 until nDays) yield {
       val day = data(0).time.withTimeAtStartOfDay.plusDays(i)
-      val d = data.filter(i => sameDay(day,i.time))
+      val d = data.filter(i => sameDay(day, i.time))
       new EliaEntry(day, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum)
     }).toList
   }
   val monthlyAverages = {
     (for (i <- 0 until nMonths) yield {
       val month = data(0).time.withTimeAtStartOfDay.withDayOfMonth(1).plusMonths(i)
-      val d = data.filter(i => sameMonth(month,i.time))
+      val d = data.filter(i => sameMonth(month, i.time))
       new EliaEntry(month, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum)
     }).toList
   }
@@ -94,14 +98,14 @@ abstract class EliaData(val name: String, folderName: String, startRow: Int) ext
     else row.getCell(col).getStringCellValue.toDouble
   }
 }
-class WindData extends EliaData("Wind", "windData", 4) {
+class WindData extends EliaData("Wind", "data/windData", 4) {
   def createEntry(row: HSSFRow): EliaEntry = {
     new EliaEntry(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
       toDouble(row, 1), toDouble(row, 2), toDouble(row, 3))
   }
 }
 
-class SolarData extends EliaData("Solar", "solarData", 4) {
+class SolarData extends EliaData("Solar", "data/solarData", 4) {
   def createEntry(row: HSSFRow): EliaEntry = {
     new EliaEntry(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
       row.getCell(1).getNumericCellValue,

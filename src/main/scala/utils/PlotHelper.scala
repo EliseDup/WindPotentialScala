@@ -13,8 +13,13 @@ import org.jfree.chart.plot.PlotOrientation
 import org.jfree.chart.JFreeChart
 import org.jfree.data.statistics.HistogramDataset
 import org.jfree.data.category.DefaultCategoryDataset
+import org.jfree.data.xy.WindDataset
+import org.jfree.data.xy.DefaultWindDataset
+import historicalData.WindData
+import org.jfree.data.general.DefaultPieDataset
+import historicalData.MeteoData
 
-class PlotHelper {
+object PlotHelper {
 
   def plotTime(t: List[DateTime], values: List[Double]) {
     plotTime(t, values, "", "")
@@ -25,7 +30,7 @@ class PlotHelper {
     (0 until t.size).map(i => series.addOrUpdate(new Minute(t(i).toDate()), values(i)))
     val dataset = new TimeSeriesCollection();
     dataset.addSeries(series);
-    val chart = ChartFactory.createTimeSeriesChart("", "Date", label, dataset, true, true, false)
+    val chart = ChartFactory.createTimeSeriesChart(title, "Date", label, dataset, true, true, false)
     createFrame(chart)
   }
   def plotXY(x: List[Double], y: List[Double]) {
@@ -55,16 +60,16 @@ class PlotHelper {
       false)
     createFrame(chart)
   }
-  
-def repartition(values: List[Double], n: Int) {
-  repartition(values,n,"")
-}
+
+  def repartition(values: List[Double], n: Int) {
+    repartition(values, n, "")
+  }
   def repartition(values: List[Double], n: Int, title: String) {
-    val min = values.min
+    val min = Math.max(0, values.min)
     val max = values.max
     val dataset = new DefaultCategoryDataset()
     // Ajouter le nombre de données dans le nième intervalles en min et max
-    val inter = (max - min) / n
+    val inter = (max - min) / n.toDouble
     var total = 0.0
     for (i <- 0 until n) {
       val size = values.filter(j => j >= i * inter && j < (i + 1) * inter).size
@@ -100,6 +105,17 @@ def repartition(values: List[Double], n: Int) {
       true,
       true,
       false)
+    createFrame(chart)
+  }
+
+  def windPlot2(meteoData: MeteoData) {
+    val serie = new XYSeries("")
+    meteoData.windDegrees.map(i => serie.add(i._2, meteoData.data.filter(_.windDir.equalsIgnoreCase(i._1)).size))//.map(_.windSpeed).sum))
+    
+    val dataSet = new XYSeriesCollection()
+    dataSet.addSeries(serie)
+    
+    val chart = ChartFactory.createPolarChart("Wind direction distrubtion", dataSet, true, true, false)
     createFrame(chart)
   }
 }

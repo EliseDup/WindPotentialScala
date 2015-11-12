@@ -22,12 +22,12 @@ class MeteoEntry(val time: DateTime, val temp: Double, val humidity: Double,
 object MeteoEntry extends Serializable {
   @transient val dateFormat = DateTimeFormat.forPattern("yyyy/MM/dd hh:mm a")
 
-  def apply(day : String, csvLine: Array[String]) = {
+  def apply(day: String, csvLine: Array[String]) = {
     new MeteoEntry(dateFormat.parseDateTime(day + " " + csvLine(0)),
       doubleOrNAN(csvLine(1)),
       doubleOrNAN(csvLine(3)),
       doubleOrNAN(csvLine(4)),
-      csvLine(5),
+      csvLine(6),
       doubleOrZero(csvLine(7)),
       csvLine(12))
   }
@@ -48,25 +48,31 @@ object MeteoEntry extends Serializable {
  *
  * http://www.wunderground.com/history/airport/EBBR/2012/11/10/DailyHistory.html?req_city=Bruxelles&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1
  */
-class MeteoData(val city : String, val start: DateTime, val end: DateTime) extends Serializable {
+class MeteoData(val city: String, val start: DateTime, val end: DateTime) extends Serializable {
   val nDay = Days.daysBetween(start, end).getDays
   @transient val dayFormat = DateTimeFormat.forPattern("yyyy/MM/dd")
-
+  
+  val windDirections = Array("North", "NNE", "NE", "ENE", 
+      "East", "ESE", "SE", "SSE", 
+      "South", "SSW", "SW", "WSW", 
+      "West", "WNW", "NW", "NNW")
+  val windDegrees = (0 until windDirections.size).map(i => (windDirections(i),22.5*i)).toArray
+  
   val data = createMeteoData
   val times = data.map(_.time)
   val temp = data.map(_.temp)
   val windSpeed = data.map(_.windSpeed)
-  
+
   def createMeteoData: List[MeteoEntry] = {
     (for (i <- 0 until nDay) yield createMeteoDay(i)).flatten.toList
   }
   def createMeteoDay(i: Int): List[MeteoEntry] = {
     val day = start.plusDays(i).toString(dayFormat)
-    println(day)
+    println("Load meteo for " + day)
     val urlString = "http://www.wunderground.com/history/airport/EBBR/" +
       day +
-      "/DailyHistory.html?req_city="+
-      city+
+      "/DailyHistory.html?req_city=" +
+      city +
       "&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1"
 
     val csv = fromInputStream(new URL(urlString).openStream).getLines
