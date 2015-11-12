@@ -33,50 +33,33 @@ import org.joda.time.Months
  *  - column 5 :Monitored Capacity [MWp]	 -> NUMERICCELL
  *
  */
-class EliaEntry(val time: DateTime, val forecast: Double, val actual: Double, val capacity: Double) extends Serializable {
-  val capacityFactor = actual / capacity
+class PowerGenerationObservation(time: DateTime, val forecast: Double, val actual: Double, val capacity: Double, name : String) extends Observation(time, actual, name) {
+  // Capacity factor correspond to the power obtained to the capacity installed
+  val capacityFactor = actual / capacity 
   // Given we have a power measurement every 15 minutes, the energy produced [MWh] is Power/4
   val energy = actual / 4.0
-  override def toString() = "Date :" + time + ", forecast [MW] :" + forecast + ", actual [MW]" + actual + ", installed capacity [MW]:" + capacity
 }
-abstract class EliaData(val name: String, folderName: String, startRow: Int) extends Serializable {
 
-  @transient val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+abstract class EliaData(val name: String, folderName: String, startRow: Int) extends HistoricalData[PowerGenerationObservation](name) {
 
-  val data: List[EliaEntry] = createData
-  val n = data.size
-  val times = data.map(_.time).toList
-  val actuals = data.map(_.actual).toList
-  val meanFactor = data.map(_.capacityFactor).sum / n
-
-  def dataYear(y: Int) = data.filter(_.time.getYear() == y)
-  def dataYearMonth(y: Int, m: Int) = data.filter(t => t.time.getYear() == y && t.time.getMonthOfYear() == m)
-  
-  val nDays = Days.daysBetween(data(0).time, data(n - 1).time).getDays() + 1
-  val nMonths = Months.monthsBetween(data(0).time, data(n - 1).time).getMonths() + 1
-
+  val meanFactor = observations.map(_.capacityFactor).sum / n
+ 
   val dailyAverages = {
     (for (i <- 0 until nDays) yield {
-      val day = data(0).time.withTimeAtStartOfDay.plusDays(i)
-      val d = data.filter(i => sameDay(day, i.time))
-      new EliaEntry(day, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum)
+      val day = observations(0).time.withTimeAtStartOfDay.plusDays(i)
+      val d = observations.filter(i => sameDay(day, i.time))
+      new PowerGenerationObservation(day, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum, name)
     }).toList
   }
   val monthlyAverages = {
     (for (i <- 0 until nMonths) yield {
-      val month = data(0).time.withTimeAtStartOfDay.withDayOfMonth(1).plusMonths(i)
-      val d = data.filter(i => sameMonth(month, i.time))
-      new EliaEntry(month, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum)
+      val month = observations(0).time.withTimeAtStartOfDay.withDayOfMonth(1).plusMonths(i)
+      val d = observations.filter(i => sameMonth(month, i.time))
+      new PowerGenerationObservation(month, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum, name)
     }).toList
   }
-  def sameDay(d1: DateTime, d2: DateTime): Boolean = {
-    d1.getYear == d2.getYear && d1.dayOfYear == d2.dayOfYear
-  }
-  def sameMonth(d1: DateTime, d2: DateTime): Boolean = {
-    d1.getYear == d2.getYear && d1.monthOfYear == d2.monthOfYear
-  }
-
-  def createData: List[EliaEntry] = {
+  
+  def createData: List[PowerGenerationObservation] = {
     val folder = new File(folderName)
     val files = folder.listFiles()
     val res = {
@@ -90,7 +73,7 @@ abstract class EliaData(val name: String, folderName: String, startRow: Int) ext
     }
     res.flatten.toList
   }
-  def createEntry(row: HSSFRow): EliaEntry
+  def createEntry(row: HSSFRow): PowerGenerationObservation
 
   def toDouble(row: HSSFRow, col: Int): Double = {
     if (row.getCell(col) == null) 0.0
@@ -99,17 +82,19 @@ abstract class EliaData(val name: String, folderName: String, startRow: Int) ext
   }
 }
 class WindData extends EliaData("Wind", "data/windData", 4) {
-  def createEntry(row: HSSFRow): EliaEntry = {
-    new EliaEntry(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
-      toDouble(row, 1), toDouble(row, 2), toDouble(row, 3))
+  def createEntry(row: HSSFRow): PowerGenerationObservation = {
+    @transient val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+    new PowerGenerationObservation(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
+      toDouble(row, 1), toDouble(row, 2), toDouble(row, 3), name)
   }
 }
 
 class SolarData extends EliaData("Solar", "data/solarData", 4) {
-  def createEntry(row: HSSFRow): EliaEntry = {
-    new EliaEntry(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
+  def createEntry(row: HSSFRow): PowerGenerationObservation = {
+    @transient val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
+    new PowerGenerationObservation(new DateTime(dateFormat.parseDateTime(row.getCell(0).getStringCellValue)),
       row.getCell(1).getNumericCellValue,
       row.getCell(3).getNumericCellValue,
-      row.getCell(5).getNumericCellValue)
+      row.getCell(5).getNumericCellValue, name)
   }
 }

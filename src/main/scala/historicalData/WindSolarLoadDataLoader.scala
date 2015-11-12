@@ -13,9 +13,9 @@ import utils.Helper
 object WindSolarLoadDataLoader {
 
   def main(args: Array[String]) = {
+    Helper.saveResult("load", new LoadData)
     Helper.saveResult("wind", new WindData)
     Helper.saveResult("solar", new SolarData)
-    Helper.saveResult("load", new LoadData)
 
   }
 

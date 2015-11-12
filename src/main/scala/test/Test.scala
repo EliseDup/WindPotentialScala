@@ -19,7 +19,7 @@ object Test {
   //  PlotHelper.plotXY(speeds, power)
 
     // Estimate wind power from data
-    val wind = Helper.readResult("wind").asInstanceOf[WindData].data.filter(i => i.time.getYear==2015 && i.time.getMonthOfYear==10).toList
+    val wind = Helper.readResult("wind").asInstanceOf[WindData].dataYearMonth(2015,10)
     val meteo = Helper.readResult("meteo").asInstanceOf[MeteoData].data.filter(_.time.getYear==2015).toList
     val nTurbines = wind(wind.size - 1).capacity / 2.0
     

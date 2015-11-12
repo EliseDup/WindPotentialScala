@@ -27,8 +27,6 @@ object Launcher {
     }
 
     val meteo2015 = meteo.data.filter(i => i.windSpeed >= 0 && i.time.getYear == 2015 && i.time.getMonthOfYear == 10)
-    val wind2015 = wind.data.filter(i => i.time.getYear == 2015 && i.time.getMonthOfYear == 10)
-
     //helper.plotTime(meteo2015.map(_.time), meteo2015.map(_.windSpeed),"", "Wind Speed [m/s]")
     //helper.plotTime(wind2015.map(_.time), wind2015.map(_.energy), "", "Wind Power Generation [MWh]")
 
