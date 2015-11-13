@@ -1,6 +1,5 @@
 package test
 
-import calculation.WindTurbine
 import utils.PlotHelper
 import utils.Helper
 import historicalData.WindData
@@ -10,37 +9,27 @@ import org.jfree.data.time.TimeSeries
 import org.jfree.data.time.Minute
 import org.jfree.data.time.TimeSeriesCollection
 import org.jfree.chart.ChartFactory
+import calculation.WindTurbineSpecifications
+import historicalData.Observation
+import org.apache.commons.math3.distribution.WeibullDistribution
 
 object Test {
   def main(args: Array[String]) = {
-    val turbine = new WindTurbine(2000, 80)
-    val speeds = (0 until 3000).map(i => i * 0.01).toList
-    val power = speeds.map(v => turbine.power(v))
-  //  PlotHelper.plotXY(speeds, power)
-
+    val turbine = WindTurbineSpecifications.TwoMW()
+    val s = (0 until 250).map(i => 0.1*i).toList
+    //PlotHelper.plotXY( (s,s.map(s => turbine.power(s)),"2MW"))
+  
     // Estimate wind power from data
-    val wind = Helper.readResult("wind").asInstanceOf[WindData].dataYearMonth(2015,10)
-    val meteo = Helper.readResult("meteo").asInstanceOf[MeteoData].data.filter(_.time.getYear==2015).toList
+    val wind = Helper.readResult("wind").asInstanceOf[WindData].dataYearMonth(2015, 10)
+    val meteo = Helper.readResult("meteoBruxelles").asInstanceOf[MeteoData].dataYearMonth(2015, 10)
     val nTurbines = wind(wind.size - 1).capacity / 2.0
-    
-    val predictions ={
-      for(i <- meteo) yield {
-        println(i.time + "\t" + i.windSpeed + "\t" + turbine.power(i.windSpeed))
-        new Prediction(i.time, nTurbines*turbine.power(turbine.windExtrapolation(i.windSpeed,10.0,80.0,0.6))/1000.0)
-      }
-    }
-    
-    val predicted = new TimeSeries("Predicted")
-    predictions.map(p => predicted.addOrUpdate(new Minute(p.time.toDate()), p.value))
-    val actuals = new TimeSeries("Actual")
-    wind.map(p => actuals.addOrUpdate(new Minute(p.time.toDate()), p.actual))
-    
-    val dataset = new TimeSeriesCollection();
-    dataset.addSeries(predicted);dataset.addSeries(actuals)
-    val chart = ChartFactory.createTimeSeriesChart("", "", "", dataset, true, true, false)
-    PlotHelper.createFrame(chart)
-  
+
+    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(i.windSpeed, 10) / 1000.0, "Prediction"))
+  //  PlotHelper.plotObservations(List(predictions, wind))
+    def res(city : String) = (Helper.meteo(city).dataYearMonth(2015, 10),city)
+   
+    PlotHelper.plotObservationsWithName(List(res("Bruxelles"),res("Paris"),res("Amsterdam"),res("Londres")))
   }
+
   
-  class Prediction(val time : DateTime, val value : Double)
 }

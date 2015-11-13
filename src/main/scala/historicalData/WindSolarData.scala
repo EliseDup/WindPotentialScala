@@ -33,9 +33,9 @@ import org.joda.time.Months
  *  - column 5 :Monitored Capacity [MWp]	 -> NUMERICCELL
  *
  */
-class PowerGenerationObservation(time: DateTime, val forecast: Double, val actual: Double, val capacity: Double, name : String) extends Observation(time, actual, name) {
+class PowerGenerationObservation(time: DateTime, val forecast: Double, val actual: Double, val capacity: Double, name: String) extends Observation(time, actual, name) {
   // Capacity factor correspond to the power obtained to the capacity installed
-  val capacityFactor = actual / capacity 
+  val capacityFactor = actual / capacity
   // Given we have a power measurement every 15 minutes, the energy produced [MWh] is Power/4
   val energy = actual / 4.0
 }
@@ -43,22 +43,7 @@ class PowerGenerationObservation(time: DateTime, val forecast: Double, val actua
 abstract class EliaData(val name: String, folderName: String, startRow: Int) extends HistoricalData[PowerGenerationObservation](name) {
 
   val meanFactor = observations.map(_.capacityFactor).sum / n
- 
-  val dailyAverages = {
-    (for (i <- 0 until nDays) yield {
-      val day = observations(0).time.withTimeAtStartOfDay.plusDays(i)
-      val d = observations.filter(i => sameDay(day, i.time))
-      new PowerGenerationObservation(day, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum, name)
-    }).toList
-  }
-  val monthlyAverages = {
-    (for (i <- 0 until nMonths) yield {
-      val month = observations(0).time.withTimeAtStartOfDay.withDayOfMonth(1).plusMonths(i)
-      val d = observations.filter(i => sameMonth(month, i.time))
-      new PowerGenerationObservation(month, d.map(_.forecast / 4.0).sum, d.map(_.actual / 4.0).sum, d.map(_.capacity / 4.0).sum, name)
-    }).toList
-  }
-  
+
   def createData: List[PowerGenerationObservation] = {
     val folder = new File(folderName)
     val files = folder.listFiles()
@@ -73,6 +58,8 @@ abstract class EliaData(val name: String, folderName: String, startRow: Int) ext
     }
     res.flatten.toList
   }
+  def mean(t : DateTime, list : List[PowerGenerationObservation]) = new PowerGenerationObservation(t, list.map(_.forecast / 4.0).sum, list.map(_.actual / 4.0).sum, list.map(_.capacity / 4.0).sum, name)
+ 
   def createEntry(row: HSSFRow): PowerGenerationObservation
 
   def toDouble(row: HSSFRow, col: Int): Double = {

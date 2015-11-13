@@ -16,7 +16,6 @@ object WindSolarLoadDataLoader {
     Helper.saveResult("load", new LoadData)
     Helper.saveResult("wind", new WindData)
     Helper.saveResult("solar", new SolarData)
-
   }
 
 }

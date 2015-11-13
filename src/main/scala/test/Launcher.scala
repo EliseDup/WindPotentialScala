@@ -26,11 +26,11 @@ object Launcher {
       PlotHelper.barChart(dataset)
     }
 
-    val meteo2015 = meteo.data.filter(i => i.windSpeed >= 0 && i.time.getYear == 2015 && i.time.getMonthOfYear == 10)
+    val meteo2015 = meteo.dataYearMonth(15, 10).filter(_.windSpeed >= 0)
     //helper.plotTime(meteo2015.map(_.time), meteo2015.map(_.windSpeed),"", "Wind Speed [m/s]")
     //helper.plotTime(wind2015.map(_.time), wind2015.map(_.energy), "", "Wind Power Generation [MWh]")
 
-    // helper.windPlot2(meteo)
+    PlotHelper.windPlot(meteo)
 
     val mean = meteo.windSpeed.sum / meteo.windSpeed.size.toDouble
     println("Mean Wind Speed :" + mean)

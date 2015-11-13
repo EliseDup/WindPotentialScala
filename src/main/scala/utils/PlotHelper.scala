@@ -18,31 +18,44 @@ import org.jfree.data.xy.DefaultWindDataset
 import historicalData.WindData
 import org.jfree.data.general.DefaultPieDataset
 import historicalData.MeteoData
+import historicalData.Observation
 
 object PlotHelper {
 
-  def plotTime(t: List[DateTime], values: List[Double]) {
-    plotTime(t, values, "", "")
-  }
-  def plotTime(t: List[DateTime], values: List[Double], label: String, title: String) {
-    assert(t.size == values.size)
-    val series = new TimeSeries(label)
-    (0 until t.size).map(i => series.addOrUpdate(new Minute(t(i).toDate()), values(i)))
-    val dataset = new TimeSeriesCollection();
-    dataset.addSeries(series);
-    val chart = ChartFactory.createTimeSeriesChart(title, "Date", label, dataset, true, true, false)
+  def plotTime(series: List[(List[DateTime], List[Double], String)]) { plotTime(series, "") }
+  def plotTime(serie: (List[DateTime], List[Double], String)) { plotTime(List(serie), "") }
+  /**
+   * Plot a list of time series in on frame
+   */
+  def plotTime(series: List[(List[DateTime], List[Double], String)], title: String) {
+    val dataset = new TimeSeriesCollection()
+    series.map { s =>
+      val serie = new TimeSeries(s._3)
+      (0 until s._1.size).map(i => serie.addOrUpdate(new Minute(s._1(i).toDate()), s._2(i)))
+      dataset.addSeries(serie)
+    }
+    val chart = ChartFactory.createTimeSeriesChart(title, "", "", dataset, true, true, false)
     createFrame(chart)
   }
-  def plotXY(x: List[Double], y: List[Double]) {
-    plotXY(x, "", y, "", "")
-  }
-  def plotXY(x: List[Double], labelX: String, y: List[Double], labelY: String, title: String) {
-    assert(x.size == y.size)
-    val series = new XYSeries(title)
-    (0 until x.size).map(i => series.add(x(i), y(i)))
+  
+def plotObservations(series: List[(List[Observation])]) { 
+val list = for(i <- series) yield (i.map(_.time), i.map(_.value),i(0).name)
+plotTime(list,"")
+}
+def plotObservationsWithName(series: List[(List[Observation],String)]) { 
+val list = for(i <- series) yield (i._1.map(_.time), i._1.map(_.value),i._2)
+plotTime(list,"")
+}
+  def plotXY(xys: List[(List[Double], List[Double], String)]) { plotXY(xys, "") }
+  def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy), "") }
+  def plotXY(xys: List[(List[Double], List[Double], String)], title: String) {
     val dataSet = new XYSeriesCollection()
-    dataSet.addSeries(series)
-    val chart = ChartFactory.createXYLineChart(title, labelX, labelY, dataSet, PlotOrientation.VERTICAL,
+    xys.map { xy =>
+      val serie = new XYSeries(xy._3)
+      (0 until xy._1.size).map(i => serie.add(xy._1(i), xy._2(i)))
+      dataSet.addSeries(serie)
+    }
+    val chart = ChartFactory.createXYLineChart(title, "", "", dataSet, PlotOrientation.VERTICAL,
       true, true, false)
     createFrame(chart)
   }
@@ -50,14 +63,7 @@ object PlotHelper {
   def histogram(values: List[Double], n: Int, title: String) {
     val dataSet = new HistogramDataset()
     dataSet.addSeries(title, values.toArray, n)
-    val chart = ChartFactory.createHistogram("",
-      null,
-      null,
-      dataSet,
-      PlotOrientation.VERTICAL,
-      true,
-      true,
-      false)
+    val chart = ChartFactory.createHistogram("",null, null,dataSet,PlotOrientation.VERTICAL,true, true, false)
     createFrame(chart)
   }
 
@@ -76,14 +82,7 @@ object PlotHelper {
       total = total + size / 4.0
       dataset.addValue(size / 4.0, "", (i + 1) * inter)
     }
-    val chart = ChartFactory.createBarChart(title,
-      null,
-      null,
-      dataset,
-      PlotOrientation.VERTICAL,
-      true,
-      true,
-      false)
+    val chart = ChartFactory.createBarChart(title,null,null,dataset,PlotOrientation.VERTICAL,true,true,false)
     createFrame(chart)
   }
 
@@ -96,26 +95,19 @@ object PlotHelper {
     frame.setVisible(true)
   }
 
-  def barChart(dataset: DefaultCategoryDataset) {
-    val chart = ChartFactory.createBarChart("",
-      null,
-      null,
-      dataset,
-      PlotOrientation.VERTICAL,
-      true,
-      true,
-      false)
-    createFrame(chart)
-  }
-
-  def windPlot2(meteoData: MeteoData) {
+  def windPlot(meteoData: MeteoData) {
     val serie = new XYSeries("")
-    meteoData.windDegrees.map(i => serie.add(i._2, meteoData.data.filter(_.windDir.equalsIgnoreCase(i._1)).size))//.map(_.windSpeed).sum))
-    
+    meteoData.windDegrees.map(i => serie.add(i._2, meteoData.observations.filter(_.windDir.equalsIgnoreCase(i._1)).map(_.windSpeed).sum))
+
     val dataSet = new XYSeriesCollection()
     dataSet.addSeries(serie)
-    
+
     val chart = ChartFactory.createPolarChart("Wind direction distrubtion", dataSet, true, true, false)
     createFrame(chart)
   }
+  def barChart(dataset: DefaultCategoryDataset) {
+    val chart = ChartFactory.createBarChart("", null, null, dataset,PlotOrientation.VERTICAL, true, true, false)
+    createFrame(chart)
+  }
+
 }

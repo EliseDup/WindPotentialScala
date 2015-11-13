@@ -4,10 +4,9 @@ import org.joda.time.DateTime
 import java.io.File
 import java.io.FileInputStream
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import org.joda.time.format.DateTimeFormat
 
 // Load in KW for a quarter, convert for kWh
-class LoadObservation(time: DateTime, value : Double) extends Observation(time, value, "Load") {
+class LoadObservation(time: DateTime, value: Double) extends Observation(time, value, "Load") {
   val consumption = value / 4.0
 }
 
@@ -37,6 +36,8 @@ class LoadData extends HistoricalData[LoadObservation]("Load") {
     }
     res.flatten.toList
   }
+
+  def mean(t: DateTime, list: List[LoadObservation]) = new LoadObservation(t, list.map(_.value / 4.0).sum)
 
   // replacer tous les 0 par une moyenne ?
   val correctedData = {
