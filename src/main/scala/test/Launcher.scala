@@ -26,7 +26,7 @@ object Launcher {
       PlotHelper.barChart(dataset)
     }
 
-    val meteo2015 = meteo.dataYearMonth(15, 10).filter(_.windSpeed >= 0)
+    val meteo2015 = meteo.dataYear(15).filter(_.windSpeed >= 0)
     //helper.plotTime(meteo2015.map(_.time), meteo2015.map(_.windSpeed),"", "Wind Speed [m/s]")
     //helper.plotTime(wind2015.map(_.time), wind2015.map(_.energy), "", "Wind Power Generation [MWh]")
 

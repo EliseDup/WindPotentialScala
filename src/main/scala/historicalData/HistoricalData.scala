@@ -42,6 +42,6 @@ abstract class HistoricalData[A <: Observation](name: String) extends Serializab
   }
   
   // Return a subset with the observations for a given year, or a given month of a year
-  def dataYear(y: Int) = observations.filter(_.time.getYear == y).toList
-  def dataYearMonth(y: Int, m: Int) = observations.filter(t => t.time.getYear == y && t.time.getMonthOfYear == m).toList
+  def dataYear(y: Int) = observations.filter(t => t.time.getYear == y && t.value >=0).toList
+  def dataYearMonth(y: Int, m: Int) = observations.filter(t => t.time.getYear == y && t.time.getMonthOfYear == m && t.value >=0).toList
 }

@@ -44,16 +44,19 @@ object MeteoEntry {
 
 /**
  * URL to get a csv with data every 20 minutes :
- *  - The important think is the AIRPORT and the date: 
+ *  - The important think is the AIRPORT and the date:
  *   Brussels = EBBR
- *   Anvers = 
+ *   Anvers =
  *
  * http://www.wunderground.com/history/airport/EBBR/2012/11/10/DailyHistory.html?req_city=Bruxelles&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1
  */
 class MeteoData(val airport: String, val start: DateTime, val end: DateTime) extends HistoricalData[MeteoEntry]("Meteo") {
-  
+
   val temp = observations.map(_.temp)
+  val averageTemp = temp.sum / n
+
   val windSpeed = observations.map(_.windSpeed)
+  val averageWind = windSpeed.sum / n
 
   val windDirections = Array("North", "NNE", "NE", "ENE",
     "East", "ESE", "SE", "SSE",
@@ -69,17 +72,17 @@ class MeteoData(val airport: String, val start: DateTime, val end: DateTime) ext
     @transient val dayFormat = DateTimeFormat.forPattern("yyyy/MM/dd")
     val day = start.plusDays(i).toString(dayFormat)
     println("Load meteo for " + day)
-    val urlString = "http://www.wunderground.com/history/airport/"+
-      airport+"/" +
+    val urlString = "http://www.wunderground.com/history/airport/" +
+      airport + "/" +
       day +
       "/DailyHistory.html?req_city=Bruxelles&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1"
 
     val csv = fromInputStream(new URL(urlString).openStream).getLines
     (for (line <- csv; if !line.contains("Time") && line.nonEmpty) yield MeteoEntry(day, line.split(","))).toList
   }
-  
-  def mean(t : DateTime, list : List[MeteoEntry]) = 
-    new MeteoEntry(t, mean(list.map(_.temp)),mean(list.map(_.humidity)),
-        mean(list.map(_.pressure)),"NA",mean(list.map(_.windSpeedkmh)),"NA")
-  def mean(list : List[Double]):Double= list.sum / list.size.toDouble
+
+  def mean(t: DateTime, list: List[MeteoEntry]) =
+    new MeteoEntry(t, mean(list.map(_.temp)), mean(list.map(_.humidity)),
+      mean(list.map(_.pressure)), "NA", mean(list.map(_.windSpeedkmh)), "NA")
+  def mean(list: List[Double]): Double = list.sum / list.size.toDouble
 }
