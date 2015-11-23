@@ -4,7 +4,7 @@ import historicalData.WindData
 import utils.PlotHelper
 import historicalData.MeteoData
 
-class WindTurbineSpecifications(val ratedPower: Double,
+class TheoriticalWindTurbine(val ratedPower: Double,
     val cutInSpeed: Double, val ratedSpeed: Double, val cutOutSpeed: Double,
     val diameter: Double, val hubHeight : Double, val powerCoefficient : Double) {
   /**
@@ -25,6 +25,8 @@ class WindTurbineSpecifications(val ratedPower: Double,
     else if (speed > ratedSpeed) ratedPower
     else Math.min(ratedPower, theoriticalPower(speed))
   }
+  
+  
   /**
    * Extrapolation to calculate the wind speed at height H from wind speed v0
    * measured at a given height h0
@@ -49,7 +51,8 @@ class WindTurbineSpecifications(val ratedPower: Double,
     v0 * (Math.log(h / z0) / Math.log(h0 / z0))
   }
 }
-object WindTurbineSpecifications {
+object TheoriticalWindTurbine {
   // 2MW turbine specifications
-  def TwoMW() = new WindTurbineSpecifications(2000, 3, 12, 22, 80, 80, 0.38)
+  def TwoMW() = new TheoriticalWindTurbine(2000, 3, 12, 22, 80, 80, 0.38)
+  
 }

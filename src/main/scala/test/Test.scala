@@ -9,27 +9,35 @@ import org.jfree.data.time.TimeSeries
 import org.jfree.data.time.Minute
 import org.jfree.data.time.TimeSeriesCollection
 import org.jfree.chart.ChartFactory
-import calculation.WindTurbineSpecifications
+import calculation.TheoriticalWindTurbine
 import historicalData.Observation
 import org.apache.commons.math3.distribution.WeibullDistribution
+import historicalData.MeteoDataLoader
+import calculation.Enercon82_2000
 
 object Test {
   def main(args: Array[String]) = {
-    val turbine = WindTurbineSpecifications.TwoMW()
-    val s = (0 until 250).map(i => 0.1*i).toList
-    //PlotHelper.plotXY( (s,s.map(s => turbine.power(s)),"2MW"))
-  
-    // Estimate wind power from data
-    val wind = Helper.readResult("wind").asInstanceOf[WindData].dataYearMonth(2015, 10)
-    val meteo = Helper.readResult("meteoBruxelles").asInstanceOf[MeteoData].dataYearMonth(2015, 10)
-    val nTurbines = wind(wind.size - 1).capacity / 2.0
-
-    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(i.windSpeed, 10) / 1000.0, "Prediction"))
-  //  PlotHelper.plotObservations(List(predictions, wind))
-    def res(city : String) = (Helper.meteo(city).dataYearMonth(2015, 10),city)
-   
-    PlotHelper.plotObservationsWithName(List(res("Bruxelles"),res("Paris"),res("Amsterdam"),res("Londres")))
+    windPrediction("Bruxelles")
+    windRepartition
   }
 
-  
+  def windPrediction(city: String) {
+    val turbine = new Enercon82_2000(98, 0.6)
+
+    // Estimate wind power from data
+    val wind = Helper.readResult("wind").asInstanceOf[WindData].dataYear(2015)
+    val meteo = Helper.readResult("meteo" + city).asInstanceOf[MeteoData].dataYear(2015)
+    val nTurbines = wind(wind.size - 1).capacity*Math.pow(10,3) / turbine.ratedPower
+
+    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(i.windSpeed) / 1000.0, "Prediction"))
+    PlotHelper.plotObservationsWithName(List((predictions, "Predictions"), (wind, "Actuals")))
+
+  }
+  def windRepartition {
+    def res(city: String) = (Helper.meteo(city).dataYear(2015), city)
+    def windSpeed(city: String) = (Helper.meteo(city).dataYear(2015).map(_.windSpeed), city)
+    val list = MeteoDataLoader.cities.map(c => windSpeed(c._1))
+    PlotHelper.repartition(list, 10)
+
+  }
 }
