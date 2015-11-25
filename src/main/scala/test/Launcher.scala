@@ -7,16 +7,16 @@ import java.io.FileInputStream
 import org.jfree.data.category.DefaultCategoryDataset
 import utils.PlotHelper
 import historicalData.LoadData
-import historicalData.SolarData
-import historicalData.WindData
+import historicalData.SolarEnergyData
+import historicalData.WindEnergyData
 import utils.Helper
 import historicalData.MeteoData
 
 object Launcher {
 
   def main(args: Array[String]) = {
-    val wind = Helper.readResult("wind").asInstanceOf[WindData]
-    val solar = Helper.readResult("solar").asInstanceOf[SolarData]
+    val wind = Helper.readResult("wind").asInstanceOf[WindEnergyData]
+    val solar = Helper.readResult("solar").asInstanceOf[SolarEnergyData]
     val load = Helper.readResult("load").asInstanceOf[LoadData]
     val meteo = Helper.readResult("meteo").asInstanceOf[MeteoData]
 

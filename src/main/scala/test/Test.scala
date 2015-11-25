@@ -2,7 +2,7 @@ package test
 
 import utils.PlotHelper
 import utils.Helper
-import historicalData.WindData
+import historicalData.WindEnergyData
 import historicalData.MeteoData
 import org.joda.time.DateTime
 import org.jfree.data.time.TimeSeries
@@ -14,29 +14,32 @@ import historicalData.Observation
 import org.apache.commons.math3.distribution.WeibullDistribution
 import historicalData.MeteoDataLoader
 import calculation.Enercon82_2000
+import historicalData.MeteoStations
 
 object Test {
   def main(args: Array[String]) = {
+    val stations = Helper.readResult("meteoStations").asInstanceOf[MeteoStations]
     windPrediction("Bruxelles")
-    windRepartition
+   // windRepartition
   }
 
   def windPrediction(city: String) {
     val turbine = new Enercon82_2000(98, 0.6)
 
     // Estimate wind power from data
-    val wind = Helper.readResult("wind").asInstanceOf[WindData].dataYear(2015)
-    val meteo = Helper.readResult("meteo" + city).asInstanceOf[MeteoData].dataYear(2015)
+    val wind = Helper.readResult("wind").asInstanceOf[WindEnergyData].dataYearMonth(2015,10)
+    val meteo = Helper.readResult("meteo" + city).asInstanceOf[MeteoData].dataYearMonth(2015,10)
     val nTurbines = wind(wind.size - 1).capacity*Math.pow(10,3) / turbine.ratedPower
 
-    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(i.windSpeed) / 1000.0, "Prediction"))
+    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(i.windSpeed,10) / 1000.0, "Prediction"))
     PlotHelper.plotObservationsWithName(List((predictions, "Predictions"), (wind, "Actuals")))
-
+    val error = Helper.rmse(wind,predictions)
+        println("ERROR" + error)
   }
   def windRepartition {
     def res(city: String) = (Helper.meteo(city).dataYear(2015), city)
     def windSpeed(city: String) = (Helper.meteo(city).dataYear(2015).map(_.windSpeed), city)
-    val list = MeteoDataLoader.cities.map(c => windSpeed(c._1))
+    val list = MeteoDataLoader.cities.map(c => windSpeed(c))
     PlotHelper.repartition(list, 10)
 
   }

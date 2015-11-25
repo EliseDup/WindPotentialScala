@@ -1,6 +1,6 @@
 package calculation
 
-import historicalData.WindData
+import historicalData.WindEnergyData
 import utils.PlotHelper
 import historicalData.MeteoData
 

@@ -15,7 +15,7 @@ import org.jfree.data.statistics.HistogramDataset
 import org.jfree.data.category.DefaultCategoryDataset
 import org.jfree.data.xy.WindDataset
 import org.jfree.data.xy.DefaultWindDataset
-import historicalData.WindData
+import historicalData.WindEnergyData
 import org.jfree.data.general.DefaultPieDataset
 import historicalData.MeteoData
 import historicalData.Observation

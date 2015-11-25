@@ -50,7 +50,7 @@ object MeteoEntry {
  *
  * http://www.wunderground.com/history/airport/EBBR/2012/11/10/DailyHistory.html?req_city=Bruxelles&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1
  */
-class MeteoData(val airport: String, val start: DateTime, val end: DateTime) extends HistoricalData[MeteoEntry]("Meteo") {
+class MeteoData(val station: MeteoStation, val start: DateTime, val end: DateTime) extends HistoricalData[MeteoEntry]("Meteo") {
 
   val temp = observations.map(_.temp)
   val averageTemp = temp.sum / n
@@ -73,7 +73,7 @@ class MeteoData(val airport: String, val start: DateTime, val end: DateTime) ext
     val day = start.plusDays(i).toString(dayFormat)
     println("Load meteo for " + day)
     val urlString = "http://www.wunderground.com/history/airport/" +
-      airport + "/" +
+      station.stationID + "/" +
       day +
       "/DailyHistory.html?req_city=Bruxelles&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1"
 
