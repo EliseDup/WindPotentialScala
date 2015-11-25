@@ -8,6 +8,9 @@ import utils.Helper
  * save the object in a file
  *
  * We get a measure every 20 minutes
+ * 
+ * http://www.wunderground.com/about/faq/international_cities.asp 
+ * To get information about the airport ID for a given, city, the latitude longitude, elevation,
  */
 object MeteoDataLoader {
   
@@ -24,14 +27,9 @@ object MeteoDataLoader {
    * LIRU = Rome
    *			... => http://www.wunderground.com/history/
    */
-  
-  val cities = List(("Bruxelles", "EBBR"),
-    ("Paris", "LFPO"),
-   // ("Londres", "EGLL"),
-    ("Rome", "LIRU"),
-    ("Madrid", "LEMD")/*,
-    ("Ostende","Ostende"),
-    ("Spa","EBLB")*/)
+  val stations = new MeteoStations()
+  Helper.saveResult("meteoStations", stations)
+  val cities = List("Brussels","Roma","Paris","Amsterdam")
 
   def main(args: Array[String]) = {
 
@@ -39,8 +37,8 @@ object MeteoDataLoader {
     val end = new DateTime(2015, 10, 31, 0, 0)
 
     cities.map(c => {
-      println("Load Meteo for :" + c._1)
-      Helper.saveResult("meteo" + c._1, new MeteoData(c._2, start, end))
+      println("Load Meteo for :" + c)
+      Helper.saveResult("meteo" + c, new MeteoData(stations.stations.find(_.city.equals(c)).get, start, end))
     })
     println("Finished")
   }
