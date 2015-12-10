@@ -18,9 +18,11 @@ import historicalData.MeteoStations
 
 object Test {
   def main(args: Array[String]) = {
+    
+    val meteo =Helper.readResult("meteoBrussels").asInstanceOf[MeteoData]
     val stations = Helper.readResult("meteoStations").asInstanceOf[MeteoStations]
-    windPrediction("Bruxelles")
-   // windRepartition
+   // windPrediction("Brussels")
+   windRepartition(List("Brussels"))
   }
 
   def windPrediction(city: String) {
@@ -31,16 +33,16 @@ object Test {
     val meteo = Helper.readResult("meteo" + city).asInstanceOf[MeteoData].dataYearMonth(2015,10)
     val nTurbines = wind(wind.size - 1).capacity*Math.pow(10,3) / turbine.ratedPower
 
-    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(i.windSpeed,10) / 1000.0, "Prediction"))
+    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(i.windSpeed,i.station.elev) / 1000.0, "Prediction"))
     PlotHelper.plotObservationsWithName(List((predictions, "Predictions"), (wind, "Actuals")))
     val error = Helper.rmse(wind,predictions)
         println("ERROR" + error)
   }
-  def windRepartition {
+  def windRepartition(cities : List[String]) {
     def res(city: String) = (Helper.meteo(city).dataYear(2015), city)
     def windSpeed(city: String) = (Helper.meteo(city).dataYear(2015).map(_.windSpeed), city)
-    val list = MeteoDataLoader.cities.map(c => windSpeed(c))
-    PlotHelper.repartition(list, 10)
+    val list = cities.map(c => windSpeed(c))
+    PlotHelper.repartition(list, 30)
 
   }
 }

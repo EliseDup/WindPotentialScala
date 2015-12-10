@@ -13,7 +13,8 @@ lazy val root = (project in file(".")).
 	"com.github.wookietreiber" %% "scala-chart" % "latest.integration",
 	"com.itextpdf" % "itextpdf" % "5.5.6",
 	"com.typesafe.play" %% "play-json" % "2.3.4",
-	"org.scalanlp" % "breeze_2.11" % "0.11.2"
+	"org.scalanlp" % "breeze_2.11" % "0.11.2",
+	"net.sf.opencsv" % "opencsv" % "2.3"
 	)
 	
   )

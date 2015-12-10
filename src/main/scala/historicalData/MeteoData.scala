@@ -5,13 +5,19 @@ import org.joda.time.Days
 import org.joda.time.format.DateTimeFormat
 import scala.io.Source.{ fromInputStream }
 import java.net._
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import java.io.FileOutputStream
+import java.io.BufferedWriter
+import java.io.FileWriter
+import au.com.bytecode.opencsv.CSVWriter
+import scala.collection.mutable.ArrayBuffer
 
 /**
  *  Ligne du csv :
  *  HeureCET,TempératureC,Point de roséeC,Humidité,Pression au niveau de la merhPa,VisibilitéKm,Wind Direction,Vitesse du ventKm/h,Vitesse des rafalesKm/h,Précipitationmm,Evénements,Conditions,WindDirDegrees,DateUTC
  */
 
-class MeteoEntry(time: DateTime, val temp: Double, val humidity: Double,
+class MeteoEntry(val station: MeteoStation, time: DateTime, val temp: Double, val humidity: Double,
     val pressure: Double, val windDir: String, val windSpeedkmh: Double, val conditions: String) extends Observation(time, temp, "Meteo") {
 
   val windSpeed = windSpeedkmh / 3.6
@@ -21,8 +27,9 @@ class MeteoEntry(time: DateTime, val temp: Double, val humidity: Double,
 object MeteoEntry {
   @transient val dateFormat = DateTimeFormat.forPattern("yyyy/MM/dd hh:mm a")
 
-  def apply(day: String, csvLine: Array[String]) = {
-    new MeteoEntry(dateFormat.parseDateTime(day + " " + csvLine(0)),
+  def apply(station: MeteoStation, day: String, csvLine: Array[String]) = {
+    new MeteoEntry(station,
+      dateFormat.parseDateTime(day + " " + csvLine(0)),
       doubleOrNAN(csvLine(1)),
       doubleOrNAN(csvLine(3)),
       doubleOrNAN(csvLine(4)),
@@ -68,21 +75,32 @@ class MeteoData(val station: MeteoStation, val start: DateTime, val end: DateTim
     val horizonObs = Days.daysBetween(start, end).getDays
     (for (i <- 0 to horizonObs) yield createMeteoDay(i)).flatten.toList
   }
+
   def createMeteoDay(i: Int): List[MeteoEntry] = {
     @transient val dayFormat = DateTimeFormat.forPattern("yyyy/MM/dd")
     val day = start.plusDays(i).toString(dayFormat)
-    println("Load meteo for " + day)
+     if(start.plusDays(i).dayOfYear()==0) println("Load meteo for " + day)
     val urlString = "http://www.wunderground.com/history/airport/" +
       station.stationID + "/" +
       day +
       "/DailyHistory.html?req_city=Bruxelles&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1"
 
     val csv = fromInputStream(new URL(urlString).openStream).getLines
-    (for (line <- csv; if !line.contains("Time") && line.nonEmpty) yield MeteoEntry(day, line.split(","))).toList
+    (for (line <- csv; if !line.contains("Time") && line.nonEmpty && line.split(",").size > 1) yield MeteoEntry(station, day, line.split(","))).toList
   }
 
   def mean(t: DateTime, list: List[MeteoEntry]) =
-    new MeteoEntry(t, mean(list.map(_.temp)), mean(list.map(_.humidity)),
+    new MeteoEntry(station, t, mean(list.map(_.temp)), mean(list.map(_.humidity)),
       mean(list.map(_.pressure)), "NA", mean(list.map(_.windSpeedkmh)), "NA")
   def mean(list: List[Double]): Double = list.sum / list.size.toDouble
+
+  def writeToCSV = {
+    val out = new BufferedWriter(new FileWriter("results/meteo" + station.city + ".csv"));
+    val writer = new CSVWriter(out);
+    writer.writeNext(Array("Time", "Temp", "WindDir", "WindSpeed"))
+    for (i <- observations) {
+      writer.writeNext(Array(i.time.toDate.toString, i.temp.toString, i.windDir.toString, i.windSpeed.toString))
+    }
+    out.close
+  }
 }

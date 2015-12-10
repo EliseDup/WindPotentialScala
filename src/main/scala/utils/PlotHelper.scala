@@ -21,6 +21,7 @@ import historicalData.MeteoData
 import historicalData.Observation
 import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.axis.LogarithmicAxis
+import org.jfree.data.statistics.HistogramType
 
 object PlotHelper {
 
@@ -63,7 +64,7 @@ object PlotHelper {
 
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-  
+
     createFrame(chart)
   }
 
@@ -73,7 +74,22 @@ object PlotHelper {
     val chart = ChartFactory.createHistogram("", null, null, dataSet, PlotOrientation.VERTICAL, true, true, false)
     createFrame(chart)
   }
+  def cumulativeDensity(values: List[Double], n: Int, title: String) {
+    val size = values.size
+    val inter = values.max / n
+    val serie = new XYSeries("")
+    val dataset = new XYSeriesCollection
+    for (i <- 0 until n) {
+      val y = i * inter
+      val percent = values.filter(_ >= y).size / size.toDouble
+      serie.add(percent*100, y)
+    }
+    dataset.addSeries(serie)
+    val chart = ChartFactory.createXYLineChart(title, "", "", dataset, PlotOrientation.VERTICAL,
+      true, true, false)
+    createFrame(chart)
 
+  }
   def repartition(values: List[(List[Double], String)], n: Int) {
     repartition(values, n, "")
   }
