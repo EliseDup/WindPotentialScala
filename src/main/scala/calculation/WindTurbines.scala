@@ -1,4 +1,11 @@
 package calculation
+/**
+ * 4 roughness classes :
+ *  - 0 : z_0 = 0.0002 m (water areas, lakes) 
+ *  - 1 : z_0 = 0.03 m (open areas with few windbreaks)
+ *  - 2 : z_0 = 0.1 m (farm land with windbreaks)
+ *  - 3 : z_0 = 0.4 m (urban districts, forests, and farm land with mny windbreaks)
+ */
 
 abstract class WindTurbine(val ratedPower: Double, val diameter: Double,
     val hubHeight: Double, val z0: Double) {

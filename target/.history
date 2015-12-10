@@ -12,3 +12,8 @@ compile
 eclipse
 compile
 clean
+compile
+clean
+eclipse
+compile
+refresh

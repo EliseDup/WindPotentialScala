@@ -67,7 +67,7 @@ class WindEnergyData extends EliaData("WindEnergy", "data/windData", 4) {
   def createEntry(row: HSSFRow): PowerGenerationObservation = {
     @transient val dateFormat = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm")
     new PowerGenerationObservation(new DateTime(dateFormat.parseDateTime(Helper.toString(row,0))),
-      Helper.toDouble(row, 1), Helper.toDouble(row, 2), Helper.toDouble(row, 3), name)
+      Helper.stringToDouble(row, 1), Helper.stringToDouble(row, 2), Helper.stringToDouble(row, 3), name)
   }
 }
 
