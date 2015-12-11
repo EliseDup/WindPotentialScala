@@ -26,7 +26,7 @@ object Test {
   }
 
   def windPrediction(city: String) {
-    val turbine = new Enercon82_2000(98, 0.6)
+    val turbine = new Enercon82_2000(98)
 
     // Estimate wind power from data
     val wind = Helper.readResult("wind").asInstanceOf[WindEnergyData].dataYearMonth(2015,10)
