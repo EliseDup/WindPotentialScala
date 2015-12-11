@@ -1,4 +1,6 @@
 package calculation
+
+import utils.PlotHelper
 /**
  * 4 roughness classes :
  *  - 0 : z_0 = 0.0002 m (water areas, lakes) 
@@ -18,9 +20,10 @@ abstract class WindTurbine(val ratedPower: Double, val diameter: Double,
     v0 * (Math.log(hubHeight / z0) / Math.log(h0 / z0))
   }
 
+  def plot = PlotHelper.plotXY((powerCurve.map(_._1.toDouble), powerCurve.map(_._2.toDouble),"Power Curve of "+ratedPower +"kW Turbine"))
 }
 
-class Enercon82_2000(hubHeight: Double, z0: Double) extends WindTurbine(2000, 82, hubHeight, z0) {
+class Enercon82_2000(hubHeight: Double) extends WindTurbine(2000, 82, hubHeight, 0.4) {
   val powerCurve = List(
     (0, 0),
     (1, 0),

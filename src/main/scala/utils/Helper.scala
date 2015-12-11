@@ -74,4 +74,24 @@ object Helper {
     val wb = new HSSFWorkbook(inp)
     wb.getSheetAt(index)
   }
+
+  /**
+   * Distance between to point in Latitude,Longitude decimal degrees
+   */
+  val earthRadius = 6371000 // metres
+  def distance(p1: GeoPoint, p2: GeoPoint) : Double = {
+    val phi1 = p1.latitude.toRadians
+    val phi2 = p2.latitude.toRadians
+    val deltaPhi = (p2.latitude - p1.latitude).toRadians
+    val deltaLambda = (p2.longitude - p1.longitude).toRadians
+
+    val a = Math.pow(Math.sin(deltaPhi / 2.0), 2) +
+      Math.cos(phi1) * Math.cos(phi2) * Math.pow(Math.sin(deltaLambda / 2.0), 2)
+    val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    earthRadius * c
+  }
+
+}
+case class GeoPoint(val latitude: Double, val longitude: Double){
+  override def toString() = "Point of latitude "+latitude +", longitude :"+longitude
 }
