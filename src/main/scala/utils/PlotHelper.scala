@@ -22,15 +22,14 @@ import historicalData.Observation
 import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.axis.LogarithmicAxis
 import org.jfree.data.statistics.HistogramType
+import org.jfree.ui.RectangleEdge
 
 object PlotHelper {
-
-  def plotTime(series: List[(List[DateTime], List[Double], String)]) { plotTime(series, "") }
-  def plotTime(serie: (List[DateTime], List[Double], String)) { plotTime(List(serie), "") }
   /**
    * Plot a list of time series in on frame
    */
-  def plotTime(series: List[(List[DateTime], List[Double], String)], title: String) {
+  def plotTime(serie: (List[DateTime], List[Double], String)) { plotTime(List(serie)) }
+  def plotTime(series: List[(List[DateTime], List[Double], String)], title: String = "") {
     val dataset = new TimeSeriesCollection()
     series.map { s =>
       val serie = new TimeSeries(s._3)
@@ -43,15 +42,14 @@ object PlotHelper {
 
   def plotObservations(series: List[(List[Observation])]) {
     val list = for (i <- series) yield (i.map(_.time), i.map(_.value), i(0).name)
-    plotTime(list, "")
+    plotTime(list)
   }
   def plotObservationsWithName(series: List[(List[Observation], String)]) {
     val list = for (i <- series) yield (i._1.map(_.time), i._1.map(_.value), i._2)
-    plotTime(list, "")
+    plotTime(list)
   }
-  def plotXY(xys: List[(List[Double], List[Double], String)]) { plotXY(xys, "", false, false) }
-  def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy), "", false, false) }
-  def plotXY(xys: List[(List[Double], List[Double], String)], title: String, logX: Boolean, logY: Boolean) {
+  def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
+  def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", logX: Boolean = false, logY: Boolean = false) {
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
       val serie = new XYSeries(xy._3)
@@ -68,32 +66,32 @@ object PlotHelper {
     createFrame(chart)
   }
 
-  def histogram(values: List[Double], n: Int, title: String) {
+  def histogram(values: List[Double], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
     val dataSet = new HistogramDataset()
     dataSet.addSeries(title, values.toArray, n)
-    val chart = ChartFactory.createHistogram("", null, null, dataSet, PlotOrientation.VERTICAL, true, true, false)
+    val chart = ChartFactory.createHistogram(title, xLabel, yLabel, dataSet, PlotOrientation.VERTICAL, legend, false, false)
     createFrame(chart)
   }
-  def cumulativeDensity(values: List[Double], n: Int, title: String) {
-    val size = values.size
-    val inter = values.max / n
-    val serie = new XYSeries("")
+  
+  def cumulativeDensity(values : List[Double]) { cumulativeDensity(List((values,"")), legend=false)}
+  def cumulativeDensity(values: List[(List[Double], String)], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = true) {
     val dataset = new XYSeriesCollection
-    for (i <- 0 until n) {
-      val y = i * inter
-      val percent = values.filter(_ >= y).size / size.toDouble
-      serie.add(percent*100, y)
-    }
-    dataset.addSeries(serie)
-    val chart = ChartFactory.createXYLineChart(title, "", "", dataset, PlotOrientation.VERTICAL,
-      true, true, false)
+    values.map(v => {
+      val size = v._1.size
+      val inter = v._1.max / n
+      val serie = new XYSeries(v._2)
+      for (i <- 0 until n) {
+        val y = i * inter
+        val percent = v._1.filter(_ >= y).size / size.toDouble
+        serie.add(percent * 100, y)
+      }
+      dataset.addSeries(serie)
+    })
+    val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
+    // if(legend) chart.getLegend().setPosition(RectangleEdge.TOP)
     createFrame(chart)
-
   }
-  def repartition(values: List[(List[Double], String)], n: Int) {
-    repartition(values, n, "")
-  }
-  def repartition(values: List[(List[Double], String)], n: Int, title: String) {
+  def repartition(values: List[(List[Double], String)], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
     val dataset = new DefaultCategoryDataset()
     val allValues = values.map(_._1).flatten
     val min = Math.max(0, allValues.min)
@@ -107,7 +105,7 @@ object PlotHelper {
         dataset.addValue(size, v._2, (i + 1) * inter)
       }
     }
-    val chart = ChartFactory.createBarChart(title, null, null, dataset, PlotOrientation.VERTICAL, true, true, false)
+    val chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
     createFrame(chart)
   }
 
