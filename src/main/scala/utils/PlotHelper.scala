@@ -74,7 +74,7 @@ object PlotHelper {
   }
   
   def cumulativeDensity(values : List[Double]) { cumulativeDensity(List((values,"")), legend=false)}
-  def cumulativeDensity(values: List[(List[Double], String)], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = true) {
+  def cumulativeDensity(values: List[(List[Double], String)], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
     val dataset = new XYSeriesCollection
     values.map(v => {
       val size = v._1.size

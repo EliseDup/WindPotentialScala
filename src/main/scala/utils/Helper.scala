@@ -62,10 +62,14 @@ object Helper {
     squares.sum / squares.size
   }
 
-  def txtToCSV(input: String, output: String) {
+  def txtToCSV(input: String, output: String, indexes : List[Int]=List(), indexesOnly:Boolean=false) {
     val lines = Source.fromFile(input).getLines()
     val writer = new CSVWriter(new FileWriter(output))
-    for (l <- lines) writer.writeNext(l.split("\t"))
+    for (l <- lines) {
+      val str = l.split("\t")
+      val res = if(indexesOnly) indexes.map(str(_)).toArray else str
+      writer.writeNext(res)
+    }
     writer.close()
   }
 
@@ -79,7 +83,7 @@ object Helper {
    * Distance between to point in Latitude,Longitude decimal degrees
    */
   val earthRadius = 6371000 // metres
-  def distance(p1: GeoPoint, p2: GeoPoint) : Double = {
+  def distance(p1: GeoPoint, p2: GeoPoint): Double = {
     val phi1 = p1.latitude.toRadians
     val phi2 = p2.latitude.toRadians
     val deltaPhi = (p2.latitude - p1.latitude).toRadians
@@ -90,8 +94,24 @@ object Helper {
     val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
     earthRadius * c
   }
-
+  /**
+   * The area of the earth between a line of latitude and the north pole (the area of a spherical cap)
+   * A = 2 PI R h
+   * With h = R * (1-sin(lat))
+   *
+   * So the area between two line of latitude is
+   * A = 2 PI R^2 (1 - sin(lat1)) - 2 PI R^2 (1 - sin(lat2)) = 2 PI R^2 |sin(lat1)-sin(lat2)|
+   *
+   * The are of the lat long rectangle is proportionnal to the difference between the 2 longitudes
+   *
+   * = > AreaRect = 2 PI R^2 *|sin(lat1)-sin(lat2)| * |lon1 - lon2| / 360
+   */
+  def areaRectangle(lowerLeftCorner: GeoPoint, upperRightCorner: GeoPoint): Double = {
+    1.0 / 180.0 * Math.PI * Math.pow(earthRadius, 2) *
+      Math.abs(Math.sin(lowerLeftCorner.latitude.toRadians) - Math.sin(upperRightCorner.latitude.toRadians)) *
+      Math.abs(lowerLeftCorner.longitude - upperRightCorner.longitude)
+  }
 }
-case class GeoPoint(val latitude: Double, val longitude: Double){
-  override def toString() = "Point of latitude "+latitude +", longitude :"+longitude
+case class GeoPoint(val latitude: Double, val longitude: Double) {
+  override def toString() = "Point of latitude " + latitude + ", longitude :" + longitude
 }
