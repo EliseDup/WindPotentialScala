@@ -29,14 +29,14 @@ object PlotHelper {
    * Plot a list of time series in on frame
    */
   def plotTime(serie: (List[DateTime], List[Double], String)) { plotTime(List(serie)) }
-  def plotTime(series: List[(List[DateTime], List[Double], String)], title: String = "") {
+  def plotTime(series: List[(List[DateTime], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "", legend : Boolean = false) {
     val dataset = new TimeSeriesCollection()
     series.map { s =>
       val serie = new TimeSeries(s._3)
       (0 until s._1.size).map(i => serie.addOrUpdate(new Minute(s._1(i).toDate()), s._2(i)))
       dataset.addSeries(serie)
     }
-    val chart = ChartFactory.createTimeSeriesChart(title, "", "", dataset, true, true, false)
+    val chart = ChartFactory.createTimeSeriesChart(title, xLabel, yLabel, dataset, legend, true, false)
     createFrame(chart)
   }
 
@@ -49,17 +49,16 @@ object PlotHelper {
     plotTime(list)
   }
   def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
-  def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", logX: Boolean = false, logY: Boolean = false) {
+  def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
+      legend : Boolean = false, logX: Boolean = false, logY: Boolean = false) {
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
       val serie = new XYSeries(xy._3)
       (0 until xy._1.size).map(i => serie.add(xy._1(i), xy._2(i)))
       dataSet.addSeries(serie)
     }
-    val chart = ChartFactory.createXYLineChart(title, "", "", dataSet, PlotOrientation.VERTICAL,
-      true, true, false)
+    val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataSet, PlotOrientation.VERTICAL, legend, false, false)
     val plot = chart.getXYPlot();
-
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
 
