@@ -17,7 +17,7 @@ object TestCase {
       (test.t, test.noConstantRate, "Turbines Operation Constant Rate"),
       (test.t, test.noConstantGrowth, "Turbines Operation Constant Growth"),
       (test.t, test.ncConstantRate, "Turbines Construction Constant Rate"),
-      (test.t, test.ncConstantGrowth, "Turbines Construction Constant Growth")), "", true, false)
+      (test.t, test.ncConstantGrowth, "Turbines Construction Constant Growth")))
   }
 }
 class Case {

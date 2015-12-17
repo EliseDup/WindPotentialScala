@@ -8,13 +8,15 @@ abstract class LandCoverClass(val code: Int, val label: String, val hubHeigthCon
 
   def isInWater = classes.waterIndexes.contains(code)
   def isAgriculturalArea = classes.agriculturalAreas.contains(code)
+def isOffshoreLess50km = classes.offshoreLess50km.contains(code)
 
 }
 abstract class LandCoverClasses[C <: LandCoverClass](legendFileName: String) {
   val waterIndexes: List[Int]
   val openSpaces: List[Int]
   val agriculturalAreas: List[Int]
-
+  val offshoreLess50km: List[Int]
+  
   val classes: Map[Int, C] = {
     val sheet = Helper.xlsSheet(Helper.ressourcesPy + "/landCover/" + legendFileName + ".xls", 0)
     (1 to sheet.getLastRowNum).map(r => {
@@ -56,10 +58,10 @@ class CorineLandCoverClasses extends LandCoverClasses[CorineLandCoverClass]("clc
   val waterIndexes = (40 to 44).toList ++ List(48, 49, 50, 255)
   val openSpaces = (30 to 34).toList
   val agriculturalAreas = (12 to 22).toList
-
+val offshoreLess50km = List(44)
   def landCoverClass(row: HSSFRow) = CorineLandCoverClass(row, this)
   // 0 also corresponds to sea and ocean ?
-  override def apply(index: Int) = if (index == 0) classes(44) else super.apply(index)
+  //override def apply(index: Int) = if (index == 0) classes(44) else super.apply(index)
 }
 
 class GlobalLandCoverClass(code: Int, label: String, ratio: Double, classes: GlobalLandCoverClasses) extends LandCoverClass(code, label, ratio, classes)
@@ -70,7 +72,7 @@ class GlobalLandCoverClasses extends LandCoverClasses[GlobalLandCoverClass]("glc
   val waterIndexes = (20 to 23).toList
   val openSpaces = List(11, 12)
   val agriculturalAreas = List(16)
-
+  val offshoreLess50km = List()
   def landCoverClass(row: HSSFRow) = GlobalLandCoverClass(row, this)
 
 }
