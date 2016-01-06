@@ -16,6 +16,10 @@ import au.com.bytecode.opencsv.CSVWriter
 import java.io.File
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.hssf.usermodel.HSSFSheet
+import squants.Meters
+import squants.space.SquareMeters
+import squants.space.Degrees
+import squants.space.Radians
 
 object Helper {
   val ressourcesPy = "/Users/Elise/Documents/workspace/WindPotentialPY/ressources/"
@@ -82,8 +86,8 @@ object Helper {
   /**
    * Distance between to point in Latitude,Longitude decimal degrees
    */
-  val earthRadius = 6371000 // metres
-  def distance(p1: GeoPoint, p2: GeoPoint): Double = {
+  val earthRadius = Meters(6371000)
+  def distance(p1: GeoPoint, p2: GeoPoint) = {
     val phi1 = p1.latitude.toRadians
     val phi2 = p2.latitude.toRadians
     val deltaPhi = (p2.latitude - p1.latitude).toRadians
@@ -92,7 +96,7 @@ object Helper {
     val a = Math.pow(Math.sin(deltaPhi / 2.0), 2) +
       Math.cos(phi1) * Math.cos(phi2) * Math.pow(Math.sin(deltaLambda / 2.0), 2)
     val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    earthRadius * c
+    earthRadius*c
   }
   /**
    * The area of the earth between a line of latitude and the north pole (the area of a spherical cap)
@@ -106,10 +110,10 @@ object Helper {
    *
    * = > AreaRect = 2 PI R^2 *|sin(lat1)-sin(lat2)| * |lon1 - lon2| / 360
    */
-  def areaRectangle(lowerLeftCorner: GeoPoint, upperRightCorner: GeoPoint): Double = {
-    1.0 / 180.0 * Math.PI * Math.pow(earthRadius, 2) *
+  def areaRectangle(lowerLeftCorner: GeoPoint, upperRightCorner: GeoPoint) = {
+     earthRadius*earthRadius*(1.0 / 180.0 * Math.PI *
       Math.abs(Math.sin(lowerLeftCorner.latitude.toRadians) - Math.sin(upperRightCorner.latitude.toRadians)) *
-      Math.abs(lowerLeftCorner.longitude - upperRightCorner.longitude)
+      Math.abs(lowerLeftCorner.longitude - upperRightCorner.longitude))
   }
 }
 case class GeoPoint(val latitude: Double, val longitude: Double) {

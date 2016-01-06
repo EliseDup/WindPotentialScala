@@ -1,7 +1,9 @@
-package calculation
+package energyGeneration
 
 import org.apache.commons.math3.distribution.WeibullDistribution
 import utils.PlotHelper
+import calculation.Enercon82_2000
+import calculation.WindTurbine
 
 object LoadHourCalculation {
   def main(args: Array[String]): Unit = {

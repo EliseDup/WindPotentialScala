@@ -17,3 +17,12 @@ clean
 eclipse
 compile
 refresh
+eclipse
+compile
+clean
+eclipse
+clean
+compile
+eclipse
+clean
+eclipse

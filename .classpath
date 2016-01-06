@@ -35,6 +35,7 @@
   <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/org.spire-math/spire_2.11/jars/spire_2.11-0.7.4.jar"/>
   <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/org.spire-math/spire-macros_2.11/jars/spire-macros_2.11-0.7.4.jar"/>
   <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.5.jar"/>
+  <classpathentry kind="lib" path="/Users/Elise/.ivy2/cache/com.squants/squants_2.11/jars/squants_2.11-0.5.3.jar"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
   <classpathentry kind="output" path="bin"/>
 </classpath>
