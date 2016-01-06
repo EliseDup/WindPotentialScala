@@ -51,5 +51,5 @@ class WindTurbine850kW extends WindTurbineComposition(Kilowatts(850),
 class WindTurbine3MW extends WindTurbineComposition(Megawatts(3),
   foundation = WindTurbineComponent((1140.0, Concrete20MPa), (36.0, Steel)),
   tower = WindTurbineComponent((158.76, Steel), (1.24, Paint)),
-  nacelle = WindTurbineComponent((13 + 9.33 + 5.71 + 1.02 + 23.58 + 3.87 + 1.02 + 3.47 + 19.2 + 0.73, Steel), (1.43 + 0.241 + 0.94 + 1.38, Copper), (0.241 + 0.69, Aluminium)), //(0.7,Plastic)
+  nacelle = WindTurbineComponent((13 + 9.33 + 5.71 + 1.02 + 23.58 + 3.87 + 1.02 + 3.47, Steel), (1.43 + 0.241 + 0.94 + 1.38, Copper), (0.241 + 0.69 + 1.38, Aluminium)), //(0.7,Plastic)
   rotor = WindTurbineComponent((19.2, Steel), (12.04, GlassFibre), (8.03, Epoxy), (0.73, Steel)))
