@@ -19,7 +19,7 @@ import org.apache.poi.hssf.usermodel.HSSFSheet
 import squants.Meters
 import squants.space.SquareMeters
 import squants.space.Degrees
-import squants.space.Radians
+import squants.space.Angle
 
 object Helper {
   val ressourcesPy = "/Users/Elise/Documents/workspace/WindPotentialPY/ressources/"
@@ -112,10 +112,10 @@ object Helper {
    */
   def areaRectangle(lowerLeftCorner: GeoPoint, upperRightCorner: GeoPoint) = {
      earthRadius*earthRadius*(1.0 / 180.0 * Math.PI *
-      Math.abs(Math.sin(lowerLeftCorner.latitude.toRadians) - Math.sin(upperRightCorner.latitude.toRadians)) *
-      Math.abs(lowerLeftCorner.longitude - upperRightCorner.longitude))
+      Math.abs(lowerLeftCorner.latitude.sin-upperRightCorner.latitude.sin) *
+      Math.abs(lowerLeftCorner.longitude.toDegrees - upperRightCorner.longitude.toDegrees))
   }
 }
-case class GeoPoint(val latitude: Double, val longitude: Double) {
+case class GeoPoint(val latitude: Angle, val longitude: Angle) {
   override def toString() = "Point of latitude " + latitude + ", longitude :" + longitude
 }
