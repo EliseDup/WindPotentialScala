@@ -17,6 +17,7 @@ import squants.motion.MetersPerSecond
 import squants.energy.KilowattHours
 import squants.energy.GigawattHours
 import utils.TerawattHours
+import squants.space.Degrees
 
 class GridData(name: String, val gridSize : Double) {
   // Coefficients for wind extrapolation depends on Land Cover class
@@ -98,7 +99,7 @@ class GridObject(val center: GeoPoint, val gridSize : Double, val uWind: Velocit
    *
    */
 
-  val s = gridSize / 2.0;
+  val s = Degrees(gridSize / 2.0);
   // val length = Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude - s, center.longitude + s)) / 1000.0
   // val height = Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude - s)) / 1000.0
   // val cellSize = length * height
@@ -135,7 +136,7 @@ object GridObject {
     val csvLine = line.split("\t")
     val clcClass = if (csvLine(5).equals("NA") || csvLine(5).toInt == 0) None else Some(data.clcClasses(csvLine(5).toInt))
     val glcClass = if (csvLine(6).equals("NA")) None else Some(data.glcClasses(csvLine(6).toInt))
-    new GridObject(GeoPoint(csvLine(0).toDouble, csvLine(1).toDouble), data.gridSize,
+    new GridObject(GeoPoint(Degrees(csvLine(0).toDouble), Degrees(csvLine(1).toDouble)), data.gridSize,
       MetersPerSecond(csvLine(2).toDouble), MetersPerSecond(csvLine(3).toDouble), MetersPerSecond(csvLine(4).toDouble), clcClass, glcClass)
   }
 }

@@ -26,3 +26,7 @@ compile
 eclipse
 clean
 eclipse
+clean
+eclipse
+clean
+compile
