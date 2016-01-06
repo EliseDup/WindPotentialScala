@@ -1,9 +1,10 @@
-package calculation
+package energyGeneration
 
 import utils.Helper
 import org.apache.poi.hssf.usermodel.HSSFRow
 
-abstract class LandCoverClass(val code: Int, val label: String, val hubHeigthConversionRatio: Double, val classes: LandCoverClasses[_]) {
+abstract class LandCoverClass(val code: Int, val label: String, val hubHeigthConversionRatio: Double, 
+    val classes: LandCoverClasses[_]) {
   override def toString() = "Land Cover Class :" + label + "(" + code + ")"
 
   def isInWater = classes.waterIndexes.contains(code)
