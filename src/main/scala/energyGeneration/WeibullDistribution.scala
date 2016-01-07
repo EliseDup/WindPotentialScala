@@ -2,12 +2,15 @@ package energyGeneration
 
 import org.apache.commons.math3.distribution.WeibullDistribution
 import utils.PlotHelper
-import calculation.Enercon82_2000
 import calculation.WindTurbine
+import squants.motion.Velocity
+import squants.motion.MetersPerSecond
+import squants.energy.Kilowatts
+import calculation.WindTurbine2MW
 
 object LoadHourCalculation {
   def main(args: Array[String]): Unit = {
-    val turbine2MW = new Enercon82_2000(80)
+    val turbine2MW = new WindTurbine2MW
     val k = List(1.75,2.0,2.4)
     val v = (1 until 14).map(i => (0 until 10).map(_ * 0.1 + i)).flatten.toList
     val euEstimation = v.map(i => Math.max(0, i*626.38-2003.3)).toList
@@ -27,5 +30,5 @@ class Weibull(meanspeed: Double, k: Double) {
   val x = wb.sample(1000000).toList
   def plot = PlotHelper.histogram(x, 100, "Weibull distribution scale :" + meanspeed + ", shape:" + k)
 
-  def capacityFactor(turbine: WindTurbine): Double = x.map(turbine.power(_)).sum / x.size / turbine.ratedPower
+  def capacityFactor(turbine: WindTurbine): Double = x.map(v => turbine.power(MetersPerSecond(v))).foldLeft(Kilowatts(0))(_ + _) / x.size / turbine.components.ratedPower
 }

@@ -4,11 +4,16 @@ import squants.energy._
 import squants.mass._
 import squants.mass.MassConversions
 import org.joda.convert.ToString
+import calculation._
 
 object Test {
   def main(args: Array[String]): Unit = {
-    println(new WindTurbine3MW)
-    println(new WindTurbine850kW)
+    val a = new WindTurbine2MW
+   a.plot
+    val b = new WindTurbine3MW
+    b.plot
+    val c = new WindTurbine850kW
+   // c.plot
   }
 }
 
@@ -33,22 +38,28 @@ object WindTurbineComponent {
   def apply(values: (Double, Material)*) = new WindTurbineComponent(values.map(v => (Tonnes(v._1), v._2)).toList)
 }
 
-class WindTurbineComposition(val power: Power,
+class WindTurbineComponents(val ratedPower: Power,
   val foundation: WindTurbineComponent = new WindTurbineComponent(),
   val tower: WindTurbineComponent = new WindTurbineComponent(),
   val nacelle: WindTurbineComponent = new WindTurbineComponent(),
   val rotor: WindTurbineComponent = new WindTurbineComponent())
     extends WindTurbineComponent(foundation.materials ++ tower.materials ++ nacelle.materials ++ rotor.materials) {
-  override def toString = "Wind turbine power : " + power + ", total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity
+  override def toString = "Wind turbine power : " + ratedPower + ", total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity
 }
 
-class WindTurbine850kW extends WindTurbineComposition(Kilowatts(850),
+class WindTurbine850kWComponents extends WindTurbineComponents(Kilowatts(850),
   foundation = WindTurbineComponent((480.0, Concrete20MPa), (15.0, Steel)),
   tower = WindTurbineComponent((69.07, Steel), (0.93, Paint)),
   nacelle = WindTurbineComponent((3.35 + 2.41 + 1.47 + 4.21 + 0.26 + 0.26 + 6.08 + 1 + 0.26 + 0.894, Steel), (0.37 + 0.062 + 0.24 + 0.357, Copper), (0.062 + 0.18 + 0.357, Aluminium)), //(0.18,Plastic)
   rotor = WindTurbineComponent((4.8, Steel), (3.01, GlassFibre), (2.01, Epoxy), (0.18, Steel)))
+// TODO
+class WindTurbine2MWComponents extends WindTurbineComponents(Megawatts(2),
+  foundation = WindTurbineComponent((1140.0, Concrete20MPa), (36.0, Steel)),
+  tower = WindTurbineComponent((158.76, Steel), (1.24, Paint)),
+  nacelle = WindTurbineComponent((13 + 9.33 + 5.71 + 1.02 + 23.58 + 3.87 + 1.02 + 3.47, Steel), (1.43 + 0.241 + 0.94 + 1.38, Copper), (0.241 + 0.69 + 1.38, Aluminium)), //(0.7,Plastic)
+  rotor = WindTurbineComponent((19.2, Steel), (12.04, GlassFibre), (8.03, Epoxy), (0.73, Steel)))
 
-class WindTurbine3MW extends WindTurbineComposition(Megawatts(3),
+class WindTurbine3MWComponents extends WindTurbineComponents(Megawatts(3),
   foundation = WindTurbineComponent((1140.0, Concrete20MPa), (36.0, Steel)),
   tower = WindTurbineComponent((158.76, Steel), (1.24, Paint)),
   nacelle = WindTurbineComponent((13 + 9.33 + 5.71 + 1.02 + 23.58 + 3.87 + 1.02 + 3.47, Steel), (1.43 + 0.241 + 0.94 + 1.38, Copper), (0.241 + 0.69 + 1.38, Aluminium)), //(0.7,Plastic)

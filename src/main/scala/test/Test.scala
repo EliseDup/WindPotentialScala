@@ -13,8 +13,10 @@ import calculation.TheoriticalWindTurbine
 import historicalData.Observation
 import org.apache.commons.math3.distribution.WeibullDistribution
 import historicalData.MeteoDataLoader
-import calculation.Enercon82_2000
 import historicalData.MeteoStations
+import squants.motion.MetersPerSecond
+import squants.space.Meters
+import calculation.WindTurbine2MW
 
 object Test {
   def main(args: Array[String]) = {
@@ -26,14 +28,14 @@ object Test {
   }
 
   def windPrediction(city: String) {
-    val turbine = new Enercon82_2000(98)
+    val turbine = new WindTurbine2MW
 
     // Estimate wind power from data
     val wind = Helper.readResult("wind").asInstanceOf[WindEnergyData].dataYearMonth(2015,10)
     val meteo = Helper.readResult("meteo" + city).asInstanceOf[MeteoData].dataYearMonth(2015,10)
-    val nTurbines = wind(wind.size - 1).capacity*Math.pow(10,3) / turbine.ratedPower
+    val nTurbines = wind(wind.size - 1).capacity*Math.pow(10,3) / turbine.components.ratedPower.value
 
-    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(i.windSpeed,i.station.elev) / 1000.0, "Prediction"))
+    val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(MetersPerSecond(i.windSpeed),Meters(i.station.elev),Meters(0.4)).value / 1000.0, "Prediction"))
     PlotHelper.plotObservationsWithName(List((predictions, "Predictions"), (wind, "Actuals")))
     val error = Helper.rmse(wind,predictions)
         println("ERROR" + error)
