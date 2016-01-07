@@ -3,13 +3,13 @@ package energyGeneration
 import utils.Helper
 import org.apache.poi.hssf.usermodel.HSSFRow
 
-abstract class LandCoverClass(val code: Int, val label: String, val hubHeigthConversionRatio: Double, 
+abstract class LandCoverClass(val code: Int, val label: String, val hubHeigthConversionRatio: Double,
     val classes: LandCoverClasses[_]) {
   override def toString() = "Land Cover Class :" + label + "(" + code + ")"
 
   def isInWater = classes.waterIndexes.contains(code)
   def isAgriculturalArea = classes.agriculturalAreas.contains(code)
-def isOffshoreLess50km = classes.offshoreLess50km.contains(code)
+  def isOffshoreLess50km = classes.offshoreLess50km.contains(code)
 
 }
 abstract class LandCoverClasses[C <: LandCoverClass](legendFileName: String) {
@@ -17,7 +17,7 @@ abstract class LandCoverClasses[C <: LandCoverClass](legendFileName: String) {
   val openSpaces: List[Int]
   val agriculturalAreas: List[Int]
   val offshoreLess50km: List[Int]
-  
+
   val classes: Map[Int, C] = {
     val sheet = Helper.xlsSheet(Helper.ressourcesPy + "/landCover/" + legendFileName + ".xls", 0)
     (1 to sheet.getLastRowNum).map(r => {
@@ -59,7 +59,7 @@ class CorineLandCoverClasses extends LandCoverClasses[CorineLandCoverClass]("clc
   val waterIndexes = (40 to 44).toList ++ List(48, 49, 50, 255)
   val openSpaces = (30 to 34).toList
   val agriculturalAreas = (12 to 22).toList
-val offshoreLess50km = List(44)
+  val offshoreLess50km = List(44)
   def landCoverClass(row: HSSFRow) = CorineLandCoverClass(row, this)
   // 0 also corresponds to sea and ocean ?
   //override def apply(index: Int) = if (index == 0) classes(44) else super.apply(index)
@@ -69,6 +69,7 @@ class GlobalLandCoverClass(code: Int, label: String, ratio: Double, classes: Glo
 object GlobalLandCoverClass {
   def apply(row: HSSFRow, cl: GlobalLandCoverClasses) = new GlobalLandCoverClass(Helper.toInt(row, 0), Helper.toString(row, 1), Helper.toDouble(row, 5), cl)
 }
+
 class GlobalLandCoverClasses extends LandCoverClasses[GlobalLandCoverClass]("glc/Global_Legend") {
   val waterIndexes = (20 to 23).toList
   val openSpaces = List(11, 12)

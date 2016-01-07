@@ -9,12 +9,13 @@ import utils.GeoPoint
 import energyGeneration.GridData
 import squants.space.SquareMeters
 import squants.space.SquareKilometers
+import squants.space.Degrees
 
 object TestERA40 {
   def main(args: Array[String]) = {
     //Helper.txtToCSV(Helper.ressourcesPy + "results/worldDailyAugust2002test", Helper.ressourcesPy + "test.csv", List(4,3,2),true)
     val name = "europeDaily2002"
-    val wind = new GridData("results/" + name+"lc", 0.125)
+    val wind = new GridData("results/" + name+"lc", Degrees(0.125), new WindTurbine3MW(), new WindTurbine3MW())
    // wind.writeGrid(name + "final")
     println("Grid Size : " + wind.grids.size + "=" + wind.grids.map(_.area).foldLeft(SquareKilometers(0))(_ plus _))
 
