@@ -13,7 +13,7 @@ import utils._
  */
 class WindTurbineComponent(val components: List[(Mass, String)] = List(), val materials : Materials = Materials()) {
   val weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
-  val embodiedEnergy = components.map(m => materials(m._2).getOrElse(Material("",Joules(0),Tonnes(0))).energyIntensity * m._1).foldLeft(Gigajoules(0))(_ + _)
+  val embodiedEnergy = components.map(m => materials(m._2).getOrElse(Material("",Joules(0),Tonnes(1))).energyIntensity * m._1).foldLeft(Gigajoules(0))(_ + _)
   val energyIntensity = embodiedEnergy / weight
 }
 
