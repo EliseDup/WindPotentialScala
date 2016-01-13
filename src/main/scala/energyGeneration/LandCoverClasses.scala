@@ -73,7 +73,7 @@ object GlobalLandCoverClass {
 class GlobalLandCoverClasses extends LandCoverClasses[GlobalLandCoverClass]("glc/Global_Legend") {
   val waterIndexes = (20 to 23).toList
   val openSpaces = List(11, 12)
-  val agriculturalAreas = List(16)
+  val agriculturalAreas = (10 to 18).toList
   val offshoreLess50km = List()
   def landCoverClass(row: HSSFRow) = GlobalLandCoverClass(row, this)
 

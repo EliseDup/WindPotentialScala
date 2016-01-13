@@ -22,6 +22,9 @@ import squants.space.Angle
 import calculation.WindTurbine
 import calculation.WindTurbine
 import calculation.WindTurbine
+import squants.energy.Watts
+import squants.energy.WattHours
+import utils.PlotHelper
 
 class GridData(name: String, val gridSize: Angle, val onshoreTurbine : WindTurbine, val offshoreTurbine : WindTurbine) {
   // Coefficients for wind extrapolation depends on Land Cover class
@@ -38,17 +41,27 @@ class GridData(name: String, val gridSize: Angle, val onshoreTurbine : WindTurbi
   def windSpeeds80(gr: List[GridObject] = grids) = gr.map(_.windSpeed80.value)
   def powerDensities(gr: List[GridObject] = grids) = gr.map(_.powerDensity.value)
   def powerDensities80(gr: List[GridObject] = grids) = gr.map(_.powerDensity80.value)
-  def energyGenerated(gr: List[GridObject] = grids) = gr.map(_.energyGeneratedPerYear()).foldLeft(TerawattHours(0.0))(_ + _)
+  def energyGenerated(gr: List[GridObject] = grids, minEROI:Double = 0.0) = gr.map(_.energyGeneratedPerYear(minEROI=minEROI)).foldLeft(TerawattHours(0.0))(_ + _)
   def nTurbines(gr: List[GridObject] = grids) = gr.map(_.nTurbines).sum
   def erois(gr: List[GridObject] = grids) = gr.map(_.EROI)
+  
+  def plotEROIVSCumulatedProduction(gr: List[GridObject] = grids) = {
+    val eroiPro = gr.map(g => (g.EROI,g.energyGeneratedPerYear())).sortBy(_._1).reverse
+    var tot = 0.0
+    val eroiCum = eroiPro.map(i => {
+      tot = tot + i._2.to(TerawattHours)
+      (i._1,tot)
+    })
+    PlotHelper.plotXY(List((eroiCum.map(_._2),eroiCum.map(_._1),"")), xLabel = "Cumulated Annual Production [TWh]", yLabel = "EROI")
+  }
 
   def landGrids(gr: List[GridObject] = grids) = gr.filter(g => !g.lc.isInWater)
   def agriculturalAreas(gr: List[GridObject] = grids) = gr.filter(_.lc.isAgriculturalArea)
   def offshoreGrids(gr: List[GridObject] = grids) = gr.filter(g => g.lc.isOffshoreLess50km)
   println("Total n grids" + grids.size + " - clc grids " + clcGrids.size)
-  println("Total Energy Generated : " + energyGenerated() + "\t" + nTurbines(clcGrids))
-  println("Energy Generated No Water: " + energyGenerated(landGrids(clcGrids)) + "\t" + nTurbines(landGrids(clcGrids)))
-  println("Energy Generated Agriculture: " + energyGenerated(agriculturalAreas(clcGrids)) + "\t" + nTurbines(agriculturalAreas(clcGrids)))
+  println("Total Energy Generated : " + energyGenerated() + "\t" + nTurbines())
+  println("Energy Generated No Water: " + energyGenerated(landGrids()) + "\t" + nTurbines(landGrids()))
+  println("Energy Generated Agriculture: " + energyGenerated(agriculturalAreas()) + "\t" + nTurbines(agriculturalAreas()))
 
   def writeGridToCSV(name: String, gr: List[GridObject] = grids) {
     val writer = new CSVWriter(new FileWriter(name))
@@ -118,9 +131,12 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine : WindTu
    */
   
   val loadHours = Hours(Math.max(0, 626.38 * windSpeed80.value - 2003.3))
-  val nTurbines = if (loadHours.value <= 0) 0 else area.toSquareKilometers * 4
+  val nTurbines = if (loadHours.value <= 0) 0 else area.toSquareKilometers * turbine.nPerSquareKM
   val powerInstalled = nTurbines * turbine.components.ratedPower
-  def energyGeneratedPerYear(minSpeed: Double = 0.0): Energy = powerInstalled * loadHours
+  def energyGeneratedPerYear(minSpeed: Double = 0.0, minEROI : Double = 0.0): Energy = {
+    if(windSpeed80 < windSpeed || EROI < minEROI) WattHours(0)
+    else powerInstalled * loadHours
+  }
 
   val EROI = {
     if (nTurbines == 0) 0.0

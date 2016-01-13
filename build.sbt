@@ -3,6 +3,7 @@ lazy val root = (project in file(".")).
     name := "data",
     version := "1.0",
     scalaVersion := "2.11.7",
+	EclipseKeys.withSource := true,
     resolvers ++= Seq("Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
     "Sonatype Releases" at "https://oss.sonatype.org/content/repositories/releases/"
     ),
