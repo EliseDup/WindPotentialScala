@@ -31,3 +31,11 @@ eclipse
 clean
 compile
 eclipse
+compile
+clean
+eclipse
+clean
+refresh
+compile
+clean
+compile

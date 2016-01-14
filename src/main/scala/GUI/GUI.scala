@@ -3,14 +3,14 @@ package GUI
 import scala.swing._
 import scala.swing.TabbedPane._
 import swing.event._
-import embodiedEnergy.Materials
+import construction.Materials
 import javax.swing.JComboBox
-import energyGeneration.GridData
 import utils.PlotHelper
 import squants.space.Degrees
 import squants.space.SquareKilometers
 import squants.energy._
-import calculation.WindTurbine
+import landCover.GridData
+import operation.WindTurbine
 
 object GUI extends SimpleSwingApplication {
   
