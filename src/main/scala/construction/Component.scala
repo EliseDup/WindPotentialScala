@@ -1,33 +1,20 @@
-package embodiedEnergy
+package construction
 
 import squants.energy._
 import squants.mass._
-import squants.mass.MassConversions
-import org.joda.convert.ToString
-import calculation._
 import squants.time.Hours
 import utils._
 
 /**
  * To get the embodied energy in wind turbine due to the manufacturing of the components
  */
-class WindTurbineComponent(val components: List[(Mass, String)] = List(), val materials : Materials = Materials()) {
-  val weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
-  val embodiedEnergy = components.map(m => materials(m._2).getOrElse(Material("",Joules(0),Tonnes(1))).energyIntensity * m._1).foldLeft(Gigajoules(0))(_ + _)
-  val energyIntensity = embodiedEnergy / weight
-}
-
-object WindTurbineComponent {
-  def apply(values: (Double, String)*) = new WindTurbineComponent(values.map(v => (Tonnes(v._1), v._2)).toList)
- //  def newMaterials(values: (Double, Energy)*) = new WindTurbineComponent(values.map(v => (Tonnes(v._1), Material(v._2, Tonnes(v._1)))).toList)
-}
-
 class WindTurbineComponents(val ratedPower: Power,
   val foundation: WindTurbineComponent,
   val tower: WindTurbineComponent,
   val nacelle: WindTurbineComponent,
   val rotor: WindTurbineComponent)
-    extends WindTurbineComponent(foundation.components ++ tower.components ++ nacelle.components ++ rotor.components) {
+    
+  extends WindTurbineComponent(foundation.components ++ tower.components ++ nacelle.components ++ rotor.components) {
   override def toString = "Wind turbine power : " + ratedPower + ", total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
 }
 
@@ -41,8 +28,22 @@ object WindTurbineComponents {
     else throw new IllegalArgumentException("No value for" + mw + "MW wi,d turbine")
   }
 }
+
+class WindTurbineComponent(val components: List[(Mass, String)] = List(), val materials : Materials = Materials()) {
+  val weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
+  val embodiedEnergy = components.map(m => materials(m._2).getOrElse(Material("",Joules(0),Tonnes(1))).energyIntensity * m._1).foldLeft(Gigajoules(0))(_ + _)
+  val energyIntensity = embodiedEnergy / weight
+}
+
+object WindTurbineComponent {
+  def apply(values: (Double, String)*) = new WindTurbineComponent(values.map(v => (Tonnes(v._1), v._2)).toList)
+}
+
+
 /**
- * Example of actual wind turbines
+ * 
+ * Examples of the composition of actual wind turbines
+ * 
  */
 class WindTurbine850kWComponents extends WindTurbineComponents(Kilowatts(850),
   foundation = WindTurbineComponent((480.0, "Concrete"), (15.0, "Steel")),

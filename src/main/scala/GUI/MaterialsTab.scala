@@ -1,7 +1,7 @@
 package GUI
 
 import scala.swing.Panel
-import embodiedEnergy.Materials
+import construction.Materials
 import scala.swing._
 import scala.swing.TabbedPane._
 import swing.event._
@@ -18,13 +18,11 @@ import squants.energy.Energy
 class MaterialsTab extends BoxPanel(Orientation.Vertical) {
 
   val materials = Materials()
-  def ModifiedMaterials : Materials=Materials()
-  
+  def ModifiedMaterials : Materials = Materials()
   val model = materials.list.map(_.toArray).toArray
 
   val table = new Table(model, Array("Material", "Energy Intensity", "", "Unit", "")) {
     selection.elementMode = Table.ElementMode.Cell
-
     override def editor(row: Int, col: Int): TableCellEditor = {
       if (col == 2) new ComboBoxEditor("GJ", Energy.units.map(_.symbol).toArray)
       else if (col == 4) new ComboBoxEditor("t", Mass.units.map(_.symbol).toArray)
@@ -32,22 +30,7 @@ class MaterialsTab extends BoxPanel(Orientation.Vertical) {
     }
   }
   listenTo(table.selection)
-
-  reactions += {
-    case TableRowsSelected(source, range, false) =>
-      outputSelection(source, "Rows selected, changes: %s" format range)
-    case TableColumnsSelected(source, range, false) =>
-      outputSelection(source, "Columns selected, changes: %s" format range)
-    case e => println("%s => %s" format (e.getClass.getSimpleName, e.toString))
-  }
   contents += new ScrollPane(table)
-  def outputSelection(table: Table, msg: String) {
-    val rowId = table.selection.rows.leadIndex
-    val colId = table.selection.columns.leadIndex
-    val rows = table.selection.rows.mkString(", ")
-    val cols = table.selection.columns.mkString(", ")
-  }
-
 }
 trait AbstractCellEditorTrait extends AbstractCellEditor
 trait TableCellEditorTrait extends TableCellEditor

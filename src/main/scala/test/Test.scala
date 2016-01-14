@@ -9,14 +9,13 @@ import org.jfree.data.time.TimeSeries
 import org.jfree.data.time.Minute
 import org.jfree.data.time.TimeSeriesCollection
 import org.jfree.chart.ChartFactory
-import calculation.TheoriticalWindTurbine
 import historicalData.Observation
 import org.apache.commons.math3.distribution.WeibullDistribution
 import historicalData.MeteoDataLoader
 import historicalData.MeteoStations
 import squants.motion.MetersPerSecond
 import squants.space.Meters
-import calculation.WindTurbine2MW
+import operation.WindTurbine2MW
 
 object Test {
   def main(args: Array[String]) = {

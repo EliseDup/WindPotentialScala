@@ -1,11 +1,7 @@
-package embodiedEnergy
+package construction
 
 import squants.energy._
 import squants.mass._
-import squants.mass.MassConversions
-import org.joda.convert.ToString
-import calculation._
-import squants.time.Hours
 import utils._
 
 class Materials(val list: List[Material]) {

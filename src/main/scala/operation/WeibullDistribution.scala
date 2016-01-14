@@ -1,12 +1,10 @@
-package energyGeneration
+package operation
 
 import org.apache.commons.math3.distribution.WeibullDistribution
 import utils.PlotHelper
-import calculation.WindTurbine
 import squants.motion.Velocity
 import squants.motion.MetersPerSecond
 import squants.energy.Kilowatts
-import calculation.WindTurbine2MW
 
 object LoadHourCalculation {
   def main(args: Array[String]): Unit = {
