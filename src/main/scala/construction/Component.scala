@@ -4,6 +4,37 @@ import squants.energy._
 import squants.mass._
 import squants.time.Hours
 import utils._
+/**
+ * No matter how we calculate it, we just want to have the total weigth, and embodied energy !
+ */
+abstract class AbstractWindTurbineComponents {
+  val weight : Mass
+  val embodiedEnergy : Energy
+  def energyIntensity : SpecificEnergy = embodiedEnergy / weight
+  
+  override def toString = "Wind turbine : total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
+
+}
+/**
+ * 3MW : 1443.302 tons
+ * 2MW : 962.844 tons
+ * 850 kW : 596.822 tons
+ * 
+ * From "Energy and CO2 life-cycle analyses of wind turbines- review and applications
+ */
+class DefaultWindTurbineComponents(val weight: Mass)  extends AbstractWindTurbineComponents {
+  val blades = (weight*0.027, Material("Glass fibre, epoxy,PVC", Megajoules(61.8), Kilograms(1)))
+  val hub = (weight*0.035, Material("Steel", Megajoules(36.8), Kilograms(1)))
+  val transmission = (weight*0.052, Material("Steel", Megajoules(36.8), Kilograms(1)))
+  val generator = (weight*0.026, Material("Copper", Megajoules(86.2), Kilograms(1)))
+  val nacelle = (weight*0.003, Material("Glass fibre", Megajoules(61.8), Kilograms(1)))
+  val tower = (weight*0.233, Material("Steel", Megajoules(36.8), Kilograms(1)))
+  val foundations = (weight*0.603, Material("Concrete", Megajoules(3.2), Kilograms(1)))
+  val electrical = (weight*0.021, Material("Copper", Megajoules(86.2), Kilograms(1)))
+  
+  val components = List(blades,hub,transmission,generator,nacelle,tower,foundations,electrical)
+  val embodiedEnergy = components.map(c => c._2.energyIntensity*c._1).foldLeft(Gigajoules(0))(_ + _)
+}
 
 /**
  * To get the embodied energy in wind turbine due to the manufacturing of the components
@@ -13,9 +44,8 @@ class WindTurbineComponents(val ratedPower: Power,
   val tower: WindTurbineComponent,
   val nacelle: WindTurbineComponent,
   val rotor: WindTurbineComponent)
-    
-  extends WindTurbineComponent(foundation.components ++ tower.components ++ nacelle.components ++ rotor.components) {
-  override def toString = "Wind turbine power : " + ratedPower + ", total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
+
+    extends WindTurbineComponent(foundation.components ++ tower.components ++ nacelle.components ++ rotor.components) {
 }
 
 object WindTurbineComponents {
@@ -29,21 +59,18 @@ object WindTurbineComponents {
   }
 }
 
-class WindTurbineComponent(val components: List[(Mass, String)] = List(), val materials : Materials = Materials()) {
+class WindTurbineComponent(val components: List[(Mass, String)] = List(), val materials: Materials = Materials()) extends AbstractWindTurbineComponents {
   val weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
-  val embodiedEnergy = components.map(m => materials(m._2).getOrElse(Material("",Joules(0),Tonnes(1))).energyIntensity * m._1).foldLeft(Gigajoules(0))(_ + _)
-  val energyIntensity = embodiedEnergy / weight
+  val embodiedEnergy = components.map(m => materials(m._2).getOrElse(Material("", Joules(0), Tonnes(1))).energyIntensity * m._1).foldLeft(Gigajoules(0))(_ + _)
 }
 
 object WindTurbineComponent {
   def apply(values: (Double, String)*) = new WindTurbineComponent(values.map(v => (Tonnes(v._1), v._2)).toList)
-}
-
-
+  }
 /**
- * 
+ *
  * Examples of the composition of actual wind turbines
- * 
+ *
  */
 class WindTurbine850kWComponents extends WindTurbineComponents(Kilowatts(850),
   foundation = WindTurbineComponent((480.0, "Concrete"), (15.0, "Steel")),

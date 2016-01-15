@@ -30,11 +30,11 @@ import squants.mass._
 /*
  * N.B.: Power coefficient should be evaluated in order to have a curve close to the power curve when it is not available
  */
-class WindTurbine(val ratedPower: Power, val diameter: Length, val hubHeight: Length,
+class WindTurbine(val ratedPower: Power, val weight : Mass, val diameter: Length, val hubHeight: Length,
     val cutInSpeed: Velocity, val ratedSpeed: Velocity, val cutOutSpeed: Velocity, val powerCoefficient: Double,
     val nPerSquareKM: Double) {
 
-  val components = WindTurbineComponents(ratedPower)
+  val components = new DefaultWindTurbineComponents(weight)
 
   // Embodied Energy = E_fix + P_I t
   // E_fix = fix part for construction and deconstruction
@@ -48,14 +48,14 @@ class WindTurbine(val ratedPower: Power, val diameter: Length, val hubHeight: Le
 
   def power(speed: Velocity) = {
     if (speed < cutInSpeed || speed > cutOutSpeed) Watts(0.0)
-    else if (speed > ratedSpeed) components.ratedPower
-    else Watts(math.min(components.ratedPower.toWatts, powerCoefficient * theoriticalPowerInWind(speed).toWatts))
+    else if (speed > ratedSpeed) ratedPower
+    else Watts(math.min(ratedPower.toWatts, powerCoefficient * theoriticalPowerInWind(speed).toWatts))
   }
 
   def plot = {
     val s = (0 until cutOutSpeed.toMetersPerSecond.toInt + 5).toList
     val p = s.map(i => power(MetersPerSecond(i)).toKilowatts)
-    PlotHelper.plotXY(List((s.map(_.toDouble), p, "")), xLabel = "Wind Speed [m/s]", yLabel = "Power [kW]", title = "Power of " + components.ratedPower + " Turbine")
+    PlotHelper.plotXY(List((s.map(_.toDouble), p, "")), xLabel = "Wind Speed [m/s]", yLabel = "Power [kW]", title = "Power of " + ratedPower + " Turbine")
   }
 }
 
@@ -83,7 +83,7 @@ object WindTurbine {
   }
 }
 
-class WindTurbine2MW extends WindTurbine(Megawatts(2), Meters(82), Meters(98),
+class WindTurbine2MW extends WindTurbine(Megawatts(2), Tonnes(963), Meters(82), Meters(98),
   MetersPerSecond(3), MetersPerSecond(12), MetersPerSecond(22), 0.38, 4) with PowerCurve {
   val specs = List(
     (0, 0), (1, 0), (2, 3), (3, 25), (4, 82), (5, 174),
@@ -95,5 +95,9 @@ class WindTurbine2MW extends WindTurbine(Megawatts(2), Meters(82), Meters(98),
   override def power(windSpeed: Velocity) = powerFromCurve(windSpeed)
 }
 
-class WindTurbine3MW extends WindTurbine(Megawatts(3), Meters(90), Meters(80), MetersPerSecond(4), MetersPerSecond(16), MetersPerSecond(25), 0.25, 4)
-class WindTurbine850kW extends WindTurbine(Kilowatts(850), Meters(52), Meters(60), MetersPerSecond(4), MetersPerSecond(16), MetersPerSecond(25), 0.25, 4) 
+// ONSHORE
+class WindTurbine3MW extends WindTurbine(Megawatts(3), Tonnes(1443), Meters(90), Meters(80), MetersPerSecond(4), MetersPerSecond(16), MetersPerSecond(25), 0.25, 4)
+class WindTurbine850kW extends WindTurbine(Kilowatts(850),  Tonnes(596.8), Meters(52), Meters(60), MetersPerSecond(4), MetersPerSecond(16), MetersPerSecond(25), 0.25, 4) 
+
+// OFFSHORE
+class WindTurbine8MW extends WindTurbine(Megawatts(8), Tonnes(3000), Meters(140), Meters(120), MetersPerSecond(4), MetersPerSecond(16), MetersPerSecond(25), 0.25, 4)
