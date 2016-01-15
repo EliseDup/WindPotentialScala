@@ -32,7 +32,7 @@ object Test {
     // Estimate wind power from data
     val wind = Helper.readResult("wind").asInstanceOf[WindEnergyData].dataYearMonth(2015,10)
     val meteo = Helper.readResult("meteo" + city).asInstanceOf[MeteoData].dataYearMonth(2015,10)
-    val nTurbines = wind(wind.size - 1).capacity*Math.pow(10,3) / turbine.components.ratedPower.value
+    val nTurbines = wind(wind.size - 1).capacity*Math.pow(10,3) / turbine.ratedPower.value
 
     val predictions = meteo.map(i => new Observation(i.time, nTurbines * turbine.power(MetersPerSecond(i.windSpeed),Meters(i.station.elev),Meters(0.4)).value / 1000.0, "Prediction"))
     PlotHelper.plotObservationsWithName(List((predictions, "Predictions"), (wind, "Actuals")))
