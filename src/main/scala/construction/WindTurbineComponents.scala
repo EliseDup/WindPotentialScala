@@ -10,18 +10,20 @@ import squants.motion.Velocity
 /**
  * No matter how we calculate it, we just want to have the total weigth, and embodied energy !
  */
-abstract class WindTurbineComponents {
+abstract class Components {
   val components: List[(Mass, Material)]
+  def weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
+  def embodiedEnergy: Energy = components.map(c => c._2.energyIntensity * c._1).foldLeft(Gigajoules(0))(_ + _)
+  def energyIntensity: SpecificEnergy = embodiedEnergy / weight
+  override def toString = "Components : total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
+
+}
+abstract class WindTurbineComponents extends Components {
   val ratedPower: Power
   val hubHeight: Length
   val diameter: Length
   val cutInSpeed: Velocity; val ratedSpeed: Velocity; val cutOutSpeed: Velocity;
 
-  def weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
-  def embodiedEnergy: Energy = components.map(c => c._2.energyIntensity * c._1).foldLeft(Gigajoules(0))(_ + _)
-  def energyIntensity: SpecificEnergy = embodiedEnergy / weight
-
-  override def toString = "Wind turbine : total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
 }
 
 object WindTurbineComponents {

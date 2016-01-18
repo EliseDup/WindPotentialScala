@@ -26,8 +26,11 @@ import landCover._
 import operation._
 import squants.space.Length
 import squants.space.Meters
+import construction.WindFarmComponents
 
-class GridData(name: String, val gridSize: Angle, val onshoreTurbine: WindTurbine, val offshoreTurbine: WindTurbine) {
+class GridData(name: String, val gridSize: Angle, 
+    val onshoreTurbine: WindTurbine, val offshoreTurbine: WindTurbine,
+    val onshoreFarm : WindFarmComponents, val offshoreFarm : WindFarmComponents) {
   // Coefficients for wind extrapolation depends on Land Cover class
   val clcClasses = new CorineLandCoverClasses()
   val glcClasses = new GlobCoverClasses()
@@ -87,8 +90,8 @@ class GridData(name: String, val gridSize: Angle, val onshoreTurbine: WindTurbin
  * From data of ERA-40 dataset
  *
  */
-class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTurbine, val uWind: Velocity,
-    val vWind: Velocity, val windSpeed: Velocity,
+class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTurbine, val farm : WindFarmComponents,
+    val uWind: Velocity, val vWind: Velocity, val windSpeed: Velocity,
     val clc: Option[CorineLandCoverClass], val glc: Option[GlobCoverClass],
     val seaLevel : Length) {
 val water = seaLevel.value < 0
@@ -133,6 +136,8 @@ val water = seaLevel.value < 0
 
   def loadHours(h: Length = turbine.specs.hubHeight) = Hours(Math.max(0, 626.38 * windSpeedAtHub(h).value - 2003.3))
   val nTurbines = if (loadHours().value <= 0) 0 else area.toSquareKilometers * turbine.nPerSquareKM
+  val nFarms = nTurbines * turbine.ratedPower / Megawatts(300)
+
   val powerInstalled = nTurbines * turbine.ratedPower
   def energyGeneratedPerYear(minSpeed: Velocity = MetersPerSecond(0), minEROI: Double = 0.0, h: Length = turbine.specs.hubHeight): Energy = {
     if (windSpeedAtHub(h) < minSpeed || EROI < minEROI) WattHours(0)
@@ -142,8 +147,8 @@ val water = seaLevel.value < 0
   val EROI = {
     if (nTurbines == 0) 0.0
     else {
-      val out = turbine.lifeTime * turbine.ratedPower * loadHours()
-      val in = turbine.specs.embodiedEnergy
+      val out = nTurbines*turbine.lifeTime * turbine.ratedPower * loadHours()
+      val in = nTurbines*turbine.specs.embodiedEnergy + nFarms*farm.embodiedEnergy
       out / in
     }
   }
@@ -156,7 +161,8 @@ object GridObject {
     val glcClass = if (csvLine(7).equals("NA")) None else Some(data.glcClasses(csvLine(7).toInt))
     val lc = if (clcClass.isDefined) clcClass.get else glcClass.get
     val turbine = if(csvLine(8).toDouble<0) data.offshoreTurbine else data.onshoreTurbine
-    new GridObject(GeoPoint(Degrees(csvLine(0).toDouble), Degrees(csvLine(1).toDouble)), data.gridSize, turbine,
+    val farm = if(csvLine(8).toDouble<0) data.offshoreFarm else data.onshoreFarm
+    new GridObject(GeoPoint(Degrees(csvLine(0).toDouble), Degrees(csvLine(1).toDouble)), data.gridSize, turbine,farm, 
       MetersPerSecond(csvLine(2).toDouble), MetersPerSecond(csvLine(3).toDouble), MetersPerSecond(csvLine(4).toDouble), clcClass, glcClass, Meters(csvLine(8).toDouble))
   }
 }
