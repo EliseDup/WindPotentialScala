@@ -28,30 +28,31 @@ import squants.mass._
  */
 
 /*
- * N.B.: Power coefficient should be evaluated in order to have a curve close to the power curve when it is not available
+ * N.B.: Power coefficient should be evaluated in order to have a curve close to the power curve when it is not available,
+ * the maximum being the Betz Limit = 16/27 = 0.59
  */
-class WindTurbine(val ratedPower: Power, val components : Components, val diameter: Length, val hubHeight: Length,
-    val cutInSpeed: Velocity, val ratedSpeed: Velocity, val cutOutSpeed: Velocity, val powerCoefficient: Double,
-    val nPerSquareKM: Double) {
-
+class WindTurbine(val specs: WindTurbineComponents, val powerCoefficient: Double, val nPerSquareKM: Double) {
+  val ratedPower = specs.ratedPower
   // Embodied Energy = E_fix + P_I t
   // E_fix = fix part for construction and deconstruction
   // P_I t = a part that increases with time, e.g. maintenance and fuel provisioning 
-  val lifeTime = 20; val radius = diameter / 2
+  val lifeTime = 20; val radius = specs.diameter / 2
   val area = Math.PI * radius * radius; val airDensity = KilogramsPerCubicMeter(1.225)
+
+  // We approximate the power by the Cubic power curve
   def theoriticalPowerInWind(speed: Velocity) = Watts(0.5 * airDensity.toKilogramsPerCubicMeter * area.toSquareMeters * Math.pow(speed.toMetersPerSecond, 3))
 
   def power(windSpeed: Velocity, h0: Length, z0: Length): Power = power(windExtrapolation(windSpeed, h0, z0))
-  def windExtrapolation(v0: Velocity, h0: Length, z0: Length): Velocity = v0 * (Math.log(hubHeight / z0) / Math.log(h0 / z0))
+  def windExtrapolation(v0: Velocity, h0: Length, z0: Length): Velocity = v0 * (Math.log(specs.hubHeight / z0) / Math.log(h0 / z0))
 
   def power(speed: Velocity) = {
-    if (speed < cutInSpeed || speed > cutOutSpeed) Watts(0.0)
-    else if (speed > ratedSpeed) ratedPower
-    else Watts(math.min(ratedPower.toWatts, powerCoefficient * theoriticalPowerInWind(speed).toWatts))
+    if (speed < specs.cutInSpeed || speed > specs.cutOutSpeed) Watts(0.0)
+    else if (speed > specs.ratedSpeed) specs.ratedPower
+    else Watts(math.min(specs.ratedPower.toWatts, powerCoefficient * theoriticalPowerInWind(speed).toWatts))
   }
 
   def plot = {
-    val s = (0 until cutOutSpeed.toMetersPerSecond.toInt + 5).toList
+    val s = (0 until specs.cutOutSpeed.toMetersPerSecond.toInt + 5).toList
     val p = s.map(i => power(MetersPerSecond(i)).toKilowatts)
     PlotHelper.plotXY(List((s.map(_.toDouble), p, "")), xLabel = "Wind Speed [m/s]", yLabel = "Power [kW]", title = "Power of " + ratedPower + " Turbine")
   }
@@ -61,11 +62,11 @@ class WindTurbine(val ratedPower: Power, val components : Components, val diamet
  * When the power curve is available, use this
  */
 trait PowerCurve {
-  val specs: List[(Int, Int)]
+  val curve: List[(Int, Int)]
   val ratedPower: Power
-  def powerCurve = specs.map(i => (i._1, Kilowatts(i._2)))
+  def powerCurve = curve.map(i => (i._1, Kilowatts(i._2)))
   def powerFromCurve(windSpeed: Velocity): Power = powerCurve.find(i => i._1 == Math.floor(windSpeed.value).toInt).getOrElse((0, Kilowatts(0)))._2
-  def plotCurve = PlotHelper.plotXY((powerCurve.map(_._1.toDouble), powerCurve.map(_._2.value), "Power Curve of " + ratedPower + " Turbine"))
+  def plotCurve = PlotHelper.plotXY(List((powerCurve.map(_._1.toDouble), powerCurve.map(_._2.value), "")), xLabel = "Wind Speed [m/s]", yLabel = "Power [kW]", title = "Power curve of " + ratedPower + " Turbine")
 }
 
 /**
@@ -81,9 +82,8 @@ object WindTurbine {
   }
 }
 
-class WindTurbine2MW extends WindTurbine(Megawatts(2), new DefaultWindTurbineComponents(Tonnes(963)), Meters(82), Meters(98),
-  MetersPerSecond(3), MetersPerSecond(12), MetersPerSecond(22), 0.38, 4) with PowerCurve {
-  val specs = List(
+class WindTurbine2MW extends WindTurbine(WindTurbineComponents("2MW"), 0.38, 4) with PowerCurve {
+  val curve = List(
     (0, 0), (1, 0), (2, 3), (3, 25), (4, 82), (5, 174),
     (6, 321), (7, 532), (8, 815), (9, 1180), (10, 1580),
     (11, 1810), (12, 1980), (13, 2050), (14, 2050), (15, 2050),
@@ -94,5 +94,6 @@ class WindTurbine2MW extends WindTurbine(Megawatts(2), new DefaultWindTurbineCom
 }
 
 // ONSHORE
-class WindTurbine3MW extends WindTurbine(Megawatts(3), new DefaultWindTurbineComponents(Tonnes(1443)), Meters(90), Meters(80), MetersPerSecond(4), MetersPerSecond(16), MetersPerSecond(25), 0.25, 4)
-class WindTurbine850kW extends WindTurbine(Kilowatts(850),  new DefaultWindTurbineComponents(Tonnes(596.8)), Meters(52), Meters(60), MetersPerSecond(4), MetersPerSecond(16), MetersPerSecond(25), 0.25, 4) 
+class WindTurbine1500kW extends WindTurbine(WindTurbineComponents("1500kW"), 0.25, 4)
+class WindTurbine3MW extends WindTurbine(WindTurbineComponents("3MW"), 0.25, 4)
+class WindTurbine850kW extends WindTurbine(WindTurbineComponents("850kW"), 0.25, 4) 

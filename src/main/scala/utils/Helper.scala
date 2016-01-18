@@ -82,7 +82,11 @@ object Helper {
     val wb = new HSSFWorkbook(inp)
     wb.getSheetAt(index)
   }
-
+def xlsSheet(fileName: String, sheetName :String): HSSFSheet = {
+    val inp = new FileInputStream(new File(fileName))
+    val wb = new HSSFWorkbook(inp)
+    wb.getSheet(sheetName)
+  }
   /**
    * Distance between to point in Latitude,Longitude decimal degrees
    */
