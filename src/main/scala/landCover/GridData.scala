@@ -96,12 +96,12 @@ val water = seaLevel.value < 0
   val clcCode: Int = if (clc.isDefined) clc.get.code else -1
   val glcCode: Int = if (glc.isDefined) glc.get.code else -1
   val h0 = Meters(10)
-  def windSpeedAtHub(h: Length = turbine.hubHeight): Velocity = {
+  def windSpeedAtHub(h: Length = turbine.specs.hubHeight): Velocity = {
     Math.log(h.toMeters / lc.z0.toMeters) / Math.log(h0.toMeters / lc.z0.toMeters) * windSpeed
   }
   val airDensity = KilogramsPerCubicMeter(1.225)
   val powerDensity = WattsPerSquareMeter(0.5 * airDensity.value * Math.pow(windSpeed.value, 3))
-  def powerDensityAtHub(h: Length = turbine.hubHeight) = WattsPerSquareMeter(0.5 * airDensity.value * Math.pow(windSpeedAtHub(h).value, 3))
+  def powerDensityAtHub(h: Length = turbine.specs.hubHeight) = WattsPerSquareMeter(0.5 * airDensity.value * Math.pow(windSpeedAtHub(h).value, 3))
 
   /**
    * Calculate the cell size in km^2
@@ -131,10 +131,10 @@ val water = seaLevel.value < 0
    * => Result in Wh
    */
 
-  def loadHours(h: Length = turbine.hubHeight) = Hours(Math.max(0, 626.38 * windSpeedAtHub(h).value - 2003.3))
+  def loadHours(h: Length = turbine.specs.hubHeight) = Hours(Math.max(0, 626.38 * windSpeedAtHub(h).value - 2003.3))
   val nTurbines = if (loadHours().value <= 0) 0 else area.toSquareKilometers * turbine.nPerSquareKM
   val powerInstalled = nTurbines * turbine.ratedPower
-  def energyGeneratedPerYear(minSpeed: Velocity = MetersPerSecond(0), minEROI: Double = 0.0, h: Length = turbine.hubHeight): Energy = {
+  def energyGeneratedPerYear(minSpeed: Velocity = MetersPerSecond(0), minEROI: Double = 0.0, h: Length = turbine.specs.hubHeight): Energy = {
     if (windSpeedAtHub(h) < minSpeed || EROI < minEROI) WattHours(0)
     else powerInstalled * loadHours(h)
   }
@@ -143,7 +143,7 @@ val water = seaLevel.value < 0
     if (nTurbines == 0) 0.0
     else {
       val out = turbine.lifeTime * turbine.ratedPower * loadHours()
-      val in = turbine.components.embodiedEnergy
+      val in = turbine.specs.embodiedEnergy
       out / in
     }
   }

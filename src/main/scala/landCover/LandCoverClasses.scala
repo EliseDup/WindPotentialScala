@@ -13,9 +13,9 @@ abstract class LandCoverClass(val code: Int, val label: String, val z0: Length,
 }
 
 abstract class LandCoverClasses[C <: LandCoverClass](legendFileName: String) {
-   val openSpaces: List[Int]
+  val openSpaces: List[Int]
   val agriculturalAreas: List[Int]
- 
+
   val classes: Map[Int, C] = {
     val sheet = Helper.xlsSheet(Helper.ressourcesPy + "/landCover/" + legendFileName + ".xls", 0)
     (1 to sheet.getLastRowNum).map(r => {
@@ -54,16 +54,15 @@ object CorineLandCoverClass {
 }
 
 class CorineLandCoverClasses extends LandCoverClasses[CorineLandCoverClass]("clc/clc2000legend") {
-  
+
   val openSpaces = (30 to 34).toList
   val agriculturalAreas = (12 to 22).toList
-  
+
   def landCoverClass(row: HSSFRow) = CorineLandCoverClass(row, this)
-  // 0 also corresponds to sea and ocean ?
-  //override def apply(index: Int) = if (index == 0) classes(44) else super.apply(index)
+
 }
 
-class GlobCoverClass(code: Int, label: String, z0 : Length, classes: GlobCoverClasses) extends LandCoverClass(code, label, z0, classes)
+class GlobCoverClass(code: Int, label: String, z0: Length, classes: GlobCoverClasses) extends LandCoverClass(code, label, z0, classes)
 object GlobCoverClass {
   def apply(row: HSSFRow, cl: GlobCoverClasses) = new GlobCoverClass(Helper.toInt(row, 0), Helper.toString(row, 1), Meters(Helper.toDouble(row, 5)), cl)
 }
@@ -71,12 +70,12 @@ object GlobCoverClass {
 class GlobCoverClasses extends LandCoverClasses[GlobCoverClass]("globCover/GlobCover2009_Legend") {
   val openSpaces = List()
   val agriculturalAreas = List()
- 
+
   def landCoverClass(row: HSSFRow) = GlobCoverClass(row, this)
 
 }
 
-class GlobalLandCoverClass(code: Int, label: String, z0 : Length, classes: GlobalLandCoverClasses) extends LandCoverClass(code, label, z0, classes)
+class GlobalLandCoverClass(code: Int, label: String, z0: Length, classes: GlobalLandCoverClasses) extends LandCoverClass(code, label, z0, classes)
 object GlobalLandCoverClass {
   def apply(row: HSSFRow, cl: GlobalLandCoverClasses) = new GlobalLandCoverClass(Helper.toInt(row, 0), Helper.toString(row, 1), Meters(Helper.toDouble(row, 5)), cl)
 }
@@ -84,7 +83,7 @@ object GlobalLandCoverClass {
 class GlobalLandCoverClasses extends LandCoverClasses[GlobalLandCoverClass]("glc/Global_Legend") {
   val openSpaces = List(11, 12)
   val agriculturalAreas = (10 to 18).toList
- 
+
   def landCoverClass(row: HSSFRow) = GlobalLandCoverClass(row, this)
 
 }

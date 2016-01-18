@@ -13,8 +13,15 @@ import operation._
 import construction._
 
 object TestERA40 {
+  
   def main(args: Array[String]) = {
+
+    val t = new WindTurbine2MW
+    t.plot
+    t.plotCurve
+   println("---")
     //Helper.txtToCSV(Helper.ressourcesPy + "results/worldDailyAugust2002test", Helper.ressourcesPy + "test.csv", List(4,3,2),true)
+
     val name = "world5years"
     val wind = new GridData("results/" + name, Degrees(0.25), new WindTurbine2MW, new WindTurbine2MW)
 
