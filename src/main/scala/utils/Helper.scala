@@ -20,6 +20,7 @@ import squants.Meters
 import squants.space.SquareMeters
 import squants.space.Degrees
 import squants.space.Angle
+import org.apache.poi.ss.usermodel.Row
 
 object Helper {
   val ressourcesPy = "/Users/Elise/Documents/workspace/WindPotentialPY/ressources/"
@@ -40,20 +41,20 @@ object Helper {
   /**
    * XLS Reading
    */
-  def toString(row: HSSFRow, col: Int): String = {
+  def toString(row: Row, col: Int): String = {
     if (row.getCell(col) == null || row.getCell(col).getStringCellValue.isEmpty()) ""
     else row.getCell(col).getStringCellValue
   }
-  def stringToDouble(row: HSSFRow, col: Int): Double = {
+  def stringToDouble(row: Row, col: Int): Double = {
     if (row.getCell(col) == null || row.getCell(col).getStringCellValue.isEmpty()) 0.0
     else row.getCell(col).getStringCellValue.toDouble
   }
-  def toDouble(row: HSSFRow, col: Int): Double = {
+  def toDouble(row: Row, col: Int): Double = {
     if (row.getCell(col) == null) 0.0
     else row.getCell(col).getNumericCellValue()
   }
-  def toInt(row: HSSFRow, col: Int): Int = row.getCell(col).getNumericCellValue.toInt
-  def toDate(row: HSSFRow, col: Int): Date = row.getCell(col).getDateCellValue
+  def toInt(row: Row, col: Int): Int = row.getCell(col).getNumericCellValue.toInt
+  def toDate(row: Row, col: Int): Date = row.getCell(col).getDateCellValue
 
   /**
    * RMSE = SUM_i ((values(i)-predictions(i))^2) / N ?

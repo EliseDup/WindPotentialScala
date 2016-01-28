@@ -17,9 +17,7 @@ import squants.energy.Energy
 
 class MaterialsTab extends BoxPanel(Orientation.Vertical) {
 
-  val materials = Materials()
-  def ModifiedMaterials : Materials = Materials()
-  val model = materials.list.map(_.toArray).toArray
+  val model = Materials.list.map(_.toArray).toArray
 
   val table = new Table(model, Array("Material", "Energy Intensity", "", "Unit", "")) {
     selection.elementMode = Table.ElementMode.Cell
