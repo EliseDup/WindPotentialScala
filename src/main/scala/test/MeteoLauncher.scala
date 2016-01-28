@@ -16,6 +16,7 @@ import historicalData.MeteoStations
 import squants.motion.MetersPerSecond
 import squants.space.Meters
 import operation.WindTurbine2MW
+import construction.Materials
 
 object Test {
   def main(args: Array[String]) = {

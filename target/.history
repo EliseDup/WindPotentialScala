@@ -39,3 +39,12 @@ refresh
 compile
 clean
 compile
+clean
+eclipse
+clean
+compile
+eclipse
+compile
+clean
+build
+compile

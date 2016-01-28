@@ -12,22 +12,24 @@ import squants.energy._
 import landCover.GridData
 import operation.WindTurbine
 import construction.WindFarmComponents
+import operation.WindTurbineWithPower
 
 object GUI extends SimpleSwingApplication {
+   
+  val sizeTurbine = List("850 kW", "2 MW", "3 MW")
+  val farm = new WindFarmComponents()
   
-  val sizeTurbine = List(Kilowatts(850), Megawatts(2), Megawatts(3))
-  val farm = WindFarmComponents()
   def top = new MainFrame {
     title = "Wind power potential"
     preferredSize = new Dimension(750, 500)
-    val materials = new MaterialsTab
+    val mat = new MaterialsTab
     val simu = new SimulationTab(sizeTurbine)
     val start = new Button { text = "Go !" }
 
     contents = new FlowPanel {
       contents.append(new TabbedPane {
         pages += new Page("Simulation", simu)
-        pages += new Page("Materials", materials)
+        pages += new Page("Materials", mat)
       })
       contents.append(start)
     }
@@ -37,7 +39,8 @@ object GUI extends SimpleSwingApplication {
       case ButtonClicked(start) =>
         val wind = new GridData("results/" +
           simu.area.selection.item.toLowerCase() + "5yearslc", Degrees(0.25),
-          WindTurbine(sizeTurbine(simu.onshore.selection.index)), WindTurbine(sizeTurbine(simu.offshore.selection.index)),farm,farm)
+          new WindTurbineWithPower(sizeTurbine(simu.onshore.selection.index)), 
+          new WindTurbineWithPower(sizeTurbine(simu.offshore.selection.index)),farm,farm)
         
         wind.plotEROIVSCumulatedProduction(wind.agriculturalAreas(wind.clcGrids))
         PlotHelper.cumulativeDensity(List((wind.erois(wind.agriculturalAreas(wind.clcGrids)), "")), xLabel = "% of Sites", yLabel = "EROI")

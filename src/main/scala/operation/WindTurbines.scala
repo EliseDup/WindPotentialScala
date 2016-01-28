@@ -32,6 +32,7 @@ import squants.mass._
  * the maximum being the Betz Limit = 16/27 = 0.59
  */
 class WindTurbine(val specs: WindTurbineComponents, val powerCoefficient: Double, val nPerSquareKM: Double) {
+  
   val ratedPower = specs.ratedPower
   // Embodied Energy = E_fix + P_I t
   // E_fix = fix part for construction and deconstruction
@@ -69,20 +70,7 @@ trait PowerCurve {
   def plotCurve = PlotHelper.plotXY(List((powerCurve.map(_._1.toDouble), powerCurve.map(_._2.value), "")), xLabel = "Wind Speed [m/s]", yLabel = "Power [kW]", title = "Power curve of " + ratedPower + " Turbine")
 }
 
-/**
- * Examples of existing wind turbines
- */
-object WindTurbine {
-  def apply(power: Power): WindTurbine = apply(power.toMegawatts)
-  def apply(mw: Double): WindTurbine = {
-    if (mw == 0.85) new WindTurbine850kW
-    else if (mw == 2) new WindTurbine2MW
-    else if (mw == 3) new WindTurbine3MW
-    else throw new IllegalArgumentException("No value for" + mw + "MW wind turbine")
-  }
-}
-
-class WindTurbine2MW extends WindTurbine(WindTurbineComponents("2MW"), 0.38, 4) with PowerCurve {
+class WindTurbine2MW extends WindTurbine(new WindTurbineComponents("2MW"), 0.38, 4) with PowerCurve {
   val curve = List(
     (0, 0), (1, 0), (2, 3), (3, 25), (4, 82), (5, 174),
     (6, 321), (7, 532), (8, 815), (9, 1180), (10, 1580),
@@ -94,6 +82,5 @@ class WindTurbine2MW extends WindTurbine(WindTurbineComponents("2MW"), 0.38, 4) 
 }
 
 // ONSHORE
-class WindTurbine1500kW extends WindTurbine(WindTurbineComponents("1500kW"), 0.25, 4)
-class WindTurbine3MW extends WindTurbine(WindTurbineComponents("3MW"), 0.25, 4)
-class WindTurbine850kW extends WindTurbine(WindTurbineComponents("850kW"), 0.25, 4) 
+class WindTurbineWithPower(power : String) extends WindTurbine(new WindTurbineComponents(power), 0.25, 4)
+

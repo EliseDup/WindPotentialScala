@@ -5,6 +5,7 @@ import utils.PlotHelper
 import squants.motion.Velocity
 import squants.motion.MetersPerSecond
 import squants.energy.Kilowatts
+import construction.Materials
 
 object LoadHourCalculation {
   def main(args: Array[String]): Unit = {
