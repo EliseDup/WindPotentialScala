@@ -26,21 +26,14 @@ abstract class Components {
 
   override def toString = "Components : total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
 
-  def list(sheet: Sheet) = {
-    val start = Helper.toInt(sheet.getRow(0), 0) - 1;
-    val end = Helper.toInt(sheet.getRow(0), 1) - 1;
-    (start to end).map(r => {
-      val row = sheet.getRow(r)
-      val mass = Mass(Helper.toDouble(row, 1).toString() + Helper.toString(row, 2)).get
-      (mass, Materials.getOrNone(Helper.toString(row, 0)))
-    }).toList
-  }
-  def materialFrom(row: Row) = Materials.getOrNone(Helper.toString(row, 0))
+  def *(d: Double): Components = Components(components.map(i => (i._1 * d, i._2)))
+  
 }
 
 object Components {
-  def apply(comp: (Mass, Material)*) = new Components {
-    val components = comp.toList
+  def apply(comp: (Mass, Material)*) : Components = apply(comp.toList)
+  def apply(list : List[(Mass, Material)]) : Components = new Components{
+    val components = list
   }
 }
 /**
@@ -52,9 +45,18 @@ abstract class AbstractWindTurbineComponents extends Components {
   val hubHeight, diameter: Length
   val cutInSpeed, ratedSpeed, cutOutSpeed: Velocity
   val foundation, tower, nacelle, rotor: Components
+  
+  override def transportEnergy = super.transportEnergy + 
+  Transport.truckTransport(tower.weight, Kilometers(1100)) + Transport.shipTransport(tower.weight, Kilometers(8050)) + 
+  Transport.truckTransport(nacelle.weight, Kilometers(1025)) +
+  Transport.truckTransport(rotor.weight, Kilometers(600)) + 
+  Transport.truckTransport(foundation.weight, Kilometers(50))
+  
+  
 }
 
 class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineComponents {
+
   val sheet = Helper.xlsSheet("ressources/windTurbines.xls", sheetName)
 
   val componentsWithName: List[(String, Mass, Material)] = {
@@ -91,7 +93,7 @@ class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineCo
  *
  * From "Energy and CO2 life-cycle analyses of wind turbines- review and applications" ==> does not seem correct !!
  */
-class DefaultWindTurbineComponents(val totWeight: Mass, val ratedPower: Power, val diameter: Length, val hubHeight: Length,
+/*class DefaultWindTurbineComponents(val totWeight: Mass, val ratedPower: Power, val diameter: Length, val hubHeight: Length,
     val cutInSpeed: Velocity, val ratedSpeed: Velocity, val cutOutSpeed: Velocity) extends AbstractWindTurbineComponents {
 
   val blades = (totWeight * 0.027, Fiberglass)
@@ -118,4 +120,4 @@ object DefaultWindTurbineComponents {
       Length(Helper.toString(spec, 1)).get, Velocity(Helper.toString(spec, 3)).get, Velocity(Helper.toString(spec, 4)).get, Velocity(Helper.toString(spec, 5)).get)
   }
 
-}
+}*/

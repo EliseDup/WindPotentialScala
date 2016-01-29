@@ -1,5 +1,8 @@
 package construction
 
+import squants.mass._
+import squants.space.Length
+
 /**
  * Foundations change with water depth
  *  - 0-30m / 1-2 MW : Monopile
@@ -11,7 +14,21 @@ package construction
  *  										20–30 1.067 1.090 1.113 1.136 1.159 1.262 1.501 1.705
  *  										30–40 1.237 1.264 1.290 1.317 1.344 1.464 1.741 1.977
  *  										40–50 1.396 1.427 1.457 1.418 1.517 1.653 1.966 2.232
+ * From :
  */
+object OffshoreFoundations {
+  def foundation(waterDepth : Length)={
+    if(waterDepth.toMeters <= 30) monopile
+    else if(waterDepth.toMeters <= 50) jacket
+    else floating
+  }
+  
+  val monopile = Components((Tonnes(650),Steel))
+  val jacket = Components((Tonnes(759),Steel),(Tonnes(126),Concrete))
+  val floating = Components((Tonnes(1258),Steel))
+
+}
+
 object MultiplyingFactor {
 
   def factor(depth: Double, distance: Double) = {
@@ -27,8 +44,4 @@ object MultiplyingFactor {
       Array(1.067, 1.090, 1.113, 1.136, 1.159, 1.262, 1.501, 1.705),
       Array(1.237, 1.264, 1.290, 1.317, 1.344, 1.464, 1.741, 1.977),
       Array(1.396, 1.427, 1.457, 1.418, 1.517, 1.653, 1.966, 2.232))
-}
-
-object OffshoreWind {
-  // val floatingCables = 
 }
