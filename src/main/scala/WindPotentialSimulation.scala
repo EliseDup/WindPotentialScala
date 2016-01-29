@@ -10,25 +10,26 @@ import operation.WindTurbineWithPower
 import utils.PlotHelper
 import squants.energy.MegawattHours
 import squants.energy.KilowattHours
-import construction.DefaultWindTurbineComponents
 import construction.WindTurbineComponents
+import construction.WindTurbineComponents
+import operation.WindTurbineWithPower
 
 object WindPotentialSimulation {
   def main(args: Array[String]): Unit = {
-    
-    val farm = new WindFarmComponents()
 
-    val offshore = new WindTurbineWithPower("5MWoffshore")
-    val onshore = new WindTurbine2MW
- 
-    println(offshore.specs)
-    println(onshore.specs)
-    
-    val name = "world5years"
+    val pow = List("850KW", "1.65MW", "1500kW", "2MW", "3MW")
+    for (p <- pow) println(print(new WindTurbineWithPower(p).specs))
+    def print(comp: WindTurbineComponents) {
+      val w = comp.weight - comp.foundation.weight
+      println("Tower " + comp.tower.weight / w)
+      println("Rotor " + comp.rotor.weight / w)
+      println("Nacelle " + comp.nacelle.weight / w)
 
-    val wind = new GridData("results/" + name, Degrees(0.25), onshore, offshore, farm, farm)
+    }
 
-    wind.plotEROIVSCumulatedProduction(wind.offshoreGrids())
+    // val name = "world5years"
+    // val wind = new GridData("results/" + name, Degrees(0.25), onshore, offshore, farm, farm)
+    // wind.plotEROIVSCumulatedProduction(wind.offshoreGrids())
 
   }
 }

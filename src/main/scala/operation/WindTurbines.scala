@@ -51,7 +51,7 @@ class WindTurbine(val specs: WindTurbineComponents, val powerCoefficient: Double
     else if (speed > specs.ratedSpeed) specs.ratedPower
     else Watts(math.min(specs.ratedPower.toWatts, powerCoefficient * theoriticalPowerInWind(speed).toWatts))
   }
-
+  
   def plot = {
     val s = (0 until specs.cutOutSpeed.toMetersPerSecond.toInt + 5).toList
     val p = s.map(i => power(MetersPerSecond(i)).toKilowatts)
