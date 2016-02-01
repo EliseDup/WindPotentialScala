@@ -27,12 +27,12 @@ abstract class Components {
   override def toString = "Components : total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
 
   def *(d: Double): Components = Components(components.map(i => (i._1 * d, i._2)))
-  
+
 }
 
 object Components {
-  def apply(comp: (Mass, Material)*) : Components = apply(comp.toList)
-  def apply(list : List[(Mass, Material)]) : Components = new Components{
+  def apply(comp: (Mass, Material)*): Components = apply(comp.toList)
+  def apply(list: List[(Mass, Material)]): Components = new Components {
     val components = list
   }
 }
@@ -40,19 +40,19 @@ object Components {
  * The list of components of a wind turbines, mainly : Tower, Foundation, Rotor and Nacelle
  * Also some specifications
  */
+
 abstract class AbstractWindTurbineComponents extends Components {
   val ratedPower: Power
   val hubHeight, diameter: Length
   val cutInSpeed, ratedSpeed, cutOutSpeed: Velocity
   val foundation, tower, nacelle, rotor: Components
-  
-  override def transportEnergy = super.transportEnergy + 
-  Transport.truckTransport(tower.weight, Kilometers(1100)) + Transport.shipTransport(tower.weight, Kilometers(8050)) + 
-  Transport.truckTransport(nacelle.weight, Kilometers(1025)) +
-  Transport.truckTransport(rotor.weight, Kilometers(600)) + 
-  Transport.truckTransport(foundation.weight, Kilometers(50))
-  
-  
+
+  override def transportEnergy = super.transportEnergy +
+    Transport.truckTransport(tower.weight, Kilometers(1100)) + Transport.shipTransport(tower.weight, Kilometers(8050)) +
+    Transport.truckTransport(nacelle.weight, Kilometers(1025)) +
+    Transport.truckTransport(rotor.weight, Kilometers(600)) +
+    Transport.truckTransport(foundation.weight, Kilometers(50))
+
 }
 
 class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineComponents {
@@ -65,7 +65,7 @@ class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineCo
     (start to end).map(r => {
       val row = sheet.getRow(r)
       val mass = Mass(Helper.toDouble(row, 1).toString() + Helper.toString(row, 2)).get
-      (Helper.toString(row, 6), mass, Materials.getOrNone(Helper.toString(row, 0)))
+      (Helper.toString(row, 3), mass, Materials.getOrNone(Helper.toString(row, 0)))
     }).toList
   }
 
@@ -86,38 +86,29 @@ class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineCo
 
 }
 
+
 /**
- * 3MW : 1443.302 tons
- * 2MW : 962.844 tons
- * 850 kW : 597 tons
- *
- * From "Energy and CO2 life-cycle analyses of wind turbines- review and applications" ==> does not seem correct !!
+ * From : Assessing the Life Cycle Environmental Impacts of Offshore
+ * Wind Power Generation and Power Transmission in the North Sea - Christine Birkeland
  */
-/*class DefaultWindTurbineComponents(val totWeight: Mass, val ratedPower: Power, val diameter: Length, val hubHeight: Length,
-    val cutInSpeed: Velocity, val ratedSpeed: Velocity, val cutOutSpeed: Velocity) extends AbstractWindTurbineComponents {
 
-  val blades = (totWeight * 0.027, Fiberglass)
-  val hub = (totWeight * 0.035, Steel)
-  val transmission = (totWeight * 0.052, Steel)
-  val generator = (totWeight * 0.026, Copper)
-  val nacelleComp = (totWeight * 0.003, Fiberglass)
-  val towerComp = (totWeight * 0.233, Steel)
-  val foundationComp = (totWeight * 0.603, Concrete)
-  val electrical = (totWeight * 0.021, Copper)
+class DefaultWindTurbineComponents(val ratedPower: Power) {
+  
+  val nMW = ratedPower.toMegawatts
 
-  val components = List(blades, hub, transmission, generator, nacelleComp, towerComp, foundationComp, electrical)
-  val rotor = Components(blades, hub)
-  val nacelle = Components(transmission, generator, nacelleComp, electrical)
-  val tower = Components(towerComp)
-  val foundation = Components(foundationComp)
+  val hub = Components((Kilograms(38791.7 / 5), CastIron), (Kilograms(2041.7 / 5), Aluminium)) * nMW
+  val blades = Components((Kilograms(2056.3 / 5), Steel), (Kilograms(39068.8 / 5), Fiberglass)) * nMW
+  val nacelle = Components((Kilograms(26250.0 / 5), CastIron),
+    (Kilograms((11400 + 8250 + 24575 + 63700 + 600) / 5.0), Steel),
+    (Kilograms((650 + 6255) / 5.0), Aluminium),
+    (Kilograms((650 + 7000 + 3750 + 420) / 5.0), Copper)) * nMW
+  val tower = Components((Kilograms(2.8 * 2400 / 5), Concrete), (Kilograms(339406.7 / 5), Steel)) * nMW
+
+  val foundations = Components((Kilograms(560000/5.0),Steel),(Kilograms(1300*2400/5),Concrete))*nMW // TODO , Kilograms(5151000/5,Gravel))
+
+  val replacementsParts = Components((Kilograms(8138 / 5.0), CastIron),
+    (Kilograms((186 + 157976 + 7618 + 2558) / 5.0), Steel),
+    (Kilograms((1612 + 1939) / 5.0), Aluminium),
+    (Kilograms((2170 + 1612 + 1301163) / 5.0), Copper),
+    (Kilograms((155 + 116) / 5.0), Silica)) * nMW
 }
-
-object DefaultWindTurbineComponents {
-  def apply(sheetName: String) = {
-    val sheet = Helper.xlsSheet("ressources/windTurbines.xls", sheetName)
-    val spec = sheet.getRow(2)
-    new DefaultWindTurbineComponents(Mass(Helper.toString(spec, 6)).get, Power(Helper.toString(spec, 0)).get, Length(Helper.toString(spec, 2)).get,
-      Length(Helper.toString(spec, 1)).get, Velocity(Helper.toString(spec, 3)).get, Velocity(Helper.toString(spec, 4)).get, Velocity(Helper.toString(spec, 5)).get)
-  }
-
-}*/
