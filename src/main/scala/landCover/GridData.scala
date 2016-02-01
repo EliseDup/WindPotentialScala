@@ -26,13 +26,13 @@ import landCover._
 import operation._
 import squants.space.Length
 import squants.space.Meters
-import construction.WindFarmComponents
 import squants.space.Kilometers
 import construction.MultiplyingFactor
+import construction.WindFarm
+import construction.OffshoreWindFarm
 
 class GridData(name: String, val gridSize: Angle,
-    val onshoreTurbine: WindTurbine, val offshoreTurbine: WindTurbine,
-    val onshoreFarm: WindFarmComponents, val offshoreFarm: WindFarmComponents) {
+    val onshoreTurbine: WindTurbine, val offshoreTurbine: WindTurbine) {
 
   // Coefficients for wind extrapolation depends on Land Cover class
   val clcClasses = new CorineLandCoverClasses()
@@ -102,12 +102,16 @@ class GridData(name: String, val gridSize: Angle,
  * From data of ERA-40 dataset
  *
  */
-class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTurbine, val farm: WindFarmComponents,
+class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTurbine,
     val uWind: Velocity, val vWind: Velocity, val windSpeed: Velocity,
     val clc: Option[CorineLandCoverClass], val glc: Option[GlobCoverClass],
     val seaLevel: Length, val distanceToCoast: Length) {
 
   val water = seaLevel.value < 0
+  // Only area up to 200 m depth are suitable for offshore wind farm !
+  val offshoreArea = water && -seaLevel.toMeters <= 200
+  val suitableArea = offshoreArea || !water
+
   val lc: LandCoverClass = if (clc.isDefined) clc.get else glc.get
   val clcCode: Int = if (clc.isDefined) clc.get.code else -1
   val glcCode: Int = if (glc.isDefined) glc.get.code else -1
@@ -122,14 +126,16 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
   /**
    * Calculate the cell size in km^2
    * Lat,Lon represent the center of the cell
-   * =>  ___________  lat+0125/2
-   *    |						|
-   *    |						|
-   *    |			o 		|
-   *    |						|
-   *    |						|
-   *     ___________ lat-0125/2
-   * lon-0.125/2     lon+0.125/2
+   * =>
+   * lat+0125/2	 ___________  lat+0125/2
+   * lon-0.125/2|						| lon+0.125/2
+   *    				|						|
+   *    				|			o 		|
+   *    				|						|
+   *            |						|
+   *             ___________
+   * lat-0125/2							 lat-0125/2
+   * lon-0.125/2				     lon+0.125/2
    *
    */
 
@@ -137,6 +143,10 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
   val lowerLeftCorner = GeoPoint(center.latitude - s, center.longitude - s)
   val upperRightCorner = GeoPoint(center.latitude + s, center.longitude + s)
   val area = Helper.areaRectangle(lowerLeftCorner, upperRightCorner)
+  val minLatDistance = List(Helper.distance(GeoPoint(center.latitude + s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude + s)),
+    Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude - s, center.longitude + s))).minBy(_.value)
+  val minLonDisance = List(Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude - s, center.longitude + s)),
+    Helper.distance(GeoPoint(center.latitude + s, center.longitude + s), GeoPoint(center.latitude + s, center.longitude - s))).minBy(_.value)
 
   /**
    * Regarding average wind energy production potential per square kilometre,
@@ -148,13 +158,16 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
    */
 
   def loadHours(h: Length = turbine.specs.hubHeight, minSpeed: Velocity = MetersPerSecond(4)) = {
-    if (windSpeedAtHub(h) < minSpeed) Hours(0)
+    if (windSpeedAtHub(h) < minSpeed || !suitableArea) Hours(0)
     else Hours(Math.max(0, 626.38 * windSpeedAtHub(h).value - 2003.3))
   }
-  val nTurbines = if (loadHours().value <= 0) 0 else area.toSquareKilometers * turbine.nPerSquareKM
-  val nFarms = nTurbines * turbine.ratedPower / Megawatts(300)
+  val nTurbines = if (loadHours().value <= 0) 0
+  else WakeEffect.nTurbines(minLatDistance, minLonDisance, turbine.specs.diameter) //area.toSquareKilometers * turbine.nPerSquareKM
 
   val powerInstalled = nTurbines * turbine.ratedPower
+
+  val farm = if (water) new OffshoreWindFarm(distanceToCoast, turbine, powerInstalled)
+  else new WindFarm(turbine, powerInstalled)
 
   def energyGeneratedPerYear(minEROI: Double = 0.0, h: Length = turbine.specs.hubHeight): Energy = {
     if (EROI < minEROI) WattHours(0)
@@ -168,7 +181,8 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
     if (nTurbines == 0) 0.0
     else {
       val out = nTurbines * turbine.lifeTime * turbine.ratedPower * loadHours()
-      val in = nTurbines * turbine.specs.embodiedEnergy * factor //+ nFarms * farm.embodiedEnergy
+      val in = farm.embodiedEnergy // nTurbines * turbine.specs.embodiedEnergy * factor //+ nFarms * farm.embodiedEnergy
+      println(out.toGigajoules + "\t" + in.toGigajoules + "\t" + (out / in))
       out / in
     }
   }
@@ -181,8 +195,8 @@ object GridObject {
     val glcClass = if (csvLine(7).equals("-1.0")) None else Some(data.glcClasses(csvLine(7).toDouble.toInt))
     val lc = if (clcClass.isDefined) clcClass.get else glcClass.get
     val turbine = if (csvLine(8).toDouble < 0) data.offshoreTurbine else data.onshoreTurbine
-    val farm = if (csvLine(8).toDouble < 0) data.offshoreFarm else data.onshoreFarm
-    new GridObject(GeoPoint(Degrees(csvLine(0).toDouble), Degrees(csvLine(1).toDouble)), data.gridSize, turbine, farm,
+    // val farm = if (csvLine(8).toDouble < 0) data.offshoreFarm else data.onshoreFarm
+    new GridObject(GeoPoint(Degrees(csvLine(0).toDouble), Degrees(csvLine(1).toDouble)), data.gridSize, turbine,
       MetersPerSecond(csvLine(2).toDouble), MetersPerSecond(csvLine(3).toDouble), MetersPerSecond(csvLine(4).toDouble), clcClass, glcClass,
       Meters(csvLine(8).toDouble), Kilometers(csvLine(9).toDouble))
   }

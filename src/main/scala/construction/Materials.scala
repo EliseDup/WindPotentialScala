@@ -68,7 +68,7 @@ object Cement extends Material("Cement", EnergyIntensity(Gigajoules(3.5), Gigajo
 
 object Materials {
 
-  val list = List(Aluminium, CastIron, Concrete, Copper, Diesel,
+  def list = List(Aluminium, CastIron, Concrete, Copper, Diesel,
     EpoxyResin, Fiberglass, Gasoline, Iron, Paint,
     Polyester, Silica, Steel, SteelBar, Lead,
     Polyester, Polyethylene, Polypropylene, Polystyrene)

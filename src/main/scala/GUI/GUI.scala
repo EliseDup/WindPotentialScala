@@ -11,14 +11,12 @@ import squants.space.SquareKilometers
 import squants.energy._
 import landCover.GridData
 import operation.WindTurbine
-import construction.WindFarmComponents
 import operation.WindTurbineWithPower
 
 object GUI extends SimpleSwingApplication {
    
   val sizeTurbine = List("850 kW", "2 MW", "3 MW")
-  val farm = new WindFarmComponents()
-  
+
   def top = new MainFrame {
     title = "Wind power potential"
     preferredSize = new Dimension(750, 500)
@@ -40,7 +38,7 @@ object GUI extends SimpleSwingApplication {
         val wind = new GridData("results/" +
           simu.area.selection.item.toLowerCase() + "5yearslc", Degrees(0.25),
           new WindTurbineWithPower(sizeTurbine(simu.onshore.selection.index)), 
-          new WindTurbineWithPower(sizeTurbine(simu.offshore.selection.index)),farm,farm)
+          new WindTurbineWithPower(sizeTurbine(simu.offshore.selection.index)))
         
         wind.plotEROIVSCumulatedProduction(wind.agriculturalAreas(wind.clcGrids))
         PlotHelper.cumulativeDensity(List((wind.erois(wind.agriculturalAreas(wind.clcGrids)), "")), xLabel = "% of Sites", yLabel = "EROI")
