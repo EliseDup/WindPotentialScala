@@ -30,9 +30,10 @@ import squants.space.Kilometers
 import construction.MultiplyingFactor
 import construction.WindFarm
 import construction.OffshoreWindFarm
+import squants.space.SquareKilometers
 
-class GridData(name: String, val gridSize: Angle,
-    val onshoreTurbine: WindTurbine, val offshoreTurbine: WindTurbine) {
+class GridData(val name: String, val gridSize: Angle,
+    val onshoreTurbine: WindTurbine, val offshoreTurbine: WindTurbine, val details: Boolean = false) {
 
   // Coefficients for wind extrapolation depends on Land Cover class
   val clcClasses = new CorineLandCoverClasses()
@@ -40,15 +41,18 @@ class GridData(name: String, val gridSize: Angle,
 
   val grids: List[GridObject] = {
     val lines = Source.fromFile(Helper.ressourcesPy + name).getLines().toList
-    lines.map(l => GridObject(l, this)).toList
+    lines.map(l => if (details) GridObject.applyDetails(l, this) else GridObject(l, this)).toList
   }
   val clcGrids = grids.filter(_.clc.isDefined)
 
   def windSpeeds(gr: List[GridObject] = grids, atHub: Boolean = false) = if (atHub) gr.map(_.windSpeedAtHub().value) else gr.map(_.windSpeed.value)
+  def windSpeedsMonth(month : Int, gr: List[GridObject] = grids) = gr.map(_.windSpeedMonth(month).value)
+ 
   def powerDensities(gr: List[GridObject] = grids, atHub: Boolean = false) = if (atHub) gr.map(_.powerDensityAtHub().value) else gr.map(_.powerDensity.value)
   def energyGenerated(gr: List[GridObject] = grids, minEROI: Double = 0.0) = gr.map(_.energyGeneratedPerYear(minEROI = minEROI)).foldLeft(TerawattHours(0.0))(_ + _)
   def nTurbines(gr: List[GridObject] = grids) = gr.map(_.nTurbines).sum
   def erois(gr: List[GridObject] = grids) = gr.map(_.EROI)
+  def area(gr: List[GridObject] = grids) = gr.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
 
   def plotEROIVSCumulatedProduction(gr: List[GridObject] = grids) = {
     val eroiPro = gr.map(g => (g.EROI, g.energyGeneratedPerYear())).sortBy(_._1).reverse
@@ -66,10 +70,10 @@ class GridData(name: String, val gridSize: Angle,
   def offshoreGrids(gr: List[GridObject] = grids) = gr.filter(g => g.seaLevel <= Meters(0) && g.seaLevel >= Meters(-50))
   val res = offshoreGrids()
 
-  println("Total n grids" + grids.size + " - clc grids " + clcGrids.size)
-  println("Total Energy Generated : " + energyGenerated() + "\t" + nTurbines())
-  println("Energy Generated No Water: " + energyGenerated(landGrids()) + "\t" + nTurbines(landGrids(clcGrids)))
-  println("Energy Generated Offshore: " + energyGenerated(offshoreGrids()) + "\t" + nTurbines(offshoreGrids()))
+  // println("Total n grids" + grids.size + " - clc grids " + clcGrids.size + "("+area(clcGrids)+")")
+  // println("Total Energy Generated : " + energyGenerated(clcGrids) + "\t" + nTurbines(clcGrids))
+  println(name + " - Energy Generated No Water: " + energyGenerated(landGrids(clcGrids)) + "\t" + nTurbines(landGrids(clcGrids)) + "(" + area(landGrids(clcGrids)) + ")")
+  // println("Energy Generated Offshore: " + energyGenerated(offshoreGrids(clcGrids)) + "\t" + nTurbines(offshoreGrids(clcGrids)))
 
   def writeGridToCSV(name: String, gr: List[GridObject] = grids) {
     val writer = new CSVWriter(new FileWriter(name))
@@ -80,8 +84,8 @@ class GridData(name: String, val gridSize: Angle,
     writer.close()
   }
   def writeGrid(name: String, gr: List[GridObject] = grids) {
-    val out_stream = new PrintStream(new java.io.FileOutputStream(name + "nTurbines"))
-    /*gr.map(g => {
+    val out_stream = new PrintStream(new java.io.FileOutputStream(name))
+    gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
         "\t" + g.uWind.value.toString + "\t" + g.vWind.value.toString +
         "\t" + g.windSpeed.value.toString + "\t" + g.windSpeedAtHub().value.toString +
@@ -89,10 +93,6 @@ class GridData(name: String, val gridSize: Angle,
         "\t" + g.seaLevel.value.toString +
         "\t" + g.distanceToCoast.value.toString +
         "\t" + g.loadHours().value.toString + "\n")
-    })*/
-    gr.map(g => {
-      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
-        "\t" + (if (g.water) "-1.0" else g.nTurbines.toString()) + "\n")
     })
     out_stream.close()
   }
@@ -102,6 +102,17 @@ class GridData(name: String, val gridSize: Angle,
  * From data of ERA-40 dataset
  *
  */
+class GridObjectDetails(center: GeoPoint, gridSize: Angle, turbine: WindTurbine,
+  windSpeeds: List[Velocity],
+  clc: Option[CorineLandCoverClass], glc: Option[GlobCoverClass],
+  seaLevel: Length, distanceToCoast: Length)
+    extends GridObject(center, gridSize, turbine, MetersPerSecond(0), MetersPerSecond(0),
+      windSpeeds.foldLeft(MetersPerSecond(0))(_ + _) / windSpeeds.size, clc, glc, seaLevel, distanceToCoast){
+  
+  override def windSpeedMonth(month : Int) = windSpeeds(month)
+  
+}
+
 class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTurbine,
     val uWind: Velocity, val vWind: Velocity, val windSpeed: Velocity,
     val clc: Option[CorineLandCoverClass], val glc: Option[GlobCoverClass],
@@ -110,8 +121,13 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
   val water = seaLevel.value < 0
   // Only area up to 200 m depth are suitable for offshore wind farm !
   val offshoreArea = water && -seaLevel.toMeters <= 200
-  val suitableArea = offshoreArea || !water
 
+  /**
+   *  Altitude < 2000 meters
+   *
+   */
+  val suitableArea = (offshoreArea || !water) && seaLevel.toMeters <= 2000
+  
   val lc: LandCoverClass = if (clc.isDefined) clc.get else glc.get
   val clcCode: Int = if (clc.isDefined) clc.get.code else -1
   val glcCode: Int = if (glc.isDefined) glc.get.code else -1
@@ -119,6 +135,8 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
   def windSpeedAtHub(h: Length = turbine.specs.hubHeight): Velocity = {
     Math.log(h.toMeters / lc.z0.toMeters) / Math.log(h0.toMeters / lc.z0.toMeters) * windSpeed
   }
+  def windSpeedMonth(month : Int) = windSpeed
+  
   val airDensity = KilogramsPerCubicMeter(1.225)
   val powerDensity = WattsPerSquareMeter(0.5 * airDensity.value * Math.pow(windSpeed.value, 3))
   def powerDensityAtHub(h: Length = turbine.specs.hubHeight) = WattsPerSquareMeter(0.5 * airDensity.value * Math.pow(windSpeedAtHub(h).value, 3))
@@ -162,7 +180,7 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
     else Hours(Math.max(0, 626.38 * windSpeedAtHub(h).value - 2003.3))
   }
   val nTurbines = if (loadHours().value <= 0) 0
-  else WakeEffect.nTurbines(minLatDistance, minLonDisance, turbine.specs.diameter) //area.toSquareKilometers * turbine.nPerSquareKM
+  else WakeEffect.nTurbines(area, turbine.specs.diameter) //area.toSquareKilometers * turbine.nPerSquareKM
 
   val powerInstalled = nTurbines * turbine.ratedPower
 
@@ -180,9 +198,9 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
   val EROI = {
     if (nTurbines == 0) 0.0
     else {
-      val out = nTurbines * turbine.lifeTime * turbine.ratedPower * loadHours()
+      val out = nTurbines * turbine.lifeTime * turbine.ratedPower * loadHours() * WakeEffect.wakeEffect(nTurbines)
       val in = farm.embodiedEnergy // nTurbines * turbine.specs.embodiedEnergy * factor //+ nFarms * farm.embodiedEnergy
-      println(out.toGigajoules + "\t" + in.toGigajoules + "\t" + (out / in))
+      //   println(out.toGigajoules + "\t" + in.toGigajoules + "\t" + (out / in))
       out / in
     }
   }
@@ -190,15 +208,24 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
 
 object GridObject {
   def apply(line: String, data: GridData) = {
-    val csvLine = line.split("\t")
-    val clcClass = if (csvLine(6).equals("-1.0") || csvLine(6).toDouble.toInt == 0) None else Some(data.clcClasses(csvLine(6).toDouble.toInt))
-    val glcClass = if (csvLine(7).equals("-1.0")) None else Some(data.glcClasses(csvLine(7).toDouble.toInt))
-    val lc = if (clcClass.isDefined) clcClass.get else glcClass.get
-    val turbine = if (csvLine(8).toDouble < 0) data.offshoreTurbine else data.onshoreTurbine
-    // val farm = if (csvLine(8).toDouble < 0) data.offshoreFarm else data.onshoreFarm
-    new GridObject(GeoPoint(Degrees(csvLine(0).toDouble), Degrees(csvLine(1).toDouble)), data.gridSize, turbine,
-      MetersPerSecond(csvLine(2).toDouble), MetersPerSecond(csvLine(3).toDouble), MetersPerSecond(csvLine(4).toDouble), clcClass, glcClass,
-      Meters(csvLine(8).toDouble), Kilometers(csvLine(9).toDouble))
+    val l = line.split("\t")
+    val turbine = if (l(8).toDouble < 0) data.offshoreTurbine else data.onshoreTurbine
+    new GridObject(center(l), data.gridSize, turbine,
+      velocity(l, 2), velocity(l, 3), velocity(l, 4), clcClass(l, 6, data), glcClass(l, 7, data),
+      Meters(l(8).toDouble), Kilometers(l(9).toDouble))
   }
+  def applyDetails(line: String, data: GridData) = {
+    val l = line.split("\t")
+    val turbine = if (l(17).toDouble < 0) data.offshoreTurbine else data.onshoreTurbine
+    val speeds = (2 until 2 + 12).map(i => velocity(l, i)).toList
+    new GridObjectDetails(center(l), data.gridSize, turbine,
+      speeds, clcClass(l, 14, data), glcClass(l, 16, data), Meters(l(17).toDouble), Kilometers(l(18).toDouble))
+  }
+
+  def velocity(line: Array[String], index: Int) = MetersPerSecond(line(index).toDouble)
+  def center(line: Array[String]) = GeoPoint(Degrees(line(0).toDouble), Degrees(line(1).toDouble))
+  def clcClass(line: Array[String], index: Int, data: GridData) = if (line(index).equals("-1.0") || line(index).equals("NA") || line(index).toDouble.toInt == 0) None else Some(data.clcClasses(line(index).toDouble.toInt))
+  def glcClass(line: Array[String], index: Int, data: GridData) = if (line(index).equals("-1.0") || line(index).equals("NA")) None else Some(data.glcClasses(line(index).toDouble.toInt))
+  def lcClass(clc: Option[CorineLandCoverClass], glc: Option[CorineLandCoverClass]) = if (clc.isDefined) clc.get else glc.get
 }
 
