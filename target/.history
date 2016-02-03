@@ -48,3 +48,6 @@ compile
 clean
 build
 compile
+eclipse
+clean
+compile
