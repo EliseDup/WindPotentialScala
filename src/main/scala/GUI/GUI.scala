@@ -40,8 +40,6 @@ object GUI extends SimpleSwingApplication {
           new WindTurbineWithPower(sizeTurbine(simu.onshore.selection.index)), 
           new WindTurbineWithPower(sizeTurbine(simu.offshore.selection.index)))
         
-        wind.plotEROIVSCumulatedProduction(wind.agriculturalAreas(wind.clcGrids))
-        PlotHelper.cumulativeDensity(List((wind.erois(wind.agriculturalAreas(wind.clcGrids)), "")), xLabel = "% of Sites", yLabel = "EROI")
     }
   }
 

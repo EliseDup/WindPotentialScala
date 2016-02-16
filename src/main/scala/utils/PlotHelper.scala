@@ -5,11 +5,12 @@ import org.jfree.data.time.TimeSeries
 import org.jfree.data.time.Minute
 import org.jfree.data.time.TimeSeriesCollection
 import org.jfree.chart.ChartFactory
+import org.jfree.chart.ChartUtilities
 import org.jfree.chart.ChartPanel
 import org.jfree.ui.ApplicationFrame
-import org.jfree.data.xy.XYSeries
+import org.jfree.data.xy._
 import org.jfree.data.xy.XYSeriesCollection
-import org.jfree.chart.plot.PlotOrientation
+import org.jfree.chart.plot._
 import org.jfree.chart.JFreeChart
 import org.jfree.data.statistics.HistogramDataset
 import org.jfree.data.category.DefaultCategoryDataset
@@ -23,13 +24,19 @@ import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.axis.LogarithmicAxis
 import org.jfree.data.statistics.HistogramType
 import org.jfree.ui.RectangleEdge
+import org.jfree.chart.renderer.xy._
+import java.awt.Color
+import java.awt.image.BufferedImage
+import java.awt.geom._
+import java.io.FileOutputStream
+import com.sun.image.codec.jpeg.JPEGCodec
 
 object PlotHelper {
   /**
    * Plot a list of time series in on frame
    */
   def plotTime(serie: (List[DateTime], List[Double], String)) { plotTime(List(serie)) }
-  def plotTime(series: List[(List[DateTime], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "", legend : Boolean = false) {
+  def plotTime(series: List[(List[DateTime], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
     val dataset = new TimeSeriesCollection()
     series.map { s =>
       val serie = new TimeSeries(s._3)
@@ -50,7 +57,7 @@ object PlotHelper {
   }
   def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
-      legend : Boolean = false, logX: Boolean = false, logY: Boolean = false) {
+    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false) {
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
       val serie = new XYSeries(xy._3)
@@ -61,7 +68,6 @@ object PlotHelper {
     val plot = chart.getXYPlot();
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-
     createFrame(chart)
   }
 
@@ -69,25 +75,26 @@ object PlotHelper {
     val dataSet = new HistogramDataset()
     dataSet.addSeries(title, values.toArray, n)
     val chart = ChartFactory.createHistogram(title, xLabel, yLabel, dataSet, PlotOrientation.VERTICAL, legend, false, false)
+    val plot = chart.getXYPlot();
     createFrame(chart)
   }
-  
-  def cumulativeDensity(values : List[Double]) { cumulativeDensity(List((values,"")),legend=false)}
+
+  def cumulativeDensity(values: List[Double]) { cumulativeDensity(List((values, "")), legend = false) }
   def cumulativeDensity(values: List[(List[Double], String)], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = true) {
     val dataset = new XYSeriesCollection
     values.map(v => {
+      val min = Math.min(0, v._1.min)
       val size = v._1.size
-      val inter = v._1.max / n
+      val inter = (v._1.max - min) / n
       val serie = new XYSeries(v._2)
       for (i <- 0 until n) {
-        val y = i * inter
+        val y = min + i * inter
         val percent = v._1.filter(_ >= y).size / size.toDouble
         serie.add(percent * 100, y)
       }
       dataset.addSeries(serie)
     })
     val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
-    // if(legend) chart.getLegend().setPosition(RectangleEdge.TOP)
     createFrame(chart)
   }
   def repartition(values: List[(List[Double], String)], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
@@ -108,7 +115,13 @@ object PlotHelper {
     createFrame(chart)
   }
 
-  def createFrame(chart: JFreeChart) {
+  def createFrame(chart: JFreeChart, save: Boolean = false) {
+    if (save) {
+      val plot = chart.getXYPlot();
+      plot.getRenderer().setSeriesPaint(0, Color.BLUE)
+      plot.setBackgroundPaint(Color.WHITE)
+      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream("test.jpg"), chart, 500, 300, 2, 2)
+    }
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
     val frame = new ApplicationFrame("")

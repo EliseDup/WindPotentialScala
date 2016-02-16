@@ -57,13 +57,14 @@ class WindTurbine(val specs: WindTurbineComponents, val powerCoefficient: Double
     val p = s.map(i => power(MetersPerSecond(i)).toKilowatts)
     PlotHelper.plotXY(List((s.map(_.toDouble), p, "")), xLabel = "Wind Speed [m/s]", yLabel = "Power [kW]", title = "Power of " + ratedPower + " Turbine")
   }
+  override def toString() = specs.toString()
 }
 
 /**
  * When the power curve is available, use this
  */
 trait PowerCurve {
-  val curve: List[(Int, Int)]
+  val curve: List[(Int, Double)]
   val ratedPower: Power
   def powerCurve = curve.map(i => (i._1, Kilowatts(i._2)))
   def powerFromCurve(windSpeed: Velocity): Power = powerCurve.find(i => i._1 == Math.floor(windSpeed.value).toInt).getOrElse((0, Kilowatts(0)))._2
@@ -72,11 +73,11 @@ trait PowerCurve {
 
 class WindTurbine2MW extends WindTurbine(new WindTurbineComponents("2MW"), 0.38, 4) with PowerCurve {
   val curve = List(
-    (0, 0), (1, 0), (2, 3), (3, 25), (4, 82), (5, 174),
-    (6, 321), (7, 532), (8, 815), (9, 1180), (10, 1580),
-    (11, 1810), (12, 1980), (13, 2050), (14, 2050), (15, 2050),
-    (16, 2050), (17, 2050), (18, 2050), (19, 2050), (20, 2050),
-    (21, 2050), (22, 2050), (23, 2050), (24, 2050), (25, 2050), (26, 0))
+    (0, 0.0), (1, 0.0), (2, 0.0), (3, 0.0), (4, 66.3), (5, 152.0),
+    (6, 280.0), (7, 457.0), (8, 690.0), (9, 978.0), (10, 1296.0),
+    (11, 1598.0), (12, 1818.0), (13, 1935.0), (14, 1980.0), (15, 1995.0),
+    (16, 1999.0), (17, 2000.0), (18, 2000.0), (19, 2000.0), (20, 2000.0),
+    (21, 2000.0), (22, 2000.0), (23, 2000.0), (24, 2000.0), (25, 2000.0), (26, 0.0))
   // Use the power curve !!
   override def power(windSpeed: Velocity) = powerFromCurve(windSpeed)
 }

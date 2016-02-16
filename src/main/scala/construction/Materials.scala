@@ -17,6 +17,7 @@ class EnergyIntensity(
   val BAT: Energy,
   val limit: Energy,
   val unit: Mass)
+
 object EnergyIntensity {
   def apply(energy: Energy, unit: Mass) = new EnergyIntensity(energy, energy, energy, unit)
   def apply(energy: Energy, bat: Energy, unit: Mass) = new EnergyIntensity(energy, bat, bat, unit)
@@ -38,15 +39,18 @@ case class Material(name: String, energy: EnergyIntensity, distanceFromFactory: 
  * From J.Yang, B.Chen - Integrated evaluation of embodied energy, greenhouse gas emission and economic performance of a typical wind farm in China
  *
  *
+ * Main components : Steel - Concrete - Fiberglass 
+ * 
+ * 
  */
 
-object Aluminium extends Material("Aluminium", EnergyIntensity(Megajoules(208), Kilograms(1)))
+object Aluminium extends Material("Aluminium", EnergyIntensity(Megajoules(151), Kilograms(1))) // EnergyIntensity(Megajoules(208), Kilograms(1)))
 object CastIron extends Material("CastIron", EnergyIntensity(Megajoules(32.6), Kilograms(1))) // TODO
-object Concrete extends Material("Concrete", EnergyIntensity(Megajoules(6.03), Kilograms(2.4)),Kilometers(50))
-object Copper extends Material("Copper", EnergyIntensity(Megajoules(164), Kilograms(1)))
+object Concrete extends Material("Concrete", EnergyIntensity(Megajoules(4.08), Kilograms(2.4)))// EnergyIntensity(Megajoules(6.03), Kilograms(2.4)), Kilometers(50))
+object Copper extends Material("Copper", EnergyIntensity(Megajoules(379), Kilograms(1)))//EnergyIntensity(Megajoules(164), Kilograms(1)))
 object Diesel extends Material("Diesel", EnergyIntensity(Megajoules(42.7), Kilograms(1)))
-object EpoxyResin extends Material("EpoxyResin", EnergyIntensity(Megajoules(45.7), Kilograms(1)))
-object Fiberglass extends Material("Fiberglass", EnergyIntensity(Megajoules(188), Kilograms(1)))
+object EpoxyResin extends Material("EpoxyResin", EnergyIntensity(Megajoules(163), Kilograms(1))) //EnergyIntensity(Megajoules(45.7), Kilograms(1)))
+object Fiberglass extends Material("Fiberglass", EnergyIntensity(Megajoules(168), Kilograms(1))) //EnergyIntensity(Megajoules(188), Kilograms(1)))
 object Gasoline extends Material("Gasoline", EnergyIntensity(Megajoules(43.1), Kilograms(1)))
 object Iron extends Material("Iron", EnergyIntensity(Megajoules(32.6), Kilograms(1))) // TODO
 object Paint extends Material("Paint", EnergyIntensity(Megajoules(0), Kilograms(1))) // TODO
@@ -74,6 +78,9 @@ object Materials {
     Polyester, Polyethylene, Polypropylene, Polystyrene)
   def apply(name: String): Option[Material] = list.find(_.name.equals(name))
   val none = Material("", EnergyIntensity(Joules(0), Kilograms(1)), Kilometers(1))
-  def getOrNone(name: String): Material = apply(name).getOrElse(none)
+  def getOrNone(name: String): Material = {
+ //   if( !apply(name).isDefined) println(name)
+    apply(name).getOrElse(none)
+  }
 
 }

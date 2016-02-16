@@ -52,7 +52,10 @@ abstract class AbstractWindTurbineComponents extends Components {
     Transport.truckTransport(nacelle.weight, Kilometers(1025)) +
     Transport.truckTransport(rotor.weight, Kilometers(600)) +
     Transport.truckTransport(foundation.weight, Kilometers(50))
-
+   
+   override def embodiedEnergy  = Gigajoules(10000*ratedPower.toMegawatts)
+   
+   override def toString = "Wind Turbine "+ ratedPower + ", hub height : "+ hubHeight +", rotor diameter : " +diameter
 }
 
 class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineComponents {
@@ -85,6 +88,8 @@ class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineCo
   val cutOutSpeed = Velocity(Helper.toString(spec, 5)).get
 
 }
+
+
 
 
 /**
