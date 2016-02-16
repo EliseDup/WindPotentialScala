@@ -23,7 +23,8 @@ import squants.space.Angle
 import org.apache.poi.ss.usermodel.Row
 
 object Helper {
-  val ressourcesPy = "/Users/Elise/Documents/workspace/WindPotentialPY/ressources/"
+  val ressourcesPy = "/Users/Elise/Documents/workspace/ressources/"
+  val resultsPy = "/Users/Elise/Documents/workspace/WindPotentialPy/results/"
   val ressources = "/Users/Elise/Documents/workspace/WindPotential/ressources/"
 
   def saveResult(name: String, ob: Object) {

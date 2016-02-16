@@ -19,9 +19,9 @@ import squants.space.Area
 object WakeEffect {
 
   // We have to fix a spacing and then we wan evalate the number of turbines in the area and the corresponding array efficieny
-  // 5D corresponds to 4 2MW wind turbines of diameter 80 m / km^2 => 8MW /km^2
-  // 9D corresponds to 4MW / km^2 with 2MW wind turbines
-  val spacingIndex = 1 // 0 is 4D, 1 is 5D, .. and 5 is 9D
+  // So to put one wind turbine one need a space of nD * nD (a square surrounding the wind turbine)
+  // 9D with 80m diameter is about 2 wind turbine per square kilometers
+  val spacingIndex = 5 // 0 is 4D, 1 is 5D, .. and 5 is 9D
 
   val spacing = (4 to 9).toArray
   val n = Array(4, 16, 36, 64, 100)
@@ -35,7 +35,7 @@ object WakeEffect {
   val nDiameters = spacing(spacingIndex)
 
   def nTurbines(x: Length, y: Length, d: Length) = (x / (nDiameters * d) * y / (nDiameters * d))
-  def nTurbines(area : Area, d : Length) = area / ((nDiameters * d)*(nDiameters * d))
+  def nTurbines(area : Area, d : Length) = area / ((d*nDiameters)*(d*nDiameters))
   
   def wakeEffect(nTurbines: Double) = {
     val nIndex =
