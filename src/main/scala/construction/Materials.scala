@@ -19,6 +19,7 @@ class EnergyIntensity(
   val unit: Mass)
 
 object EnergyIntensity {
+  def apply(e : Double) : EnergyIntensity = this(Megajoules(e), Kilograms(1))
   def apply(energy: Energy, unit: Mass) = new EnergyIntensity(energy, energy, energy, unit)
   def apply(energy: Energy, bat: Energy, unit: Mass) = new EnergyIntensity(energy, bat, bat, unit)
 }
@@ -42,33 +43,48 @@ case class Material(name: String, energy: EnergyIntensity, distanceFromFactory: 
  * Main components : Steel - Concrete - Fiberglass 
  * 
  * 
+ * ICE DATABASE !! Mean values
+ * 
  */
+// MAIN COMPONENTS OF WIND TURBINES
 
-object Aluminium extends Material("Aluminium", EnergyIntensity(Megajoules(151), Kilograms(1))) // EnergyIntensity(Megajoules(208), Kilograms(1)))
-object CastIron extends Material("CastIron", EnergyIntensity(Megajoules(32.6), Kilograms(1))) // TODO
-object Concrete extends Material("Concrete", EnergyIntensity(Megajoules(4.08), Kilograms(2.4)))// EnergyIntensity(Megajoules(6.03), Kilograms(2.4)), Kilometers(50))
-object Copper extends Material("Copper", EnergyIntensity(Megajoules(379), Kilograms(1)))//EnergyIntensity(Megajoules(164), Kilograms(1)))
-object Diesel extends Material("Diesel", EnergyIntensity(Megajoules(42.7), Kilograms(1)))
-object EpoxyResin extends Material("EpoxyResin", EnergyIntensity(Megajoules(163), Kilograms(1))) //EnergyIntensity(Megajoules(45.7), Kilograms(1)))
-object Fiberglass extends Material("Fiberglass", EnergyIntensity(Megajoules(168), Kilograms(1))) //EnergyIntensity(Megajoules(188), Kilograms(1)))
-object Gasoline extends Material("Gasoline", EnergyIntensity(Megajoules(43.1), Kilograms(1)))
-object Iron extends Material("Iron", EnergyIntensity(Megajoules(32.6), Kilograms(1))) // TODO
-object Paint extends Material("Paint", EnergyIntensity(Megajoules(0), Kilograms(1))) // TODO
-object Polyester extends Material("Polyester", EnergyIntensity(Megajoules(45.7), Kilograms(1)))
-object Silica extends Material("Silica", EnergyIntensity(Megajoules(30.6), Kilograms(1)))
-object Steel extends Material("Steel", EnergyIntensity(Megajoules(32.6), Kilograms(1)))
-object SteelBar extends Material("SteelBar", EnergyIntensity(Megajoules(32.6), Kilograms(1)))
-object Lead extends Material("Lead", EnergyIntensity(Megajoules(0), Kilograms(1))) // TODO
+object Aluminium extends Material("Aluminium", EnergyIntensity(155))
+object CastIron extends Material("CastIron", EnergyIntensity(25))
+object Concrete extends Material("Concrete", EnergyIntensity(0.75))
+object Copper extends Material("Copper", EnergyIntensity(42))
+object Steel extends Material("Steel", EnergyIntensity(32.6))
+object Lead extends Material("Lead", EnergyIntensity(25.21)) // TODO
+object Ballast extends Material("Ballast", EnergyIntensity(0)) // TODO
 
+// Glass Reinforced Plastic - GRP - Fibreglass
+object EpoxyResin extends Material("EpoxyResin", EnergyIntensity(137))
+object Fiberglass extends Material("Fiberglass", EnergyIntensity(28))
+object GlassReinforcedPlastic extends Material("GlassReinforcedPlastic", EnergyIntensity(100))
+
+object Insulation extends Material("Insulation", EnergyIntensity(45))
+object Resin extends Material("Resin", EnergyIntensity(75))
 // Energy Use and Energy Intensity of the U.S. Chemical Industry
-// Ernst Worrell, Dian Phylipsen, Dan Einstein, and Nathan Martin
-object Polypropylene extends Material("Polypropylene", EnergyIntensity(Megajoules(10.5), Kilograms(1)))
-object Polyethylene extends Material("Polyethylene", EnergyIntensity(Megajoules(9.3), Kilograms(1)))
-object Polystyrene extends Material("Polystyrene", EnergyIntensity(Megajoules(9.3), Kilograms(1)))
-object Plastic extends Material("Plastic", EnergyIntensity(Megajoules(10), Kilograms(1)))
+// Ernst Worrell, Dian Phylipsen, Dan Einstein, and Nathan Martin ?
+
+// Plastics
+object Polypropylene extends Material("Polypropylene", EnergyIntensity(95.89))
+object Polyethylene extends Material("Polyethylene", EnergyIntensity(83.1))
+object Polystyrene extends Material("Polystyrene", EnergyIntensity(99.20))
+object Plastic extends Material("Plastic", EnergyIntensity(80.5))
+object PVC extends Material("PVC", EnergyIntensity(77.2))
 
 // From industrial efficienct technology database 
-object Cement extends Material("Cement", EnergyIntensity(Gigajoules(3.5), Gigajoules(1.1), Tonnes(1)))
+object Cement extends Material("Cement", EnergyIntensity(5.2))
+object Diesel extends Material("Diesel", EnergyIntensity(42.7))
+object LubricatingOil extends Material("LubricatingOil",EnergyIntensity(42.7)) //TODO
+object Electronics extends Material("Electronics",EnergyIntensity(42))
+
+object SteelBar extends Material("SteelBar", EnergyIntensity(32.6))
+object Gasoline extends Material("Gasoline", EnergyIntensity(43.1))
+object Iron extends Material("Iron", EnergyIntensity(32.6)) // TODO
+object Paint extends Material("Paint", EnergyIntensity(70)) // TODO
+object Polyester extends Material("Polyester", EnergyIntensity(45.7))
+object Silica extends Material("Silica", EnergyIntensity(30.6))
 
 object Materials {
 

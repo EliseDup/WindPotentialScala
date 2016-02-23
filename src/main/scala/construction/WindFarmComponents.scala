@@ -30,6 +30,7 @@ class WindFarm(val turbine : WindTurbine, val ratedPower : Power) {
 
 class OffshoreWindFarm(distanceToShore : Length, turbine : WindTurbine, ratedPower : Power) extends WindFarm(turbine, ratedPower) {
   
-  override def embodiedEnergy: Energy = super.embodiedEnergy + Transmission.toOnshoreGridCablesEnergy(distanceToShore)
+  override def embodiedEnergy: Energy = super.embodiedEnergy + 
+  Transmission.embodiedEnergyTransmission(ratedPower, distanceToShore)
   
 }

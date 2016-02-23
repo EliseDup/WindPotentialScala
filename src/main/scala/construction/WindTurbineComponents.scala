@@ -8,6 +8,8 @@ import utils._
 import squants.motion.Velocity
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Row
+import squants.electro.Megavolts
+import squants.motion.MetersPerSecond
 
 /**
  * A component is just a list of materials and mass
@@ -16,12 +18,14 @@ import org.apache.poi.ss.usermodel.Row
 
 abstract class Components {
   val components: List[(Mass, Material)]
-
+  val energyInput : Energy = Joules(0)
+  val transportEnergyInput : Energy = Joules(0)
+  
   def weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
   def constructionEnergy: Energy = components.map(c => c._2.energyIntensity * c._1).foldLeft(Gigajoules(0))(_ + _)
   def transportEnergy: Energy = components.map(c => c._2.transportEnergy(c._1)).foldLeft(Gigajoules(0))(_ + _)
 
-  def embodiedEnergy = constructionEnergy + transportEnergy
+  def embodiedEnergy = energyInput + transportEnergyInput + constructionEnergy + transportEnergy
   def energyIntensity: SpecificEnergy = embodiedEnergy / weight
 
   override def toString = "Components : total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
@@ -32,6 +36,11 @@ abstract class Components {
 
 object Components {
   def apply(comp: (Mass, Material)*): Components = apply(comp.toList)
+  def apply(energyIn : Energy, transportIn : Energy, comp: (Mass, Material)*): Components =new Components {
+    val components = comp.toList
+    override val energyInput = energyIn
+    override val transportEnergyInput = transportIn
+  }
   def apply(list: List[(Mass, Material)]): Components = new Components {
     val components = list
   }
@@ -46,7 +55,7 @@ abstract class AbstractWindTurbineComponents extends Components {
   val hubHeight, diameter: Length
   val cutInSpeed, ratedSpeed, cutOutSpeed: Velocity
   val foundation, tower, nacelle, rotor: Components
-
+ 
   override def transportEnergy = super.transportEnergy +
     Transport.truckTransport(tower.weight, Kilometers(1100)) + Transport.shipTransport(tower.weight, Kilometers(8050)) +
     Transport.truckTransport(nacelle.weight, Kilometers(1025)) +
@@ -56,6 +65,17 @@ abstract class AbstractWindTurbineComponents extends Components {
    override def embodiedEnergy  = Gigajoules(10000*ratedPower.toMegawatts)
    
    override def toString = "Wind Turbine "+ ratedPower + ", hub height : "+ hubHeight +", rotor diameter : " +diameter
+}
+
+class OffshoreWindTurbineComponents extends AbstractWindTurbineComponents {
+  val ratedPower = Megawatts(5); val hubHeight = Meters(90); val diameter = Meters(126)
+  val cutInSpeed = MetersPerSecond(3.5); val ratedSpeed = MetersPerSecond(11.4); val cutOutSpeed = MetersPerSecond(30);
+  val foundation = Components()
+  val rotor = Components((Tonnes(60),Steel),(Tonnes(50),GlassReinforcedPlastic))
+  val nacelle = Components((Tonnes(197),Steel),(Tonnes(8),Aluminium),(Tonnes(32),Copper),(Tonnes(2),GlassReinforcedPlastic))
+  val tower = Components((Tonnes(330),Steel),(Tonnes(5),Aluminium),(Tonnes(4),Electronics),(Tonnes(4),Polyethylene),(Tonnes(2),Copper),(Tonnes(2),LubricatingOil))
+ 
+  val components = foundation.components ++ tower.components ++ nacelle.components  
 }
 
 class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineComponents {

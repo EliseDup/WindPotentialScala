@@ -68,12 +68,12 @@ object Helper {
     squares.sum / squares.size
   }
 
-  def txtToCSV(input: String, output: String, indexes : List[Int]=List(), indexesOnly:Boolean=false) {
+  def txtToCSV(input: String, output: String, indexes: List[Int] = List(), indexesOnly: Boolean = false) {
     val lines = Source.fromFile(input).getLines()
     val writer = new CSVWriter(new FileWriter(output))
     for (l <- lines) {
       val str = l.split("\t")
-      val res = if(indexesOnly) indexes.map(str(_)).toArray else str
+      val res = if (indexesOnly) indexes.map(str(_)).toArray else str
       writer.writeNext(res)
     }
     writer.close()
@@ -84,10 +84,40 @@ object Helper {
     val wb = new HSSFWorkbook(inp)
     wb.getSheetAt(index)
   }
-def xlsSheet(fileName: String, sheetName :String): HSSFSheet = {
+  def xlsSheet(fileName: String, sheetName: String): HSSFSheet = {
     val inp = new FileInputStream(new File(fileName))
     val wb = new HSSFWorkbook(inp)
     wb.getSheet(sheetName)
+  }
+
+  /**
+   * y(x) = A (x-x1)(x-x2) + B (x-x1)(x-x3) + C (x-x2)(x-x3)
+   *
+   * y(x1) = y1 => C = y1 / (x1-x2)(x1-x3)
+   * y(x2) = y2 => B = y2 / (x2-x1)(x2-x3)
+   * y(x3) = y3 => A = y3 / (x3-x1)(x3-x2)
+   *
+   * y(x) = (A+B+C) x^2 - (Ax1+Ax2+Bx1+Bx3+Cx2+Cx3) x + (x1x2+x1x3+x2x3)
+   */
+  case class Point(val x: Double, val y: Double)
+  class SecondOrderPolynomial(a: Double, b: Double, c: Double) {
+    def apply(x: Double) = a * x * x + b * x + c
+  }
+  object SecondOrderPolynomial {
+    def apply(p1: Point, p2: Point, p3: Point) = {
+      val a = p3.y / ((p3.x - p1.x) * (p3.x - p2.x))
+      val b = p2.y / ((p2.x - p1.x) * (p2.x - p3.x))
+      val c = p1.y / ((p1.x - p2.x) * (p1.x - p3.x))
+      new SecondOrderPolynomial(a + b + c, -(a * (p1.x + p2.x) + b * (p1.x + p3.x) + c * (p2.x + p3.x)), a * p1.x * p2.x + b * p1.x * p3.x + c * p2.x * p3.x)
+    }
+  }
+  class FirstOrderPolynomial(p1 : Point, p2 : Point){
+    val a = (p1.y - p2.y) / (p1.x - p2.x)
+   val b = p1.y - a*p1.x
+   def apply(x : Double) = a*x + b
+  }
+  object FirstOrderPolynomial{
+    def apply(p1 : Point, p2: Point) = new FirstOrderPolynomial(p1,p2)
   }
   /**
    * Distance between to point in Latitude,Longitude decimal degrees
@@ -102,7 +132,7 @@ def xlsSheet(fileName: String, sheetName :String): HSSFSheet = {
     val a = Math.pow(Math.sin(deltaPhi / 2.0), 2) +
       Math.cos(phi1) * Math.cos(phi2) * Math.pow(Math.sin(deltaLambda / 2.0), 2)
     val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-    earthRadius*c
+    earthRadius * c
   }
   /**
    * The area of the earth between a line of latitude and the north pole (the area of a spherical cap)
@@ -117,8 +147,8 @@ def xlsSheet(fileName: String, sheetName :String): HSSFSheet = {
    * = > AreaRect = 2 PI R^2 *|sin(lat1)-sin(lat2)| * |lon1 - lon2| / 360
    */
   def areaRectangle(lowerLeftCorner: GeoPoint, upperRightCorner: GeoPoint) = {
-     earthRadius*earthRadius*(1.0 / 180.0 * Math.PI *
-      Math.abs(lowerLeftCorner.latitude.sin-upperRightCorner.latitude.sin) *
+    earthRadius * earthRadius * (1.0 / 180.0 * Math.PI *
+      Math.abs(lowerLeftCorner.latitude.sin - upperRightCorner.latitude.sin) *
       Math.abs(lowerLeftCorner.longitude.toDegrees - upperRightCorner.longitude.toDegrees))
   }
 }
