@@ -12,17 +12,12 @@ import squants.radio._
 import squants.time._
 import squants.energy._
 import squants.space._
-import utils.TerawattHours
-import utils.PlotHelper
 import landCover._
 import operation._
-import construction.MultiplyingFactor
-import construction.WindFarm
-import construction.OffshoreWindFarm
-import utils.Thermodynamics
+import construction._
+import utils._
 
-class GridData(val name: String, val gridSize: Angle,
-    val onshoreTurbine: WindTurbine, val offshoreTurbine: WindTurbine, val details: Boolean = false) {
+class GridData(val name: String, val gridSize: Angle, val details: Boolean = false) {
 
   // Coefficients for wind extrapolation depends on Land Cover class
   val glcClasses = new GlobCoverClasses()
@@ -42,13 +37,20 @@ class GridData(val name: String, val gridSize: Angle,
   def windSpeedsMonth(month: Int, gr: List[GridObject] = grids) = gr.map(_.windSpeedMonth(month).value)
 
   def powerDensities(gr: List[GridObject] = grids, atHub: Boolean = false) = if (atHub) gr.map(_.powerDensityAtHub().value) else gr.map(_.powerDensity.value)
-  def energyGenerated(gr: List[GridObject] = grids) = gr.map(_.energyGeneratedPerYear).foldLeft(TerawattHours(0.0))(_ + _)
-  def nTurbines(gr: List[GridObject] = grids) = gr.map(_.nTurbines).sum
-  def erois(gr: List[GridObject] = grids) = gr.map(_.EROI)
   def area(gr: List[GridObject] = grids) = gr.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
 
-  def plotEROIVSCumulatedProduction(gr: List[GridObject] = grids) = {
-    val eroiPro = gr.map(g => (g.EROI, g.energyGeneratedPerYear)).sortBy(_._1).reverse
+  def listEROIVSCumulatedProduction(gr: List[GridObject] = grids, turbinePowerDensity: Power, embodiedEnergy: Energy) = {
+    val eroiPro = ((gr.map(g => (g.EROI(turbinePowerDensity, embodiedEnergy), g.energyGeneratedPerYear(turbinePowerDensity)))).toList :+ (0.0, Joules(0.0))).sortBy(_._1).reverse
+    var tot = 0.0
+    val eroiCum = eroiPro.map(i => {
+      tot = tot + i._2.to(TerawattHours)
+      (i._1, tot)
+    })
+    (eroiCum.map(_._2), eroiCum.map(_._1))
+  }
+
+  def plotEROIVSCumulatedProduction(gr: List[GridObject] = grids, turbinePowerDensity: Power, embodiedEnergy: Energy) = {
+    val eroiPro = gr.map(g => (g.EROI(turbinePowerDensity, embodiedEnergy), g.energyGeneratedPerYear(turbinePowerDensity))).sortBy(_._1).reverse
     var tot = 0.0
     val eroiCum = eroiPro.map(i => {
       tot = tot + i._2.to(TerawattHours)
@@ -85,18 +87,18 @@ class GridData(val name: String, val gridSize: Angle,
  * SEE http://www.globalwindatlas.com/datasets.html
  *
  */
-class GridObjectDetails(center: GeoPoint, gridSize: Angle, turbine: WindTurbine,
+class GridObjectDetails(center: GeoPoint, gridSize: Angle,
   windSpeeds: List[Velocity],
   lc: LandCoverClass,
   elevation: Length, distanceToCoast: Length, urbanFactor: Double)
-    extends GridObject(center, gridSize, turbine, MetersPerSecond(0), MetersPerSecond(0),
+    extends GridObject(center, gridSize, MetersPerSecond(0), MetersPerSecond(0),
       windSpeeds.foldLeft(MetersPerSecond(0))(_ + _) / windSpeeds.size, lc, elevation, distanceToCoast, urbanFactor) {
 
   override def windSpeedMonth(month: Int) = windSpeeds(month)
 
 }
 
-class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTurbine,
+class GridObject(val center: GeoPoint, val gridSize: Angle,
     val uWind: Velocity, val vWind: Velocity, val windSpeed: Velocity,
     val lc: LandCoverClass,
     val elevation: Length, val distanceToCoast: Length,
@@ -106,16 +108,18 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
 
   val onshore = elevation.value >= 0
   val offshore = elevation.value < 0
+
   val suitableArea = {
     val geo =
       if (onshore) elevation.toMeters <= 2000
-      else elevation.toMeters >= -200
+      else elevation.toMeters >= -200 && distanceToCoast.toKilometers >= 10
     geo & windSpeed.toMetersPerSecond >= 4
   }
 
   val h0 = Meters(10)
+  val hubHeight = if (onshore) Meters(80) else Meters(90)
 
-  def windSpeedAtHub(h: Length = turbine.specs.hubHeight): Velocity = {
+  def windSpeedAtHub(h: Length = hubHeight): Velocity = {
     if (offshore) assert(h.toMeters == 90)
     else assert(h.toMeters == 80)
     Math.log(h.toMeters / lc.z0.toMeters) / Math.log(h0.toMeters / lc.z0.toMeters) * windSpeed
@@ -126,9 +130,9 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
   // Here we take the assumption of 15° degrees celsius everywhere
   // density = P / RT
   // P ~ z 
-  val hubAltitude = Meters(Math.max(0.0, elevation.toMeters) + turbine.specs.hubHeight.toMeters)
+  val hubAltitude = Meters(Math.max(0.0, elevation.toMeters) + hubHeight.toMeters)
   val powerDensity = Thermodynamics.powerDensity(windSpeed, hubAltitude)
-  def powerDensityAtHub(h: Length = turbine.specs.hubHeight) = Thermodynamics.powerDensity(windSpeedAtHub(h), hubAltitude)
+  def powerDensityAtHub(h: Length = hubHeight) = Thermodynamics.powerDensity(windSpeedAtHub(h), hubAltitude)
 
   /**
    * Calculate the cell size in km^2
@@ -165,53 +169,70 @@ class GridObject(val center: GeoPoint, val gridSize: Angle, val turbine: WindTur
    */
 
   val loadHours =
-    if (!suitableArea) Hours(0)
     // EU REPORT
-    // else Hours(Math.max(0, Math.min(5500, 626.51 * windSpeedAtHub().value - 1901)))
-    // HOOGWIJK REPORT
-    else Hours(Math.max(0, Math.min(4000, 565 * windSpeedAtHub().value - 1745)))
+    Hours(Math.max(0, Math.min(5500, 626.51 * windSpeedAtHub().value - 1901)))
+  // HOOGWIJK REPORT
+  // Hours(Math.max(0, Math.min(4000, 565 * windSpeedAtHub().value - 1745)))
 
-  val nTurbines =
-    if (loadHours.value <= 0) 0
-    else area.toSquareKilometers * (1.0 - urbanFactor) * 2
-  // else WakeEffect.nTurbines(area, turbine.specs.diameter) 
+  val effectiveArea = area.toSquareKilometers * (1.0 - urbanFactor)
 
-  val powerInstalled = nTurbines * turbine.ratedPower
+  def powerInstalled(turbinePowerDensity: Power): Power = effectiveArea * turbinePowerDensity
+  def energyGeneratedPerYear(turbinePowerDensity: Power): Energy = powerInstalled(turbinePowerDensity) * loadHours * 0.9
 
-  if ((powerInstalled.toMegawatts / area.toSquareKilometers) > turbine.ratedPower.toMegawatts * 2 + 1) {
-    println(powerInstalled.toMegawatts + "\t" + area.toSquareKilometers + "\t" + turbine.ratedPower)
-  }
-  val farm =
-    if (offshore) new OffshoreWindFarm(distanceToCoast, turbine, powerInstalled)
-    else new WindFarm(turbine, powerInstalled)
-
-  val energyGeneratedPerYear: Energy = powerInstalled * loadHours * farm.arrrayFactor * farm.availabilityFactor
-
-  val EROI = {
-    if (nTurbines == 0) 0.0
+  def EROI(turbinePowerDensity: Power, embodiedEnergyPerMW: Energy) = {
+    if (loadHours == 0) 0.0
     else {
-      val out = turbine.lifeTime * energyGeneratedPerYear
-      val in = farm.embodiedEnergy
+      val out = 20*energyGeneratedPerYear(turbinePowerDensity)
+      val in = powerInstalled(turbinePowerDensity).toMegawatts * embodiedEnergyPerMW
       out / in
 
     }
   }
 }
 
+class OffshoreGridObject(center: GeoPoint, gridSize: Angle,
+  uWind: Velocity, vWind: Velocity, windSpeed: Velocity,
+  lc: LandCoverClass,
+  elevation: Length, distanceToCoast: Length,
+  urbanFactor: Double)
+    extends GridObject(center, gridSize, uWind, vWind, windSpeed, lc, elevation, distanceToCoast, urbanFactor) {
+
+  val turbine = new OffshoreWindTurbineComponents().embodiedEnergy
+  val foundation = OffshoreFoundations.foundation(-elevation).embodiedEnergy
+  def nTurbines(turbinePowerDensity: Power) = powerInstalled(turbinePowerDensity).toMegawatts / 5.0
+
+  override def EROI(turbinePowerDensity: Power, embodiedEnergyPerMW: Energy) = {
+    if (loadHours == 0) 0.0
+    else {
+      val out = 20*energyGeneratedPerYear(turbinePowerDensity)
+      val in = nTurbines(turbinePowerDensity) * (foundation + turbine) + 
+      0.5*Transmission.embodiedEnergyTransmission(powerInstalled(turbinePowerDensity), distanceToCoast)
+      
+      println( (nTurbines(turbinePowerDensity) * (foundation + turbine)) / Transmission.embodiedEnergyTransmission(powerInstalled(turbinePowerDensity), distanceToCoast))
+      
+      out / in
+
+    }
+  }
+
+}
 object GridObject {
   def apply(line: String, data: GridData) = {
     val l = line.split("\t")
-    val turbine = if (l(9).toDouble < 0) data.offshoreTurbine else data.onshoreTurbine
-    new GridObject(center(l), data.gridSize, turbine,
-      velocity(l, 2), velocity(l, 3), velocity(l, 4), lcClass(l, data),
-      Meters(l(9).toDouble), Kilometers(l(10).toDouble), l(8).toDouble / 225.0)
+    if (l(9).toDouble < 0)
+      new OffshoreGridObject(center(l), data.gridSize,
+        velocity(l, 2), velocity(l, 3), velocity(l, 4), lcClass(l, data),
+        Meters(l(9).toDouble), Kilometers(l(10).toDouble), l(8).toDouble / 225.0)
+    else
+      new GridObject(center(l), data.gridSize,
+        velocity(l, 2), velocity(l, 3), velocity(l, 4), lcClass(l, data),
+        Meters(l(9).toDouble), Kilometers(l(10).toDouble), l(8).toDouble / 225.0)
   }
   def applyDetails(line: String, data: GridData) = {
     val l = line.split("\t")
-    val turbine = if (l(17).toDouble < 0) data.offshoreTurbine else data.onshoreTurbine
     val speeds = (2 until 2 + 12).map(i => velocity(l, i)).toList
-    new GridObjectDetails(center(l), data.gridSize, turbine,
-      speeds, lcClass(l, data), Meters(l(18).toDouble), Kilometers(l(19).toDouble), l(17).toDouble / (15*15))
+    new GridObjectDetails(center(l), data.gridSize,
+      speeds, lcClass(l, data), Meters(l(18).toDouble), Kilometers(l(19).toDouble), l(17).toDouble / (15 * 15))
   }
 
   def velocity(line: Array[String], index: Int) = MetersPerSecond(line(index).toDouble)

@@ -36,9 +36,7 @@ object GUI extends SimpleSwingApplication {
     reactions += {
       case ButtonClicked(start) =>
         val wind = new GridData("results/" +
-          simu.area.selection.item.toLowerCase() + "5yearslc", Degrees(0.25),
-          new WindTurbineWithPower(sizeTurbine(simu.onshore.selection.index)), 
-          new WindTurbineWithPower(sizeTurbine(simu.offshore.selection.index)))
+          simu.area.selection.item.toLowerCase() + "5yearslc", Degrees(0.25))
         
     }
   }

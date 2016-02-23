@@ -115,7 +115,7 @@ object PlotHelper {
     createFrame(chart)
   }
 
-  def createFrame(chart: JFreeChart, save: Boolean = false) {
+  def createFrame(chart: JFreeChart, save: Boolean = true) {
     if (save) {
       val plot = chart.getXYPlot();
       plot.getRenderer().setSeriesPaint(0, Color.BLUE)

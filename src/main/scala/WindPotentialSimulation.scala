@@ -14,41 +14,24 @@ import utils._
 import java.io.File
 import java.io.PrintStream
 import java.io.FileOutputStream
+import utils.Helper.Point
 
 object WindPotentialSimulation {
   def main(args: Array[String]): Unit = {
 
-    val energyGenerated = GigawattHours(3129)
-    val energyConsumed = Megajoules(0.17)*energyGenerated.toKilowattHours
-    
-    println(energyConsumed.toGigajoules / 50 + " GJ /MW")
-    
-    println( Grams(1979*energyGenerated.toMegawattHours).to(Tonnes))
-    
-    val on = new WindTurbineWithPower("2MW")
-    val off = new WindTurbineWithPower("5MWoffshore")
-    val wind = new GridData("world5years", Degrees(0.5), on, off)
-
-    val onshore = wind.onshoreGrids
-    wind.plotEROIVSCumulatedProduction(wind.onshoreGrids)
-    wind.plotEROIVSCumulatedProduction(wind.onshoreConstrainedGrids)
-    def plotGrids(g: List[GridObject]) {
-      val speed = g.map(_.loadHours.value)
-      PlotHelper.cumulativeDensity(List((speed, "")), xLabel = "% sites", yLabel = "Load Hours")
-    }
-    println("--End--")
-  }
-  def plot(wind: GridData) {
-    PlotHelper.cumulativeDensity(List((wind.windSpeeds(), "")), title = wind.name)
-    PlotHelper.cumulativeDensity(List((wind.powerDensities(), "")), title = wind.name)
-  }
-  def plotEuropeWind() {
-    val l = List("europe2002", "europeNovember2001", "europeFebruary2002", "europeMay2002", "europeAugust2002")
-    val speed = l.map({ w =>
-      val wind = new GridData("results/" + w, Degrees(0.125), new WindTurbineWithPower("2MW"), new WindTurbineWithPower("5MWoffshore"))
-      (wind.windSpeeds(wind.onshoreGrids), w)
+    /*
+    val list = List("November2001","February2002","May2002","August2002")     
+    val winds = 
+      (for(l <- list) yield {
+      val w = new GridData("europe"+l, Degrees(0.5))
+      (w.windSpeeds(w.onshoreGrids),l)
     })
-    PlotHelper.cumulativeDensity(speed)
+*/
+  
+    val wind = new GridData("world5years", Degrees(0.5))
+    val offshore = wind.offshoreConstrainedGrids
+    wind.plotEROIVSCumulatedProduction(offshore,Megawatts(2),Joules(0))
+
   }
 
 }
