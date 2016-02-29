@@ -14,23 +14,24 @@ import squants.space.Length
  *
  */
 
-class WindFarm(val turbine : WindTurbine, val ratedPower : Power) {
+class WindFarm(val ratedPower: Power) {
 
   val availabilityFactor = 1.0
   val arrrayFactor = 0.9
-  val transformerStation = Transmission.transformerStation(ratedPower)
-  val internalCables =  Transmission.externalOnshoreCables(ratedPower)
-  val externalCables = Transmission.internalOnshoreCables(ratedPower)
 
+  val turbine = new WindTurbineComponents("2MW")
   val nTurbines = ratedPower / turbine.ratedPower
-  
-  def embodiedEnergy = turbine.specs.embodiedEnergy * nTurbines 
-  //+ transformerStation.embodiedEnergy + internalCables.embodiedEnergy + externalCables.embodiedEnergy
+
+  def embodiedEnergy = turbine.embodiedEnergy * nTurbines + Transmission.embodiedEnergyOnshoreTransmission(ratedPower)
 }
 
-class OffshoreWindFarm(distanceToShore : Length, turbine : WindTurbine, ratedPower : Power) extends WindFarm(turbine, ratedPower) {
-  
-  override def embodiedEnergy: Energy = super.embodiedEnergy + 
-  Transmission.embodiedEnergyTransmission(ratedPower, distanceToShore)
-  
+class OffshoreWindFarm(ratedPower: Power,
+    val distanceToShore: Length, val waterDepth: Length) extends WindFarm(ratedPower) {
+
+  val turbines = OffshoreWindTurbineComponents.embodiedEnergy
+  val foundations = OffshoreFoundations.foundation(waterDepth).embodiedEnergy
+  val transmission = Transmission.embodiedEnergyOffshoreTransmission(ratedPower, distanceToShore)
+
+  override def embodiedEnergy: Energy = nTurbines * (turbines + foundations) + transmission
+
 }

@@ -18,16 +18,16 @@ import squants.space._
  */
 object Transport {
  
-  val road = Megajoules(3.266) / Kilometers(1) / Tonnes(1)
-  val rail = Megajoules(0.751) / Kilometers(1) / Tonnes(1)
-  val ship = Megajoules(0.170) / Kilometers(1) / Tonnes(1)
+  val road = Megajoules(3.266)
+  val rail = Megajoules(0.751)
+  val ship = Megajoules(0.170)
 
-  def truckTransport(mass: Mass, distance: Length) = road*mass*distance
-  def shipTransport(mass: Mass, distance: Length) = ship*mass*distance
-  def trainTransport(mass: Mass, distance: Length) = rail*mass*distance
+  def truckTransport(mass: Mass, distance: Length) = road*mass.toTonnes*distance.toKilometers
+  def shipTransport(mass: Mass, distance: Length) = ship*mass.toTonnes*distance.toKilometers
+  def trainTransport(mass: Mass, distance: Length) = rail*mass.toTonnes*distance.toKilometers
   
   def transportEnergy(mass: Mass, distance: Length, isRoad: Boolean = true, isSea: Boolean = false, isRail: Boolean = false): Energy = {
     val tr = if (isRoad) road else if (isRail) rail else ship
-    tr * mass * distance
+    tr *mass.toTonnes*distance.toKilometers
   }
 }

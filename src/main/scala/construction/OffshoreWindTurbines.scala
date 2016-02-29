@@ -33,16 +33,16 @@ object OffshoreFoundations {
   }
   // Total = jacket + pile (constant = 241 tons)
   val jacketWeightFuntion = Helper.SecondOrderPolynomial(Point(20.0, 400.0), Point(40.0, 550.0), Point(60.0, 890.0))
-  def jacket(depth: Length) = Components((Tonnes(jacketWeightFuntion(depth.toMeters) + 241.6), Steel))
+  def jacket(depth: Length) = Product((Tonnes(jacketWeightFuntion(depth.toMeters) + 241.6), Steel))
 
   // Total = tower + transition piece
   val towerWeightFunction = Helper.FirstOrderPolynomial(Point(20, 305), Point(50, 325))
   val transitionWeightFunction = Helper.SecondOrderPolynomial(Point(20, 310), Point(40, 605), Point(50, 800))
-  def monopile(depth: Length) = Components((Tonnes(towerWeightFunction(depth.toMeters) + transitionWeightFunction(depth.toMeters)), Steel))
+  def monopile(depth: Length) = Product((Tonnes(towerWeightFunction(depth.toMeters) + transitionWeightFunction(depth.toMeters)), Steel))
 
   // Floating 
-  val floatingSpar = Components((Tonnes(1300), Steel), (Tonnes(5250), Ballast))
-  val floatingTLP = Components((Tonnes(1675), Steel))
+  val floatingSpar = Product((Tonnes(1300), Steel), (Tonnes(5250), Ballast))
+  val floatingTLP = Product((Tonnes(1675), Steel))
 
   /*  
   val monopile = Components((Tonnes(650),Steel))

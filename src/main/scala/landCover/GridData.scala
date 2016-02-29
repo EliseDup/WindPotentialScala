@@ -39,8 +39,8 @@ class GridData(val name: String, val gridSize: Angle, val details: Boolean = fal
   def powerDensities(gr: List[GridObject] = grids, atHub: Boolean = false) = if (atHub) gr.map(_.powerDensityAtHub().value) else gr.map(_.powerDensity.value)
   def area(gr: List[GridObject] = grids) = gr.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
 
-  def listEROIVSCumulatedProduction(gr: List[GridObject] = grids, turbinePowerDensity: Power, embodiedEnergy: Energy) = {
-    val eroiPro = ((gr.map(g => (g.EROI(turbinePowerDensity, embodiedEnergy), g.energyGeneratedPerYear(turbinePowerDensity)))).toList :+ (0.0, Joules(0.0))).sortBy(_._1).reverse
+  def listEROIVSCumulatedProduction(gr: List[GridObject] = grids, turbinePowerDensity: Power) = {
+    val eroiPro = ((gr.map(g => (g.EROI(turbinePowerDensity), g.energyGeneratedPerYear(turbinePowerDensity)))).toList :+ (0.0, Joules(0.0))).sortBy(_._1).reverse
     var tot = 0.0
     val eroiCum = eroiPro.map(i => {
       tot = tot + i._2.to(TerawattHours)
@@ -49,8 +49,8 @@ class GridData(val name: String, val gridSize: Angle, val details: Boolean = fal
     (eroiCum.map(_._2), eroiCum.map(_._1))
   }
 
-  def plotEROIVSCumulatedProduction(gr: List[GridObject] = grids, turbinePowerDensity: Power, embodiedEnergy: Energy) = {
-    val eroiPro = gr.map(g => (g.EROI(turbinePowerDensity, embodiedEnergy), g.energyGeneratedPerYear(turbinePowerDensity))).sortBy(_._1).reverse
+  def plotEROIVSCumulatedProduction(gr: List[GridObject] = grids, turbinePowerDensity: Power) = {
+    val eroiPro = gr.map(g => (g.EROI(turbinePowerDensity), g.energyGeneratedPerYear(turbinePowerDensity))).sortBy(_._1).reverse
     var tot = 0.0
     val eroiCum = eroiPro.map(i => {
       tot = tot + i._2.to(TerawattHours)
@@ -179,11 +179,11 @@ class GridObject(val center: GeoPoint, val gridSize: Angle,
   def powerInstalled(turbinePowerDensity: Power): Power = effectiveArea * turbinePowerDensity
   def energyGeneratedPerYear(turbinePowerDensity: Power): Energy = powerInstalled(turbinePowerDensity) * loadHours * 0.9
 
-  def EROI(turbinePowerDensity: Power, embodiedEnergyPerMW: Energy) = {
+  def EROI(turbinePowerDensity: Power) = {
     if (loadHours == 0) 0.0
     else {
       val out = 20*energyGeneratedPerYear(turbinePowerDensity)
-      val in = powerInstalled(turbinePowerDensity).toMegawatts * embodiedEnergyPerMW
+      val in = new WindFarm(powerInstalled(turbinePowerDensity)).embodiedEnergy
       out / in
 
     }
@@ -197,21 +197,16 @@ class OffshoreGridObject(center: GeoPoint, gridSize: Angle,
   urbanFactor: Double)
     extends GridObject(center, gridSize, uWind, vWind, windSpeed, lc, elevation, distanceToCoast, urbanFactor) {
 
-  val turbine = new OffshoreWindTurbineComponents().embodiedEnergy
+  val turbine = OffshoreWindTurbineComponents.embodiedEnergy
   val foundation = OffshoreFoundations.foundation(-elevation).embodiedEnergy
   def nTurbines(turbinePowerDensity: Power) = powerInstalled(turbinePowerDensity).toMegawatts / 5.0
 
-  override def EROI(turbinePowerDensity: Power, embodiedEnergyPerMW: Energy) = {
+  override def EROI(turbinePowerDensity: Power) = {
     if (loadHours == 0) 0.0
     else {
       val out = 20*energyGeneratedPerYear(turbinePowerDensity)
-      val in = nTurbines(turbinePowerDensity) * (foundation + turbine) + 
-      0.5*Transmission.embodiedEnergyTransmission(powerInstalled(turbinePowerDensity), distanceToCoast)
-      
-      println( (nTurbines(turbinePowerDensity) * (foundation + turbine)) / Transmission.embodiedEnergyTransmission(powerInstalled(turbinePowerDensity), distanceToCoast))
-      
+      val in = new OffshoreWindFarm(powerInstalled(turbinePowerDensity),distanceToCoast,-elevation).embodiedEnergy
       out / in
-
     }
   }
 

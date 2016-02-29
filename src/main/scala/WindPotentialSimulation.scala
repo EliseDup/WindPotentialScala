@@ -18,19 +18,15 @@ import utils.Helper.Point
 
 object WindPotentialSimulation {
   def main(args: Array[String]): Unit = {
-
-    /*
-    val list = List("November2001","February2002","May2002","August2002")     
-    val winds = 
-      (for(l <- list) yield {
-      val w = new GridData("europe"+l, Degrees(0.5))
-      (w.windSpeeds(w.onshoreGrids),l)
-    })
-*/
-  
+    val onshore = new WindFarm(Megawatts(500))
+    val offshore = new OffshoreWindFarm(Megawatts(500), Kilometers(50), Meters(50))
+    
+    println(onshore.embodiedEnergy.toGigajoules / 500.0)
+ println(offshore.embodiedEnergy.toGigajoules / 500.0)
+ 
     val wind = new GridData("world5years", Degrees(0.5))
-    val offshore = wind.offshoreConstrainedGrids
-    wind.plotEROIVSCumulatedProduction(offshore,Megawatts(2),Joules(0))
+   
+   wind.plotEROIVSCumulatedProduction(turbinePowerDensity=Megawatts(2))
 
   }
 
