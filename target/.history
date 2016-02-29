@@ -55,3 +55,7 @@ eclipse
 compile 
 clean
 cd
+eclipse
+clean
+compile
+eclipse

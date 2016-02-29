@@ -24,12 +24,26 @@ object EnergyIntensity {
   def apply(energy: Energy, bat: Energy, unit: Mass) = new EnergyIntensity(energy, bat, bat, unit)
 }
 
-case class Material(name: String, energy: EnergyIntensity, distanceFromFactory: Length = Kilometers(600)) {
+/**
+ * 
+ * The energy intensity is generally given by the Ecoinvent process.
+ * It includes all the energy input for "CRADLE TO GATE" (i.e. extracion, transport to factory, transformation)
+ * 
+ * Distance from factory is the average distance from factory to the next place ? TODO !!
+ * 
+ * Assume 1000 km by truck for transportation of the large components from the supplier to Vestas' factories 
+ * (VESTAS - LCA of 1.65 MW wind turbines)
+ * 
+ */
+case class Material(name: String, energy: EnergyIntensity, distanceFromFactory: Length = Kilometers(1000)) {
 
   val energyIntensity = energy.current / energy.unit
+  
+  def productionEnergy(mass : Mass) = energyIntensity*mass
   def transportEnergy(mass: Mass, isRoad: Boolean = true, isSea: Boolean = false, isRail: Boolean = false) = {
     Transport.transportEnergy(mass, distanceFromFactory, isRoad, isSea, isRail)
   }
+  
   def toArray = List(name, energy.current.toGigajoules, "GJ", energy.unit.toTonnes, "t").toArray
 }
 
@@ -53,8 +67,10 @@ object CastIron extends Material("CastIron", EnergyIntensity(25))
 object Concrete extends Material("Concrete", EnergyIntensity(0.75))
 object Copper extends Material("Copper", EnergyIntensity(42))
 object Steel extends Material("Steel", EnergyIntensity(32.6))
+object StainlessSteel extends Material("StainlessSteel", EnergyIntensity(74.8))
 object Lead extends Material("Lead", EnergyIntensity(25.21)) // TODO
 object Ballast extends Material("Ballast", EnergyIntensity(0)) // TODO
+object Zinc extends Material("Zinc", EnergyIntensity(51)) 
 
 // Glass Reinforced Plastic - GRP - Fibreglass
 object EpoxyResin extends Material("EpoxyResin", EnergyIntensity(137))
@@ -81,7 +97,6 @@ object Electronics extends Material("Electronics",EnergyIntensity(42))
 
 object SteelBar extends Material("SteelBar", EnergyIntensity(32.6))
 object Gasoline extends Material("Gasoline", EnergyIntensity(43.1))
-object Iron extends Material("Iron", EnergyIntensity(32.6)) // TODO
 object Paint extends Material("Paint", EnergyIntensity(70)) // TODO
 object Polyester extends Material("Polyester", EnergyIntensity(45.7))
 object Silica extends Material("Silica", EnergyIntensity(30.6))
@@ -89,7 +104,7 @@ object Silica extends Material("Silica", EnergyIntensity(30.6))
 object Materials {
 
   def list = List(Aluminium, CastIron, Concrete, Copper, Diesel,
-    EpoxyResin, Fiberglass, Gasoline, Iron, Paint,
+    EpoxyResin, Fiberglass, Gasoline, Paint,
     Polyester, Silica, Steel, SteelBar, Lead,
     Polyester, Polyethylene, Polypropylene, Polystyrene)
   def apply(name: String): Option[Material] = list.find(_.name.equals(name))
