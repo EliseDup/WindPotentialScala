@@ -9,9 +9,9 @@ import utils.PlotHelper
 import squants.space.Degrees
 import squants.space.SquareKilometers
 import squants.energy._
-import landCover.GridData
-import operation.WindTurbine
-import operation.WindTurbineWithPower
+import gridData.WorldGrid
+import windEnergy.WindTurbine
+import windEnergy.WindTurbineWithPower
 
 object GUI extends SimpleSwingApplication {
    
@@ -35,7 +35,7 @@ object GUI extends SimpleSwingApplication {
 
     reactions += {
       case ButtonClicked(start) =>
-        val wind = new GridData("results/" +
+        val wind = new WorldGrid("results/" +
           simu.area.selection.item.toLowerCase() + "5yearslc", Degrees(0.25))
         
     }

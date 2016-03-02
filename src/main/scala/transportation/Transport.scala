@@ -1,4 +1,4 @@
-package construction
+package transportation
 
 import squants.energy._
 import squants.mass._

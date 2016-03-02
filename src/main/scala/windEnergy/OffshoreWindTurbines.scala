@@ -1,9 +1,10 @@
-package construction
+package windEnergy
 
 import squants.mass._
 import squants.space.Length
 import utils.Helper.Point
 import utils.Helper
+import construction._
 
 /**
  * Foundations change with water depth

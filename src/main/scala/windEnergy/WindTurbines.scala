@@ -1,4 +1,4 @@
-package operation
+package windEnergy
 
 import utils.PlotHelper
 import construction._
@@ -6,6 +6,8 @@ import squants.motion._
 import squants.energy._
 import squants.space._
 import squants.mass._
+import squants.SquantifiedDouble
+import windEnergy.WindTurbineComponents
 
 /**
  * Extrapolation to calculate the wind speed at height H from wind speed v0

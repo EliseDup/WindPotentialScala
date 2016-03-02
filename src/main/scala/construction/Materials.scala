@@ -4,6 +4,7 @@ import squants.energy._
 import squants.mass._
 import utils._
 import squants.space._
+import transportation.Transport
 
 /**
  * Classification of energy intensities :

@@ -1,4 +1,4 @@
-package construction
+package windEnergy
 /**
  * Give the weight of each components only as a function of rotor radius, hub heigth, and nominal power
  * 

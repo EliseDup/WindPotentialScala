@@ -1,12 +1,10 @@
-package construction
+package windEnergy
 
 import squants.energy.Power
-import squants.mass.Mass
-import utils.Helper
-import squants.energy.Megawatts
 import squants.energy.Energy
-import operation.WindTurbine
 import squants.space.Length
+import construction._
+import squants.SquantifiedDouble
 
 /**
  * A wind farm consists of windmills, highvoltage transformer stations and transmission grid.
@@ -22,7 +20,7 @@ class WindFarm(val ratedPower: Power) {
   val turbine = new WindTurbineComponents("2MW")
   val nTurbines = ratedPower / turbine.ratedPower
 
-  def embodiedEnergy = turbine.embodiedEnergy * nTurbines + Transmission.embodiedEnergyOnshoreTransmission(ratedPower)
+  def embodiedEnergy = turbine.embodiedEnergy * nTurbines + WindPowerTransmission.embodiedEnergyOnshoreTransmission(ratedPower)
 }
 
 class OffshoreWindFarm(ratedPower: Power,
@@ -30,7 +28,7 @@ class OffshoreWindFarm(ratedPower: Power,
 
   val turbines = OffshoreWindTurbineComponents.embodiedEnergy
   val foundations = OffshoreFoundations.foundation(waterDepth).embodiedEnergy
-  val transmission = Transmission.embodiedEnergyOffshoreTransmission(ratedPower, distanceToShore)
+  val transmission = WindPowerTransmission.embodiedEnergyOffshoreTransmission(ratedPower, distanceToShore)
 
   override def embodiedEnergy: Energy = nTurbines * (turbines + foundations) + transmission
 

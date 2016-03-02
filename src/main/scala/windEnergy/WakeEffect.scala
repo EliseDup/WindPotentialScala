@@ -1,7 +1,9 @@
-package operation
+package windEnergy
 
 import squants.space.Length
 import squants.space.Area
+import squants.SquantifiedDouble
+import squants.SquantifiedLong
 
 /**
  * Array sizeTurbine spacing
