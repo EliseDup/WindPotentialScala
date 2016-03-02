@@ -1,4 +1,4 @@
-package landCover
+package gridData
 
 import utils.Helper
 import org.apache.poi.hssf.usermodel.HSSFRow
@@ -26,18 +26,20 @@ abstract class LandCoverClasses(val name: String, legendFileName: String, codeIn
   def apply(c: Int) = classes(c)
 }
 
-class GlobCoverClasses extends LandCoverClasses("GlobCover2009", "globCover/GlobCover2009_Legend", z0Index = 5) {
+object GlobCoverClasses extends LandCoverClasses("GlobCover2009", "globCover/GlobCover2009_Legend", z0Index = 5) {
   val noData = List(230)
   override val urbanAreas = List(190)
 }
 
-class ModisCoverClasses extends LandCoverClasses("Modis", "modis/modisLegend") {
+object ModisCoverClasses extends LandCoverClasses("Modis", "modis/modisLegend") {
   val noData = List()
   override val urbanAreas = List(13)
 
 }
 
-/////
-class CorineLandCoverClasses extends LandCoverClasses("CorineLandCover", "clc/clc2000legend", codeIndex = 0, labelIndex = 12, z0Index = 10) {
+/**
+ * Do not use Corine land cover anymore as it is only available in Europe ..
+ */
+object CorineLandCoverClasses extends LandCoverClasses("CorineLandCover", "clc/clc2000legend", codeIndex = 0, labelIndex = 12, z0Index = 10) {
   val noData = List(0, 48, 49, 50, 255)
 }

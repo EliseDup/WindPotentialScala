@@ -15,7 +15,7 @@ import historicalData.MeteoDataLoader
 import historicalData.MeteoStations
 import squants.motion.MetersPerSecond
 import squants.space.Meters
-import operation.WindTurbine2MW
+import windEnergy.WindTurbine2MW
 import construction.Materials
 
 object Test {

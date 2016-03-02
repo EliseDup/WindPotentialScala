@@ -1,11 +1,13 @@
-package construction
+package windEnergy
 
 import squants.mass._
 import squants.space._
 import squants.energy._
 import squants.time._
+import construction._
+import transportation.Transport
 
-object Transmission {
+object WindPowerTransmission {
 
   // --- OFFSHORE ---
   /**

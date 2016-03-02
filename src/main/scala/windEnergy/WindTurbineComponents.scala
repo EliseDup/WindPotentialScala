@@ -1,15 +1,29 @@
-package construction
+package windEnergy
 
 import squants.energy._
 import squants.mass._
 import squants.space._
-import squants.time.Hours
 import utils._
 import squants.motion.Velocity
-import org.apache.poi.ss.usermodel.Sheet
-import org.apache.poi.ss.usermodel.Row
-import squants.electro.Megavolts
 import squants.motion.MetersPerSecond
+import construction.Aluminium
+import construction.CastIron
+import construction.Concrete
+import construction.Copper
+import construction.Electronics
+import construction.Fiberglass
+import construction.GlassReinforcedPlastic
+import construction.LubricatingOil
+import construction.Material
+import construction.Materials
+import construction.Polyethylene
+import construction.Silica
+import construction.Steel
+import transportation.Transport
+import squants.energy.Power.apply
+import squants.mass.Mass.apply
+import squants.motion.Velocity.apply
+import squants.space.Length.apply
 
 /**
  * A component is just a list of materials and mass
