@@ -27,21 +27,20 @@ import utils._
  *
  */
 
-class GridCell(val center: GeoPoint, val gridSize: Angle,
+class GridCell(val csvLine : Array[String], val center: GeoPoint, val gridSize: Angle,
     val windSpeed: Velocity,
     val irradiance: Irradiance,
     val lc: LandCoverClass,
     val elevation: Length, val distanceToCoast: Length,
-    val urbanFactor: Double) {
+    val urbanFactor: Double,
+    val protectedArea: Boolean) {
 
   override def toString() = "Grid Object center : " + center + ", mean wind speed : " + windSpeed + ", land cover : " + lc
 
   val onshore = elevation.value >= 0
   val offshore = elevation.value < 0
-  def EROI(potential: RenewablePotential) = potential.EROI(this)
+  def EROI(potential: EnergyGenerationPotential) = potential.EROI(this)
 
-  def windSpeedMonth(month: Int)  = windSpeed
-  
   /**
    * Calculate the cell size in km^2
    * Lat,Lon represent the center of the cell
@@ -74,13 +73,8 @@ class GridCell(val center: GeoPoint, val gridSize: Angle,
 object GridCell {
   def apply(line: String, data: WorldGrid) = {
     val l = line.split("\t")
-    new GridCell(center(l), data.gridSize, velocity(l, 4), WattsPerSquareMeter(0), lcClass(l, data), Meters(l(9).toDouble), Kilometers(l(10).toDouble), l(8).toDouble / 225.0)
-  }
-  def applyDetails(line: String, data: WorldGrid) = {
-    val l = line.split("\t")
-    val speeds = (2 until 2 + 12).map(i => velocity(l, i)).toList
-    new GridCellPerMonth(center(l), data.gridSize,
-      speeds, lcClass(l, data), Meters(l(18).toDouble), Kilometers(l(19).toDouble), l(17).toDouble / (15 * 15))
+    new GridCell(l,center(l), data.gridSize, velocity(l, 4), WattsPerSquareMeter(0), lcClass(l, data), Meters(l(9).toDouble), Kilometers(l(10).toDouble), l(8).toDouble / 225.0,
+        l(11).toInt==1)
   }
 
   def velocity(line: Array[String], index: Int) = MetersPerSecond(line(index).toDouble)
@@ -95,15 +89,4 @@ object GridCell {
     else ModisCoverClasses(modis.toInt)
 
   }
-}
-
-class GridCellPerMonth(center: GeoPoint, gridSize: Angle,
-  windSpeeds: List[Velocity],
-  lc: LandCoverClass,
-  elevation: Length, distanceToCoast: Length, urbanFactor: Double)
-    extends GridCell(center, gridSize,
-      windSpeeds.foldLeft(MetersPerSecond(0))(_ + _) / windSpeeds.size, WattsPerSquareMeter(0), lc, elevation, distanceToCoast, urbanFactor) {
-
-  override def windSpeedMonth(month: Int) = windSpeeds(month)
-
 }

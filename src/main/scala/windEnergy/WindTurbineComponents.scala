@@ -3,68 +3,13 @@ package windEnergy
 import squants.energy._
 import squants.mass._
 import squants.space._
+import squants.motion._
+
 import utils._
-import squants.motion.Velocity
-import squants.motion.MetersPerSecond
-import construction.Aluminium
-import construction.CastIron
-import construction.Concrete
-import construction.Copper
-import construction.Electronics
-import construction.Fiberglass
-import construction.GlassReinforcedPlastic
-import construction.LubricatingOil
-import construction.Material
-import construction.Materials
-import construction.Polyethylene
-import construction.Silica
-import construction.Steel
+
+import construction._
 import transportation.Transport
-import squants.energy.Power.apply
-import squants.mass.Mass.apply
-import squants.motion.Velocity.apply
-import squants.space.Length.apply
 
-/**
- * A component is just a list of materials and mass
- * So we can evaluate the embodied energy associated
- *
- * We add to this the energy input for the production (and end-of-life ?) and the energy input for the transport to the final destination
- */
-
-abstract class Product {
-
-  val components: List[(Mass, Material)]
-  def energyInput: Energy = Joules(0)
-  def transportEnergyInput: Energy = Joules(0)
-
-  def weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
-  def materialProdcutionEnergy: Energy = components.map(c => c._2.productionEnergy(c._1)).foldLeft(Joules(0))(_ + _)
-  def materialTransportEnergy: Energy = components.map(c => c._2.transportEnergy(c._1)).foldLeft(Joules(0))(_ + _)
-
-  def embodiedEnergy = {
-    energyInput + transportEnergyInput + materialProdcutionEnergy + materialTransportEnergy
-  }
-
-  def energyIntensity: SpecificEnergy = embodiedEnergy / weight
-
-  override def toString = "Components : total weight : " + weight + ",total energy embodied : " + embodiedEnergy + ", =>" + energyIntensity.to(GigajoulesPerton) + "GJ/t"
-
-  def *(d: Double): Product = Product(components.map(i => (i._1 * d, i._2)))
-
-}
-
-object Product {
-  def apply(comp: (Mass, Material)*): Product = apply(comp.toList)
-  def apply(energyIn: Energy, transportIn: Energy, comp: (Mass, Material)*): Product = new Product {
-    val components = comp.toList
-    override val energyInput = energyIn
-    override val transportEnergyInput = transportIn
-  }
-  def apply(list: List[(Mass, Material)]): Product = new Product {
-    val components = list
-  }
-}
 /**
  * The list of components of a wind turbines, mainly : Tower, Foundation, Rotor and Nacelle
  * Also some specifications

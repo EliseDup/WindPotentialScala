@@ -32,6 +32,8 @@ import java.io.FileOutputStream
 import com.sun.image.codec.jpeg.JPEGCodec
 
 object PlotHelper {
+  
+  var i = 0
   /**
    * Plot a list of time series in on frame
    */
@@ -55,6 +57,7 @@ object PlotHelper {
     val list = for (i <- series) yield (i._1.map(_.time), i._1.map(_.value), i._2)
     plotTime(list)
   }
+  def plotXY(x :List[Double], y : List[Double]) { plotXY(List((x,y,""))) }
   def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
     legend: Boolean = false, logX: Boolean = false, logY: Boolean = false) {
@@ -118,9 +121,10 @@ object PlotHelper {
   def createFrame(chart: JFreeChart, save: Boolean = true) {
     if (save) {
       val plot = chart.getXYPlot();
-      plot.getRenderer().setSeriesPaint(0, Color.BLUE)
+      //plot.getRenderer().setSeriesPaint(0, Color.BLUE)
       plot.setBackgroundPaint(Color.WHITE)
-      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream("test.jpg"), chart, 500, 300, 2, 2)
+      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i+".jpg"), chart, 500, 300, 2, 2)
+      i=i+1
     }
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
