@@ -19,37 +19,71 @@ import windEnergy._
 import scala.io.Source
 import org.jfree.data.category.DefaultCategoryDataset
 import org.apache.commons.math3.special.Gamma
+import scala.collection.mutable.ListBuffer
+import squants.radio.WattsPerSquareMeter
 
 object WindPotentialSimulation {
 
   def main(args: Array[String]): Unit = {
 
-    val potential = WindPotential
-    val wind = new WorldGrid("worldData.txt", Degrees(0.5))
+    val wind = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
+    wind.writeGrid("energyGenerated")
+    val grids = wind.grids; val onshore = wind.onshoreGrids; val offshore = wind.offshoreGrids
 
-    val onshore = wind.onshoreGrids
-    val offshore = wind.offshoreGrids
+    PlotHelper.cumulativeDensity(grids.map(_.windSpeed.toMetersPerSecond))
+    
+    val onshoreConstrained = wind.onshoreGrids.filter(WindPotential.suitabilityFactor(_) > 0)
+    val offshoreConstrained = wind.offshoreGrids.filter(WindPotential.suitabilityFactor(_) > 0)
+    val constrained = wind.grids.filter(WindPotential.suitabilityFactor(_) > 0)
+    
+      printMinEROIValues(onshoreConstrained, 5.0)
+      printMinEROIValues(onshoreConstrained, 7.0)
+      printMinEROIValues(onshoreConstrained, 10.0)
+ 
+   // val a =  wind.listValueVSCumulated(onshore.map(g => (WindPotential.EROI(g), WindPotential.powerCaptured(g,1.0, topDown = false).to(Terawatts))))
+   // val b =  wind.listValueVSCumulated(onshore.map(g => (WindPotential.EROI(g), WindPotential.powerCaptured(g,1.0, topDown = true).to(Terawatts))))
+    
+   // PlotHelper.plotXY( List((a._1,a._2,"Unconstrained"),(b._1,b._2,"Maximum Rate of Extraction")))
+   // eroi(wind, onshore)  
+   }
 
-    eroi(onshore)
-    eroi(offshore.filter(_.elevation.toMeters >= -200))
+  def printMinEROIValues(gr: List[GridCell], eroi: Double) = {
+    val sust = gr.filter(WindPotential.EROI(_) >= eroi)
+    println("---")
+    println("Power captured" + "\t" + sust.map(WindPotential.powerCaptured(_).to(Terawatts)).sum + "\t" + "TW")
+    println("Power installed" + "\t" + sust.map(WindPotential.powerInstalled(_).to(Megawatts)).sum + "\t" + "MW")
+    println("Area" + "\t" + sust.map(g => WindPotential.suitabilityFactor(g) * g.area.toSquareKilometers).sum + "\t" + "km2")
 
-    def eroi(gr: List[GridCell]) {
-
-      val all = wind.listEROIVSCumulatedPower(gr.map(g => (g, 1.0)), potential)
-      val landUse = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.geographicFactor(g))), potential)
-      val windRegime = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.geographicFactor(g) * potential.windRegimeFactor(g))), potential)
-
-      PlotHelper.plotXY(List(
-        (all._1, all._2, "Total"),
-        (landUse._1, landUse._2, "Geographic potential"),
-        (windRegime._1, windRegime._2, "Wind Regime Restrictions")),
-
-        xLabel = "Mean power captured [TW]",
-        yLabel = "EROI", legend = true)
-    }
   }
 
-  def technicalPotential(grids: List[GridCell], potential: EnergyGenerationPotential) {
+  def plotEGenVSArea(wind: WorldGrid, gr: List[GridCell]) {
+    val list = wind.listValueVSArea(gr.map(g => (WindPotential.energyGeneratedPerYear(g).to(TerawattHours), WindPotential.suitabilityFactor(g) * g.area)))
+    PlotHelper.plotXY(List((list._1, list._2, "")), xLabel = "Area [millions km2]", yLabel = "Energy Generated [TWh/year]")
+
+  }
+  def plotSpeedVSArea(wind: WorldGrid, gr: List[GridCell]) {
+    val vHub = wind.listValueVSArea(gr.map(g => (g.windSpeedHub.value, g.area)))
+    val vHubGeo = wind.listValueVSArea(gr.map(g => (g.windSpeedHub.value, g.area * WindPotential.suitabilityFactor(g))))
+
+    PlotHelper.plotXY(List((vHub._1, vHub._2, "Total"), (vHubGeo._1, vHubGeo._2, "Suitability Factor")), xLabel = "Area [millions km2]", yLabel = "Wind Speed [m/s]")
+  }
+
+  def eroi(wind: WorldGrid, gr: List[GridCell]) {
+    val potential = WindPotential
+    val all = wind.listEROIVSCumulatedPower(gr.map(g => (g, 1.0)), potential)
+    val landUse = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.landUseFactor(g))), potential)
+    val windRegime = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.landUseFactor(g) * potential.windRegimeFactor(g))), potential)
+
+    PlotHelper.plotXY(List(
+      (all._1, all._2, "Total"),
+      (landUse._1, landUse._2, "Geographic potential"),
+      (windRegime._1, windRegime._2, "Wind Regime Restrictions")),
+
+      xLabel = "Puissance Moyenne [TW]", //Mean power captured [TW]",
+      yLabel = "EROI") //, legend = true)
+  }
+
+  def technicalPotential(grids: List[GridCell], potential: EnergyGenerationPotential = WindPotential) {
     PlotHelper.histogram(grids.map(potential.energyGeneratedPerYear(_).to(TerawattHours)), n = 20, xLabel = "Technical potential in grid cell [TWh]", yLabel = "# Grid cells")
   }
 

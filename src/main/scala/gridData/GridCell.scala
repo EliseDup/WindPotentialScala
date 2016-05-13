@@ -14,6 +14,53 @@ import squants.energy._
 import squants.space._
 import construction._
 import utils._
+import org.apache.commons.math3.special.Gamma
+import windEnergy.WeibullParameters
+
+case class Country(val name: String)
+
+/**
+ * Calculate the cell size in km^2
+ * Lat,Lon represent the center of the cell
+ * =>
+ * lat+0125/2	 ___________  lat+0125/2
+ * lon-0.125/2|						| lon+0.125/2
+ *    				|						|
+ *    				|			o 		|
+ *    				|						|
+ *            |						|
+ *             ___________
+ * lat-0125/2							 lat-0125/2
+ * lon-0.125/2				     lon+0.125/2
+ *
+ */
+
+class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val lc: LandCoverClass,
+    val urbanFactor: Double, val protectedArea: Boolean, val country: Country) {
+
+  val s = gridSize / 2.0;
+  val lowerLeftCorner = GeoPoint(center.latitude - s, center.longitude - s)
+  val upperRightCorner = GeoPoint(center.latitude + s, center.longitude + s)
+  val area = Helper.areaRectangle(lowerLeftCorner, upperRightCorner)
+  val meanLonDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude - s, center.longitude + s)) +
+    Helper.distance(GeoPoint(center.latitude + s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
+  val meanLatDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude - s)) +
+    Helper.distance(GeoPoint(center.latitude - s, center.longitude + s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
+
+}
+
+class GridCellSolar(center: GeoPoint, gridSize: Angle, lc: LandCoverClass, urbanFactor: Double,
+    protectedArea: Boolean, country: Country, val irradiance: Irradiance) extends DefaultGridCell(center, gridSize, lc, urbanFactor, protectedArea, country) {
+  def pvPotential = Watts(irradiance.toWattsPerSquareMeter) * Hours(8760.0)
+}
+object GridCellSolar {
+  def apply(l: Array[String], gridSize: Angle) = {
+    new GridCellSolar(GeoPoint(Degrees(l(0).toDouble), Degrees(l(1).toDouble)),
+      gridSize, LandCover.landCover(l(2), l(3), l(4)), l(5).toDouble / 225.0, l(6).toInt == 1,
+      Country(l(7)),
+      WattsPerSquareMeter(l(8).toDouble))
+  }
+}
 
 /**
  *
@@ -25,15 +72,15 @@ import utils._
  *
  * SEE http://www.globalwindatlas.com/datasets.html
  *
+ *
  */
-
-class GridCell(val csvLine : Array[String], val center: GeoPoint, val gridSize: Angle,
+class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle, lc: LandCoverClass, urbanFactor: Double,
+    protectedArea: Boolean, country: Country,
     val windSpeed: Velocity,
-    val irradiance: Irradiance,
-    val lc: LandCoverClass,
-    val elevation: Length, val distanceToCoast: Length,
-    val urbanFactor: Double,
-    val protectedArea: Boolean) {
+    val windSpeedStandardDeviation: Double,
+    val kineticEnergyDissipation: Irradiance,
+    val irradiance : Irradiance,
+    val elevation: Length, val distanceToCoast: Length) extends DefaultGridCell(center, gridSize, lc, urbanFactor, protectedArea, country) {
 
   override def toString() = "Grid Object center : " + center + ", mean wind speed : " + windSpeed + ", land cover : " + lc
 
@@ -41,52 +88,34 @@ class GridCell(val csvLine : Array[String], val center: GeoPoint, val gridSize: 
   val offshore = elevation.value < 0
   def EROI(potential: EnergyGenerationPotential) = potential.EROI(this)
 
-  /**
-   * Calculate the cell size in km^2
-   * Lat,Lon represent the center of the cell
-   * =>
-   * lat+0125/2	 ___________  lat+0125/2
-   * lon-0.125/2|						| lon+0.125/2
-   *    				|						|
-   *    				|			o 		|
-   *    				|						|
-   *            |						|
-   *             ___________
-   * lat-0125/2							 lat-0125/2
-   * lon-0.125/2				     lon+0.125/2
-   *
-   */
-
-  val s = gridSize / 2.0;
-  val lowerLeftCorner = GeoPoint(center.latitude - s, center.longitude - s)
-  val upperRightCorner = GeoPoint(center.latitude + s, center.longitude + s)
-  val area = Helper.areaRectangle(lowerLeftCorner, upperRightCorner)
-  val meanLonDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude - s, center.longitude + s)) +
-    Helper.distance(GeoPoint(center.latitude + s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
-  val meanLatDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude - s)) +
-    Helper.distance(GeoPoint(center.latitude - s, center.longitude + s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
-
   val effectiveArea = area * (1.0 - urbanFactor)
 
-}
+  val h0 = Meters(10)
+  val hubHeight = if (onshore) Meters(80) else Meters(90)
 
+  def windSpeedAt(height: Length): Velocity = Math.log(height / lc.z0) / Math.log(h0 / lc.z0) * windSpeed
+  val windSpeedHub = windSpeedAt(hubHeight)
+  /**
+   * Shape parameter k[-] and scale parameters c [m/s]
+   * of the Weibull distribution
+   */
+  val weibull = WeibullParameters(windSpeed, windSpeedStandardDeviation, if (onshore) Meters(80) else Meters(90))
+}
+/**
+ * Latitude	Longitude	Corine Land Cover	GlobCover	Modis	Urban Factor	Protected area ?	Country	Elevation [m]	Distance to Coast [km]	Uwind	Vwind	Wind	Std Wind	KineticEnergyDissipation Irradiance
+ *
+ */
 object GridCell {
-  def apply(line: String, data: WorldGrid) = {
-    val l = line.split("\t")
-    new GridCell(l,center(l), data.gridSize, velocity(l, 4), WattsPerSquareMeter(0), lcClass(l, data), Meters(l(9).toDouble), Kilometers(l(10).toDouble), l(8).toDouble / 225.0,
-        l(11).toInt==1)
+  def apply(l: Array[String], gridSize: Angle) = {
+    new GridCell(l, center(l), gridSize, LandCover.landCover(l(2), l(3), l(4)), l(5).toDouble / 225.0, l(6).toInt == 1,
+      Country(l(7)),
+      velocity(l, 12), l(13).toDouble,
+      WattsPerSquareMeter(l(14).toDouble),
+      WattsPerSquareMeter(l(15).toDouble),
+      Meters(l(8).toDouble), Kilometers(l(9).toDouble))
   }
 
   def velocity(line: Array[String], index: Int) = MetersPerSecond(line(index).toDouble)
   def center(line: Array[String]) = GeoPoint(Degrees(line(0).toDouble), Degrees(line(1).toDouble))
 
-  // 5 = Corine, 6 = GlobCover, 7 = Modis
-  def lcClass(line: Array[String], data: WorldGrid) = {
-    val corine = line(5); val globCover = line(6); val modis = line(7);
-    /*if (!(corine.equals("NA") || CorineCoverClasses.noData.contains(corine.toInt))) CorineCoverClasses(corine.toInt)
-    else */
-    if (!(globCover.equals("NA") || GlobCoverClasses.noData.contains(globCover.toInt))) GlobCoverClasses(globCover.toInt)
-    else ModisCoverClasses(modis.toInt)
-
-  }
 }
