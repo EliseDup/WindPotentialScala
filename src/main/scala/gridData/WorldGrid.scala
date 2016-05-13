@@ -40,7 +40,7 @@ class WorldGrid(val name: String, val gridSize: Angle) {
   }
 
   def listEROIVSCumulatedPower(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential): (List[Double], List[Double]) = {
-    listValueVSCumulated(gr.map(g => (potential.EROI(g._1), potential.powerCaptured(g._1, g._2).to(Terawatts))))
+    listValueVSCumulated(gr.map(g => (potential.EROI(g._1), potential.powerGenerated(g._1, g._2).to(Terawatts))))
   }
   def listEnergyGeneratedPerYearVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential) = {
     val eroiPro = gr.map(g => (potential.energyGeneratedPerYear(g._1, g._2)).to(TerawattHours))

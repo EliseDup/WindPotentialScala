@@ -26,31 +26,16 @@ object WindPotentialSimulation {
 
   def main(args: Array[String]): Unit = {
 
-    val wind = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
-    wind.writeGrid("energyGenerated")
-    val grids = wind.grids; val onshore = wind.onshoreGrids; val offshore = wind.offshoreGrids
+    val world = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
+    val grids = world.grids; val onshore = world.onshoreGrids; val offshore = world.offshoreGrids
 
-    PlotHelper.cumulativeDensity(grids.map(_.windSpeed.toMetersPerSecond))
-    
-    val onshoreConstrained = wind.onshoreGrids.filter(WindPotential.suitabilityFactor(_) > 0)
-    val offshoreConstrained = wind.offshoreGrids.filter(WindPotential.suitabilityFactor(_) > 0)
-    val constrained = wind.grids.filter(WindPotential.suitabilityFactor(_) > 0)
-    
-      printMinEROIValues(onshoreConstrained, 5.0)
-      printMinEROIValues(onshoreConstrained, 7.0)
-      printMinEROIValues(onshoreConstrained, 10.0)
- 
-   // val a =  wind.listValueVSCumulated(onshore.map(g => (WindPotential.EROI(g), WindPotential.powerCaptured(g,1.0, topDown = false).to(Terawatts))))
-   // val b =  wind.listValueVSCumulated(onshore.map(g => (WindPotential.EROI(g), WindPotential.powerCaptured(g,1.0, topDown = true).to(Terawatts))))
-    
-   // PlotHelper.plotXY( List((a._1,a._2,"Unconstrained"),(b._1,b._2,"Maximum Rate of Extraction")))
-   // eroi(wind, onshore)  
-   }
+    eroi(world, onshore, WindPotential)
+  }
 
   def printMinEROIValues(gr: List[GridCell], eroi: Double) = {
     val sust = gr.filter(WindPotential.EROI(_) >= eroi)
     println("---")
-    println("Power captured" + "\t" + sust.map(WindPotential.powerCaptured(_).to(Terawatts)).sum + "\t" + "TW")
+    println("Power captured" + "\t" + sust.map(WindPotential.powerGenerated(_).to(Terawatts)).sum + "\t" + "TW")
     println("Power installed" + "\t" + sust.map(WindPotential.powerInstalled(_).to(Megawatts)).sum + "\t" + "MW")
     println("Area" + "\t" + sust.map(g => WindPotential.suitabilityFactor(g) * g.area.toSquareKilometers).sum + "\t" + "km2")
 
@@ -68,16 +53,15 @@ object WindPotentialSimulation {
     PlotHelper.plotXY(List((vHub._1, vHub._2, "Total"), (vHubGeo._1, vHubGeo._2, "Suitability Factor")), xLabel = "Area [millions km2]", yLabel = "Wind Speed [m/s]")
   }
 
-  def eroi(wind: WorldGrid, gr: List[GridCell]) {
-    val potential = WindPotential
+  def eroi(wind: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
     val all = wind.listEROIVSCumulatedPower(gr.map(g => (g, 1.0)), potential)
     val landUse = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.landUseFactor(g))), potential)
-    val windRegime = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.landUseFactor(g) * potential.windRegimeFactor(g))), potential)
+    // val windRegime = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.landUseFactor(g) * potential.windRegimeFactor(g))), potential)
 
     PlotHelper.plotXY(List(
       (all._1, all._2, "Total"),
-      (landUse._1, landUse._2, "Geographic potential"),
-      (windRegime._1, windRegime._2, "Wind Regime Restrictions")),
+      (landUse._1, landUse._2, "Geographic potential")),
+      //   (windRegime._1, windRegime._2, "Wind Regime Restrictions")),
 
       xLabel = "Puissance Moyenne [TW]", //Mean power captured [TW]",
       yLabel = "EROI") //, legend = true)
