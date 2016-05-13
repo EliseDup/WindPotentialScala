@@ -74,6 +74,7 @@ object GridCellSolar {
  *
  *
  */
+
 class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle, lc: LandCoverClass, urbanFactor: Double,
     protectedArea: Boolean, country: Country,
     val windSpeed: Velocity,
