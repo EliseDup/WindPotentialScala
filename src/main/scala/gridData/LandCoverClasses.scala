@@ -4,6 +4,12 @@ import utils.Helper
 import org.apache.poi.hssf.usermodel.HSSFRow
 import squants.space._
 
+object LandCover {
+  def landCover(corine : String, globCover : String, modis :String) = {
+    if (!(globCover.equals("NA") || GlobCoverClasses.noData.contains(globCover.toInt))) GlobCoverClasses(globCover.toInt)
+    else ModisCoverClasses(modis.toInt)
+  }
+}
 class LandCoverClass(val code: Int, val label: String, val z0: Length, val classes: LandCoverClasses) {
 
   override def toString() = "Land Cover Class " + code + " : " + label + "," + z0

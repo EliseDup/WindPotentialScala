@@ -100,10 +100,11 @@ object PlotHelper {
     val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
     createFrame(chart)
   }
-  def repartition(values: List[(List[Double], String)], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
+  def repartition(value : List[Double]) { repartition(List((value,""))) }
+  def repartition(values: List[(List[Double], String)], n: Int = 10, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
     val dataset = new DefaultCategoryDataset()
     val allValues = values.map(_._1).flatten
-    val min = Math.max(0, allValues.min)
+    val min = allValues.min// Math.max(0, allValues.min)
     val max = allValues.max
     val inter = (max - min) / n.toDouble
 
@@ -115,7 +116,7 @@ object PlotHelper {
       }
     }
     val chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
-    createFrame(chart)
+    createFrame(chart, save=false)
   }
 
   def createFrame(chart: JFreeChart, save: Boolean = true) {

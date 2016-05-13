@@ -27,6 +27,8 @@ object Helper {
   val resultsPy = "/Users/Elise/Documents/workspace/WindPotentialPy/results/"
   val ressources = "/Users/Elise/Documents/workspace/WindPotential/ressources/"
 
+  def getLines(file : String, delimiter : String = "\t") = Source.fromFile(file).getLines().toList.map(_.split(delimiter))
+  
   def saveResult(name: String, ob: Object) {
     val oos = new ObjectOutputStream(new FileOutputStream("results/" + name))
     oos.writeObject(ob)

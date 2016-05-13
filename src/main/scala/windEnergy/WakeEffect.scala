@@ -23,30 +23,32 @@ object WakeEffect {
   // We have to fix a spacing and then we wan evalate the number of turbines in the area and the corresponding array efficieny
   // So to put one wind turbine one need a space of nD * nD (a square surrounding the wind turbine)
   // 9D with 80m diameter is about 2 wind turbine per square kilometers
-  val spacingIndex = 5 // 0 is 4D, 1 is 5D, .. and 5 is 9D
 
-  val spacing = (4 to 9).toArray
   val n = Array(4, 16, 36, 64, 100)
-  val array = Array(
-    Array(0.81, 0.87, 0.91, 0.93, 0.95, 0.96),
-    Array(0.65, 0.76, 0.82, 0.87, 0.9, 0.92),
-    Array(0.57, 0.7, 0.78, 0.83, 0.87, 0.9),
-    Array(0.52, 0.66, 0.75, 0.81, 0.85, 0.88),
-    Array(0.49, 0.63, 0.73, 0.79, 0.84, 0.87))
+  // Map (nDiameters => Array(wake effect) )
+  val array = Map(
+    4 -> Array(0.81, 0.65, 0.57, 0.52, 0.49),
+    5 -> Array(0.87, 0.76, 0.7, 0.66, 0.63),
+    6 -> Array(0.91, 0.82, 0.78, 0.75, 0.73),
+    7 -> Array(0.93, 0.87, 0.83, 0.81, 0.79),
+    8 -> Array(0.95, 0.9, 0.87, 0.85, 0.84),
+    9 -> Array(0.96, 0.92, 0.9, 0.88, 0.87))
 
-  val nDiameters = spacing(spacingIndex)
-
-  def nTurbines(x: Length, y: Length, d: Length) = (x / (nDiameters * d) * y / (nDiameters * d))
-  def nTurbines(area : Area, d : Length) = area / ((d*nDiameters)*(d*nDiameters))
+  def nTurbines(x: Length, y: Length, d: Length, nDiameters: Int) = (x / (nDiameters * d) * y / (nDiameters * d))
+  def nTurbines(area: Area, d: Length, nDiameters: Int) = area / ((d * nDiameters) * (d * nDiameters))
   
-  def wakeEffect(nTurbines: Double) = {
+  def wakeEffect(area: Area, d: Length, nDiameters: Int) : Double = wakeEffect(nTurbines(area,d,nDiameters), nDiameters)
+  def wakeEffect(nTurbines: Double, nDiameters: Int) = {
     val nIndex =
       if (nTurbines <= n(0)) 0
       else if (nTurbines <= n(1)) 1
       else if (nTurbines <= n(2)) 2
       else if (nTurbines <= n(3)) 3
       else 4
-
-    array(nIndex)(spacingIndex)
+    val nD =
+      if (nDiameters < 4) 4
+      else if (nDiameters > 9) 9
+      else nDiameters
+    array(nD)(nIndex)
   }
 }
