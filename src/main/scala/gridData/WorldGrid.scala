@@ -36,7 +36,7 @@ class WorldGrid(val name: String, val gridSize: Angle) {
   }
 
   def listEROIVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential): (List[Double], List[Double]) = {
-    listValueVSCumulated(gr.map(g => (potential.EROI(g._1), potential.energyGeneratedPerYear(g._1, g._2).to(TerawattHours))))
+    listValueVSCumulated(gr.map(g => (potential.EROI(g._1), potential.energyGeneratedPerYear(g._1, g._2).to(Exajoules))))
   }
 
   def listEROIVSCumulatedPower(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential): (List[Double], List[Double]) = {
@@ -61,12 +61,14 @@ class WorldGrid(val name: String, val gridSize: Angle) {
     PlotHelper.plotXY(List((list._1, list._2, "")), xLabel = "Cumulated Annual Production [TWh]", yLabel = "EROI")
   }
 
-  def writeGrid(name: String, gr: List[DefaultGridCell] = grids) {
+  def writeGrid(name: String, gr: List[GridCell] = grids) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
-        //"\t" + g.windSpeed.value.toString +
-        //"\t" + WindPotential.energyGeneratedPerYear(g).to(TerawattHours) +
+        "\t" + g.irradiance.value.toString +
+        "\t" + (g.irradiance.toWattsPerSquareMeter/1000.0*8760).toString +
+        "\t" + SolarPotential.energyGeneratedPerYear(g).to(TerawattHours) + 
+        "\t" + SolarPotential.suitabilityFactor(g) +
         /*"\t" + g.irradiance.value.toString +
         "\t" + g.lc.code.toDouble.toString +
         "\t" + g.elevation.value.toString +

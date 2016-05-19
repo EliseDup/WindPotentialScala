@@ -51,15 +51,17 @@ object CapacityFactorCalculation {
     else 0.0
   }
   def apply(w : WeibullParameters, vr: Double): Double = apply(w.cHub.toMetersPerSecond,w.kHub,vr)
+  
   def apply(c : Double, k : Double, vr: Double): Double = {
     (Math.exp(-Math.pow(vc / c, k)) - Math.exp(-Math.pow(vr / c, k))) / (Math.pow(vr / c, k) - Math.pow(vc / c, k)) - Math.exp(-Math.pow(vf / c, k))
   }
-  def apply(c : Double, k : Double) :Double= {
+  
+ /* def apply(c : Double, k : Double) :Double= {
     val res = vrs.map(apply(c,k, _)).zipWithIndex.max
  //   println(c + "\t" + k + "\t" + vrs(res._2))
     res._1
-  }
-  def apply(w : WeibullParameters): Double = apply(w.cHub.toMetersPerSecond,w.kHub)
+  }*/
+  def apply(w : WeibullParameters): Double = apply(w.cHub.toMetersPerSecond,w.kHub, 15.0)
 
   def linear(w : WeibullParameters, vr: Double): Double = {
     val c = w.cHub.toMetersPerSecond; val k = w.kHub

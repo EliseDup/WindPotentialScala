@@ -27,9 +27,9 @@ object WindPotentialSimulation {
   def main(args: Array[String]): Unit = {
 
     val world = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
-    val grids = world.grids; val onshore = world.onshoreGrids; val offshore = world.offshoreGrids
-
-    eroi(world, onshore, WindPotential)
+    val solar = world.grids.filter(_.irradiance.value > 0)
+    // eroi(world, solar, SolarPotential)
+    eroi(world, world.onshoreGrids, WindPotential)
   }
 
   def printMinEROIValues(gr: List[GridCell], eroi: Double) = {
@@ -41,29 +41,26 @@ object WindPotentialSimulation {
 
   }
 
-  def plotEGenVSArea(wind: WorldGrid, gr: List[GridCell]) {
-    val list = wind.listValueVSArea(gr.map(g => (WindPotential.energyGeneratedPerYear(g).to(TerawattHours), WindPotential.suitabilityFactor(g) * g.area)))
+  def plotEGenVSArea(world: WorldGrid, gr: List[GridCell]) {
+    val list = world.listValueVSArea(gr.map(g => (WindPotential.energyGeneratedPerYear(g).to(TerawattHours), WindPotential.suitabilityFactor(g) * g.area)))
     PlotHelper.plotXY(List((list._1, list._2, "")), xLabel = "Area [millions km2]", yLabel = "Energy Generated [TWh/year]")
 
   }
-  def plotSpeedVSArea(wind: WorldGrid, gr: List[GridCell]) {
-    val vHub = wind.listValueVSArea(gr.map(g => (g.windSpeedHub.value, g.area)))
-    val vHubGeo = wind.listValueVSArea(gr.map(g => (g.windSpeedHub.value, g.area * WindPotential.suitabilityFactor(g))))
+  def plotSpeedVSArea(world: WorldGrid, gr: List[GridCell]) {
+    val vHub = world.listValueVSArea(gr.map(g => (g.windSpeedHub.value, g.area)))
+    val vHubGeo = world.listValueVSArea(gr.map(g => (g.windSpeedHub.value, g.area * WindPotential.suitabilityFactor(g))))
 
     PlotHelper.plotXY(List((vHub._1, vHub._2, "Total"), (vHubGeo._1, vHubGeo._2, "Suitability Factor")), xLabel = "Area [millions km2]", yLabel = "Wind Speed [m/s]")
   }
 
-  def eroi(wind: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
-    val all = wind.listEROIVSCumulatedPower(gr.map(g => (g, 1.0)), potential)
-    val landUse = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.landUseFactor(g))), potential)
-    // val windRegime = wind.listEROIVSCumulatedPower(gr.map(g => (g, potential.landUseFactor(g) * potential.windRegimeFactor(g))), potential)
+  def eroi(world: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
+    val all = world.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
+    val landUse = world.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g))), potential)
 
     PlotHelper.plotXY(List(
       (all._1, all._2, "Total"),
       (landUse._1, landUse._2, "Geographic potential")),
-      //   (windRegime._1, windRegime._2, "Wind Regime Restrictions")),
-
-      xLabel = "Puissance Moyenne [TW]", //Mean power captured [TW]",
+      xLabel = "Mean Energy Generated [EJ]",
       yLabel = "EROI") //, legend = true)
   }
 
@@ -71,21 +68,21 @@ object WindPotentialSimulation {
     PlotHelper.histogram(grids.map(potential.energyGeneratedPerYear(_).to(TerawattHours)), n = 20, xLabel = "Technical potential in grid cell [TWh]", yLabel = "# Grid cells")
   }
 
-  def areaRepartition(wind: WorldGrid, potential: EnergyGenerationPotential) {
+  def areaRepartition(world: WorldGrid, potential: EnergyGenerationPotential) {
 
     val out_stream = new PrintStream(new java.io.FileOutputStream("suitability"))
-    wind.grids.map(g => out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
+    world.grids.map(g => out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
       "\t" + potential.suitabilityFactor(g) + "\t" + (if (g.windSpeed.toMetersPerSecond >= 3) "1.0" else "0.0") + "\n"))
     out_stream.close()
 
-    printGrids(wind.grids)
+    printGrids(world.grids)
     println("----------")
-    printGrids(wind.onshoreGrids)
+    printGrids(world.onshoreGrids)
     println("----------")
-    printGrids(wind.offshoreGrids)
+    printGrids(world.offshoreGrids)
 
     def print(name: String, list: List[GridCell]) {
-      println(name + "\t" + list.size + "\t" + wind.area(list).toSquareKilometers)
+      println(name + "\t" + list.size + "\t" + world.area(list).toSquareKilometers / 1E6 + "\t" + "Millions km^2")
     }
 
     def printGrids(grids: List[GridCell]) {
