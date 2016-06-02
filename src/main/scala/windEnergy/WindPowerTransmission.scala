@@ -63,6 +63,17 @@ object WindPowerTransmission {
       })
   }
 
+  def weightOffshore(material: Material, power: Power, distanceToShore: Length) = {
+    (internalOffshoreCables.weight(material)) * power.toMegawatts / 600.0 + (
+      //  HVAC
+      if (distanceToShore.toKilometers <= 80) {
+        (HVACExternalCables.weight(material) / 30.0 * distanceToShore.toKilometers + HVACSubStation.weight(material)) * power.toMegawatts / 390.0
+      } //HVDC
+      else {
+        (HVDCExternalCables.weight(material) * distanceToShore.toKilometers + HVDCSubStation.weight(material)) * power.toMegawatts / 600.0
+      })
+  }
+
   /**
    * Assessing the Life Cycle Environmental Impacts of Offshore Wind Power Generation and Power Transmission in the North Sea
    *
@@ -116,36 +127,41 @@ object WindPowerTransmission {
   // --- ONSHORE ---
   // Scale this with the size of the wind farm, here it is given for 300 MW
   val refPower = Megawatts(300)
-  
+
   // 500 MVa transformer station -> ABB Power transformer TrafoStar 500MVA
   val transformerStation = Product(
-    KilowattHours(750000+177206000+300000),
+    KilowattHours(750000 + 177206000 + 300000),
     Joules(0),
     (Kilograms(153258), Steel),
     (Kilograms(39960), Copper),
-    (Kilograms(63000),LubricatingOil),
-    (Kilograms(6500),Insulation),
+    (Kilograms(63000), LubricatingOil),
+    (Kilograms(6500), Insulation),
     //(Kilograms(15000), Wood),
     //(Kilograms(2650),Porcelain),
-    (Kilograms(2200),Paint))
+    (Kilograms(2200), Paint))
 
-    // 95 km of 32 kV cable
+  // 95 km of 32 kV cable
   val internalOnshoreCables = Product(
     Joules(0),
     Joules(0),
     (Tonnes(63.4), Aluminium),
     (Tonnes(55.2), Plastic),
     (Tonnes(30.9), Copper))
-// 50 km of 150 kV cable
+  // 50 km of 150 kV cable
   val externalOnshoreCables = Product(
     Joules(0),
     Joules(0),
     (Tonnes(1519), Plastic),
     (Tonnes(953), Aluminium),
     (Tonnes(238.6), Copper))
-    
+
   def embodiedEnergyOnshoreTransmission(power: Power) = {
-    (transformerStation.embodiedEnergy)*power.toMegawatts / 500.0 + (internalOnshoreCables.embodiedEnergy + externalOnshoreCables.embodiedEnergy) * power.toMegawatts / 390.0
+    (transformerStation.embodiedEnergy) * power.toMegawatts / 500.0 + (internalOnshoreCables.embodiedEnergy + externalOnshoreCables.embodiedEnergy) * power.toMegawatts / 390.0
+  }
+  def weightOnshore(material: Material, power: Power) = {
+    transformerStation.weight(material) * power.toMegawatts / 500.0 +
+      (internalOnshoreCables.weight(material) + externalOnshoreCables.weight(material)) * power.toMegawatts / 390.0
+
   }
 }
 

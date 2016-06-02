@@ -16,8 +16,12 @@ import construction._
 import utils._
 import org.apache.commons.math3.special.Gamma
 import windEnergy.WeibullParameters
+import squants.UnitOfMeasure
+import squants.Quantity
 
 case class Country(val name: String)
+
+class MeteoData[A <: Quantity[_]](val mean : A, val perMonth : Array[A])
 
 /**
  * Calculate the cell size in km^2
@@ -80,7 +84,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle, lc
     val windSpeed: Velocity,
     val windSpeedStandardDeviation: Double,
     val kineticEnergyDissipation: Irradiance,
-    val irradiance : Irradiance,
+    val irradiance : MeteoData[Irradiance],
     val elevation: Length, val distanceToCoast: Length) extends DefaultGridCell(center, gridSize, lc, urbanFactor, protectedArea, country) {
 
   override def toString() = "Grid Object center : " + center + ", mean wind speed : " + windSpeed + ", land cover : " + lc
@@ -112,7 +116,7 @@ object GridCell {
       Country(l(7)),
       velocity(l, 12), l(13).toDouble,
       WattsPerSquareMeter(l(14).toDouble),
-      WattsPerSquareMeter(l(15).toDouble),
+      new MeteoData[Irradiance](WattsPerSquareMeter(l(15).toDouble), (0 until 12).map(i => WattsPerSquareMeter(if(l.size > 16+i) l(16+i).toDouble else 0.0)).toArray),
       Meters(l(8).toDouble), Kilometers(l(9).toDouble))
   }
 

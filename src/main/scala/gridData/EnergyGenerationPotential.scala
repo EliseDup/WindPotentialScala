@@ -9,6 +9,7 @@ import utils.Thermodynamics
 import windEnergy._
 import org.jfree.data.time.Year
 import org.apache.commons.math3.special.Gamma
+import construction.Material
 
 trait EnergyGenerationPotential {
 
@@ -51,8 +52,10 @@ object WindPotential extends EnergyGenerationPotential {
   def areaTurbine(cell: GridCell) = nD * diameterRotor(cell) * nD * diameterRotor(cell)
   def areaRotor(cell: GridCell) = Math.PI * diameterRotor(cell) * diameterRotor(cell) / 4.0
 
-  def technologyDensity(cell: GridCell) = Megawatts(2) / SquareKilometers(1) // nominalPower(cell) / areaTurbine(cell)
+  def technologyDensity(cell: GridCell) = nominalPower(cell) / SquareKilometers(1) // nominalPower(cell) / areaTurbine(cell)
   def nTurbines(cell: GridCell) = cell.area * suitabilityFactor(cell) / areaTurbine(cell)
+
+  def weight(cell: GridCell, material: Material) = WindFarm.weight(material, powerInstalled(cell))
 
   def powerInstalled(cell: GridCell): Power = powerInstalled(cell, suitabilityFactor(cell))
   def powerInstalled(cell: GridCell, suitabilityFactor: Double): Power = cell.area * suitabilityFactor * technologyDensity(cell)
@@ -79,12 +82,15 @@ object WindPotential extends EnergyGenerationPotential {
   }
   def landUseFactor(cell: GridCell) = {
     altitudeFactor(cell) * (
-      if (cell.onshore)
+      if (cell.onshore) {
         if (cell.lc.isAgricultural) 0.7
-      else if (cell.lc.isForest) 0.1
-      else if (cell.lc.isOpenArea || cell.lc.isUrban) 0.9
-      else 0.0
-      else 1.0)
+        else if (cell.lc.isGrassLand) 0.8
+        else if (cell.lc.isForest) 0.0
+        else if (cell.lc.isSavannah) 0.9
+        else if (cell.lc.isShrubLand) 0.5
+        else if (cell.lc.isBarrenArea) 1.0
+        else 0.0
+      } else 1.0)
   }
   def windRegimeFactor(cell: GridCell) = if (cell.windSpeed.toMetersPerSecond >= 4) 1.0 else 0.0
 
@@ -100,6 +106,7 @@ object WindPotential extends EnergyGenerationPotential {
   def capacityFactor(cell: GridCell): Double = CapacityFactorCalculation(cell.weibull)
 
   def energyGenerated1MW(cell: GridCell) = capacityFactor(cell) * availabilityFactor(cell) * lossFactor(cell) * Megawatts(1) * Hours(365 * 24)
+
   def EROI(cell: GridCell): Double = {
     val out = 20 * energyGenerated1MW(cell)
     val in =
@@ -113,14 +120,15 @@ object WindPotential extends EnergyGenerationPotential {
 object SolarPotential extends EnergyGenerationPotential {
 
   def landUseFactor(cell: GridCell) = {
-    if (cell.lc.isForest || cell.lc.isWaterBodies) 0.0
-    else if (cell.lc.isOpenArea) 0.05
-    else 0.01
+   val cover = cell.lc
+   if(cover.isAgricultural || cover.isShrubLand || cover.isGrassLand || cover.isSavannah) 0.01
+   else if(cover.isBarrenArea) 0.05
+   else 0.0
   }
 
   def availabilityFactor(cell: GridCell) = 1.0
   def lossFactor(cell: GridCell) = 1.0
-  def powerDensity(cell: GridCell) = cell.irradiance
+  def powerDensity(cell: GridCell) = cell.irradiance.mean
 
   val technologyEfficiency = 0.14
   val performanceRatio = 0.75
@@ -128,12 +136,17 @@ object SolarPotential extends EnergyGenerationPotential {
   def powerGenerated(cell: GridCell, suitabilityFactor: Double) =
     powerDensity(cell) * cell.area * suitabilityFactor * performanceRatio * technologyEfficiency
 
+  def energyGeneratedPerMonth(cell: GridCell, month: Int, suitabilityFactor: Double): Energy =
+    cell.irradiance.perMonth(month) * cell.area * suitabilityFactor * performanceRatio * technologyEfficiency * Hours(24 * 30)
+
+  def energyGeneratedPerMonth(cell: GridCell, month: Int): Energy = energyGeneratedPerMonth(cell, month, suitabilityFactor(cell))
+
   def EROI(cell: GridCell): Double = {
-    if (suitabilityFactor(cell) == 0 || cell.irradiance.value == 0) 0.0
+    if (suitabilityFactor(cell) == 0 || cell.irradiance.mean.value == 0) 0.0
     else {
       val out = 25 * energyGeneratedPerYear(cell)
       // 2106 MJ /m^2
-      val in = KilowattHours(2664) * cell.area.toSquareMeters * suitabilityFactor(cell)
+      val in = Megajoules(2300) * cell.area.toSquareMeters * suitabilityFactor(cell)
       out / in
     }
   }

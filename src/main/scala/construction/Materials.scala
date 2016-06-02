@@ -20,11 +20,13 @@ abstract class Product {
   def transportEnergyInput: Energy = Joules(0)
 
   def weight = components.map(_._1).foldLeft(Tonnes(0))(_ + _)
-  def materialProdcutionEnergy: Energy = components.map(c => c._2.productionEnergy(c._1)).foldLeft(Joules(0))(_ + _)
+  def weight(material : Material) = components.filter(_._2 == material).map(_._1).foldLeft(Tonnes(0))(_ + _)
+ 
+  def materialProductionEnergy: Energy = components.map(c => c._2.productionEnergy(c._1)).foldLeft(Joules(0))(_ + _)
   def materialTransportEnergy: Energy = components.map(c => c._2.transportEnergy(c._1)).foldLeft(Joules(0))(_ + _)
 
   def embodiedEnergy = {
-    energyInput + transportEnergyInput + materialProdcutionEnergy + materialTransportEnergy
+    energyInput + transportEnergyInput + materialProductionEnergy + materialTransportEnergy
   }
 
   def energyIntensity: SpecificEnergy = embodiedEnergy / weight

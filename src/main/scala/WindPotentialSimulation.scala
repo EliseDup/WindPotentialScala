@@ -21,15 +21,75 @@ import org.jfree.data.category.DefaultCategoryDataset
 import org.apache.commons.math3.special.Gamma
 import scala.collection.mutable.ListBuffer
 import squants.radio.WattsPerSquareMeter
+import sun.awt.X11.XLabelPeer
 
 object WindPotentialSimulation {
 
   def main(args: Array[String]): Unit = {
+    val world = new WorldGrid("results/worldGridIrradiance.txt", Degrees(0.5))
 
-    val world = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
-    val solar = world.grids.filter(_.irradiance.value > 0)
-    // eroi(world, solar, SolarPotential)
-    eroi(world, world.onshoreGrids, WindPotential)
+    println("Forest " + world.area(world.grids.filter(_.lc.isForest)) / 1E6)
+    println("Bare " + world.area(world.grids.filter(_.lc.isBarrenArea)) / 1E6)
+    println("Shrubland " + world.area(world.grids.filter(_.lc.isShrubLand)) / 1E6)
+    println("Savannah " + world.area(world.grids.filter(_.lc.isSavannah)) / 1E6)
+    println("Grassland " + world.area(world.grids.filter(_.lc.isGrassLand)) / 1E6)
+
+    println("Agricultural " + world.area(world.grids.filter(_.lc.isAgricultural)) / 1E6)
+    println("Flooded " + world.area(world.grids.filter(_.lc.isFloodedArea)) / 1E6)
+    println("Urban " + world.area(world.grids.filter(_.lc.isUrban)) / 1E6)
+
+    val solarCells = world.grids.filter(SolarPotential.suitabilityFactor(_) > 0)
+    val area = solarCells.map(c => c.area.toSquareKilometers * SolarPotential.suitabilityFactor(c)).sum
+    println(area / 1E6 + "millions km2")
+
+    // solarPerMonth(world.grids)
+    //    plotEGenVSArea(world, solarCells, SolarPotential)
+    eroi(world, solarCells, SolarPotential)
+
+    /*
+  val sortedCells = constrained.sortBy(WindPotential.EROI(_)).reverse
+  val res = cumulated(sortedCells.map(c => (WindPotential.energyGeneratedPerYear(c).to(Exajoules), WindPotential.nTurbines(c) / 1E6)))    
+  PlotHelper.plotXY(List((res.map(_._2), res.map(_._1), "")), yLabel = "Energy Generated [EJ/year]", xLabel = "Millions Turbines")
+*/
+  }
+  def barPlotMaterialUse(grids: List[GridCell], energy: List[Int],
+    materials: List[(Material, Mass)] = List((Steel, Tonnes(1500E6)), (Aluminium, Tonnes(44.4E6)), (Copper, Tonnes(34E6)))) {
+    val dataset = new DefaultCategoryDataset()
+    val res = energy.map(energ => (materials.map(mat => {
+      val cellIt = grids.toIterator
+      val f = cellIt.next()
+      println("first" + f.center + "\t" + WindPotential.EROI(f))
+      var e = Exajoules(0)
+      var m = Tonnes(0)
+      while (e < Exajoules(energ) && cellIt.hasNext) {
+        val next = cellIt.next()
+        e += WindPotential.energyGeneratedPerYear(next)
+        m += WindPotential.weight(next, mat._1)
+      }
+      println(energ + "\t" + mat._1.name + "\t" + e + "\t " + m)
+      dataset.addValue(m / mat._2,
+        mat._1.name, energ.toString + "EJ/year")
+    }))).flatten
+
+    PlotHelper.barChart(dataset, yLabel = "# 2012 Production")
+
+  }
+  def plotMaterialUse(grids: List[GridCell], materials: List[(Material, Mass)]) {
+    val sortedCells = grids.sortBy(WindPotential.EROI(_)).reverse
+    val res =
+      materials.map(mat => {
+        val x = cumulated(sortedCells.map(c => (WindPotential.energyGeneratedPerYear(c).to(Exajoules), WindPotential.weight(c, mat._1) / mat._2)))
+        (x.map(_._2), x.map(_._1), mat._1.name)
+      })
+    PlotHelper.plotXY(res, yLabel = "Energy Generated [EJ/year]", xLabel = "# 2012 production", legend = true)
+  }
+
+  def cumulated(values: List[(Double, Double)]) = {
+    var cum1 = 0.0; var cum2 = 0.0;
+    values.map(c => {
+      cum1 += c._1; cum2 += c._2;
+      (cum1, cum2)
+    })
   }
 
   def printMinEROIValues(gr: List[GridCell], eroi: Double) = {
@@ -37,13 +97,15 @@ object WindPotentialSimulation {
     println("---")
     println("Power captured" + "\t" + sust.map(WindPotential.powerGenerated(_).to(Terawatts)).sum + "\t" + "TW")
     println("Power installed" + "\t" + sust.map(WindPotential.powerInstalled(_).to(Megawatts)).sum + "\t" + "MW")
-    println("Area" + "\t" + sust.map(g => WindPotential.suitabilityFactor(g) * g.area.toSquareKilometers).sum + "\t" + "km2")
+    println("Energy generated" + "\t" + sust.map(WindPotential.energyGeneratedPerYear(_).to(Exajoules)).sum + "\t" + "EJ/year")
+    println("# Turbines" + "\t" + sust.map(WindPotential.nTurbines(_)).sum / 1E6)
+    println("Area" + "\t" + sust.map(g => WindPotential.suitabilityFactor(g) * g.area.toSquareKilometers).sum / 1E6 + "\t" + "millions km2")
 
   }
 
-  def plotEGenVSArea(world: WorldGrid, gr: List[GridCell]) {
-    val list = world.listValueVSArea(gr.map(g => (WindPotential.energyGeneratedPerYear(g).to(TerawattHours), WindPotential.suitabilityFactor(g) * g.area)))
-    PlotHelper.plotXY(List((list._1, list._2, "")), xLabel = "Area [millions km2]", yLabel = "Energy Generated [TWh/year]")
+  def plotEGenVSArea(world: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
+    val list = world.listValueVSArea(gr.map(g => (potential.energyGeneratedPerYear(g).to(Exajoules), WindPotential.suitabilityFactor(g) * g.area)))
+    PlotHelper.plotXY(List((list._1, list._2, "")), xLabel = "Area [millions km2]", yLabel = "Energy Generated [EJ/year]")
 
   }
   def plotSpeedVSArea(world: WorldGrid, gr: List[GridCell]) {
@@ -54,13 +116,13 @@ object WindPotentialSimulation {
   }
 
   def eroi(world: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
-    val all = world.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
+    //val all = world.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
     val landUse = world.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g))), potential)
 
     PlotHelper.plotXY(List(
-      (all._1, all._2, "Total"),
+      //(all._1, all._2, "Total"),
       (landUse._1, landUse._2, "Geographic potential")),
-      xLabel = "Mean Energy Generated [EJ]",
+      xLabel = "Energy Generated [EJ/year]",
       yLabel = "EROI") //, legend = true)
   }
 
@@ -89,7 +151,7 @@ object WindPotentialSimulation {
       print("Total", grids)
       print("protected", grids.filter(_.protectedArea))
       print("agricultural", grids.filter(_.lc.isAgricultural))
-      print("openArea", grids.filter(_.lc.isOpenArea))
+      //  print("openArea", grids.filter(_.lc.isOpenArea))
       print("forest", grids.filter(_.lc.isForest))
       print("water", grids.filter(_.lc.isWaterBodies))
       print("flooded ", grids.filter(_.lc.isFloodedArea))
@@ -100,5 +162,12 @@ object WindPotentialSimulation {
       print("sea level", grids.filter(_.elevation.toMeters >= -200))
       println("WithUrbanFactor" + "\t" + grids.filter(_.lc.isUrban).map(g => g.urbanFactor * g.area.toSquareKilometers).sum)
     }
+  }
+
+  def solarPerMonth(grids: List[GridCell]) {
+    def energyGenerated(month: Int) = grids.map(g => SolarPotential.energyGeneratedPerMonth(g, month).to(Exajoules)).sum
+    val month = (0 until 12).toList
+    PlotHelper.plotXY(month.map(_.toDouble), month.map(energyGenerated(_)))
+
   }
 }

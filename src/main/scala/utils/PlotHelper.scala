@@ -121,7 +121,7 @@ object PlotHelper {
 
   def createFrame(chart: JFreeChart, save: Boolean = true) {
     if (save) {
-      val plot = chart.getXYPlot();
+      val plot = chart.getPlot();
       //plot.getRenderer().setSeriesPaint(0, Color.BLUE)
       plot.setBackgroundPaint(Color.WHITE)
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i+".jpg"), chart, 500, 300, 2, 2)
@@ -145,8 +145,8 @@ object PlotHelper {
     val chart = ChartFactory.createPolarChart("Wind direction distrubtion", dataSet, true, true, false)
     createFrame(chart)
   }
-  def barChart(dataset: DefaultCategoryDataset) {
-    val chart = ChartFactory.createBarChart("", null, null, dataset, PlotOrientation.VERTICAL, true, true, false)
+  def barChart(dataset: DefaultCategoryDataset, title: String= "", xLabel:String = "", yLabel:String = "") {
+    val chart = ChartFactory.createBarChart(title,xLabel,yLabel,dataset, PlotOrientation.VERTICAL, true, true, false)
     createFrame(chart)
   }
 
