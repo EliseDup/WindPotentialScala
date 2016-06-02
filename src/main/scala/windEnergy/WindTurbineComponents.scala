@@ -58,14 +58,14 @@ class WindTurbineComponents(val sheetName: String) extends AbstractWindTurbineCo
       (Helper.toString(row, 3), mass, Materials.getOrNone(Helper.toString(row, 0)))
     }).toList
   }
-
+  
   val components = componentsWithName.map(i => (i._2, i._3))
   val rotor = findComponents("Rotor"); val nacelle = findComponents("Nacelle");
   val tower = findComponents("Tower"); val foundation = findComponents("Foundation");
   def findComponents(name: String) = new Product {
     val components = componentsWithName.filter(_._1.equals(name)).map(i => (i._2, i._3))
   }
-
+       
   val spec = sheet.getRow(2)
   val ratedPower = Power(Helper.toString(spec, 0)).get
   val hubHeight = Length(Helper.toString(spec, 1)).get

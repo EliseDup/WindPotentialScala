@@ -14,7 +14,7 @@ import squants.energy.Gigajoules
  */
 
 object WindFarm {
-  
+
   val availabilityFactor = 1.0
   val arrrayFactor = 0.9
 
@@ -24,32 +24,41 @@ object WindFarm {
   def embodiedEnergy(ratedPower: Power) = {
     turbine.embodiedEnergy * nTurbines(ratedPower) + WindPowerTransmission.embodiedEnergyOnshoreTransmission(ratedPower)
   }
-  
+
+  def weight(material: Material, ratedPower: Power) = {
+    turbine.weight(material) * nTurbines(ratedPower) + WindPowerTransmission.weightOnshore(material, ratedPower)
+  }
+
 }
 
 object OffshoreWindFarm {
 
   val turbine = OffshoreWindTurbineComponents
-  
+
   def nTurbines(ratedPower: Power) = ratedPower / turbine.ratedPower
-  def foundations(waterDepth : Length) = OffshoreFoundations.foundation(waterDepth).embodiedEnergy
+  def foundations(waterDepth: Length) = OffshoreFoundations.foundation(waterDepth)
   def transmission(ratedPower: Power, distanceToShore: Length) = WindPowerTransmission.embodiedEnergyOffshoreTransmission(ratedPower, distanceToShore)
 
-  def embodiedEnergy(ratedPower: Power, distanceToShore: Length, waterDepth : Length): Energy = {
-    nTurbines(ratedPower) * (turbine.embodiedEnergy + foundations(waterDepth) ) + transmission(ratedPower,distanceToShore)
+  def embodiedEnergy(ratedPower: Power, distanceToShore: Length, waterDepth: Length): Energy = {
+    nTurbines(ratedPower) * (turbine.embodiedEnergy + foundations(waterDepth).embodiedEnergy) + transmission(ratedPower, distanceToShore)
+  }
+
+  def weight(material: Material, ratedPower: Power, distanceToShore: Length, waterDepth: Length) = {
+    (turbine.weight(material) + foundations(waterDepth).weight(material)) * nTurbines(ratedPower) +
+    WindPowerTransmission.weightOffshore(material, ratedPower, distanceToShore)
   }
 
 }
 
 object SimpleWindFarm {
-  
+
   val embodiedEnergyPerMW = Gigajoules(15000)
-  
-  def embodiedEnergy(ratedPower: Power, distanceToShore: Length, waterDepth : Length): Energy = {
-    MultiplyingFactor.factor(waterDepth, distanceToShore)*embodiedEnergyPerMW*ratedPower.toMegawatts
+
+  def embodiedEnergy(ratedPower: Power, distanceToShore: Length, waterDepth: Length): Energy = {
+    MultiplyingFactor.factor(waterDepth, distanceToShore) * embodiedEnergyPerMW * ratedPower.toMegawatts
   }
-  def embodiedEnergy(ratedPower: Power): Energy = embodiedEnergyPerMW*ratedPower.toMegawatts
-  
+  def embodiedEnergy(ratedPower: Power): Energy = embodiedEnergyPerMW * ratedPower.toMegawatts
+
 }
 
 object MultiplyingFactor {

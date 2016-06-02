@@ -65,10 +65,8 @@ class WorldGrid(val name: String, val gridSize: Angle) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
-        "\t" + g.irradiance.value.toString +
-        "\t" + (g.irradiance.toWattsPerSquareMeter/1000.0*8760).toString +
-        "\t" + SolarPotential.energyGeneratedPerYear(g).to(TerawattHours) + 
-        "\t" + SolarPotential.suitabilityFactor(g) +
+        "\t" + g.irradiance.mean.value.toString +
+        "\t" + SolarPotential.suitabilityFactor(g).toString +
         /*"\t" + g.irradiance.value.toString +
         "\t" + g.lc.code.toDouble.toString +
         "\t" + g.elevation.value.toString +
@@ -96,7 +94,7 @@ class WorldGrid(val name: String, val gridSize: Angle) {
   def gridSuperClasses = {
     List(("Water Bodies", area(grids.filter(g => g.lc.classes.waterBodies.contains(g.lc.code)))),
       ("Forests", area(grids.filter(g => g.lc.classes.forest.contains(g.lc.code)))),
-      ("Open Areas", area(grids.filter(g => g.lc.classes.openAreas.contains(g.lc.code)))),
+      ("Barren Areas", area(grids.filter(g => g.lc.classes.barrenAreas.contains(g.lc.code)))),
       ("Flooded Areas", area(grids.filter(g => g.lc.classes.floodedAreas.contains(g.lc.code)))),
       ("Agricultural Areas", area(grids.filter(g => g.lc.classes.agriculturalAreas.contains(g.lc.code)))),
       ("Urban Areas", area(grids.filter(g => g.lc.classes.urbanAreas.contains(g.lc.code)))),
