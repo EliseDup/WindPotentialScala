@@ -90,16 +90,5 @@ class WorldGrid(val name: String, val gridSize: Angle) {
     })
     out_stream.close()
   }
-
-  def gridSuperClasses = {
-    List(("Water Bodies", area(grids.filter(g => g.lc.classes.waterBodies.contains(g.lc.code)))),
-      ("Forests", area(grids.filter(g => g.lc.classes.forest.contains(g.lc.code)))),
-      ("Barren Areas", area(grids.filter(g => g.lc.classes.barrenAreas.contains(g.lc.code)))),
-      ("Flooded Areas", area(grids.filter(g => g.lc.classes.floodedAreas.contains(g.lc.code)))),
-      ("Agricultural Areas", area(grids.filter(g => g.lc.classes.agriculturalAreas.contains(g.lc.code)))),
-      ("Urban Areas", area(grids.filter(g => g.lc.classes.urbanAreas.contains(g.lc.code)))),
-      ("Snow And Ice", area(grids.filter(g => g.lc.classes.ice.contains(g.lc.code)))))
-  }
-
 }
 
