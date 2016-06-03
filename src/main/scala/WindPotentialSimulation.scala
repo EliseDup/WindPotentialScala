@@ -26,24 +26,15 @@ import sun.awt.X11.XLabelPeer
 object WindPotentialSimulation {
 
   def main(args: Array[String]): Unit = {
-    val world = new WorldGrid("results/worldGridIrradiance.txt", Degrees(0.5))
-
-    println("Forest " + world.area(world.grids.filter(_.lc.isForest)) / 1E6)
-    println("Bare " + world.area(world.grids.filter(_.lc.isBarrenArea)) / 1E6)
-    println("Shrubland " + world.area(world.grids.filter(_.lc.isShrubLand)) / 1E6)
-    println("Savannah " + world.area(world.grids.filter(_.lc.isSavannah)) / 1E6)
-    println("Grassland " + world.area(world.grids.filter(_.lc.isGrassLand)) / 1E6)
-
-    println("Agricultural " + world.area(world.grids.filter(_.lc.isAgricultural)) / 1E6)
-    println("Flooded " + world.area(world.grids.filter(_.lc.isFloodedArea)) / 1E6)
-    println("Urban " + world.area(world.grids.filter(_.lc.isUrban)) / 1E6)
+    val world = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
+    printGrids(world.grids)
 
     val solarCells = world.grids.filter(SolarPotential.suitabilityFactor(_) > 0)
     val area = solarCells.map(c => c.area.toSquareKilometers * SolarPotential.suitabilityFactor(c)).sum
     println(area / 1E6 + "millions km2")
 
     // solarPerMonth(world.grids)
-    //    plotEGenVSArea(world, solarCells, SolarPotential)
+    // plotEGenVSArea(world, solarCells, SolarPotential)
     eroi(world, solarCells, SolarPotential)
 
     /*
@@ -132,38 +123,35 @@ object WindPotentialSimulation {
 
   def areaRepartition(world: WorldGrid, potential: EnergyGenerationPotential) {
 
-    val out_stream = new PrintStream(new java.io.FileOutputStream("suitability"))
-    world.grids.map(g => out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
-      "\t" + potential.suitabilityFactor(g) + "\t" + (if (g.windSpeed.toMetersPerSecond >= 3) "1.0" else "0.0") + "\n"))
-    out_stream.close()
-
     printGrids(world.grids)
     println("----------")
     printGrids(world.onshoreGrids)
     println("----------")
     printGrids(world.offshoreGrids)
 
-    def print(name: String, list: List[GridCell]) {
-      println(name + "\t" + list.size + "\t" + world.area(list).toSquareKilometers / 1E6 + "\t" + "Millions km^2")
-    }
-
-    def printGrids(grids: List[GridCell]) {
-      print("Total", grids)
-      print("protected", grids.filter(_.protectedArea))
-      print("agricultural", grids.filter(_.lc.isAgricultural))
-      //  print("openArea", grids.filter(_.lc.isOpenArea))
-      print("forest", grids.filter(_.lc.isForest))
-      print("water", grids.filter(_.lc.isWaterBodies))
-      print("flooded ", grids.filter(_.lc.isFloodedArea))
-      print("ice", grids.filter(_.lc.isIce))
-      print("urban", grids.filter(_.lc.isUrban))
-      print("wind regime", grids.filter(_.windSpeed.toMetersPerSecond >= 4))
-      print("altitude", grids.filter(_.elevation.toMeters <= 2000))
-      print("sea level", grids.filter(_.elevation.toMeters >= -200))
-      println("WithUrbanFactor" + "\t" + grids.filter(_.lc.isUrban).map(g => g.urbanFactor * g.area.toSquareKilometers).sum)
-    }
   }
+  def printGrids(grids: List[GridCell]) {
+    def print(name: String, list: List[GridCell]) {
+      println(name + "\t" + list.size + "\t" + list.map(_.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6 + "\t" + "Millions km2")
+    }
+    print("Total", grids)
+    print("protected", grids.filter(_.protectedArea))
 
+    print("WaterBodies", grids.filter(_.lc.waterBodies))
+    print("Ice", grids.filter(_.lc.ice))
+    print("BareAreas", grids.filter(_.lc.bareAreas))
+    print("Grassland", grids.filter(_.lc.grassland))
+    print("SparseVegetation", grids.filter(_.lc.sparseVegetation))
+    print("Croplands", grids.filter(_.lc.croplands))
+    print("Shrubland", grids.filter(_.lc.shrubland))
+    print("Wetlands", grids.filter(_.lc.wetlands))
+    print("MosaicNaturalCropland", grids.filter(_.lc.mosaicNaturalCropland))
+    print("Flooded", grids.filter(_.lc.floodedAreas))
+    print("MosaicGrasslandForest", grids.filter(_.lc.mosaicGrasslandForest))
+    print("UrbanAreas", grids.filter(_.lc.urbanAreas))
+    print("Forests", grids.filter(_.lc.forests))
+    print("NoData", grids.filter(_.lc.noData))
+  }
   def solarPerMonth(grids: List[GridCell]) {
     def energyGenerated(month: Int) = grids.map(g => SolarPotential.energyGeneratedPerMonth(g, month).to(Exajoules)).sum
     val month = (0 until 12).toList

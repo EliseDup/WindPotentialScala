@@ -13,20 +13,15 @@ class LandCoverClass(val code: Int, val label: String, val z0: Length, val class
 
   override def toString() = "Land Cover Class " + code + " : " + label + "," + z0
 
-  def isUrban = classes.urbanAreas.contains(code)
-  def isForest = classes.forest.contains(code)
-  def isIce = classes.ice.contains(code)
-  def isAgricultural = classes.agriculturalAreas.contains(code)
-
-  def isWaterBodies = classes.waterBodies.contains(code)
-  def isFloodedArea = classes.floodedAreas.contains(code)
-
-  def isSavannah = classes.savannah.contains(code)
-  def isGrassLand = classes.grassLand.contains(code)
-  def isShrubLand = classes.shrubLand.contains(code)
-  def isBarrenArea = classes.barrenAreas.contains(code)
+  def noData = classes.noData.contains(code)
+  def waterBodies = classes.waterBodies.contains(code); def ice = classes.ice.contains(code); def bareAreas = classes.bareAreas.contains(code)
+  def grassland = classes.grassland.contains(code); def sparseVegetation = classes.sparseVegetation.contains(code); def croplands = classes.croplands.contains(code); def shrubland = classes.shrubland.contains(code); def wetlands = classes.wetlands.contains(code)
+  def mosaicNaturalCropland = classes.mosaicNaturalCropland.contains(code); def floodedAreas = classes.floodedAreas.contains(code); def mosaicGrasslandForest = classes.mosaicGrasslandForest.contains(code);
+  def urbanAreas = classes.urbanAreas.contains(code)
+  def forests = classes.forests.contains(code)
 
 }
+
 // A 'super' class will englobe several land cover class for a more general classification (i.e. forest, water bodies, ...)
 class LandCoverSuperClass(val name: String, val indexes: List[Int]) {
   def is(index: Int) = indexes.contains(index)
@@ -35,18 +30,11 @@ class LandCoverSuperClass(val name: String, val indexes: List[Int]) {
 abstract class LandCoverClasses(val name: String, legendFileName: String, codeIndex: Int = 0, labelIndex: Int = 1, z0Index: Int = 2) {
 
   val noData: List[Int]
-
+  val waterBodies: List[Int]; val ice: List[Int]; val bareAreas: List[Int]
+  val grassland: List[Int]; val sparseVegetation: List[Int]; val croplands: List[Int]; val shrubland: List[Int]; val wetlands: List[Int]
+  val mosaicNaturalCropland: List[Int]; val floodedAreas: List[Int]; val mosaicGrasslandForest: List[Int];
   val urbanAreas: List[Int]
-  val ice: List[Int]
-  val forest: List[Int]
-  val agriculturalAreas: List[Int]
-  val waterBodies: List[Int]
-  val floodedAreas: List[Int]
-
-  val barrenAreas: List[Int]
-  val grassLand: List[Int]
-  val shrubLand: List[Int]
-  val savannah: List[Int]
+  val forests: List[Int]
 
   val classes: Map[Int, LandCoverClass] = {
     val sheet = Helper.xlsSheet(Helper.ressourcesPy + "/landCover/" + legendFileName + ".xls", 0)
@@ -61,33 +49,23 @@ abstract class LandCoverClasses(val name: String, legendFileName: String, codeIn
 
 object GlobCoverClasses extends LandCoverClasses("GlobCover2009", "globCover/GlobCover2009_Legend", z0Index = 5) {
 
-  val agriculturalAreas = List(11, 14, 20, 30)
-  val forest = List(40, 50, 60, 70, 90, 100)
-  val shrubLand = List(110, 130)
-  val grassLand = List(120, 140, 150)
-  val savannah = List()
-  val floodedAreas = List(160, 170, 180)
-  val urbanAreas = List(190)
-  val barrenAreas = List(200)
-  val waterBodies = List(210)
-  val ice = List(220)
   val noData = List(230)
- 
+  val waterBodies = List(210); val ice = List(220); val bareAreas = List(200)
+  val grassland = List(140); val sparseVegetation = List(150); val croplands = List(11, 14); val shrubland = List(130); val wetlands = List(180)
+  val mosaicNaturalCropland = List(20, 30); val floodedAreas = List(160, 170); val mosaicGrasslandForest = List(120);
+  val urbanAreas = List(190)
+  val forests = List(40, 50, 60, 70, 90, 100, 110)
+
 }
 
 object ModisCoverClasses extends LandCoverClasses("Modis", "modis/modisLegend") {
   val noData = List()
 
-  val waterBodies = List(0)
-  val forest = List(1, 2, 3, 4, 5)
-  val shrubLand = List(6, 7)
-  val savannah = List(8, 9)
-  val grassLand = List(10)
-  val floodedAreas = List(11)
-  val agriculturalAreas = List(12, 14)
+  val waterBodies = List(0); val ice = List(15); val bareAreas = List(16)
+  val grassland = List(10); val sparseVegetation = List(); val croplands = List(12); val shrubland = List(6, 7); val wetlands = List(11)
+  val mosaicNaturalCropland = List(14); val floodedAreas = List(); val mosaicGrasslandForest = List(9);
   val urbanAreas = List(13)
-  val ice = List(15)
-  val barrenAreas = List(16)
+  val forests = List(1, 2, 3, 4, 5, 8)
 
 }
 

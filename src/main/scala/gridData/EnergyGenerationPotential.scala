@@ -83,13 +83,7 @@ object WindPotential extends EnergyGenerationPotential {
   def landUseFactor(cell: GridCell) = {
     altitudeFactor(cell) * (
       if (cell.onshore) {
-        if (cell.lc.isAgricultural) 0.7
-        else if (cell.lc.isGrassLand) 0.8
-        else if (cell.lc.isForest) 0.0
-        else if (cell.lc.isSavannah) 0.9
-        else if (cell.lc.isShrubLand) 0.5
-        else if (cell.lc.isBarrenArea) 1.0
-        else 0.0
+        0.0
       } else 1.0)
   }
   def windRegimeFactor(cell: GridCell) = if (cell.windSpeed.toMetersPerSecond >= 4) 1.0 else 0.0
@@ -120,10 +114,10 @@ object WindPotential extends EnergyGenerationPotential {
 object SolarPotential extends EnergyGenerationPotential {
 
   def landUseFactor(cell: GridCell) = {
-   val cover = cell.lc
-   if(cover.isAgricultural || cover.isShrubLand || cover.isGrassLand || cover.isSavannah) 0.01
-   else if(cover.isBarrenArea) 0.05
-   else 0.0
+    val cover = cell.lc
+    if (cover.croplands) 0.01
+    else if (cover.bareAreas) 0.05
+    else 0.0
   }
 
   def availabilityFactor(cell: GridCell) = 1.0
