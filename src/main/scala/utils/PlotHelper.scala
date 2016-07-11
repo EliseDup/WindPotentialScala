@@ -145,8 +145,8 @@ object PlotHelper {
     val chart = ChartFactory.createPolarChart("Wind direction distrubtion", dataSet, true, true, false)
     createFrame(chart)
   }
-  def barChart(dataset: DefaultCategoryDataset, title: String= "", xLabel:String = "", yLabel:String = "") {
-    val chart = ChartFactory.createBarChart(title,xLabel,yLabel,dataset, PlotOrientation.VERTICAL, true, true, false)
+  def barChart(dataset: DefaultCategoryDataset, title: String= "", xLabel:String = "", yLabel:String = "", legend:Boolean=true) {
+    val chart = ChartFactory.createBarChart(title,xLabel,yLabel,dataset, PlotOrientation.VERTICAL, legend, true, false)
     createFrame(chart)
   }
 

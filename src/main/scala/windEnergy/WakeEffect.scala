@@ -16,6 +16,8 @@ import squants.SquantifiedLong
  * 10x10 										49  63  73  79  84  87
  *
  * From : A methodological review to estimate techno-economical wind energy production - Julieta Schallenberg-Rodriguez
+ * 
+ * 
  */
 
 object WakeEffect {

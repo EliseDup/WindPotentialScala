@@ -27,21 +27,25 @@ object WindPotentialSimulation {
 
   def main(args: Array[String]): Unit = {
     val world = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
-    printGrids(world.grids)
 
-    val solarCells = world.grids.filter(SolarPotential.suitabilityFactor(_) > 0)
-    val area = solarCells.map(c => c.area.toSquareKilometers * SolarPotential.suitabilityFactor(c)).sum
-    println(area / 1E6 + "millions km2")
+    eroi(world, world.onshoreGrids, WindPotential)
 
-    // solarPerMonth(world.grids)
-    // plotEGenVSArea(world, solarCells, SolarPotential)
-    eroi(world, solarCells, SolarPotential)
+    val wt = new WindTurbineComponents("3MW")
+    val wtOff = new WindTurbineComponents("5MWoffshore")
+    println(wt.embodiedEnergy.toGigajoules)
+    println(wtOff.embodiedEnergy.toGigajoules)
+    val materials = List(List(Steel, CastIron, SteelBar), List(Copper), List(Aluminium), List(EpoxyResin, Fiberglass, GlassReinforcedPlastic))
 
-    /*
-  val sortedCells = constrained.sortBy(WindPotential.EROI(_)).reverse
-  val res = cumulated(sortedCells.map(c => (WindPotential.energyGeneratedPerYear(c).to(Exajoules), WindPotential.nTurbines(c) / 1E6)))    
-  PlotHelper.plotXY(List((res.map(_._2), res.map(_._1), "")), yLabel = "Energy Generated [EJ/year]", xLabel = "Millions Turbines")
-*/
+    val dataset = new DefaultCategoryDataset()
+    materials.map(mat => {
+      val onshore = mat.map(m => wt.weight(m)).foldLeft(Tonnes(0))(_ + _) / 3.0
+      dataset.addValue(onshore.toTonnes, mat(0).name, "Onshore / MW")
+      val offshore = mat.map(m => wtOff.weight(m)).foldLeft(Tonnes(0))(_ + _) / 5.0
+      dataset.addValue(offshore.toTonnes, mat(0).name, "Offshore / MW")
+    })
+
+    PlotHelper.barChart(dataset)
+
   }
   def barPlotMaterialUse(grids: List[GridCell], energy: List[Int],
     materials: List[(Material, Mass)] = List((Steel, Tonnes(1500E6)), (Aluminium, Tonnes(44.4E6)), (Copper, Tonnes(34E6)))) {
@@ -107,16 +111,30 @@ object WindPotentialSimulation {
   }
 
   def eroi(world: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
-    //val all = world.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
+    val all = world.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
     val landUse = world.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g))), potential)
-
+val wind = world.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g) * (if(g.windSpeed.toMetersPerSecond < 4) 0.0 else 1.0))), potential)
     PlotHelper.plotXY(List(
-      //(all._1, all._2, "Total"),
-      (landUse._1, landUse._2, "Geographic potential")),
+      (all._1, all._2, "Total"),
+      (landUse._1, landUse._2, "Geographic potential"),
+      (wind._1, wind._2, "Wind Regime potential")),
       xLabel = "Energy Generated [EJ/year]",
       yLabel = "EROI") //, legend = true)
   }
 
+  def plotSolarPotentialRepartition(world: WorldGrid, grids: List[GridCell]) {
+    def listIrradianceVSArea(grids: List[GridCell], name: String) = {
+      val res = world.listValueVSArea(grids.map(g => (g.irradiance.mean.toWattsPerSquareMeter, g.area * SolarPotential.suitabilityFactor(g))))
+      (res._1, res._2, name)
+    }
+    PlotHelper.plotXY(List(listIrradianceVSArea(grids.filter(g => g.lc.croplands || g.lc.mosaicNaturalCropland), "Croplands"),
+      listIrradianceVSArea(grids.filter(_.lc.bareAreas), "Bare areas"),
+      listIrradianceVSArea(grids.filter(g => g.lc.grassland || g.lc.mosaicGrasslandForest), "Grassland"),
+      listIrradianceVSArea(grids.filter(_.lc.shrubland), "Shrubland"),
+      listIrradianceVSArea(grids.filter(_.lc.sparseVegetation), "Sparse Vegetation")), xLabel = "Suitable Area [million km2]",
+      yLabel = "Irradiance [W/m2]", legend = true)
+
+  }
   def technicalPotential(grids: List[GridCell], potential: EnergyGenerationPotential = WindPotential) {
     PlotHelper.histogram(grids.map(potential.energyGeneratedPerYear(_).to(TerawattHours)), n = 20, xLabel = "Technical potential in grid cell [TWh]", yLabel = "# Grid cells")
   }
