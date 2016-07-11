@@ -77,13 +77,19 @@ object WindPotential extends EnergyGenerationPotential {
     if (cell.onshore)
       if (cell.elevation.toMeters <= 2000) 1.0 else 0.0
     else if (cell.offshore)
-      if (cell.elevation.toMeters >= -200 && cell.distanceToCoast.toKilometers >= 10) 1.0 else 0.0
+      if (cell.elevation.toMeters >= -200) 1.0 else 0.0
     else 0.0
   }
   def landUseFactor(cell: GridCell) = {
+    val cover = cell.lc
     altitudeFactor(cell) * (
       if (cell.onshore) {
-        0.0
+        if (cover.croplands) 0.7
+        else if (cover.grassland || cover.sparseVegetation || cover.bareAreas) 0.8
+        else if (cover.shrubland) 0.5
+        else if (cover.mosaicGrasslandForest) 0.5 * 0.8
+        else if (cover.mosaicNaturalCropland) 0.5 * 0.7 + 0.5 * 0.8
+        else 0.0
       } else 1.0)
   }
   def windRegimeFactor(cell: GridCell) = if (cell.windSpeed.toMetersPerSecond >= 4) 1.0 else 0.0
@@ -106,7 +112,6 @@ object WindPotential extends EnergyGenerationPotential {
     val in =
       if (cell.onshore) SimpleWindFarm.embodiedEnergy(Megawatts(1))
       else SimpleWindFarm.embodiedEnergy(Megawatts(1), cell.distanceToCoast, -cell.elevation)
-
     out / in
   }
 }
@@ -115,20 +120,21 @@ object SolarPotential extends EnergyGenerationPotential {
 
   def landUseFactor(cell: GridCell) = {
     val cover = cell.lc
-    if (cover.croplands) 0.01
-    else if (cover.bareAreas) 0.05
+    if (cover.croplands || cover.shrubland || cover.sparseVegetation) 0.01
+    else if (cover.mosaicGrasslandForest || cover.mosaicNaturalCropland) 0.01
+    else if (cover.grassland || cover.bareAreas) 0.05
     else 0.0
   }
 
-  def availabilityFactor(cell: GridCell) = 1.0
-  def lossFactor(cell: GridCell) = 1.0
+  def availabilityFactor(cell: GridCell) = 0.9
+  def lossFactor(cell: GridCell) = 0.9
   def powerDensity(cell: GridCell) = cell.irradiance.mean
 
   val technologyEfficiency = 0.14
   val performanceRatio = 0.75
 
   def powerGenerated(cell: GridCell, suitabilityFactor: Double) =
-    powerDensity(cell) * cell.area * suitabilityFactor * performanceRatio * technologyEfficiency
+    powerDensity(cell) * cell.area * suitabilityFactor * performanceRatio * technologyEfficiency * availabilityFactor(cell)
 
   def energyGeneratedPerMonth(cell: GridCell, month: Int, suitabilityFactor: Double): Energy =
     cell.irradiance.perMonth(month) * cell.area * suitabilityFactor * performanceRatio * technologyEfficiency * Hours(24 * 30)
