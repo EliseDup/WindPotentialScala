@@ -41,6 +41,7 @@ object WakeEffect {
   
   def wakeEffect(area: Area, d: Length, nDiameters: Int) : Double = wakeEffect(nTurbines(area,d,nDiameters), nDiameters)
   def wakeEffect(nTurbines: Double, nDiameters: Int) = {
+    // if(nTurbines >= 100*100) 0.62
     val nIndex =
       if (nTurbines <= n(0)) 0
       else if (nTurbines <= n(1)) 1
