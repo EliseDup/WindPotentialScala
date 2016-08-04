@@ -26,25 +26,23 @@ import sun.awt.X11.XLabelPeer
 object WindPotentialSimulation {
 
   def main(args: Array[String]): Unit = {
+    
+   println( WindFarm.embodiedEnergy(Megawatts(1)).toGigajoules )
+   println( OffshoreWindFarm.embodiedEnergy(Megawatts(1), Meters(50), Kilometers(10) ).toGigajoules)
+    
     val world = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
-
-    eroi(world, world.onshoreGrids, WindPotential)
-
-    val wt = new WindTurbineComponents("3MW")
-    val wtOff = new WindTurbineComponents("5MWoffshore")
-    println(wt.embodiedEnergy.toGigajoules)
-    println(wtOff.embodiedEnergy.toGigajoules)
-    val materials = List(List(Steel, CastIron, SteelBar), List(Copper), List(Aluminium), List(EpoxyResin, Fiberglass, GlassReinforcedPlastic))
-
-    val dataset = new DefaultCategoryDataset()
-    materials.map(mat => {
-      val onshore = mat.map(m => wt.weight(m)).foldLeft(Tonnes(0))(_ + _) / 3.0
-      dataset.addValue(onshore.toTonnes, mat(0).name, "Onshore / MW")
-      val offshore = mat.map(m => wtOff.weight(m)).foldLeft(Tonnes(0))(_ + _) / 5.0
-      dataset.addValue(offshore.toTonnes, mat(0).name, "Offshore / MW")
-    })
-
-    PlotHelper.barChart(dataset)
+    eroi(world,world.onshoreGrids, WindPotential)
+    world.onshoreConstrainedGrids(WindPotential).map(g =>
+      if (WindPotential.powerGenerated(g) > (WindPotential.powerDensityAtHub(g) * WindPotential.areaRotor(g) * WindPotential.nTurbines(g))) {
+        println(g)
+        println(WindPotential.powerGenerated(g) + "\t" + WindPotential.capacityFactor(g) + "\t" +g.windSpeedHub)
+        println(WindPotential.powerDensity(g) + "\t"+  WindPotential.areaRotor(g) + "\t"+ WindPotential.nTurbines(g))
+        println()
+      })
+   
+      PlotHelper.plotXY(
+      world.onshoreConstrainedGrids(WindPotential).map(g => WindPotential.capacityFactor(g)),
+      world.onshoreConstrainedGrids(WindPotential).map(g => (WindPotential.powerGenerated(g) / (WindPotential.powerDensityAtHub(g) * WindPotential.areaRotor(g) * WindPotential.nTurbines(g)))))
 
   }
   def barPlotMaterialUse(grids: List[GridCell], energy: List[Int],
@@ -111,15 +109,20 @@ object WindPotentialSimulation {
   }
 
   def eroi(world: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
-    val all = world.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
+     val all = world.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
     val landUse = world.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g))), potential)
-val wind = world.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g) * (if(g.windSpeed.toMetersPerSecond < 4) 0.0 else 1.0))), potential)
+    //  val allEx = world.listEROIVSCumulatedProductionExergy(gr.map(g => (g, 1.0)), potential)
+    // val landUseEx = world.listEROIVSCumulatedProductionExergy(gr.map(g => (g, potential.suitabilityFactor(g))), potential)
+
+    //val wind = world.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g) * (if(g.windSpeed.toMetersPerSecond < 4) 0.0 else 1.0))), potential)
     PlotHelper.plotXY(List(
       (all._1, all._2, "Total"),
-      (landUse._1, landUse._2, "Geographic potential"),
-      (wind._1, wind._2, "Wind Regime potential")),
+      (landUse._1, landUse._2, "Geographic")),
+      // (allEx._1, allEx._2, "Total + Top-down"),
+      //(landUseEx._1, landUseEx._2, "Geographic + Exergy")),
+      //(wind._1, wind._2, "Wind Regime potential")),
       xLabel = "Energy Generated [EJ/year]",
-      yLabel = "EROI") //, legend = true)
+      yLabel = "EROI", legend = true)
   }
 
   def plotSolarPotentialRepartition(world: WorldGrid, grids: List[GridCell]) {

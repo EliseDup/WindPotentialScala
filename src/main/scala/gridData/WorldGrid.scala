@@ -38,7 +38,9 @@ class WorldGrid(val name: String, val gridSize: Angle) {
   def listEROIVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential): (List[Double], List[Double]) = {
     listValueVSCumulated(gr.map(g => (potential.EROI(g._1), potential.energyGeneratedPerYear(g._1, g._2).to(Exajoules))))
   }
-
+  def listEROIVSCumulatedProductionExergy(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential): (List[Double], List[Double]) = {
+    listValueVSCumulated(gr.map(g => (potential.EROIExergy(g._1), potential.energyGeneratedPerYearExergy(g._1, g._2).to(Exajoules))))
+  }
   def listEROIVSCumulatedPower(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential): (List[Double], List[Double]) = {
     listValueVSCumulated(gr.map(g => (potential.EROI(g._1), potential.powerGenerated(g._1, g._2).to(Terawatts))))
   }
@@ -65,9 +67,9 @@ class WorldGrid(val name: String, val gridSize: Angle) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
-        "\t" + g.irradiance.mean.value.toString +
-        "\t" + SolarPotential.suitabilityFactor(g).toString +
-        /*"\t" + g.irradiance.value.toString +
+        "\t" + WindPotential.nTurbines(g)+
+        /*"\t" + SolarPotential.energyGeneratedPerYear(g).to(TerawattHours).toString +
+        "\t" + g.irradiance.value.toString +
         "\t" + g.lc.code.toDouble.toString +
         "\t" + g.elevation.value.toString +
         "\t" + g.distanceToCoast.value.toString +

@@ -35,9 +35,10 @@ trait EnergyGenerationPotential {
 
   def energyGeneratedPerYear(cell: GridCell): Energy = energyGeneratedPerYear(cell, suitabilityFactor(cell))
   def energyGeneratedPerYear(cell: GridCell, suitabilityFactor: Double): Energy = powerGenerated(cell, suitabilityFactor) * Hours(24 * 365)
+  def energyGeneratedPerYearExergy(cell: GridCell, suitabilityFactor: Double) = energyGeneratedPerYear(cell, suitabilityFactor)
 
   def EROI(cell: GridCell): Double
-
+  def EROIExergy(cell: GridCell) = EROI(cell)
 }
 
 object WindPotential extends EnergyGenerationPotential {
@@ -56,17 +57,24 @@ object WindPotential extends EnergyGenerationPotential {
   def nTurbines(cell: GridCell) = cell.area * suitabilityFactor(cell) / areaTurbine(cell)
 
   def weight(cell: GridCell, material: Material) = WindFarm.weight(material, powerInstalled(cell))
-
+   
   def powerInstalled(cell: GridCell): Power = powerInstalled(cell, suitabilityFactor(cell))
   def powerInstalled(cell: GridCell, suitabilityFactor: Double): Power = cell.area * suitabilityFactor * technologyDensity(cell)
 
-  def powerGenerated(cell: GridCell, suitabilityFactor: Double): Power = powerInstalled(cell, suitabilityFactor) * capacityFactor(cell) * availabilityFactor(cell) * lossFactor(cell)
+  def powerGenerated(cell: GridCell, suitabilityFactor: Double): Power = {
+    powerInstalled(cell, suitabilityFactor) * capacityFactor(cell) * availabilityFactor(cell)* lossFactor(cell)
+  }
+  override def energyGeneratedPerYearExergy(cell: GridCell, suitabilityFactor: Double): Energy = {
+    val p = powerInstalled(cell, suitabilityFactor) * capacityFactor(cell) * availabilityFactor(cell)
+    val res = if (p / (cell.area * suitabilityFactor) > maxExergy(cell)) maxExergy(cell) * cell.area * suitabilityFactor else p
+    res * lossFactor(cell) * Hours(365 * 24)
+  }
 
   // Measurement of wind speed is taken at 10 metres height
   def hubAltitude(cell: GridCell) = Meters(Math.max(0.0, cell.elevation.toMeters) + cell.hubHeight.toMeters)
   def powerDensity(cell: GridCell) = Thermodynamics.powerDensity(cell.windSpeed, hubAltitude(cell))
   def powerDensityAtHub(cell: GridCell) = Thermodynamics.powerDensity(cell.windSpeedHub, hubAltitude(cell))
-
+  
   /**
    * Onshore we restrict the area to altitude < 2000 m
    * Offshore we restrict the area to maximum depth of 200 m and minimum distance to coast of 10 km
@@ -107,13 +115,23 @@ object WindPotential extends EnergyGenerationPotential {
 
   def energyGenerated1MW(cell: GridCell) = capacityFactor(cell) * availabilityFactor(cell) * lossFactor(cell) * Megawatts(1) * Hours(365 * 24)
 
+  def maxExergy(cell: GridCell) = 0.385 * cell.kineticEnergyDissipation
+
   def EROI(cell: GridCell): Double = {
-    val out = 20 * energyGenerated1MW(cell)
-    val in =
-      if (cell.onshore) SimpleWindFarm.embodiedEnergy(Megawatts(1))
-      else SimpleWindFarm.embodiedEnergy(Megawatts(1), cell.distanceToCoast, -cell.elevation)
-    out / in
-  }
+      val out = 20 * energyGeneratedPerYear(cell)
+      val in =
+        (if (cell.onshore) SimpleWindFarm.embodiedEnergy(powerInstalled(cell))
+        else SimpleWindFarm.embodiedEnergy(powerInstalled(cell), cell.distanceToCoast, -cell.elevation))
+      out / in
+    }
+   override def EROIExergy(cell: GridCell): Double = {
+      val out = 20 * energyGeneratedPerYearExergy(cell, suitabilityFactor(cell))
+      val in =
+        (if (cell.onshore) SimpleWindFarm.embodiedEnergy(powerInstalled(cell))
+        else SimpleWindFarm.embodiedEnergy(powerInstalled(cell), cell.distanceToCoast, -cell.elevation))
+      out / in
+    }
+
 }
 
 object SolarPotential extends EnergyGenerationPotential {
