@@ -130,9 +130,9 @@ object WindPotentialSimulation {
       val res = world.listValueVSArea(grids.map(g => (g.irradiance.mean.toWattsPerSquareMeter, g.area * SolarPotential.suitabilityFactor(g))))
       (res._1, res._2, name)
     }
-    PlotHelper.plotXY(List(listIrradianceVSArea(grids.filter(g => g.lc.croplands || g.lc.mosaicNaturalCropland), "Croplands"),
+    PlotHelper.plotXY(List(listIrradianceVSArea(grids.filter(g => g.lc.croplands || g.lc.mosaicVegetationCropland), "Croplands"),
       listIrradianceVSArea(grids.filter(_.lc.bareAreas), "Bare areas"),
-      listIrradianceVSArea(grids.filter(g => g.lc.grassland || g.lc.mosaicGrasslandForest), "Grassland"),
+      listIrradianceVSArea(grids.filter(g => g.lc.grassland || g.lc.mosaicGrasslandForestShrubland), "Grassland"),
       listIrradianceVSArea(grids.filter(_.lc.shrubland), "Shrubland"),
       listIrradianceVSArea(grids.filter(_.lc.sparseVegetation), "Sparse Vegetation")), xLabel = "Suitable Area [million km2]",
       yLabel = "Irradiance [W/m2]", legend = true)
@@ -166,9 +166,9 @@ object WindPotentialSimulation {
     print("Croplands", grids.filter(_.lc.croplands))
     print("Shrubland", grids.filter(_.lc.shrubland))
     print("Wetlands", grids.filter(_.lc.wetlands))
-    print("MosaicNaturalCropland", grids.filter(_.lc.mosaicNaturalCropland))
+    print("MosaicNaturalCropland", grids.filter(_.lc.mosaicVegetationCropland))
     print("Flooded", grids.filter(_.lc.floodedAreas))
-    print("MosaicGrasslandForest", grids.filter(_.lc.mosaicGrasslandForest))
+    print("MosaicGrasslandForest", grids.filter(_.lc.mosaicGrasslandForestShrubland))
     print("UrbanAreas", grids.filter(_.lc.urbanAreas))
     print("Forests", grids.filter(_.lc.forests))
     print("NoData", grids.filter(_.lc.noData))
