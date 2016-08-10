@@ -16,7 +16,7 @@ class LandCoverClass(val code: Int, val label: String, val z0: Length, val class
   def noData = classes.noData.contains(code)
   def waterBodies = classes.waterBodies.contains(code); def ice = classes.ice.contains(code); def bareAreas = classes.bareAreas.contains(code)
   def grassland = classes.grassland.contains(code); def sparseVegetation = classes.sparseVegetation.contains(code); def croplands = classes.croplands.contains(code); def shrubland = classes.shrubland.contains(code); def wetlands = classes.wetlands.contains(code)
-  def mosaicNaturalCropland = classes.mosaicNaturalCropland.contains(code); def floodedAreas = classes.floodedAreas.contains(code); def mosaicGrasslandForest = classes.mosaicGrasslandForest.contains(code);
+  def mosaicVegetationCropland = classes.mosaicVegetationCropland.contains(code); def floodedAreas = classes.floodedAreas.contains(code); def mosaicGrasslandForestShrubland = classes.mosaicGrasslandForestShrubland.contains(code);
   def urbanAreas = classes.urbanAreas.contains(code)
   def forests = classes.forests.contains(code)
 
@@ -32,7 +32,7 @@ abstract class LandCoverClasses(val name: String, legendFileName: String, codeIn
   val noData: List[Int]
   val waterBodies: List[Int]; val ice: List[Int]; val bareAreas: List[Int]
   val grassland: List[Int]; val sparseVegetation: List[Int]; val croplands: List[Int]; val shrubland: List[Int]; val wetlands: List[Int]
-  val mosaicNaturalCropland: List[Int]; val floodedAreas: List[Int]; val mosaicGrasslandForest: List[Int];
+  val mosaicVegetationCropland: List[Int]; val floodedAreas: List[Int]; val mosaicGrasslandForestShrubland: List[Int];
   val urbanAreas: List[Int]
   val forests: List[Int]
 
@@ -52,9 +52,9 @@ object GlobCoverClasses extends LandCoverClasses("GlobCover2009", "globCover/Glo
   val noData = List(230)
   val waterBodies = List(210); val ice = List(220); val bareAreas = List(200)
   val grassland = List(140); val sparseVegetation = List(150); val croplands = List(11, 14); val shrubland = List(130); val wetlands = List(180)
-  val mosaicNaturalCropland = List(20, 30); val floodedAreas = List(160, 170); val mosaicGrasslandForest = List(120);
+  val mosaicVegetationCropland = List(20, 30); val floodedAreas = List(160, 170); val mosaicGrasslandForestShrubland = List(110,120);
   val urbanAreas = List(190)
-  val forests = List(40, 50, 60, 70, 90, 100, 110)
+  val forests = List(40, 50, 60, 70, 90, 100)
 
 }
 
@@ -63,7 +63,7 @@ object ModisCoverClasses extends LandCoverClasses("Modis", "modis/modisLegend") 
 
   val waterBodies = List(0); val ice = List(15); val bareAreas = List(16)
   val grassland = List(10); val sparseVegetation = List(); val croplands = List(12); val shrubland = List(6, 7); val wetlands = List(11)
-  val mosaicNaturalCropland = List(14); val floodedAreas = List(); val mosaicGrasslandForest = List(9);
+  val mosaicVegetationCropland = List(14); val floodedAreas = List(); val mosaicGrasslandForestShrubland = List(9);
   val urbanAreas = List(13)
   val forests = List(1, 2, 3, 4, 5, 8)
 

@@ -22,6 +22,7 @@ object WindFarm {
   def nTurbines(ratedPower: Power) = ratedPower / turbine.ratedPower
 
   def embodiedEnergy(ratedPower: Power) = {
+    println("Onshore" + turbine.embodiedEnergy.toGigajoules/2.0 + "\t" + WindPowerTransmission.embodiedEnergyOnshoreTransmission(ratedPower).toGigajoules)
     turbine.embodiedEnergy * nTurbines(ratedPower) + WindPowerTransmission.embodiedEnergyOnshoreTransmission(ratedPower)
   }
 
@@ -40,6 +41,8 @@ object OffshoreWindFarm {
   def transmission(ratedPower: Power, distanceToShore: Length) = WindPowerTransmission.embodiedEnergyOffshoreTransmission(ratedPower, distanceToShore)
 
   def embodiedEnergy(ratedPower: Power, distanceToShore: Length, waterDepth: Length): Energy = {
+    println("Offshore" + turbine.embodiedEnergy.toGigajoules/5.0 + "\t" + foundations(waterDepth).embodiedEnergy.toGigajoules /5.0+ "\t" +transmission(ratedPower, distanceToShore).toGigajoules)
+    
     nTurbines(ratedPower) * (turbine.embodiedEnergy + foundations(waterDepth).embodiedEnergy) + transmission(ratedPower, distanceToShore)
   }
 

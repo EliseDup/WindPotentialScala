@@ -1,38 +1,31 @@
 package utils
 
 import org.joda.time.DateTime
-import org.jfree.data.time.TimeSeries
-import org.jfree.data.time.Minute
-import org.jfree.data.time.TimeSeriesCollection
-import org.jfree.chart.ChartFactory
-import org.jfree.chart.ChartUtilities
-import org.jfree.chart.ChartPanel
+import org.jfree.data.time._
+import org.jfree.chart._
 import org.jfree.ui.ApplicationFrame
 import org.jfree.data.xy._
-import org.jfree.data.xy.XYSeriesCollection
 import org.jfree.chart.plot._
 import org.jfree.chart.JFreeChart
-import org.jfree.data.statistics.HistogramDataset
 import org.jfree.data.category.DefaultCategoryDataset
-import org.jfree.data.xy.WindDataset
-import org.jfree.data.xy.DefaultWindDataset
+
 import historicalData.WindEnergyData
 import org.jfree.data.general.DefaultPieDataset
 import historicalData.MeteoData
 import historicalData.Observation
-import org.jfree.chart.axis.NumberAxis
-import org.jfree.chart.axis.LogarithmicAxis
-import org.jfree.data.statistics.HistogramType
+import org.jfree.chart.axis._
+import org.jfree.data.statistics._
 import org.jfree.ui.RectangleEdge
 import org.jfree.chart.renderer.xy._
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.awt.geom._
+import java.awt.BasicStroke
 import java.io.FileOutputStream
 import com.sun.image.codec.jpeg.JPEGCodec
 
 object PlotHelper {
-  
+
   var i = 0
   /**
    * Plot a list of time series in on frame
@@ -57,10 +50,10 @@ object PlotHelper {
     val list = for (i <- series) yield (i._1.map(_.time), i._1.map(_.value), i._2)
     plotTime(list)
   }
-  def plotXY(x :List[Double], y : List[Double]) { plotXY(List((x,y,""))) }
+  def plotXY(x: List[Double], y: List[Double]) { plotXY(List((x, y, ""))) }
   def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
-    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false) {
+    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = false) {
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
       val serie = new XYSeries(xy._3)
@@ -71,7 +64,7 @@ object PlotHelper {
     val plot = chart.getXYPlot();
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-    createFrame(chart)
+    createFrame(chart, save)
   }
 
   def histogram(values: List[Double], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
@@ -100,11 +93,11 @@ object PlotHelper {
     val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
     createFrame(chart)
   }
-  def repartition(value : List[Double]) { repartition(List((value,""))) }
+  def repartition(value: List[Double]) { repartition(List((value, ""))) }
   def repartition(values: List[(List[Double], String)], n: Int = 10, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
     val dataset = new DefaultCategoryDataset()
     val allValues = values.map(_._1).flatten
-    val min = allValues.min// Math.max(0, allValues.min)
+    val min = allValues.min // Math.max(0, allValues.min)
     val max = allValues.max
     val inter = (max - min) / n.toDouble
 
@@ -116,16 +109,17 @@ object PlotHelper {
       }
     }
     val chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
-    createFrame(chart, save=false)
+    createFrame(chart, save = false)
   }
 
   def createFrame(chart: JFreeChart, save: Boolean = true) {
     if (save) {
-      val plot = chart.getPlot();
-      //plot.getRenderer().setSeriesPaint(0, Color.BLUE)
+     val plot = chart.getPlot()
       plot.setBackgroundPaint(Color.WHITE)
-      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i+".jpg"), chart, 500, 300, 2, 2)
-      i=i+1
+      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i + ".jpg"), chart, 500, 300, 2, 2)
+      i = i + 1
+      
+      
     }
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
@@ -145,8 +139,8 @@ object PlotHelper {
     val chart = ChartFactory.createPolarChart("Wind direction distrubtion", dataSet, true, true, false)
     createFrame(chart)
   }
-  def barChart(dataset: DefaultCategoryDataset, title: String= "", xLabel:String = "", yLabel:String = "", legend:Boolean=true) {
-    val chart = ChartFactory.createBarChart(title,xLabel,yLabel,dataset, PlotOrientation.VERTICAL, legend, true, false)
+  def barChart(dataset: DefaultCategoryDataset, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = true) {
+    val chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, true, false)
     createFrame(chart)
   }
 
