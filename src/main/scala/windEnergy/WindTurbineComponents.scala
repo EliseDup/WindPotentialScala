@@ -21,10 +21,11 @@ abstract class AbstractWindTurbineComponents extends Product {
   val cutInSpeed, ratedSpeed, cutOutSpeed: Velocity
   val foundation, tower, nacelle, rotor: Product
   
-  // TODO
+  // TODO IIER : 20.460 GJ (Electricity) = 5.683.333 kWh / 2,6 MW 
   override def energyInput = KilowattHours(3283000)
   
-  // According to VESTAS - lca of 1.65 MW wind turbine
+  // According to VESTAS - lca of 1,65 MW wind turbine
+  // IIER : 9.883 GJ (Diesel)
   override def transportEnergyInput =
     Transport.truckTransport(tower.weight, Kilometers(700)) +
       Transport.truckTransport(nacelle.weight, Kilometers(1000)) + Transport.shipTransport(nacelle.weight, Kilometers(15566))+

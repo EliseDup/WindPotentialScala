@@ -43,9 +43,7 @@ class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val lc: LandCov
     val urbanFactor: Double, val protectedArea: Boolean, val country: Country) {
 
   val s = gridSize / 2.0;
-  val lowerLeftCorner = GeoPoint(center.latitude - s, center.longitude - s)
-  val upperRightCorner = GeoPoint(center.latitude + s, center.longitude + s)
-  val area = Helper.areaRectangle(lowerLeftCorner, upperRightCorner)
+  val area = Helper.areaRectangle(center, gridSize)
   val meanLonDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude - s, center.longitude + s)) +
     Helper.distance(GeoPoint(center.latitude + s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
   val meanLatDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude - s)) +
@@ -104,7 +102,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle, lc
    * Shape parameter k[-] and scale parameters c [m/s]
    * of the Weibull distribution
    */
-  val weibull = WeibullParameters(windSpeed, windSpeedStandardDeviation, if (onshore) Meters(80) else Meters(90))
+  val weibull = WeibullParameters(windSpeed, windSpeedStandardDeviation, if (onshore) Meters(80) else Meters(90), lc.z0)
 }
 /**
  * Latitude	Longitude	Corine Land Cover	GlobCover	Modis	Urban Factor	Protected area ?	Country	Elevation [m]	Distance to Coast [km]	Uwind	Vwind	Wind	Std Wind	KineticEnergyDissipation Irradiance

@@ -50,10 +50,13 @@ object PlotHelper {
     val list = for (i <- series) yield (i._1.map(_.time), i._1.map(_.value), i._2)
     plotTime(list)
   }
+  def plotXY(xy: (List[Double], List[Double])) { plotXY(List((xy._1, xy._2, ""))) }
   def plotXY(x: List[Double], y: List[Double]) { plotXY(List((x, y, ""))) }
   def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
+  def plotXY(xy: List[( (List[Double],List[Double]), String)]) { plotXY(xy.map(i => (i._1._1,i._1._2,i._2)), legend=true) }
+  
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
-    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = false) {
+    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true) {
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
       val serie = new XYSeries(xy._3)
@@ -91,7 +94,7 @@ object PlotHelper {
       dataset.addSeries(serie)
     })
     val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
-    createFrame(chart)
+    createFrame(chart, false)
   }
   def repartition(value: List[Double]) { repartition(List((value, ""))) }
   def repartition(values: List[(List[Double], String)], n: Int = 10, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
@@ -111,15 +114,35 @@ object PlotHelper {
     val chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
     createFrame(chart, save = false)
   }
-
+  def scatterPlot(values: List[(Double, Double)], title: String = "", xLabel: String = "", yLabel: String = "") {
+    val plot = new FastScatterPlot(Array(values.map(_._1.toFloat).toArray, values.map(_._2.toFloat).toArray),
+      new NumberAxis(xLabel), new NumberAxis(yLabel));
+    val chart = new JFreeChart(title, plot);
+    createFrame(chart, true)
+  }
   def createFrame(chart: JFreeChart, save: Boolean = true) {
     if (save) {
-     val plot = chart.getPlot()
+      /*   val dashedStroke = new BasicStroke(
+        1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+        1.0f, Array(10.0f, 6.0f), 0.0f)
+
+       val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
+      r.setSeriesPaint(0, Color.GREEN); r.setSeriesPaint(1, Color.GREEN);
+      r.setSeriesStroke(1, dashedStroke)
+      r.setSeriesPaint(2, Color.BLUE); r.setSeriesPaint(3, Color.BLUE);
+      r.setSeriesStroke(3, dashedStroke)
+      r.setSeriesPaint(4, Color.RED); r.setSeriesPaint(5, Color.RED);
+      r.setSeriesStroke(5, dashedStroke)
+
+      r.setBaseShapesVisible(false);
+      r.setBaseShapesFilled(true);
+      r.setDrawSeriesLineAsPath(true);
+      chart.getXYPlot().setRenderer(r);*/
+      val plot = chart.getPlot()
       plot.setBackgroundPaint(Color.WHITE)
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i + ".jpg"), chart, 500, 300, 2, 2)
       i = i + 1
-      
-      
+
     }
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))

@@ -10,6 +10,7 @@ import utils.TerawattHours
 import utils.PlotHelper
 import squants.time.Hours
 import utils.Exajoules
+import windEnergy.CapacityFactorCalculation
 
 object WindGrowth {
 
@@ -24,7 +25,7 @@ object WindGrowth {
         var next = cellIterator.next
         val pow = List(WindPotential.powerInstalled(next), annualGrowth - addedPower).min
         addedPower = addedPower + pow
-        addedProduction = addedProduction + pow * WindPotential.capacityFactor(next) * Hours(365 * 24)
+        addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * Hours(365 * 24)
       }
       newProduction = newProduction :+ addedProduction.to(Exajoules)
 
@@ -40,8 +41,8 @@ object WindGrowth {
 
     val europe = new WorldGrid("results/europeGridWind.txt", Degrees(0.25))
 
-    val suitableOnshoreGrids = europe.onshoreGrids.filter(WindPotential.suitabilityFactor(_) > 0).sortBy(g => -WindPotential.capacityFactor(g))
-    val suitableOffshoreGrids = europe.offshoreGrids.filter(WindPotential.suitabilityFactor(_) > 0).sortBy(g => -WindPotential.capacityFactor(g))
+    val suitableOnshoreGrids = europe.onshoreGrids.filter(WindPotential.suitabilityFactor(_) > 0).sortBy(g => -CapacityFactorCalculation(g))
+    val suitableOffshoreGrids = europe.offshoreGrids.filter(WindPotential.suitabilityFactor(_) > 0).sortBy(g => -CapacityFactorCalculation(g))
 
     val onshoreCellIterator: Iterator[GridCell] = suitableOnshoreGrids.toIterator
     val onshoreCellsWithTurbine: ListBuffer[(GridCell, Double)] = ListBuffer()
@@ -62,7 +63,7 @@ object WindGrowth {
         var next = cellIterator.next
         val pow = List(WindPotential.powerInstalled(next), currentGrowth - addedPower).min
         addedPower = addedPower + pow
-        addedProduction = addedProduction + pow * WindPotential.capacityFactor(next) * Hours(365 * 24)
+        addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * Hours(365 * 24)
       }
       newProduction = newProduction :+ addedProduction.to(Exajoules)
 
@@ -75,7 +76,7 @@ object WindGrowth {
   def main(args: Array[String]): Unit = {
     val world = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
     val growth = Helper.getLines("windGrowth.txt").map(l => (l(0).toInt, Megawatts(l(2).toInt)))
-    val cellIterator: Iterator[GridCell] = world.onshoreConstrainedGrids(WindPotential).sortBy(g => -WindPotential.capacityFactor(g)).toIterator
+    val cellIterator: Iterator[GridCell] = world.onshoreConstrainedGrids(WindPotential).sortBy(g => -CapacityFactorCalculation(g)).toIterator
 
     simulate(List((2015, Megawatts(432883))), cellIterator)
 
@@ -100,11 +101,10 @@ object IEWA2030 {
   def main(args: Array[String]): Unit = {
 
     val wind = new WorldGrid("europe.txt", Degrees(0.25))
-    wind.writeTest()
     val target = Helper.getLines("iewa_2030.txt").map(l => (Country(l(0)), Megawatts(l(1).toDouble)))
 
     for (i <- target) {
-      val gr = wind.grids.filter(_.country.equals(i._1)).filter(WindPotential.suitabilityFactor(_) > 0).sortBy(g => -WindPotential.capacityFactor(g))
+      val gr = wind.grids.filter(_.country.equals(i._1)).filter(WindPotential.suitabilityFactor(_) > 0).sortBy(g => -CapacityFactorCalculation(g))
       val cellIterator = gr.toIterator
       var addedPower = Watts(0)
       var addedProduction = WattHours(0)
@@ -112,7 +112,7 @@ object IEWA2030 {
         var next = cellIterator.next
         val pow = List(WindPotential.powerInstalled(next), i._2 - addedPower).min
         addedPower = addedPower + pow
-        addedProduction = addedProduction + pow * WindPotential.capacityFactor(next) * Hours(365 * 24)
+        addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * Hours(365 * 24)
       }
 
       println(i._1.name + "\t" + wind.area(gr) + "\t" + i._2.toMegawatts + "\t" + addedPower.toMegawatts + "\t" + addedProduction.to(GigawattHours))
