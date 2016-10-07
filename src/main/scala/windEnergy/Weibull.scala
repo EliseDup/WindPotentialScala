@@ -6,79 +6,94 @@ import squants.motion._
 import squants.space._
 import squants.energy._
 import org.apache.commons.math3.special.Gamma
+import gridData.GridCell
 
 /**
  * Weibull distribution at 10 m height
- * 
+ *
  * Justus and Mikhail
  */
 object Weibull {
-  def shapeParameter(meanSpeed : Velocity, std : Double) = Math.pow(std / meanSpeed.toMetersPerSecond, -1.086)
+  def shapeParameter(meanSpeed: Velocity, std: Double) = Math.pow(std / meanSpeed.toMetersPerSecond, -1.086)
   def scaleParameter(meanSpeed: Velocity, k: Double) = meanSpeed / Gamma.gamma(1 + 1.0 / k)
-  def meanSpeed(c : Velocity, k : Double) = c * Gamma.gamma(1 + 1.0 / k)
+  def meanSpeed(c: Velocity, k: Double) = c * Gamma.gamma(1 + 1.0 / k)
 }
 
-case class WeibullParameters(mean : Velocity, std : Double, hHub : Length){
+object WeibullParametersExtrapolation {
+  // Extrapolation
+  val z1 = Meters(10)
+  val a = 0.0881
+  val b = 0.37
+  def zg(z2: Length) = Meters(Math.sqrt(z1.toMeters * z2.toMeters))
+
+  def n(c1: Velocity, z2: Length, z0: Length) = 1 / Math.log(zg(z2) / z0) - (a * Math.log(c1.toMetersPerSecond / 6))
+
+  def c2(c1: Velocity, z2: Length, z0: Length) = c1 * Math.pow(z2 / z1, n(c1, z2, z0))
+  def k2(k1: Double, z2: Length, z0: Length) = k1 / (1 - a * Math.log(z2 / z1))
+
+}
+
+case class WeibullParameters(mean: Velocity, std: Double, hHub: Length, z0: Length) {
   val k = Weibull.shapeParameter(mean, std)
   val c = Weibull.scaleParameter(mean, k)
-  
-  // Extrapolation
-  val hr, h = Meters(10)
-  val n = (0.37 - 0.0881*Math.log(c.toMetersPerSecond)) / (1 - 0.0881*Math.log(h/hr))
-  
-  val cHub = c*Math.pow(hHub/h, n)
-  val kHub = k*(1- 0.0881*Math.log(h/hr)) / (1- 0.0881*Math.log(hHub/hr))
-  
+  val kHub = WeibullParametersExtrapolation.k2(k, hHub, z0)
+  val cHub = WeibullParametersExtrapolation.c2(c, hHub, z0)
+  val meanHub = Weibull.meanSpeed(cHub, kHub)
+  override def toString() = "k :" + k + ", c: " + c + ("at hub height" + hHub + " => kHub :" + kHub + ", cHub: " + cHub)
 }
 
 /**
  * Comparative analysis on power curve models of wind turbine generator in estimating capacity factor
- * 
+ *
  * Tian-Pau Chang, Feng-Jiao Liu, Hong-Hsi Ko, Shih-Ping Cheng, Li-Chung Sun, Shye-Chorng Kuo
  */
 
 object CapacityFactorCalculation {
-
-  val vc = 4.0
   // Rated speed vr can be optimized given the Weibull parameter of the wind speed in a location
-  val vrs = (12 to 15).toList
   val vf = 25.0
+  def apply(cell: GridCell): Double = cubic(cell)
+  def general(cell: GridCell): Double = general(cell.weibull.cHub.toMetersPerSecond, cell.weibull.kHub, 4.0,12.0) // (if (cell.onshore) 4.0 else 3.0), (if (cell.onshore) 12 else 11.4))
+  def cubic(cell: GridCell): Double = cubic(cell.weibull.cHub.toMetersPerSecond, cell.weibull.kHub, 4.0,12.0)// (if (cell.onshore) 4.0 else 3.0), (if (cell.onshore) 12 else 11.4))
 
-  def powerCurve(k : Double, v : Double, vr: Double) = {
+  def powerCurve(v: Double, vc: Double, vr: Double) = {
     if (v < vc) 0.0
-    else if (v <= vr) (Math.pow(v, k) - Math.pow(vc, k)) / (Math.pow(vr, k) - Math.pow(vc, k))
+    else if (v <= vr) (^(v, 3) - ^(vc, 3)) / (^(vr, 3) - ^(vc, 3))
     else if (v <= vf) 1.0
     else 0.0
   }
-  def apply(w : WeibullParameters, vr: Double): Double = apply(w.cHub.toMetersPerSecond,w.kHub,vr)
-  
-  def apply(c : Double, k : Double, vr: Double): Double = {
+
+  def general(c: Double, k: Double, vc: Double, vr: Double): Double = {
     (Math.exp(-Math.pow(vc / c, k)) - Math.exp(-Math.pow(vr / c, k))) / (Math.pow(vr / c, k) - Math.pow(vc / c, k)) - Math.exp(-Math.pow(vf / c, k))
   }
-  
- /* def apply(c : Double, k : Double) :Double= {
-    val res = vrs.map(apply(c,k, _)).zipWithIndex.max
- //   println(c + "\t" + k + "\t" + vrs(res._2))
-    res._1
-  }*/
-  def apply(w : WeibullParameters): Double = apply(w.cHub.toMetersPerSecond,w.kHub, 15.0)
 
-  def linear(w : WeibullParameters, vr: Double): Double = {
-    val c = w.cHub.toMetersPerSecond; val k = w.kHub
-    c / (vr - vc) * (Math.exp(-vc / c) - Math.exp(-vr / c)) - Math.exp(-vf / c)
+  def e(d: Double) = Math.exp(d)
+  def ^(a: Double, b: Double) = Math.pow(a, b)
+  // Regularized = Incomplete / Gamma ?? It seems regularized Gamma = Incomplete in that case ..
+  def incompleteGamma(x: Double, u: Double) = {
+     Gamma.regularizedGammaP(x, u)
   }
-  def linear(w : WeibullParameters): Double = vrs.map(linear(w, _)).max
+
+  def cubic(c: Double, k: Double, vc: Double, vr: Double): Double = {
+  -e(- ^(vf / c, k)) + (3 * ^(c, 3) * Gamma.gamma(3.0 / k)) / (k * (^(vr, 3) - ^(vc, 3))) * (incompleteGamma(3.0 / k, ^(vr / c, k)) - incompleteGamma(3.0 / k, ^(vc / c, k)))
+ //  -e(- ^(vf / c, k)) + ^(vc/vr,3) * e(- ^(vc/c,k)) + (3 * Gamma.gamma(3.0 / k)) / (k * (^(vr/c, 3))) * (incompleteGamma(3.0 / k, ^(vr / c, k)) - incompleteGamma(3.0 / k, ^(vc / c, k)))
+  }
+
+  def linear(c: Double, k: Double, vc: Double, vr: Double): Double = {
+    c / (vr - vc) * (Math.exp(- ^(vc / c, k)) - Math.exp(- ^(vr / c, k))) - Math.exp(- ^(vf / c, k))
+  }
 
   def main(args: Array[String]): Unit = {
-    val v = (0 to 19).map(i => (0 until 10).map(_ * 0.1 + i)).flatten.toList
-    val k = (1 to 5).toList
+    val v = (1 until 15).map(i => (0 until 10).map(_ * 0.1 + i)).flatten.toList
+    val k = List(1, 1.5, 2, 2.5, 3.0)
     val vr = (12 to 15).map(_.toDouble).toList
+    val list = k.map(j => (v, v.map(i => CapacityFactorCalculation.cubic(Weibull.scaleParameter(MetersPerSecond(i),j).toMetersPerSecond, j, 4.0, 12.0)), "k=" + j.toString))
+    PlotHelper.plotXY(list, legend = true, xLabel = "Mean Wind Speed [m/s]", yLabel = "Capacity Factor", save = true)
     
-    val list = k.map(j => (v, v.map(i => CapacityFactorCalculation(Weibull.scaleParameter(MetersPerSecond(i), j).toMetersPerSecond,j,15.0)), "k="+j.toString))
-    
-   PlotHelper.plotXY(list, legend=true, xLabel = "Mean Wind Speed [m/s]", yLabel = "Capacity Factor")
-   
-  }  
+    k.map(j => {
+      println(j + "\t" + v.map(i => (i, CapacityFactorCalculation.cubic(i, j, 4.0, 12.0))).maxBy(_._2))
+    })
+
+  }
 }
 
 /**

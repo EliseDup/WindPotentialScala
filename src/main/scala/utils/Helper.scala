@@ -21,14 +21,15 @@ import squants.space.SquareMeters
 import squants.space.Degrees
 import squants.space.Angle
 import org.apache.poi.ss.usermodel.Row
+import squants.space.Area
 
 object Helper {
   val ressourcesPy = "/Users/Elise/Documents/workspace/ressources/"
   val resultsPy = "/Users/Elise/Documents/workspace/WindPotentialPy/results/"
   val ressources = "/Users/Elise/Documents/workspace/WindPotential/ressources/"
 
-  def getLines(file : String, delimiter : String = "\t") = Source.fromFile(file).getLines().toList.map(_.split(delimiter))
-  
+  def getLines(file: String, delimiter: String = "\t") = Source.fromFile(file).getLines().toList.map(_.split(delimiter))
+
   def saveResult(name: String, ob: Object) {
     val oos = new ObjectOutputStream(new FileOutputStream("results/" + name))
     oos.writeObject(ob)
@@ -113,13 +114,13 @@ object Helper {
       new SecondOrderPolynomial(a + b + c, -(a * (p1.x + p2.x) + b * (p1.x + p3.x) + c * (p2.x + p3.x)), a * p1.x * p2.x + b * p1.x * p3.x + c * p2.x * p3.x)
     }
   }
-  class FirstOrderPolynomial(p1 : Point, p2 : Point){
+  class FirstOrderPolynomial(p1: Point, p2: Point) {
     val a = (p1.y - p2.y) / (p1.x - p2.x)
-   val b = p1.y - a*p1.x
-   def apply(x : Double) = a*x + b
+    val b = p1.y - a * p1.x
+    def apply(x: Double) = a * x + b
   }
-  object FirstOrderPolynomial{
-    def apply(p1 : Point, p2: Point) = new FirstOrderPolynomial(p1,p2)
+  object FirstOrderPolynomial {
+    def apply(p1: Point, p2: Point) = new FirstOrderPolynomial(p1, p2)
   }
   /**
    * Distance between to point in Latitude,Longitude decimal degrees
@@ -148,10 +149,15 @@ object Helper {
    *
    * = > AreaRect = 2 PI R^2 *|sin(lat1)-sin(lat2)| * |lon1 - lon2| / 360
    */
-  def areaRectangle(lowerLeftCorner: GeoPoint, upperRightCorner: GeoPoint) = {
+  def areaRectangle(lowerLeftCorner: GeoPoint, upperRightCorner: GeoPoint): Area = {
     earthRadius * earthRadius * (1.0 / 180.0 * Math.PI *
       Math.abs(lowerLeftCorner.latitude.sin - upperRightCorner.latitude.sin) *
       Math.abs(lowerLeftCorner.longitude.toDegrees - upperRightCorner.longitude.toDegrees))
+  }
+  def areaRectangle(center: GeoPoint, resolution: Angle) : Area = {
+    val lowerLeftCorner = GeoPoint(center.latitude - resolution/2.0, center.longitude - resolution/2.0)
+    val upperRightCorner = GeoPoint(center.latitude + resolution/2.0, center.longitude + resolution/2.0)
+    areaRectangle(lowerLeftCorner, upperRightCorner)
   }
 }
 case class GeoPoint(val latitude: Angle, val longitude: Angle) {
