@@ -53,7 +53,7 @@ object PlotHelper {
   def plotXY(xy: (List[Double], List[Double])) { plotXY(List((xy._1, xy._2, ""))) }
   def plotXY(x: List[Double], y: List[Double]) { plotXY(List((x, y, ""))) }
   def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
-  def plotXY(xy: List[( (List[Double],List[Double]), String)]) { plotXY(xy.map(i => (i._1._1,i._1._2,i._2)), legend=true) }
+  def plotXY(xy: List[( (List[Double],List[Double]), String)], xLabel: String, yLabel: String) { plotXY(xy.map(i => (i._1._1,i._1._2,i._2)), xLabel=xLabel,yLabel=yLabel) }
   
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
     legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true) {
@@ -65,6 +65,7 @@ object PlotHelper {
     }
     val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataSet, PlotOrientation.VERTICAL, legend, false, false)
     val plot = chart.getXYPlot();
+    val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
     createFrame(chart, save)
@@ -121,17 +122,18 @@ object PlotHelper {
     createFrame(chart, true)
   }
   def createFrame(chart: JFreeChart, save: Boolean = true) {
-    if (save) {
-      /*   val dashedStroke = new BasicStroke(
+   if (save) {
+  /*       val dashedStroke = new BasicStroke(
         1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
         1.0f, Array(10.0f, 6.0f), 0.0f)
 
        val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
-      r.setSeriesPaint(0, Color.GREEN); r.setSeriesPaint(1, Color.GREEN);
+      r.setSeriesPaint(0, Color.BLUE); 
+   	 r.setSeriesPaint(1, Color.BLUE);
       r.setSeriesStroke(1, dashedStroke)
-      r.setSeriesPaint(2, Color.BLUE); r.setSeriesPaint(3, Color.BLUE);
+  		r.setSeriesPaint(2, Color.BLUE); r.setSeriesPaint(3, Color.BLUE);
       r.setSeriesStroke(3, dashedStroke)
-      r.setSeriesPaint(4, Color.RED); r.setSeriesPaint(5, Color.RED);
+      r.setSeriesPaint(4, Color.GREEN); r.setSeriesPaint(5, Color.GREEN);
       r.setSeriesStroke(5, dashedStroke)
 
       r.setBaseShapesVisible(false);
@@ -139,6 +141,7 @@ object PlotHelper {
       r.setDrawSeriesLineAsPath(true);
       chart.getXYPlot().setRenderer(r);*/
       val plot = chart.getPlot()
+      
       plot.setBackgroundPaint(Color.WHITE)
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i + ".jpg"), chart, 500, 300, 2, 2)
       i = i + 1

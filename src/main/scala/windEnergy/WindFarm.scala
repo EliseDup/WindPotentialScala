@@ -58,7 +58,7 @@ object SimpleWindFarm {
   val embodiedEnergyPerMW = Gigajoules(15000)
 
   def embodiedEnergy(ratedPower: Power, distanceToShore: Length, waterDepth: Length): Energy = {
-    MultiplyingFactor.factor(waterDepth, distanceToShore) * embodiedEnergyPerMW * ratedPower.toMegawatts
+    MultiplyingFactor.factor(waterDepth, distanceToShore) * 1.3 * embodiedEnergyPerMW * ratedPower.toMegawatts
   }
   def embodiedEnergy(ratedPower: Power): Energy = embodiedEnergyPerMW * ratedPower.toMegawatts
 

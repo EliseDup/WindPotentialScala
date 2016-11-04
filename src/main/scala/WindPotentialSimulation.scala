@@ -31,7 +31,7 @@ object WindPotentialSimulation {
     PlotHelper.cumulativeDensity(List((world.grids.map(CapacityFactorCalculation(_)), "Cubic"), (world.grids.map(CapacityFactorCalculation.general(_)), "General")))
     val offshore200m = world.offshoreGrids.filter(_.elevation.toMeters >= -200)
     val grids = world.onshoreGrids ++ offshore200m
-    
+
     /*PlotHelper.plotXY(
       world.onshoreConstrainedGrids(WindPotential).map(g => CapacityFactorCalculation(g)),
       world.onshoreConstrainedGrids(WindPotential).map(g => (WindPotential.powerGenerated(g) / (WindPotential.powerDensityAtHub(g) * WindPotential.areaRotor(g) * WindPotential.nTurbines(g)))))

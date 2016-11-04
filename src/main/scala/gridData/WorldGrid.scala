@@ -64,15 +64,18 @@ class WorldGrid(val name: String, val gridSize: Angle) {
    */
   def writeGrid(name: String, gr: List[GridCell] = grids) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
-    gr.map(g => {
+    gr.filter(_.center.latitude.toDegrees > -60).map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" +
+          WindPotential.suitabilityFactor(g) + "\t"+
+          CapacityFactorCalculation.cubic(g).toString + "\t" +
+          WindPotential.EROI1MW(g) + "\t" + 
         g.windSpeed.toMetersPerSecond.toString + "\t" +
-         g.windSpeedHub.toMetersPerSecond.toString + "\t" +
+        g.windSpeedHub.toMetersPerSecond.toString + "\t" +
         g.weibull.cHub.toMetersPerSecond.toString + "\t"+
         g.weibull.kHub.toString + "\t"+ 
         WindPotential.capacityDensity(g).toWattsPerSquareMeter.toString + "\t" +
         (if(g.protectedArea) "1.0" else "0.0") + "\t" +
-        CapacityFactorCalculation.cubic(g).toString + "\t" +
+        
         g.kineticEnergyDissipation.toWattsPerSquareMeter.toString +
         "\n")
 

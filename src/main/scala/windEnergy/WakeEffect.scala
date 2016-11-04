@@ -53,5 +53,6 @@ object WakeEffect {
       else if (nDiameters > 9) 9
       else nDiameters
     array(nD)(nIndex)
+    
   }
 }
