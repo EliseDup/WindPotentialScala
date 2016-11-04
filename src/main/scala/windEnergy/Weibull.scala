@@ -75,7 +75,6 @@ object CapacityFactorCalculation {
 
   def cubic(c: Double, k: Double, vc: Double, vr: Double): Double = {
   -e(- ^(vf / c, k)) + (3 * ^(c, 3) * Gamma.gamma(3.0 / k)) / (k * (^(vr, 3) - ^(vc, 3))) * (incompleteGamma(3.0 / k, ^(vr / c, k)) - incompleteGamma(3.0 / k, ^(vc / c, k)))
- //  -e(- ^(vf / c, k)) + ^(vc/vr,3) * e(- ^(vc/c,k)) + (3 * Gamma.gamma(3.0 / k)) / (k * (^(vr/c, 3))) * (incompleteGamma(3.0 / k, ^(vr / c, k)) - incompleteGamma(3.0 / k, ^(vc / c, k)))
   }
 
   def linear(c: Double, k: Double, vc: Double, vr: Double): Double = {
@@ -93,6 +92,16 @@ object CapacityFactorCalculation {
       println(j + "\t" + v.map(i => (i, CapacityFactorCalculation.cubic(i, j, 4.0, 12.0))).maxBy(_._2))
     })
 
+  }
+  
+  def meanSpeed(cf : Double): Velocity = {
+    var c = 0.1
+    var cf1 = cubic(c, 2.0, 4.0, 12.0)
+    while(Math.abs(cf1-cf) > 0.01){
+      c += 0.1
+      cf1 = cubic(c, 2.0, 4.0, 12.0)
+    }
+    Weibull.meanSpeed(MetersPerSecond(c), 2.0)
   }
 }
 
