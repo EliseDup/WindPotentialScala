@@ -26,11 +26,13 @@ import com.sun.image.codec.jpeg.JPEGCodec
 
 object PlotHelper {
 
+  val colors = List(Color.RED, Color.BLUE, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
+
   var i = 0
   /**
    * Plot a list of time series in on frame
    */
-  def plotTime(serie: (List[DateTime], List[Double], String)) { plotTime(List(serie)) }
+  def plotTime(times: List[DateTime], values: List[Double]) { plotTime(List((times, values, ""))) }
   def plotTime(series: List[(List[DateTime], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
     val dataset = new TimeSeriesCollection()
     series.map { s =>
@@ -53,8 +55,8 @@ object PlotHelper {
   def plotXY(xy: (List[Double], List[Double])) { plotXY(List((xy._1, xy._2, ""))) }
   def plotXY(x: List[Double], y: List[Double]) { plotXY(List((x, y, ""))) }
   def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
-  def plotXY(xy: List[( (List[Double],List[Double]), String)], xLabel: String, yLabel: String) { plotXY(xy.map(i => (i._1._1,i._1._2,i._2)), xLabel=xLabel,yLabel=yLabel) }
-  
+  def plotXY(xy: List[((List[Double], List[Double]), String)], xLabel: String, yLabel: String) { plotXY(xy.map(i => (i._1._1, i._1._2, i._2)), xLabel = xLabel, yLabel = yLabel) }
+
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
     legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true) {
     val dataSet = new XYSeriesCollection()
@@ -98,13 +100,13 @@ object PlotHelper {
     createFrame(chart, false)
   }
   def repartition(value: List[Double]) { repartition(List((value, ""))) }
-  def repartition(values: List[(List[Double], String)], n: Int = 10, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
+
+  def repartition(values: List[(List[Double], String)], n: Int = 10, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = true) {
     val dataset = new DefaultCategoryDataset()
     val allValues = values.map(_._1).flatten
     val min = allValues.min // Math.max(0, allValues.min)
     val max = allValues.max
     val inter = (max - min) / n.toDouble
-
     for (v <- values) {
       // Ajouter le nombre de données dans le nième intervalles en min et max  
       for (i <- 0 until n) {
@@ -121,32 +123,50 @@ object PlotHelper {
     val chart = new JFreeChart(title, plot);
     createFrame(chart, true)
   }
-  def createFrame(chart: JFreeChart, save: Boolean = true) {
-   if (save) {
-  /*       val dashedStroke = new BasicStroke(
-        1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-        1.0f, Array(10.0f, 6.0f), 0.0f)
+  def createFrame(chart: JFreeChart, save: Boolean = true, shape: Boolean = false, xy: Boolean = true) {
 
-       val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
-      r.setSeriesPaint(0, Color.BLUE); 
-   	 r.setSeriesPaint(1, Color.BLUE);
+   if (xy) {
+      val n = chart.getXYPlot().getSeriesCount()
+      val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
+      if (shape) {
+      //  val square = new Rectangle2D.Double(-2.0, -2.0, 2.0, 2.0);
+      //  r.setSeriesShape(0, square);
+
+      } else {
+        for (i <- 0 until Math.min(n, colors.size)) r.setSeriesPaint(i, colors(i))
+      }
+      //r.setBaseShapesVisible(true);
+      //r.setBaseShapesFilled(true);
+      // r.setDrawSeriesLineAsPath(true);
+      chart.getXYPlot().setRenderer(r);
+    }
+    if (save) {
+
+      /*   val dashedStroke = new BasicStroke(
+      1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+      1.0f, Array(10.0f, 6.0f), 0.0f)
+
+      val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
+      r.setSeriesPaint(0, Color.RED);       
+ 	 		r.setSeriesPaint(1, Color.RED);
       r.setSeriesStroke(1, dashedStroke)
-  		r.setSeriesPaint(2, Color.BLUE); r.setSeriesPaint(3, Color.BLUE);
+   		r.setSeriesPaint(2, Color.BLUE); r.setSeriesPaint(3, Color.BLUE);
       r.setSeriesStroke(3, dashedStroke)
-      r.setSeriesPaint(4, Color.GREEN); r.setSeriesPaint(5, Color.GREEN);
-      r.setSeriesStroke(5, dashedStroke)
+ //    r.setSeriesPaint(4, Color.GREEN); r.setSeriesPaint(5, Color.GREEN);
+ //     r.setSeriesStroke(5, dashedStroke)
 
       r.setBaseShapesVisible(false);
       r.setBaseShapesFilled(true);
       r.setDrawSeriesLineAsPath(true);
-      chart.getXYPlot().setRenderer(r);*/
+     
+   */
       val plot = chart.getPlot()
-      
+
       plot.setBackgroundPaint(Color.WHITE)
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i + ".jpg"), chart, 500, 300, 2, 2)
       i = i + 1
-
     }
+
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
     val frame = new ApplicationFrame("")

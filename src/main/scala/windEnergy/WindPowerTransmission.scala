@@ -161,7 +161,6 @@ object WindPowerTransmission {
   def weightOnshore(material: Material, power: Power) = {
     transformerStation.weight(material) * power.toMegawatts / 500.0 +
       (internalOnshoreCables.weight(material) + externalOnshoreCables.weight(material)) * power.toMegawatts / 390.0
-
   }
 }
 

@@ -1,11 +1,10 @@
 package windEnergy
 
-import squants.energy.Power
-import squants.energy.Energy
+import squants.energy._
 import squants.space.Length
 import construction._
 import squants.SquantifiedDouble
-import squants.energy.Gigajoules
+import gridData.GridCell
 
 /**
  * A wind farm consists of windmills, highvoltage transformer stations and transmission grid.
@@ -16,7 +15,7 @@ import squants.energy.Gigajoules
 object WindFarm {
 
   val availabilityFactor = 1.0
-  val arrrayFactor = 0.9
+  val arrayFactor = 0.9
 
   val turbine = new WindTurbineComponents("2MW")
   def nTurbines(ratedPower: Power) = ratedPower / turbine.ratedPower
@@ -41,8 +40,7 @@ object OffshoreWindFarm {
   def transmission(ratedPower: Power, distanceToShore: Length) = WindPowerTransmission.embodiedEnergyOffshoreTransmission(ratedPower, distanceToShore)
 
   def embodiedEnergy(ratedPower: Power, distanceToShore: Length, waterDepth: Length): Energy = {
-    println("Offshore" + turbine.embodiedEnergy.toGigajoules/5.0 + "\t" + foundations(waterDepth).embodiedEnergy.toGigajoules /5.0+ "\t" +transmission(ratedPower, distanceToShore).toGigajoules)
-    
+    println("Offshore" + turbine.embodiedEnergy.toGigajoules/5.0 + "\t" + foundations(waterDepth).embodiedEnergy.toGigajoules/5.0 + "\t" + transmission(ratedPower, distanceToShore).toGigajoules)
     nTurbines(ratedPower) * (turbine.embodiedEnergy + foundations(waterDepth).embodiedEnergy) + transmission(ratedPower, distanceToShore)
   }
 
@@ -55,15 +53,17 @@ object OffshoreWindFarm {
 
 object SimpleWindFarm {
 
-  val embodiedEnergyPerMW = Gigajoules(15000)
+  val embodiedEnergyPerMW = Gigajoules(15860)
 
   def embodiedEnergy(ratedPower: Power, distanceToShore: Length, waterDepth: Length): Energy = {
-    MultiplyingFactor.factor(waterDepth, distanceToShore) * 1.3 * embodiedEnergyPerMW * ratedPower.toMegawatts
+    MultiplyingFactor.factor(waterDepth, distanceToShore) * embodiedEnergyPerMW * ratedPower.toMegawatts * 1.2
   }
   def embodiedEnergy(ratedPower: Power): Energy = embodiedEnergyPerMW * ratedPower.toMegawatts
 
+  def embodiedEnergy(cell : GridCell): Energy = 
+    if(cell.onshore) embodiedEnergy(Megawatts(1))
+    else embodiedEnergy(Megawatts(1), cell.distanceToCoast, cell.waterDepth)
 }
-
 object MultiplyingFactor {
 
   def factor(depth: Length, distance: Length) = {

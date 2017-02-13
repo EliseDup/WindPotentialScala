@@ -1,12 +1,12 @@
 package windEnergy
 
 import org.apache.commons.math3.distribution.WeibullDistribution
-import utils.PlotHelper
 import squants.motion._
 import squants.space._
 import squants.energy._
 import org.apache.commons.math3.special.Gamma
-import gridData.GridCell
+import gridData._
+import utils._
 
 /**
  * Weibull distribution at 10 m height
@@ -17,6 +17,11 @@ object Weibull {
   def shapeParameter(meanSpeed: Velocity, std: Double) = Math.pow(std / meanSpeed.toMetersPerSecond, -1.086)
   def scaleParameter(meanSpeed: Velocity, k: Double) = meanSpeed / Gamma.gamma(1 + 1.0 / k)
   def meanSpeed(c: Velocity, k: Double) = c * Gamma.gamma(1 + 1.0 / k)
+  
+  // Maximum instant power = 1/2 rho A int0^infty P(v) v^3 dv
+  def maxPower(cell : GridCell): Power = maxPower(cell.windSpeedHub, cell.weibull.kHub, WindPotential.diameterRotor(cell), WindPotential.hubAltitude(cell))
+  def maxPower(meanSpeed: Velocity, k: Double, d: Length = Meters(80), elevation : Length = Meters(90)): Power = 
+    Watts(16.0 / 27 * 0.5 * Thermodynamics.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI * Math.pow(d.toMeters/2,2) * Math.pow(meanSpeed.toMetersPerSecond, 3) *  Gamma.gamma(1 + 3.0 / k) / Math.pow( Gamma.gamma(1 + 1.0 / k),3))
 }
 
 object WeibullParametersExtrapolation {
@@ -52,9 +57,18 @@ object CapacityFactorCalculation {
   // Rated speed vr can be optimized given the Weibull parameter of the wind speed in a location
   val vf = 25.0
   def apply(cell: GridCell): Double = cubic(cell)
-  def general(cell: GridCell): Double = general(cell.weibull.cHub.toMetersPerSecond, cell.weibull.kHub, 4.0,12.0) // (if (cell.onshore) 4.0 else 3.0), (if (cell.onshore) 12 else 11.4))
-  def cubic(cell: GridCell): Double = cubic(cell.weibull.cHub.toMetersPerSecond, cell.weibull.kHub, 4.0,12.0)// (if (cell.onshore) 4.0 else 3.0), (if (cell.onshore) 12 else 11.4))
-
+  def general(cell: GridCell): Double = {
+    (12 to 14).map(i => general(cell.weibull.cHub.toMetersPerSecond, cell.weibull.kHub, 3.0, i)).max
+  }
+  def cubic(cell: GridCell): Double = {
+    (12 to 14).map(i => cubic(cell.weibull.cHub.toMetersPerSecond, cell.weibull.kHub, 3.0, i)).max
+  }
+  
+  // It will always be the lowest right ?!
+  def optimalRatedSpeed(cell : GridCell) : Double = {
+    (22 to 28).map(_*0.5).map(i => (i,cubic(cell.weibull.cHub.toMetersPerSecond, cell.weibull.kHub, 3.0, i))).maxBy(_._2)._1
+  }
+      
   def powerCurve(v: Double, vc: Double, vr: Double) = {
     if (v < vc) 0.0
     else if (v <= vr) (^(v, 3) - ^(vc, 3)) / (^(vr, 3) - ^(vc, 3))
