@@ -11,6 +11,8 @@ import utils.PlotHelper
 import squants.time.Hours
 import utils.Exajoules
 import windEnergy.CapacityFactorCalculation
+import squants.radio.WattsPerSquareMeter
+import windEnergy.GustavsonWakeEffect
 
 object WindGrowth {
 
@@ -100,22 +102,37 @@ object WindGrowth {
 object IEWA2030 {
   def main(args: Array[String]): Unit = {
 
-    val wind = new WorldGrid("europe.txt", Degrees(0.25))
-    val target = Helper.getLines("iewa_2030.txt").map(l => (Country(l(0)), Megawatts(l(1).toDouble)))
+    //  val wind = new WorldGrid("results/europeGridWind.txt", Degrees(0.25))
 
+    val cells = OptimalCapacityDensity.loadCells( (0 to 40).map(_*0.5).toList, "../WindPotentialPy/res_optimalCD_europe")
+    val target = Helper.getLines("results/iewa_2030.txt").map(l => (Country(l(0)), Megawatts(l(1).toDouble), GigawattHours(l(1 + 3).toDouble)))
+    val minEROI = 7
     for (i <- target) {
-      val gr = wind.grids.filter(_.country.equals(i._1)).filter(WindPotential.suitabilityFactor(_) > 0).sortBy(g => -CapacityFactorCalculation(g))
+
+      val gr = cells.filter(_.country.contains(i._1.name)).filter(_.suitableArea.toSquareKilometers > 0).filter(_.getOptimalCD(minEROI).toWattsPerSquareMeter > 0).sortBy(-_.cf)
       val cellIterator = gr.toIterator
+
       var addedPower = Watts(0)
       var addedProduction = WattHours(0)
+
       while (cellIterator.hasNext && Math.abs(addedPower.toMegawatts - i._2.toMegawatts) > 0.01) {
         var next = cellIterator.next
-        val pow = List(WindPotential.powerInstalled(next), i._2 - addedPower).min
+        val pow = List(next.powerInstalled(true, minEROI), i._2 - addedPower).min
         addedPower = addedPower + pow
-        addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * Hours(365 * 24)
+        addedProduction = addedProduction + pow * next.cf * GustavsonWakeEffect.wakeEffect(pow / Megawatts(2), next.lambda(next.getOptimalCD(minEROI))) * Hours(365 * 24)
       }
 
-      println(i._1.name + "\t" + wind.area(gr) + "\t" + i._2.toMegawatts + "\t" + addedPower.toMegawatts + "\t" + addedProduction.to(GigawattHours))
+      var extraCapacityNeeded = Watts(0)
+      var extraProduction = WattHours(0)
+      while (cellIterator.hasNext && (extraProduction + addedProduction) < i._3) {
+        var next = cellIterator.next
+        val prod = List(next.annualProduction(true, minEROI), i._3 - (extraProduction + addedProduction)).min
+        extraProduction = extraProduction + prod
+        extraCapacityNeeded = extraCapacityNeeded + (prod / (next.cf * GustavsonWakeEffect.wakeEffect(200, next.lambda(next.getOptimalCD(minEROI))) * Hours(365 * 24)))
+
+      }
+
+      println(i._1.name + "\t" + gr.map(_.suitableArea).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers + "\t" + i._2.toMegawatts + "\t" + i._3.toGigawattHours + "\t" + addedPower.toMegawatts + "\t" + addedProduction.to(GigawattHours) + "\t" + extraCapacityNeeded.toMegawatts + "\t" + extraProduction.toGigawattHours)
 
     }
   }

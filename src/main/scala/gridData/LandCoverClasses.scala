@@ -14,9 +14,17 @@ class LandCoverClass(val code: Int, val label: String, val z0: Length, val class
   override def toString() = "Land Cover Class " + code + " : " + label + "," + z0
 
   def noData = classes.noData.contains(code)
-  def waterBodies = classes.waterBodies.contains(code); def ice = classes.ice.contains(code); def bareAreas = classes.bareAreas.contains(code)
-  def grassland = classes.grassland.contains(code); def sparseVegetation = classes.sparseVegetation.contains(code); def croplands = classes.croplands.contains(code); def shrubland = classes.shrubland.contains(code); def wetlands = classes.wetlands.contains(code)
-  def mosaicVegetationCropland = classes.mosaicVegetationCropland.contains(code); def floodedAreas = classes.floodedAreas.contains(code); def mosaicGrasslandForestShrubland = classes.mosaicGrasslandForestShrubland.contains(code);
+  def waterBodies = classes.waterBodies.contains(code); 
+  def ice = classes.ice.contains(code); 
+  def bareAreas = classes.bareAreas.contains(code)
+  def grassland = classes.grassland.contains(code); 
+  def sparseVegetation = classes.sparseVegetation.contains(code); 
+  def croplands = classes.croplands.contains(code); 
+  def shrubland = classes.shrubland.contains(code); 
+  def wetlands = classes.wetlands.contains(code)
+  def mosaicVegetationCropland = classes.mosaicVegetationCropland.contains(code); 
+  def floodedAreas = classes.floodedAreas.contains(code); 
+  def mosaicGrasslandForestShrubland = classes.mosaicGrasslandForestShrubland.contains(code);
   def urbanAreas = classes.urbanAreas.contains(code)
   def forests = classes.forests.contains(code)
 

@@ -11,6 +11,9 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import au.com.bytecode.opencsv.CSVWriter
 import scala.collection.mutable.ArrayBuffer
+import utils.Helper
+import java.io.PrintStream
+import java.util.Locale
 
 /**
  *  Ligne du csv :
@@ -22,6 +25,8 @@ class MeteoEntry(val station: MeteoStation, time: DateTime, val temp: Double, va
 
   val windSpeed = windSpeedkmh / 3.6
   override def toString() = "Meteo for " + time + ", temp :" + temp + ", wind : " + windSpeed + "[m/s]"
+  override def toTxt() = time.toString(DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")) + "\t" + temp.toString +"\t" + windDir.toString + "\t" +windSpeed.toString
+
 }
 
 object MeteoEntry {
@@ -47,6 +52,7 @@ object MeteoEntry {
     case None => 0.0
     case Some(d) => d
   }
+  
 }
 
 /**
@@ -79,13 +85,18 @@ class MeteoData(val station: MeteoStation, val start: DateTime, val end: DateTim
   def createMeteoDay(i: Int): List[MeteoEntry] = {
     @transient val dayFormat = DateTimeFormat.forPattern("yyyy/MM/dd")
     val day = start.plusDays(i).toString(dayFormat)
-     if(start.plusDays(i).dayOfYear()==0) println("Load meteo for " + day)
-    val urlString = "http://www.wunderground.com/history/airport/" +
+    //if (start.plusDays(i).dayOfMonth() == 1) 
+    println("Load meteo for " + day)
+    val urlString = "https://www.wunderground.com/history/airport/" +
       station.stationID + "/" +
       day +
       "/DailyHistory.html?req_city=Bruxelles&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1"
-
-    val csv = fromInputStream(new URL(urlString).openStream).getLines
+    val csv =
+      try {
+        fromInputStream(new URL(urlString).openStream).getLines
+      } catch {
+        case e: Exception => List()
+      }
     (for (line <- csv; if !line.contains("Time") && line.nonEmpty && line.split(",").size > 1) yield MeteoEntry(station, day, line.split(","))).toList
   }
 
@@ -102,5 +113,15 @@ class MeteoData(val station: MeteoStation, val start: DateTime, val end: DateTim
       writer.writeNext(Array(i.time.toDate.toString, i.temp.toString, i.windDir.toString, i.windSpeed.toString))
     }
     out.close
+  }
+}
+
+class MeteoDataLoaded(val file: String) extends HistoricalData[Observation]("Wind") {
+  def createData = {
+    val lines = Helper.getLines(file, "\t")
+    lines.filter(_.nonEmpty).map(l => new Observation(DateTime.parse(l(0), DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")), l(3).toDouble, "Wind"))
+  }
+  def mean(t: DateTime, list: List[Observation]) = {
+    new Observation(t, list.map(_.value).sum / list.size, "Wind")
   }
 }

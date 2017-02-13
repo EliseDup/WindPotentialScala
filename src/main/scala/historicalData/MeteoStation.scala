@@ -27,7 +27,7 @@ object MeteoStation {
 
 class MeteoStations extends Serializable {
   val stations = {
-    val wb = new HSSFWorkbook(new FileInputStream(new File("data/wunderground_stations.xls")))
+    val wb = new HSSFWorkbook(new FileInputStream(new File("ressources/wunderground_stations.xls")))
     val sheet = wb.getSheetAt(0)
     for (r <- 1 to sheet.getLastRowNum) yield MeteoStation(sheet.getRow(r))
   }

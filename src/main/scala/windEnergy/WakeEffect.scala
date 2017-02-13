@@ -4,7 +4,29 @@ import squants.space.Length
 import squants.space.Area
 import squants.SquantifiedDouble
 import squants.SquantifiedLong
-
+/**
+ * From Gustavson : Limits to Wind Power Density (1979)
+ * We approach the values presented in the report with a negative exponential ~ y = a exp (-bx)
+ * x = lambda = Area_rotor / Area_turbine = (𝜋D²/4) / nD * nD = 𝜋 / 4n²
+ * Parameter a and b are calculated with 'nls' (nonlinear least squares) function in R
+ * 
+ * Values are found for arrays of 5x5, 10x10, 50x50 and ~ Infinite size
+ */
+object GustavsonWakeEffect {
+  val a5 = 0.9943; val b5 = 5.2661;
+  val a10 = 0.9871; val b10 = 11.7542;
+  val a50 = 0.9838; val b50 = 42.5681;
+  val aInf = 0.9619; val bInf = 88.9204;
+  
+  def exp(lambda: Double, a: Double, b: Double) = a * Math.exp(-b * lambda)
+  def wakeEffect(nT: Double, lambda: Double, inf : Boolean = false) = {
+    if (nT <= 25) exp(lambda, a5, b5)
+    else if (nT <= 100) exp(lambda, a10, b10)
+    else if(inf) exp(lambda, aInf, bInf)
+    else exp(lambda, a50, b50)
+    
+  }
+}
 /**
  * Array sizeTurbine spacing
  * Array efficiency(%)
@@ -16,8 +38,8 @@ import squants.SquantifiedLong
  * 10x10 										49  63  73  79  84  87
  *
  * From : A methodological review to estimate techno-economical wind energy production - Julieta Schallenberg-Rodriguez
- * 
- * 
+ *
+ *
  */
 
 object WakeEffect {
@@ -38,10 +60,10 @@ object WakeEffect {
 
   def nTurbines(x: Length, y: Length, d: Length, nDiameters: Int) = (x / (nDiameters * d) * y / (nDiameters * d))
   def nTurbines(area: Area, d: Length, nDiameters: Int) = area / ((d * nDiameters) * (d * nDiameters))
-  
-  def wakeEffect(area: Area, d: Length, nDiameters: Int) : Double = wakeEffect(nTurbines(area,d,nDiameters), nDiameters)
+
+  def wakeEffect(area: Area, d: Length, nDiameters: Int): Double = wakeEffect(nTurbines(area, d, nDiameters), nDiameters)
   def wakeEffect(nTurbines: Double, nDiameters: Int) = {
-    // if(nTurbines >= 100*100) 0.62
+    if(nTurbines >= 100*100) 0.62
     val nIndex =
       if (nTurbines <= n(0)) 0
       else if (nTurbines <= n(1)) 1
@@ -53,6 +75,6 @@ object WakeEffect {
       else if (nDiameters > 9) 9
       else nDiameters
     array(nD)(nIndex)
-    
+
   }
 }
