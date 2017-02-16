@@ -94,8 +94,8 @@ object WindPotentialSimulation {
 
   }
   def plotSpeedVSArea(world: WorldGrid, gr: List[GridCell]) {
-    val vHub = world.listValueVSArea(gr.map(g => (g.windSpeedHub.value, g.area)))
-    val vHubGeo = world.listValueVSArea(gr.map(g => (g.windSpeedHub.value, g.area * WindPotential.suitabilityFactor(g))))
+    val vHub = world.listValueVSArea(gr.map(g => (g.windSpeed.value, g.area)))
+    val vHubGeo = world.listValueVSArea(gr.map(g => (g.windSpeed.value, g.area * WindPotential.suitabilityFactor(g))))
 
     PlotHelper.plotXY(List((vHub._1, vHub._2, "Total"), (vHubGeo._1, vHubGeo._2, "Suitability Factor")), xLabel = "Area [millions km2]", yLabel = "Wind Speed [m/s]")
   }

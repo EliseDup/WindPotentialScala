@@ -22,11 +22,13 @@ import squants.space.Degrees
 import squants.space.Angle
 import org.apache.poi.ss.usermodel.Row
 import squants.space.Area
+import squants.space.Length
+import squants.motion.Velocity
 
 object Helper {
-  val ressourcesPy = "/Users/Elise/Documents/workspace/ressources/"
+  val ressourcesPy = "/Users/Elise/Documents/workspace/resources/"
   val resultsPy = "/Users/Elise/Documents/workspace/WindPotentialPy/results/"
-  val ressources = "/Users/Elise/Documents/workspace/WindPotential/ressources/"
+  val ressources = "/Users/Elise/Documents/workspace/WindPotential/resources/"
 
   def getLines(file: String, delimiter: String = "\t") = Source.fromFile(file).getLines().toList.map(_.split(delimiter))
 
@@ -92,6 +94,9 @@ object Helper {
     val wb = new HSSFWorkbook(inp)
     wb.getSheet(sheetName)
   }
+ 
+  // Logarithmic Wind Profile
+  def windSpeedAt(windSpeed0 : Velocity,h0: Length, z0 : Length,height: Length): Velocity = Math.log(height / z0) / Math.log(h0 / z0) * windSpeed0
 
   /**
    * y(x) = A (x-x1)(x-x2) + B (x-x1)(x-x3) + C (x-x2)(x-x3)

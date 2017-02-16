@@ -90,7 +90,7 @@ object WindGrowth {
     val F_acc = Newtons(1.1918E14) / world.totalArea
     val z_0 = Millimeters(1)
     val C_DN = 0.0013
-    val v_hub_0 = MetersPerSecond(world.grids.map(g => g.windSpeedHub.toMetersPerSecond * g.area.toSquareKilometers).sum / world.totalArea.toSquareKilometers)
+    val v_hub_0 = MetersPerSecond(world.grids.map(g => g.windSpeed.toMetersPerSecond * g.area.toSquareKilometers).sum / world.totalArea.toSquareKilometers)
 
     def C_ex = 0.0013
 

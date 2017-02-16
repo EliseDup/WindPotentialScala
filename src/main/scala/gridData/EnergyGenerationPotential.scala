@@ -76,10 +76,10 @@ object WindPotential extends EnergyGenerationPotential {
     res
   }
 
-  // Measurement of wind speed is taken at 10 metres height
-  def hubAltitude(cell: GridCell) = Meters(Math.max(0.0, cell.elevation.toMeters) + cell.hubHeight.toMeters)
+  // Estimation of wind speed is for 100 metres height
+  def hubAltitude(cell: GridCell) = Meters(Math.max(0.0, cell.elevation.toMeters) + 100)
   def powerDensity(cell: GridCell) = Thermodynamics.powerDensity(cell.windSpeed, hubAltitude(cell))
-  def powerDensityAtHub(cell: GridCell) = Thermodynamics.powerDensity(cell.windSpeedHub, hubAltitude(cell))
+  def powerDensityAtHub(cell: GridCell) = Thermodynamics.powerDensity(cell.windSpeed, hubAltitude(cell))
 
   /**
    * Onshore we restrict the area to altitude < 2000 m
@@ -122,7 +122,7 @@ object WindPotential extends EnergyGenerationPotential {
 
   def loadHoursLinear(cell: GridCell) =
     // EU REPORT
-    Hours(Math.max(0, Math.min(5500, 626.51 * cell.windSpeedHub.value - 1901)))
+    Hours(Math.max(0, Math.min(5500, 626.51 * cell.windSpeed.value - 1901)))
   // HOOGWIJK REPORT -> 
   // Hours(Math.max(0, Math.min(4000, 565 * windSpeedAtHub(cell).value - 1745)))
 
@@ -130,9 +130,6 @@ object WindPotential extends EnergyGenerationPotential {
   def availabilityFactor(cell: GridCell): Double = 1.0 // if (cell.offshore /*|| cell.elevation.toMeters >= 600*/ ) 0.9 else 0.97
   def lossFactor(cell: GridCell, suitabilityF: Option[Double] = None, density: Option[Irradiance] = None): Double = wakeEffect(cell, suitabilityF, density)
   def lossFactor(cell: GridCell): Double = wakeEffect(cell)
-
-  def maxExergy(cell: GridCell) = maxPowerDensity(cell) * cell.area
-  def maxPowerDensity(cell: GridCell) = cell.kineticEnergyDissipation * 0.385
 
   override def EROI(cell: GridCell, suitabilityF: Option[Double] = None, density: Option[Irradiance] = None): Double = {
     if (suitabilityF.getOrElse(suitabilityFactor(cell)) == 0) 0.0
