@@ -17,14 +17,14 @@ import utils._
 import windEnergy.CapacityFactorCalculation
 import windEnergy.SimpleWindFarm
 
-class WorldGrid(val name: String, val gridSize: Angle) {
+class WorldGrid(val name: String, val gridSize: Angle, val old : Boolean = false) {
 
-  val grids: List[GridCell] = Helper.getLines(name).map(l => GridCell(l, gridSize)).toList
+  val grids: List[GridCell] = Helper.getLines(name).map(l => 
+    if(old)GridCell(l,gridSize) else GridCell.applyNew(l, gridSize)).toList
   
   // Sum v^2 * Area
   val totalDissipation = Terawatts(875.0/3)
   val totalSquareSpeedArea = grids.map(c => Math.pow(c.windSpeed.toMetersPerSecond,2) * c.area.toSquareMeters).sum
-  val totalTauSquareSpeedArea = grids.map(c => c.kineticEnergyDissipation.toWattsPerSquareMeter * c.area.toSquareMeters).sum
   
   def constrainedGrids(potential: EnergyGenerationPotential) = grids.filter(g => potential.suitabilityFactor(g) > 0)
   val onshoreGrids = grids.filter(g => g.onshore && g.center.latitude.toDegrees > -60)
@@ -36,8 +36,6 @@ class WorldGrid(val name: String, val gridSize: Angle) {
   val totalArea = area()
   def area(gr: List[DefaultGridCell] = grids) = gr.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
   def suitableArea(gr: List[GridCell] = grids, potential: EnergyGenerationPotential) = gr.map(g => g.area * WindPotential.suitabilityFactor(g)).foldLeft(SquareKilometers(0))(_ + _)
-
-  def dissipation(gr: List[GridCell] = grids) = gr.map(g => g.kineticEnergyDissipation * g.area).foldLeft(Watts(0))(_ + _)
 
   def country(c: Country) = grids.filter(_.country.equals(c))
 
@@ -72,15 +70,22 @@ class WorldGrid(val name: String, val gridSize: Angle) {
   def writeGrid(name: String, gr: List[GridCell] = grids) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     gr.map(g => {
-      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" + g.windSpeedHub.toMetersPerSecond
-   /*  "\t"+     CapacityFactorCalculation(g).toString +" \t"+
+      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" + 
+          g.windSpeed.toMetersPerSecond.toString + "\t"+
+          g.weibull.c.toMetersPerSecond.toString + "\t" + 
+          g.weibull.k.toString + "\t" +
+          CapacityFactorCalculation(g).toString + "\t"+
+          
+         WindPotential.suitabilityFactor(g).toString + "\t" +
+         g.estimatedDissipation(this).toWattsPerSquareMeter.toString +
+          /*  CapacityFactorCalculation(g) + "\t"+
           g.area.toSquareKilometers.toString + "\t" + 
           (g.area.toSquareKilometers*WindPotential.suitabilityFactor(g)).toString + "\t" +
           WindPotential.diameterRotor(g).toKilometers.toString + "\t" +
           WindPotential.nominalPower(g).toMegawatts.toString + "\t" +
           SimpleWindFarm.embodiedEnergy(g).toMegawattHours.toString 
         //  + "\t" + g.country.toString*/
-        +"\n")
+        "\n")
 
     })
     out_stream.close()

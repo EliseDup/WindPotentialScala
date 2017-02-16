@@ -115,13 +115,13 @@ object PlotHelper {
       }
     }
     val chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
-    createFrame(chart, save = false)
+    createFrame(chart, save = false,xy=false)
   }
   def scatterPlot(values: List[(Double, Double)], title: String = "", xLabel: String = "", yLabel: String = "") {
     val plot = new FastScatterPlot(Array(values.map(_._1.toFloat).toArray, values.map(_._2.toFloat).toArray),
       new NumberAxis(xLabel), new NumberAxis(yLabel));
     val chart = new JFreeChart(title, plot);
-    createFrame(chart, true)
+    createFrame(chart, true, xy=false)
   }
   def createFrame(chart: JFreeChart, save: Boolean = true, shape: Boolean = false, xy: Boolean = true) {
 
