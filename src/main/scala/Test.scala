@@ -22,8 +22,8 @@ import org.joda.time.Years
 object Test {
   def main(args: Array[String]): Unit = {
 
-    val world = new WorldGrid("../WindPotentialPy/results/10years_grid", Degrees(0.75))
-    world.writeGrid("cf")
+    val world = new WorldGrid("../model_data/data+cd_0_75_16_02.txt", Degrees(0.75))
+    world.writeGrid("grid0_75_suitable", world.grids.filter(_.waterDepth.toMeters <= 1000))
     println(world.grids.map(g => g.estimatedDissipation(world) * g.area).foldLeft(Watts(0))(_ + _).to(Terawatts))
     
     /*   

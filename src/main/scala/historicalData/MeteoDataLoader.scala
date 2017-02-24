@@ -37,16 +37,20 @@ object MeteoDataLoader {
    */
   val stations = new MeteoStations()
 
-  val cities = stations.stations.filter(s => s.city.equals("Brussels"))
-
+  val cities = stations.stations.filter(_.countryID.equals("BX")).filter(_.stationID.nonEmpty).filter(s => !s.city.equals("Ostende") && !s.city.equals("Koksijde"))
   def main(args: Array[String]) = {
-        
     val start = new DateTime(2012, 1, 1, 0, 0)
     val end = new DateTime(2016, 12, 31, 0, 0)
     cities.map(c => {
       println("Load Meteo for :" + c.city)
       val res = new MeteoData(c, start, end)
-      res.writeToTxt("results/meteo"+c.city)
+      res.writeToTxt("results/meteo/meteo" + c.city + "5years")
+      val obs = new MeteoDataLoaded("results/meteo/meteo" + c.city + "5years")
+      val out_stream = new PrintStream(new java.io.FileOutputStream("results/hourly/wind" + c.city + "5years"))
+      obs.hourlyAverages.map(i => out_stream.print(i.toTxt() + "\n"))
+      out_stream.close()
+      println(c.city + " printed")
+
     })
     println("Finished")
   }
@@ -54,20 +58,18 @@ object MeteoDataLoader {
 
 object Test {
   def main(args: Array[String]) = {
-    val obs = new MeteoDataLoaded("results/meteoBrussels")
-    
-     val out_stream = new PrintStream(new java.io.FileOutputStream("BrusselsHourlyWind"))
+    val obs = new MeteoDataLoaded("results/meteo/meteoKoksijde5years")
+
+    val out_stream = new PrintStream(new java.io.FileOutputStream("results/hourly/windKoksijde5years"))
     obs.hourlyAverages.map(i => out_stream.print(i.toTxt() + "\n"))
     out_stream.close()
     println("printed")
-    
+
     PlotHelper.plotTime(
-        List( 
-            (obs.hourlyAverages.map(_.time), obs.hourlyAverages.map(_.value),"Hour"),
-            (obs.dailyAverages.map(_.time), obs.dailyAverages.map(_.value),"Day"),
-            (obs.monthlyAverages.map(_.time), obs.monthlyAverages.map(_.value),"Month")
-            ))
-    
+      List(
+        (obs.hourlyAverages.map(_.time), obs.hourlyAverages.map(_.value), "Hour"),
+        (obs.dailyAverages.map(_.time), obs.dailyAverages.map(_.value), "Day"),
+        (obs.monthlyAverages.map(_.time), obs.monthlyAverages.map(_.value), "Month")))
 
   }
 }

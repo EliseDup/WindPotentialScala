@@ -17,10 +17,9 @@ import utils._
 import windEnergy.CapacityFactorCalculation
 import windEnergy.SimpleWindFarm
 
-class WorldGrid(val name: String, val gridSize: Angle, val old : Boolean = false) {
+class WorldGrid(val name: String, val gridSize: Angle) {
 
-  val grids: List[GridCell] = Helper.getLines(name).map(l => 
-    if(old)GridCell(l,gridSize) else GridCell.applyNew(l, gridSize)).toList
+  val grids: List[GridCell] = Helper.getLines(name).map(GridCell(_,gridSize))
   
   // Sum v^2 * Area
   val totalDissipation = Terawatts(875.0/3)
@@ -33,10 +32,8 @@ class WorldGrid(val name: String, val gridSize: Angle, val old : Boolean = false
   def offshoreGrids(maxDepth : Length):List[GridCell] = offshoreGrids.filter(_.waterDepth <= maxDepth)
   def offshoreConstrainedGrids(potential: EnergyGenerationPotential) = offshoreGrids.filter(g => potential.suitabilityFactor(g) > 0)
 
-  val totalArea = area()
-  def area(gr: List[DefaultGridCell] = grids) = gr.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
-  def suitableArea(gr: List[GridCell] = grids, potential: EnergyGenerationPotential) = gr.map(g => g.area * WindPotential.suitabilityFactor(g)).foldLeft(SquareKilometers(0))(_ + _)
-
+  val totalArea = Helper.area(grids)
+  
   def country(c: Country) = grids.filter(_.country.equals(c))
 
   def listValueVSArea(gr: List[(Double, Area)]) = listValueVSCumulated(gr.map(g => (g._1, g._2.to(SquareKilometers) / (1E6))))
@@ -70,15 +67,12 @@ class WorldGrid(val name: String, val gridSize: Angle, val old : Boolean = false
   def writeGrid(name: String, gr: List[GridCell] = grids) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     gr.map(g => {
-      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" + 
-          g.windSpeed.toMetersPerSecond.toString + "\t"+
-          g.weibull.c.toMetersPerSecond.toString + "\t" + 
-          g.weibull.k.toString + "\t" +
-          CapacityFactorCalculation(g).toString + "\t"+
-          
-         WindPotential.suitabilityFactor(g).toString + "\t" +
-         g.estimatedDissipation(this).toWattsPerSquareMeter.toString +
-          /*  CapacityFactorCalculation(g) + "\t"+
+      out_stream.print(g.center.longitude.value.toString + "\t" + g.center.latitude.value.toString + /* "\t" + 
+          WindPotential.suitabilityFactor(g).toString + "\t" +
+          g.landCovers.bareAreas.toString + "\t" +
+          g.landCovers.waterBodies.toString + "\t" +
+          g.landCovers.indexes.map(i => i._1*i._2).sum.toString + 
+           CapacityFactorCalculation(g) + "\t"+
           g.area.toSquareKilometers.toString + "\t" + 
           (g.area.toSquareKilometers*WindPotential.suitabilityFactor(g)).toString + "\t" +
           WindPotential.diameterRotor(g).toKilometers.toString + "\t" +
