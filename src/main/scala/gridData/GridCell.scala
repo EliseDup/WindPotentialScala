@@ -20,94 +20,92 @@ import squants.UnitOfMeasure
 import squants.Quantity
 
 case class Country(val name: String)
-
-class MeteoData[A <: Quantity[_]](val mean : A, val perMonth : Array[A])
+/**
+ * Class to model observations with a global mean and a mean per month (useful for solar irradiance !)
+ */
+class MeteoData[A <: Quantity[_]](val mean: A, val perMonth: Array[A])
 
 /**
+ * Basic object of our model : A grid cell with detailed information about land cover use, country etc
+ *
+ * Land Covers : List ( % cell's area , globcover land cover index )
  * Calculate the cell size in km^2
  * Lat,Lon represent the center of the cell
  * =>
- * lat+0125/2	 ___________  lat+0125/2
- * lon-0.125/2|						| lon+0.125/2
- *    				|						|
- *    				|			o 		|
- *    				|						|
- *            |						|
- *             ___________
- * lat-0125/2							 lat-0125/2
- * lon-0.125/2				     lon+0.125/2
+ * lat+resolution/2	 ___________  lat+resolution/2
+ * lon-resolution/2|						| lon+resolution/2
+ *    						 |						|
+ *    						 |			o 		|
+ *    						 |						|
+ *            		 |						|
+ *            		   ___________
+ * lat-resolution/2						 lat-resolution/2
+ * lon-resolution/2				     lon+resolution/2
  *
  */
-
-class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val lc: LandCoverClass,
-
-    val urbanFactor: Double, val protectedArea: Boolean, val country: Country) {
+class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers: DetailedLandCover, val protectedArea: Boolean, val country: Country, val elevation: Length) {
 
   val s = gridSize / 2.0;
+
   val area = Helper.areaRectangle(center, gridSize)
   val meanLonDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude - s, center.longitude + s)) +
     Helper.distance(GeoPoint(center.latitude + s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
   val meanLatDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude - s)) +
     Helper.distance(GeoPoint(center.latitude - s, center.longitude + s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
-  
-    
-}
 
-class GridCellSolar(center: GeoPoint, gridSize: Angle, lc: LandCoverClass, urbanFactor: Double,
-    protectedArea: Boolean, country: Country, val irradiance: MeteoData[Irradiance]) extends DefaultGridCell(center, gridSize, lc, urbanFactor, protectedArea, country) {
-  def pvPotential = Watts(irradiance.mean.toWattsPerSquareMeter) * Hours(8760.0)
-}
+  val onshore = elevation.value >= 0
+  val offshore = elevation.value < 0
+  val altitude = if (offshore) Meters(0) else elevation
+  val waterDepth = if (onshore) Meters(0) else -elevation
 
-object GridCellSolar {
-  def apply(l: Array[String], gridSize: Angle) = {
-    new GridCellSolar(GeoPoint(Degrees(l(0).toDouble), Degrees(l(1).toDouble)),
-      gridSize, LandCover.landCover(l(2), l(3), l(4)), l(5).toDouble / 225.0, l(6).toInt == 1,
-      Country(l(7)),
-       new MeteoData[Irradiance](WattsPerSquareMeter(l(8).toDouble), (0 until 12).map(i => WattsPerSquareMeter(if(l.size > 8+i) l(8+i).toDouble else 0.0)).toArray))
-  }
 }
 
 /**
  *
- * Mean wind speed calculated from data of ERA-40 dataset
+ * Mean wind speed calculated from data of ERA-Interim dataset
  *
- * Land cover classes used : corine land cover when available
- *
- * Otherwise GlobCover2009, and 0.5 km MODIS-based Global Land Cover Climatology when no modis was available
+ * Land Cover from : GlobCover2009, and 0.5 km MODIS-based Global Land Cover Climatology when no GlobCover was available
+ * Protected Area from world protected area dataset
  *
  * SEE http://www.globalwindatlas.com/datasets.html
  *
- *
  */
 
-class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle, lc: LandCoverClass, urbanFactor: Double,
-    protectedArea: Boolean, country: Country,
+class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
+    landCovers: DetailedLandCover,
+    protectedArea: Boolean,
+    country: Country,
+    elevation: Length,
+    val distanceToCoast: Length,
+
     val windSpeed: Velocity,
     val windSpeedStandardDeviation: Double,
-    val elevation: Length, 
-    val distanceToCoast: Length,
-    val tau : Pressure,
-    val irradiance: MeteoData[Irradiance]) extends DefaultGridCell(center, gridSize, lc, urbanFactor, protectedArea, country) {
+    val optimalCD: Map[Double, (Boolean, Irradiance)],
+    val tau: Pressure,
+    val irradiance: MeteoData[Irradiance]) extends DefaultGridCell(center, gridSize, landCovers, protectedArea, country, elevation) {
 
-  override def toString() = "Grid Object center : " + center + ", mean wind speed : " + windSpeed + ", land cover : " + lc
+  override def toString() = "Grid Object center : " + center + ", mean wind speed : " + windSpeed
 
-  val onshore = elevation.value >= 0
-  val offshore = elevation.value < 0
   def EROI(potential: EnergyGenerationPotential) = potential.EROI(this)
+
+  def dissipation: Irradiance = WattsPerSquareMeter(tau.toPascals * windSpeed.toMetersPerSecond)
+  def estimatedDissipation(world: WorldGrid) =
+    if (area.toSquareKilometers == 0) WattsPerSquareMeter(0)
+    else world.totalDissipation / area * (Math.pow(windSpeed.toMetersPerSecond, 2) * area.toSquareMeters / world.totalSquareSpeedArea)
   
-  def dissipation : Irradiance = WattsPerSquareMeter(tau.toPascals * windSpeed.toMetersPerSecond)
-  def estimatedDissipation(world : WorldGrid) = 
-    if(area.toSquareKilometers==0) WattsPerSquareMeter(0) 
-    else world.totalDissipation / area * (Math.pow(windSpeed.toMetersPerSecond,2) * area.toSquareMeters / world.totalSquareSpeedArea)
-  
+  def suitableArea = WindPotential.suitabilityFactor(this) * area
+
   /**
    * Shape parameter k[-] and scale parameters c [m/s]
    * of the Weibull distribution
    */
   val weibull = WeibullParameters(windSpeed, windSpeedStandardDeviation)
-  
-  def altitude = if(offshore) Meters(0) else elevation
-  def waterDepth = if(onshore) Meters(0) else -elevation
+
+  def getOptimalCD(e: Double) =
+    if (!optimalCD.keySet.contains(e)) WattsPerSquareMeter(0)
+    else if (!optimalCD(e)._1) WattsPerSquareMeter(0)
+    else optimalCD(e)._2
+
 }
 /**
  * Latitude	Longitude	Corine Land Cover	GlobCover	Modis	Urban Factor	Protected area ?	Country	Elevation [m]	Distance to Coast [km]	Uwind	Vwind	Wind	Std Wind	KineticEnergyDissipation Irradiance
@@ -115,31 +113,43 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle, lc
  */
 
 object GridCell {
-  def apply(l: Array[String], gridSize: Angle) = {
-    val lc = LandCover.landCover(l(2), l(3), l(4))
-    new GridCell(l, center(l), gridSize, lc, l(5).toDouble / 225.0, l(6).toInt == 1,
-      Country(l(7)),
-      Helper.windSpeedAt(velocity(l, 12), Meters(10), lc.z0, Meters(100)), l(13).toDouble,
-      Meters(l(8).toDouble), Kilometers(l(9).toDouble),
-      if(l.size > 16) Pascals(l(16).toDouble) else Pascals(0),
-      new MeteoData[Irradiance](WattsPerSquareMeter(l(16).toDouble), (0 until 12).map(i => WattsPerSquareMeter(if(l.size > 16+i) l(16+i).toDouble else 0.0)).toArray))
-  }
-
   def velocity(line: Array[String], index: Int) = MetersPerSecond(line(index).toDouble)
   def center(line: Array[String]) = GeoPoint(Degrees(line(0).toDouble), Degrees(line(1).toDouble))
   /**
    * CSV LINE :
-   * [0] Latitude, [1] Longitude, [2] U wind, [3] V wind, [4] Mean Speed, [5] SUM ( speed time i - mean speed)^2, 
-   * [6] # Observations, [7] Standard deviation (= SQRT(5/6))
-   * [8] Corine Land Cover, [9] Modis Land Cover, [10] GLobCover, [11] # Urban Cells / (15*15), [12] Elevation, [13] Distance to nearest coast, [14] Protected Area
-   * [15] Country Name
+   * [0] Latitude, [1] Longitude,
+   * [2-24] Detailed Land Covers,
+   * [25] U wind, [26] V wind, [27] Mean Speed, [28] SUM ( speed time i - mean speed)^2,
+   * [29] # Observations, [30] Standard deviation (= SQRT(28/29))
+   * [31] Elevation, [32] Distance to nearest coast, [33] Protected Area
+   * [34] Country Name
    */
-  def applyNew(l: Array[String], gridSize: Angle) = {
+  def apply(l: Array[String], gridSize: Angle) = {
+    val indexes = Array(11, 14, 20, 30, 40, 50, 60, 70, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230)
+    val sumLC = (0 until 23).map(i => l(i + 2).toDouble).sum
+    val lcs = for (i <- (0 until 23); if (l(i + 2).toDouble > 0)) yield (l(i + 2).toDouble / sumLC, indexes(i))
+    val i = 24
     new GridCell(l, center(l), gridSize,
-        LandCover.landCover(l(8), l(9), l(10)), l(11).toDouble / 225.0, l(14).toInt == 1, Country(l(15)),
-        MetersPerSecond(l(4).toDouble), l(7).toDouble,
-        Meters(l(12).toDouble), Kilometers(l(13).toDouble),
-        Pascals(0), new MeteoData[Irradiance](WattsPerSquareMeter(0), (0 until 12).map(i => WattsPerSquareMeter(0.0)).toArray)) //TODO ?!
-        
+      new DetailedLandCover(lcs.toList),
+      l(i + 9).toInt == 1,
+      Country(l(i + 10)),
+      Meters(l(i + 7).toDouble), Kilometers(l(i + 8).toDouble),
+      MetersPerSecond(l(i + 3).toDouble), l(i + 6).toDouble,
+      if (l.size > 35) (for (e <- (0 until 40); if (l(e * 2 + 35).toDouble > 0)) yield (e * 0.5, (l(e * 2 + 36).toBoolean, WattsPerSquareMeter(l(e * 2 + 35).toDouble)))).toMap else Map(),
+      Pascals(0), new MeteoData[Irradiance](WattsPerSquareMeter(0), (0 until 12).map(i => WattsPerSquareMeter(0.0)).toArray)) //TODO ?!
+
   }
+
+  /*def apply(l: Array[String], gridSize: Angle) = {
+    val lcs = (0 to 23).filter(i => l(i+2).toDouble > 0).map(i => (l(i+2).toDouble / 225.0, GlobCoverClasses.indexes(i))).toList
+    val lc = LandCover.landCover(l(2), l(3), l(4))
+    new GridCell(l, center(l), gridSize, new DetailedLandCover(lcs),
+      l(6).toInt == 1,
+      Country(l(7)),
+      Meters(l(8).toDouble),
+      Helper.windSpeedAt(velocity(l, 12), Meters(10), lc.z0, Meters(100)), l(13).toDouble,
+      Kilometers(l(9).toDouble),
+      if (l.size > 16) Pascals(l(16).toDouble) else Pascals(0),
+      new MeteoData[Irradiance](WattsPerSquareMeter(l(16).toDouble), (0 until 12).map(i => WattsPerSquareMeter(if (l.size > 16 + i) l(16 + i).toDouble else 0.0)).toArray))
+  }*/
 }

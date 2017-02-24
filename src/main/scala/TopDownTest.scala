@@ -11,6 +11,7 @@ import utils.Exajoules
 import windEnergy.GustavsonWakeEffect
 import squants.space.Meters
 import squants.radio.Irradiance
+import utils.Helper
 
 object TopDownTest {
 
@@ -34,7 +35,7 @@ object TopDownTest {
     val list = minSpeed.map(v => {
       (cd, cd.map(c => {
         val cs = cells(v)
-        val area = world.area(cs)
+        val area = Helper.area(cs)
         cs.map(g => {
           val e = ((Math.min(1.0, c * CapacityFactorCalculation(g) * 0.9)) / (c * CapacityFactorCalculation(g)))
           (e * g.area / area)

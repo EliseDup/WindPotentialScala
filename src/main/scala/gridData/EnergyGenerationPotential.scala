@@ -16,8 +16,9 @@ trait EnergyGenerationPotential {
   // [0.0 -> 1.0] a multiplicating factor for the available area, 
   // indicating the part of the grid cell that can be used for the renewable technology
   def suitabilityFactor(cell: GridCell): Double = {
-    if (cell.protectedArea) 0.0
-    else (1.0 - cell.urbanFactor) * landUseFactor(cell)
+   // if (cell.protectedArea) 0.0
+    //else landUseFactor(cell)
+    landUseFactor(cell)
   }
   def suitableArea(cell: GridCell) = cell.area * suitabilityFactor(cell)
   // % of area of the cell that is available for this technology
@@ -53,13 +54,7 @@ object WindPotential extends EnergyGenerationPotential {
     GustavsonWakeEffect.wakeEffect(nTurbines(cell, suitabilityFactor, density), lambda)
   }
 
-  def capacityDensity(cell: GridCell, maxDensity: Double = 5.0) = WattsPerSquareMeter(2) 
-  
-    //4/(Math.PI * 42.5681) *  nominalPower(cell) / (diameterRotor(cell) * diameterRotor(cell)) 
-   //val max = (0.385 * cell.kineticEnergyDissipation / (CapacityFactorCalculation(cell) * 0.9 * availabilityFactor(cell))).toWattsPerSquareMeter
-    //val max = 1.0 / (CapacityFactorCalculation(cell) * 0.9 * availabilityFactor(cell))
-    //WattsPerSquareMeter(Math.min(max, maxDensity))
-  
+  def capacityDensity(cell: GridCell, maxDensity: Double = 5.0) = WattsPerSquareMeter(2)
 
   def nTurbines(cell: GridCell, suitabilityF: Option[Double] = None, density: Option[Irradiance] = None) = cell.area * suitabilityF.getOrElse(suitabilityFactor(cell)) * density.getOrElse(capacityDensity(cell)) / nominalPower(cell)
 
@@ -87,7 +82,7 @@ object WindPotential extends EnergyGenerationPotential {
    * We exclude all the areas that are protected
    *
    */
-  def elevationFactor(cell: GridCell) = {
+  def elevationFactor(cell: GridCell): Double = {
     if (cell.onshore)
       if (cell.elevation.toMeters <= 2000) 1.0 else 0.0
     else if (cell.offshore)
@@ -95,29 +90,26 @@ object WindPotential extends EnergyGenerationPotential {
     else 0.0
   }
 
-  def landUseFactor(cell: GridCell) = {
+  def landUseFactor(cell: GridCell): Double = {
     if (cell.center.latitude.toDegrees < -60) 0.0
-    else {
-      val cover = cell.lc
-      elevationFactor(cell) * (
-        if (cell.onshore) {
-          if (cover.croplands) 0.7
-          else if (cover.grassland || cover.sparseVegetation || cover.bareAreas) 0.8
-          else if (cover.shrubland) 0.5
-          else if (cover.mosaicGrasslandForestShrubland) 0.5 * 0.5 + 0.5 * 0.8
-          else if (cover.mosaicVegetationCropland) 0.5 * 0.7 + 0.5 * 0.8
-          else if (cover.forests) 0.1
-          else 0.0
-        } else {
-          // EU Report 4 % of 0-10 km, 10 % of 10-50km, 25 % of > 50 km
-          // NREL Report 0 % of 0-5 Nm, 33% of 5-20 Nm, 67% of > 20 Nm
-          val d = cell.distanceToCoast.toNauticalMiles
-          if (d < 5) 0.1
-          else if (d < 20) 0.33
-          else 0.67
-        })
-    }
+    else elevationFactor(cell) *
+      (if (cell.onshore) {
+        cell.landCovers.croplands * 0.7 +
+          (cell.landCovers.grassland + cell.landCovers.sparseVegetation + cell.landCovers.bareAreas) * 0.9 +
+          cell.landCovers.shrubland * 0.5 +
+          cell.landCovers.mosaicGrasslandForestShrubland * (1.0/3*(0.1+0.5+0.8)) +
+          cell.landCovers.mosaicVegetationCropland * (0.5 * 0.5 + 0.5 * 0.8)+
+          cell.landCovers.forests * 0.1
+      } else {
+        // EU Report 4 % of 0-10 km, 10 % of 10-50km, 25 % of > 50 km
+        // NREL Report 0 % of 0-5 Nm, 33% of 5-20 Nm, 67% of > 20 Nm
+        val d = cell.distanceToCoast.toNauticalMiles
+        if (d < 5) 0.1
+        else if (d < 20) 0.33
+        else 0.67
+      })
   }
+
   def windRegimeFactor(cell: GridCell) = if (cell.windSpeed.toMetersPerSecond >= 4) 1.0 else 0.0
 
   def loadHoursLinear(cell: GridCell) =
@@ -127,7 +119,7 @@ object WindPotential extends EnergyGenerationPotential {
   // Hours(Math.max(0, Math.min(4000, 565 * windSpeedAtHub(cell).value - 1745)))
 
   // EU Report
-  def availabilityFactor(cell: GridCell): Double = 1.0 // if (cell.offshore /*|| cell.elevation.toMeters >= 600*/ ) 0.9 else 0.97
+  def availabilityFactor(cell: GridCell): Double = if (cell.offshore) 0.9 else 0.97
   def lossFactor(cell: GridCell, suitabilityF: Option[Double] = None, density: Option[Irradiance] = None): Double = wakeEffect(cell, suitabilityF, density)
   def lossFactor(cell: GridCell): Double = wakeEffect(cell)
 
@@ -160,11 +152,9 @@ object WindPotential extends EnergyGenerationPotential {
 object SolarPotential extends EnergyGenerationPotential {
 
   def landUseFactor(cell: GridCell) = {
-    val cover = cell.lc
-    if (cover.croplands || cover.shrubland || cover.sparseVegetation) 0.01
-    else if (cover.mosaicGrasslandForestShrubland || cover.mosaicVegetationCropland) 0.01
-    else if (cover.grassland || cover.bareAreas) 0.05
-    else 0.0
+        (cell.landCovers.croplands + cell.landCovers.shrubland + cell.landCovers.sparseVegetation) * 0.01 +
+        (cell.landCovers.mosaicGrasslandForestShrubland + cell.landCovers.mosaicVegetationCropland) * 0.01 +
+        (cell.landCovers.grassland + cell.landCovers.bareAreas) * 0.05
   }
 
   def availabilityFactor(cell: GridCell) = 0.9

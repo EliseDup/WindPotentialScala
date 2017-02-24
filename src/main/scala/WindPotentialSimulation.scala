@@ -122,13 +122,13 @@ object WindPotentialSimulation {
       val res = world.listValueVSArea(grids.map(g => (g.irradiance.mean.toWattsPerSquareMeter, g.area * SolarPotential.suitabilityFactor(g))))
       (res._1, res._2, name)
     }
-    PlotHelper.plotXY(List(listIrradianceVSArea(grids.filter(g => g.lc.croplands || g.lc.mosaicVegetationCropland), "Croplands"),
+ /*   PlotHelper.plotXY(List(listIrradianceVSArea(grids.filter(g => g.lc.croplands || g.lc.mosaicVegetationCropland), "Croplands"),
       listIrradianceVSArea(grids.filter(_.lc.bareAreas), "Bare areas"),
       listIrradianceVSArea(grids.filter(g => g.lc.grassland || g.lc.mosaicGrasslandForestShrubland), "Grassland"),
       listIrradianceVSArea(grids.filter(_.lc.shrubland), "Shrubland"),
       listIrradianceVSArea(grids.filter(_.lc.sparseVegetation), "Sparse Vegetation")), xLabel = "Suitable Area [million km2]",
       yLabel = "Irradiance [W/m2]", legend = true)
-
+*/
   }
   def technicalPotential(grids: List[GridCell], potential: EnergyGenerationPotential = WindPotential) {
     PlotHelper.histogram(grids.map(potential.energyGeneratedPerYear(_).to(TerawattHours)), n = 20, xLabel = "Technical potential in grid cell [TWh]", yLabel = "# Grid cells")
@@ -149,7 +149,7 @@ object WindPotentialSimulation {
     }
     print("Total", grids)
     print("protected", grids.filter(_.protectedArea))
-
+/*
     print("WaterBodies", grids.filter(_.lc.waterBodies))
     print("Ice", grids.filter(_.lc.ice))
     print("BareAreas", grids.filter(_.lc.bareAreas))
@@ -163,7 +163,7 @@ object WindPotentialSimulation {
     print("MosaicGrasslandForest", grids.filter(_.lc.mosaicGrasslandForestShrubland))
     print("UrbanAreas", grids.filter(_.lc.urbanAreas))
     print("Forests", grids.filter(_.lc.forests))
-    print("NoData", grids.filter(_.lc.noData))
+    print("NoData", grids.filter(_.lc.noData))*/
   }
   def solarPerMonth(grids: List[GridCell]) {
     def energyGenerated(month: Int) = grids.map(g => SolarPotential.energyGeneratedPerMonth(g, month).to(Exajoules)).sum

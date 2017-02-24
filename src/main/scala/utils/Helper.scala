@@ -17,13 +17,10 @@ import java.io.File
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.hssf.usermodel.HSSFSheet
 import squants.Meters
-import squants.space.SquareMeters
-import squants.space.Degrees
-import squants.space.Angle
+import squants.space._
 import org.apache.poi.ss.usermodel.Row
-import squants.space.Area
-import squants.space.Length
 import squants.motion.Velocity
+import gridData._
 
 object Helper {
   val ressourcesPy = "/Users/Elise/Documents/workspace/resources/"
@@ -164,6 +161,11 @@ object Helper {
     val upperRightCorner = GeoPoint(center.latitude + resolution/2.0, center.longitude + resolution/2.0)
     areaRectangle(lowerLeftCorner, upperRightCorner)
   }
+  
+  def area(gr: List[GridCell]) = gr.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
+  def suitableArea(gr: List[GridCell], potential: EnergyGenerationPotential) = gr.map(g => g.area * WindPotential.suitabilityFactor(g)).foldLeft(SquareKilometers(0))(_ + _)
+  def mean(values: List[(GridCell, Double)]) = values.map(i => i._1.area*i._2).foldLeft(SquareKilometers(0))(_+_) / area(values.map(_._1))
+  
 }
 case class GeoPoint(val latitude: Angle, val longitude: Angle) {
   override def toString() = "Point of latitude " + latitude + ", longitude :" + longitude

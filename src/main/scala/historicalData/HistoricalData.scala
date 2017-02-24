@@ -25,7 +25,10 @@ abstract class HistoricalData[A <: Observation](name: String) extends Serializab
   val times = observations.map(_.time)
   val values = observations.map(_.value)
   
-  def nDays = Days.daysBetween(observations(0).time, observations(n - 1).time).getDays() + 1
+  def nDays = {
+    println(observations(0).time + "\t" + observations(n - 1).time+  "\t" + Days.daysBetween(observations(0).time, observations(n - 1).time).getDays())
+    Days.daysBetween(observations(0).time, observations(n - 1).time).getDays() + 1
+  }
   
   def nMonths = Months.monthsBetween(observations(0).time, observations(n - 1).time).getMonths() + 1
 
@@ -34,13 +37,13 @@ abstract class HistoricalData[A <: Observation](name: String) extends Serializab
   def sameMonth(d1: DateTime, d2: DateTime): Boolean = d1.monthOfYear == d2.monthOfYear
 
   def hourlyAverages = {
-    (for (i <- 0 until Math.min(365,nDays); h <- 0 until 24) yield {
+    (for (i <- 0 to Math.min(365,nDays); h <- 0 until 24) yield {
       val day = observations(0).time.withTimeAtStartOfDay.plusDays(i).plusHours(h)
       mean(day,observations.filter(i => sameHour(day, i.time)).filter(_.value > 0))
     }).toList
   }
   def dailyAverages = {
-    (for (i <- 0 until Math.min(365,nDays) ) yield {
+    (for (i <- 0 to Math.min(365,nDays) ) yield {
       val day = observations(0).time.withTimeAtStartOfDay.plusDays(i)
       mean(day,observations.filter(i => sameDay(day, i.time)).filter(_.value > 0))
     }).toList
