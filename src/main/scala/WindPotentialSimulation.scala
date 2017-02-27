@@ -1,7 +1,6 @@
 import construction.Materials
-import gridData._
+import grid._
 import squants.space._
-import windEnergy.WindTurbineWithPower
 import utils.PlotHelper
 import squants.energy._
 import squants.space._
@@ -15,7 +14,7 @@ import java.io.File
 import java.io.PrintStream
 import java.io.FileOutputStream
 import utils.Helper.Point
-import windEnergy._
+import wind_energy._
 import scala.io.Source
 import org.jfree.data.category.DefaultCategoryDataset
 import org.apache.commons.math3.special.Gamma

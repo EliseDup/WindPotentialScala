@@ -4,7 +4,7 @@ import squants.energy._
 import squants.mass._
 import utils._
 import squants.space._
-import transportation.Transport
+import utils.Transport
 
 /**
  * A component is just a list of materials and mass

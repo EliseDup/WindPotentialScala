@@ -9,9 +9,9 @@ import utils.PlotHelper
 import squants.space.Degrees
 import squants.space.SquareKilometers
 import squants.energy._
-import gridData.WorldGrid
-import windEnergy.WindTurbine
-import windEnergy.WindTurbineWithPower
+import grid.WorldGrid
+import wind_energy.WindTurbine
+import wind_energy.WindTurbineWithPower
 
 object GUI extends SimpleSwingApplication {
    
