@@ -1,16 +1,14 @@
 
 
-import windEnergy._
+import wind_energy._
 import squants.motion._
 import squants.space._
-import gridData._
-import gridData.WindPotential
+import grid._
 import squants.time.Hours
 import org.apache.commons.math3.special.Gamma
 import org.jfree.chart.plot.FastScatterPlot
 import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.ChartFactory
-import windEnergy.WindPowerTransmission
 import squants.energy._
 import utils._
 import squants.radio.WattsPerSquareMeter

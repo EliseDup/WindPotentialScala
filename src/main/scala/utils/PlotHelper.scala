@@ -9,10 +9,10 @@ import org.jfree.chart.plot._
 import org.jfree.chart.JFreeChart
 import org.jfree.data.category.DefaultCategoryDataset
 
-import historicalData.WindEnergyData
+import historical_data.WindEnergyData
 import org.jfree.data.general.DefaultPieDataset
-import historicalData.MeteoData
-import historicalData.Observation
+import historical_data.MeteoData
+import historical_data.Observation
 import org.jfree.chart.axis._
 import org.jfree.data.statistics._
 import org.jfree.ui.RectangleEdge

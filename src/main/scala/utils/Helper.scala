@@ -4,9 +4,9 @@ import java.io.ObjectOutputStream
 import java.io.FileOutputStream
 import java.io.ObjectInputStream
 import java.io.FileInputStream
-import historicalData.MeteoData
-import historicalData.Observation
-import historicalData.PowerGenerationObservation
+import historical_data.MeteoData
+import historical_data.Observation
+import historical_data.PowerGenerationObservation
 import org.apache.poi.hssf.usermodel.HSSFRow
 import org.joda.time.DateTime
 import java.util.Date
@@ -20,7 +20,7 @@ import squants.Meters
 import squants.space._
 import org.apache.poi.ss.usermodel.Row
 import squants.motion.Velocity
-import gridData._
+import grid._
 
 object Helper {
   val ressourcesPy = "/Users/Elise/Documents/workspace/resources/"
