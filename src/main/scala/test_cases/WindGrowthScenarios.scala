@@ -129,7 +129,7 @@ object GreenPeace {
     }
 
   }
-  def lambda(cell: GridCell, cd: Irradiance) = cd * (WindPotential.diameterRotor(cell) * WindPotential.diameterRotor(cell)) / WindPotential.nominalPower(cell) * Math.PI / 4
+  def lambda(cell: GridCell, cd: Irradiance) = 1.0 //TODO // cd * (WindPotential.diameterRotor(cell) * WindPotential.diameterRotor(cell)) / WindPotential.nominalPower(cell) * Math.PI / 4
 
 }
 
@@ -180,6 +180,6 @@ object IEWA2030 {
     out_stream.close()
   }
 
-  def lambda(cell: GridCell, cd: Irradiance) = cd * (WindPotential.diameterRotor(cell) * WindPotential.diameterRotor(cell)) / WindPotential.nominalPower(cell) * Math.PI / 4
+  def lambda(cell: GridCell, cd: Irradiance) = 1.0 //TODO // cd * (WindPotential.diameterRotor(cell) * WindPotential.diameterRotor(cell)) / WindPotential.nominalPower(cell) * Math.PI / 4
 
 }

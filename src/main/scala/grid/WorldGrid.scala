@@ -17,7 +17,8 @@ import utils._
 import wind_energy._
 
 object WorldGrid {
-  def apply() = new WorldGrid("../model_data/data+cd_0_75", Degrees(0.75))
+  def apply() = new WorldGrid("../model_data/test_n", Degrees(0.75))
+  def simple() = new WorldGrid("../model_data/data0_75", Degrees(0.75))
 }
 class WorldGrid(val name: String, val gridSize: Angle) {
 
@@ -78,15 +79,11 @@ class WorldGrid(val name: String, val gridSize: Angle) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +  "\t" +
-         g.wind71m.mean.value.toString + "\t" + 
-         g.wind100m.mean.value.toString + "\t" + 
-         g.wind125m.mean.value.toString +
-          
-          
-       /*   "\t" + g.wind125m.mean.toMetersPerSecond.toString + "\t" +  g.wind71m.mean.toMetersPerSecond.toString + "\t" + 
-          (CapacityFactorCalculation(g)*100).toString + "\t" + (WindPotential.suitabilityFactor(g)*100).toString +
-         "\t" + (g.protectedArea*100).toString + "\t" + g.distanceToCoast.toKilometers.toString +*/
-        "\n")
+        
+         g.wind100m.c.value.toString + "\t" +g.wind100m.k.toString +
+         "\t" + g.area.toSquareKilometers.toString + "\t" + g.suitableArea.toSquareKilometers.toString+
+         "\t" + WindPotential.energyInputs(Megawatts(1), Megawatts(1)*0.2*Hours(365*24*25), g).toMegawattHours.toString +
+      "\n")
 
     })
     out_stream.close()
@@ -102,9 +99,9 @@ class WorldGrid(val name: String, val gridSize: Angle) {
     gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +
            "\t"+ CapacityFactorCalculation(g).toString + "\t" + (if(g.waterDepth.toMeters > 1000) 0.0 else g.area.toSquareKilometers.toString) + 
-           "\t" + g.suitableArea.toSquareKilometers.toString + "\t" + WindPotential.diameterRotor(g).toKilometers.toString +
-           "\t" + WindPotential.nominalPower(g).toMegawatts.toString + "\t" + 
-          ( if(g.onshore) SimpleWindFarm.embodiedEnergy(Megawatts(1)).to(MegawattHours) else SimpleWindFarm.embodiedEnergy(Megawatts(1), g.distanceToCoast, g.waterDepth).to(MegawattHours)) +
+           "\t" + g.suitableArea.toSquareKilometers.toString + "\t" +
+          ( if(g.onshore) WindFarmEnergyInputs.onshoreEnergyInputs(Megawatts(1),Megawatts(1)*25*Hours(365*24)*CapacityFactorCalculation(g), g.distanceToCoast).to(MegawattHours) 
+              else WindFarmEnergyInputs.offshoreEnergyInputs(Megawatts(1), Megawatts(1)*25*Hours(365*24)*CapacityFactorCalculation(g), g.waterDepth, g.distanceToCoast).to(MegawattHours)) +
            "\n")
     })
   out_stream.close()
