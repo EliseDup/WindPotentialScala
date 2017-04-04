@@ -47,7 +47,7 @@ class MeteoData[A <: Quantity[_]](val mean: A, val perMonth: Array[A]) {
  * lon-resolution/2				     lon+resolution/2
  *
  */
-class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers: DetailedLandCover, val protectedArea: Double, val country: Country, val elevation: Length) {
+class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers: DetailedLandCover, val protectedArea: Double, val country: Country, val elevation: Length, val distanceToCoast : Length) {
 
   val s = gridSize / 2.0;
 
@@ -57,12 +57,13 @@ class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers:
   val meanLatDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude - s)) +
     Helper.distance(GeoPoint(center.latitude - s, center.longitude + s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
 
-  val onshore = elevation.value >= 0
-  val offshore = elevation.value < 0
+  val onshore = distanceToCoast.value <= 0
+  val offshore = !onshore
   val altitude = if (offshore) Meters(0) else elevation
   val waterDepth = if (onshore) Meters(0) else -elevation
-
-  def area(lcType: LandCoverType): Area = landCovers.types.filter(_._2.equals(lcType)).map(_._1).sum * area
+  
+  def proportion  (lcType: LandCoverType): Double = landCovers.types.filter(_._2.equals(lcType)).map(_._1).sum
+  def area(lcType: LandCoverType): Area = proportion(lcType) * area
 
 }
 
@@ -82,12 +83,12 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     protectedArea: Double,
     country: Country,
     elevation: Length,
-    val distanceToCoast: Length,
+    distanceToCoast: Length,
     val wind71m: WindProfile,
     val wind125m: WindProfile,
     val irradiance: MeteoData[Irradiance],
     val optimalCD: Map[Double, (Boolean, Irradiance)],
-    val tau: Pressure) extends DefaultGridCell(center, gridSize, landCovers, protectedArea, country, elevation) {
+    val tau: Pressure) extends DefaultGridCell(center, gridSize, landCovers, protectedArea, country, elevation,distanceToCoast) {
 
   override def toString() = "Grid Object center : " + center
   
@@ -129,7 +130,7 @@ object GridCell {
    * [34] -> [116] Pair of (optimal installed capacity, boolean) for EROI 0 -> 20 by 0.5
    * 
    */
-  def apply(l: Array[String], gridSize: Angle) = {
+  def apply(l: Array[String], gridSize: Angle, eroi_min : List[Double] = (0 until 40).map(_*0.5).toList) = {
     val indexes = Array(11, 14, 20, 30, 40, 50, 60, 70, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230)
     val sumLC = (3 until 26).map(i => l(i).toDouble).sum
     val lcs = for (i <- (3 until 26); if (l(i).toDouble > 0)) yield (l(i).toDouble / sumLC, indexes(i-3))
@@ -142,7 +143,7 @@ object GridCell {
       new WindProfile(MetersPerSecond(l(31).toDouble), l(32).toDouble,Meters(71)),
       new WindProfile(MetersPerSecond(l(29).toDouble), l(30).toDouble,Meters(125)),
       new MeteoData[Irradiance](WattsPerSquareMeter(0), Array()),
-      if (l.size > 34) (for (e <- (0 until 40); if (l(e * 2 + 34).toDouble > 0)) yield (e * 0.5, (l(e * 2 + 35).toBoolean, WattsPerSquareMeter(l(e * 2 + 34).toDouble)))).toMap else Map(),
+      if (l.size > 34) (for (e <- (0 until eroi_min.size); if (l(e * 2 + 34).toDouble > 0)) yield (eroi_min(e), (l(e * 2 + 35).toBoolean, WattsPerSquareMeter(320.0 / Math.pow(l(e * 2 + 34).toDouble,2))))).toMap else Map(),
       Pascals(l(33).toDouble))
   }
 }

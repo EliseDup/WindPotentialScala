@@ -9,15 +9,16 @@ import construction.Material
 import grid.WorldGrid
 import utils.Thermodynamics
 import squants.time.Hours
+import squants.motion.Velocity
+import squants.motion.MetersPerSecond
 
 object WindPotential extends EnergyGenerationPotential {
 
-  def nominalPower(cell: GridCell) = if (cell.onshore) Megawatts(2) else Megawatts(5)
-  def diameterRotor(cell: GridCell) = if (cell.onshore) Meters(80) else Meters(126)
+  // def diameterRotor(cell: GridCell) = if (cell.onshore) Meters(80) else Meters(126)
 
   // A turbine occupied nD * nD space
   def nd(cell: GridCell, suitabilityFactor: Option[Double] = None, density: Option[Irradiance] = None) = {
-    Math.sqrt(nominalPower(cell).toWatts / (density.getOrElse(capacityDensity(cell)).toWattsPerSquareMeter * (diameterRotor(cell).toMeters * diameterRotor(cell)).toMeters))
+    Math.sqrt(314.0 / density.getOrElse(capacityDensity(cell)).toWattsPerSquareMeter)
   }
 
   def wakeEffect(cell: GridCell, suitabilityFactor: Option[Double] = None, density: Option[Irradiance] = None) = gustavsonArrayEffect(cell, suitabilityFactor, density) // WakeEffect.wakeEffect(100, Math.ceil(nd(cell, suitabilityFactor, density)).toInt)
@@ -29,6 +30,7 @@ object WindPotential extends EnergyGenerationPotential {
 
   def capacityDensity(cell: GridCell, maxDensity: Double = 5.0) = WattsPerSquareMeter(2)
 
+  def nominalPower(cell: GridCell) = if (cell.onshore) Megawatts(3) else Megawatts(8)
   def nTurbines(cell: GridCell, suitabilityF: Option[Double] = None, density: Option[Irradiance] = None) = cell.area * suitabilityF.getOrElse(suitabilityFactor(cell)) * density.getOrElse(capacityDensity(cell)) / nominalPower(cell)
 
   def weight(cell: GridCell, material: Material, suitabilityF: Option[Double] = None, density: Option[Irradiance] = None) = WindFarm.weight(material, powerInstalled(cell, suitabilityF, density))
@@ -82,7 +84,7 @@ object WindPotential extends EnergyGenerationPotential {
   }
 
   // EU Report
-  def availabilityFactor(cell: GridCell): Double = if (cell.offshore) 0.9 else 0.97
+  def availabilityFactor(cell: GridCell): Double = if (cell.offshore) 0.95 else 0.97
   def lossFactor(cell: GridCell, suitabilityF: Option[Double] = None, density: Option[Irradiance] = None): Double = wakeEffect(cell, suitabilityF, density)
   def lossFactor(cell: GridCell): Double = wakeEffect(cell)
 
@@ -90,23 +92,36 @@ object WindPotential extends EnergyGenerationPotential {
     if (suitabilityF.getOrElse(suitabilityFactor(cell)) == 0 || cell.area.value == 0) 0.0
     else {
       val pow = density.getOrElse(capacityDensity(cell)) * suitabilityF.getOrElse(suitabilityFactor(cell)) * cell.area
-      val out = 20 * energyGeneratedPerYear(cell, suitabilityF, density)
-      val in =
-        (if (cell.onshore) SimpleWindFarm.embodiedEnergy(pow)
-        else SimpleWindFarm.embodiedEnergy(pow, cell.distanceToCoast, -cell.elevation))
+      val out = 25 * energyGeneratedPerYear(cell, suitabilityF, density)
+      val in = energyInputs(pow, out, cell)
       out / in
     }
   }
-
+  def energyInputs(installedCapacity: Power, energyOutput: Energy, cell: GridCell) = {
+     (if (cell.onshore) onshoreEnergyInputs(installedCapacity, energyOutput, cell.distanceToCoast)
+      else offshoreEnergyInputs(installedCapacity, energyOutput, cell.distanceToCoast, cell.waterDepth))
+  }
+  
+  def offshoreEnergyInputs(installedCapacity: Power, energyOutput: Energy, distanceToCoast: Length, waterDepth: Length) = {
+    WindFarmEnergyInputs.offshoreEnergyInputs(installedCapacity, energyOutput, waterDepth, distanceToCoast)
+  }
+  def onshoreEnergyInputs(installedCapacity: Power, energyOutput: Energy, distanceToCoast: Length) = {
+    WindFarmEnergyInputs.onshoreEnergyInputs(installedCapacity, energyOutput, distanceToCoast)
+  }
   // EROI_1MW = CF * 1MW * 20 ans / Embodied Energy 1 MW (= 15.860 GJ onshore)
   def EROI1MW(cell: GridCell): Double = {
     // We do not install wind turbines deeper than 1000 meters .. At least we don't know how much it will cost in energy !
     if (cell.waterDepth.toMeters > 1000) 0.0
     else {
-      val input =
-        (if (cell.onshore) SimpleWindFarm.embodiedEnergy(Megawatts(1))
-        else SimpleWindFarm.embodiedEnergy(Megawatts(1), cell.distanceToCoast, cell.waterDepth))
-      CapacityFactorCalculation(cell) * Megawatts(1) * Hours(365 * 24 * 20) * 0.9 / input
+      val output = CapacityFactorCalculation(cell) * Megawatts(1) * Hours(365 * 24 * 25) * 0.9
+      val input = energyInputs(Megawatts(1), output, cell)
+      output / input
     }
   }
+
+  // Relationship between rated power, rotor diameter and rated wind speed
+  val cp = 0.45
+  def rotorDiameter(ratedPower: Power, ratedSpeed: Velocity) = Meters(Math.sqrt(ratedPower.toWatts / (0.5 * cp * 1.225 * Math.PI / 4 * Math.pow(ratedSpeed.toMetersPerSecond, 3))))
+  def ratedSpeed(ratedPower: Power, rotorDiameter: Length) = MetersPerSecond(Math.pow(ratedPower.toWatts / (0.5 * cp * 1.225 * Math.PI / 4 * Math.pow(rotorDiameter.toMeters, 2)), 1.0 / 3))
+  def ratedPower(rotorDiameter: Length, ratedSpeed: Velocity) = Watts(0.5 * cp * 1.225 * Math.PI / 4 * Math.pow(rotorDiameter.toMeters, 2) * Math.pow(ratedSpeed.toMetersPerSecond, 3))
 }

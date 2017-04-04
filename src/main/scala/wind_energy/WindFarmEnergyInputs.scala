@@ -8,8 +8,8 @@ import grid.GridCell
 object WindFarmEnergyInputs {
   
   // Energy inputs in transport is in MJ / tkm
-  def truckTransport(weight: Mass, distance: Length) = Megajoules(1.25) * weight.toTonnes * distance.toKilometers
-  def shipTransport(weight: Mass, distance: Length) = Megajoules(0.29) * weight.toTonnes * distance.toKilometers
+  def truckTransport(weight: Mass, distance: Length) = Megajoules(1.25) * weight.toTonnes * Math.abs(distance.toKilometers)
+  def shipTransport(weight: Mass, distance: Length) = Megajoules(0.29) * weight.toTonnes * Math.abs(distance.toKilometers)
 
   val installedCapacity = Gigawatts(1)
 
@@ -34,15 +34,15 @@ object WindFarmEnergyInputs {
   def offshoreOperation(output: Energy) = output.toGigajoules * Gigajoules(0.007)
   def onshoreOperation(output: Energy) = output.toGigajoules * Gigajoules(0.035)
 
-  def offshoreInstallation(distanceToCoast: Length) = Gigajoules(16904) * distanceToCoast.toKilometers
-  def onshoreInstallation(distanceToCoast: Length) = Gigajoules(605.74) * distanceToCoast.toKilometers
+  def offshoreInstallation(distanceToCoast: Length) = Gigajoules(16904) * Math.abs(distanceToCoast.toKilometers)
+  def onshoreInstallation(distanceToCoast: Length) = Gigajoules(605.74) * Math.abs(distanceToCoast.toKilometers)
 
-  def offshoreCablesEnergyAndInstallation(distanceToCoast: Length) = Gigajoules(4681 + 105) * distanceToCoast.toKilometers
+  def offshoreCablesEnergyAndInstallation(distanceToCoast: Length) = Gigajoules(4681 + 105) * Math.abs(distanceToCoast.toKilometers)
   // Operation & Maintenance
-  def offshoreOM(distanceToCoast: Length) = Gigajoules(6615) * distanceToCoast.toKilometers
-  def onshoreOM(distanceToCoast: Length) = Gigajoules(21.3) * distanceToCoast.toKilometers
+  def offshoreOM(distanceToCoast: Length) = Gigajoules(6615) * Math.abs(distanceToCoast.toKilometers)
+  def onshoreOM(distanceToCoast: Length) = Gigajoules(21.3) * Math.abs(distanceToCoast.toKilometers)
   // Decommissioning
-  def offshoreDecommissioning(distanceToCoast: Length) = Gigajoules(12678) * distanceToCoast.toKilometers
+  def offshoreDecommissioning(distanceToCoast: Length) = Gigajoules(12678) * Math.abs(distanceToCoast.toKilometers)
 
   def windFarmEnergyInputs(cell: GridCell, installedCapacity: Power, output : Energy): Energy = {
     if (cell.onshore) onshoreEnergyInputs(installedCapacity, output, -cell.distanceToCoast)

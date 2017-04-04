@@ -39,7 +39,7 @@ object Test {
   }
 
   // From space between turbine and grid cell -> find density = Power / (n*D)^2
-  def ndensity(cell: GridCell, n: Int) = WattsPerSquareMeter(WindPotential.nominalPower(cell).toWatts / Math.pow(WindPotential.diameterRotor(cell).toMeters * n, 2))
+  def ndensity(cell: GridCell, n: Int) = WattsPerSquareMeter(320 / (n*n))
 
   def potentialVSCapacity(grids: List[GridCell], eroiMin: Double) = {
     val d = (1 to 100).map(_ * 0.1).toList

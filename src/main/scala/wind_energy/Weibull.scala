@@ -56,8 +56,8 @@ object CapacityFactorCalculation {
   val vf = 25.0 
   def apply(cell: GridCell): Double = cubic(cell)
 
-  def cubic(cell: GridCell): Double = {
-   cubic(cell.wind100m.c.toMetersPerSecond, cell.wind100m.k, 3.0, 12.0)
+  def cubic(cell: GridCell, vr : Double = 12.0): Double = {
+   cubic(cell.wind100m.c.toMetersPerSecond, cell.wind100m.k, 3.0, vr)
   }
   
   // It will always be the lowest right ?!
@@ -84,7 +84,7 @@ object CapacityFactorCalculation {
   }
 
   def cubic(c: Double, k: Double, vc: Double, vr: Double): Double = {
-  -e(- ^(vf / c, k)) + (3 * ^(c, 3) * Gamma.gamma(3.0 / k)) / (k * (^(vr, 3) - ^(vc, 3))) * (incompleteGamma(3.0 / k, ^(vr / c, k)) - incompleteGamma(3.0 / k, ^(vc / c, k)))
+   -e(- ^(vf / c, k)) + (3 * ^(c, 3) * Gamma.gamma(3.0 / k)) / (k * (^(vr, 3) - ^(vc, 3))) * (incompleteGamma(3.0 / k, ^(vr / c, k)) - incompleteGamma(3.0 / k, ^(vc / c, k)))
   }
 
   def linear(c: Double, k: Double, vc: Double, vr: Double): Double = {
