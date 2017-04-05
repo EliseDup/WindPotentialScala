@@ -87,7 +87,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     val wind71m: WindProfile,
     val wind125m: WindProfile,
     val irradiance: MeteoData[Irradiance],
-    val optimalCD: Map[Double, (Boolean, Irradiance)],
+    val optimalCD: Map[Double, (Velocity, Double)],
     val tau: Pressure) extends DefaultGridCell(center, gridSize, landCovers, protectedArea, country, elevation,distanceToCoast) {
 
   override def toString() = "Grid Object center : " + center
@@ -101,11 +101,11 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     else world.totalDissipation / area * (Math.pow(wind125m.mean.toMetersPerSecond, 2) * area.toSquareMeters / world.totalSquareSpeedArea)
 
   def suitableArea = WindPotential.suitabilityFactor(this) * area
-
-  def getOptimalCD(e: Double) =
+  def installedCapacityDensity(vr : Velocity, n : Double, cp : Double = 0.5) = WattsPerSquareMeter(cp*0.5*1.225*Math.PI/4*Math.pow(vr.toMetersPerSecond,3) / Math.pow(n,2))
+  
+  def getOptimalCD(e: Double) : Irradiance =
     if (!optimalCD.keySet.contains(e)) WattsPerSquareMeter(0)
-    else if (!optimalCD(e)._1) WattsPerSquareMeter(0)
-    else optimalCD(e)._2
+    else installedCapacityDensity(optimalCD(e)._1,optimalCD(e)._2)
 
 }
 /**
@@ -130,7 +130,7 @@ object GridCell {
    * [34] -> [116] Pair of (optimal installed capacity, boolean) for EROI 0 -> 20 by 0.5
    * 
    */
-  def apply(l: Array[String], gridSize: Angle, eroi_min : List[Double] = (0 until 40).map(_*0.5).toList) = {
+  def apply(l: Array[String], gridSize: Angle,eroi_min:List[Double]) = {
     val indexes = Array(11, 14, 20, 30, 40, 50, 60, 70, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230)
     val sumLC = (3 until 26).map(i => l(i).toDouble).sum
     val lcs = for (i <- (3 until 26); if (l(i).toDouble > 0)) yield (l(i).toDouble / sumLC, indexes(i-3))
@@ -143,7 +143,7 @@ object GridCell {
       new WindProfile(MetersPerSecond(l(31).toDouble), l(32).toDouble,Meters(71)),
       new WindProfile(MetersPerSecond(l(29).toDouble), l(30).toDouble,Meters(125)),
       new MeteoData[Irradiance](WattsPerSquareMeter(0), Array()),
-      if (l.size > 34) (for (e <- (0 until eroi_min.size); if (l(e * 2 + 34).toDouble > 0)) yield (eroi_min(e), (l(e * 2 + 35).toBoolean, WattsPerSquareMeter(320.0 / Math.pow(l(e * 2 + 34).toDouble,2))))).toMap else Map(),
+      if (l.size > 34) (for (e <- (0 until eroi_min.size); if (l(e * 3 + 36).toBoolean)) yield (eroi_min(e), (MetersPerSecond(l(e * 3 + 34).toDouble), l(e*3+35).toDouble))).toMap else Map(),
       Pascals(l(33).toDouble))
   }
 }
