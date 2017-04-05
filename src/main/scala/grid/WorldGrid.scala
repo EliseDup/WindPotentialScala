@@ -17,12 +17,13 @@ import utils._
 import wind_energy._
 
 object WorldGrid {
+  def apply(name : String) = new WorldGrid(name, Degrees(0.75))
   def apply() = new WorldGrid("../model_data/test_n", Degrees(0.75))
   def simple() = new WorldGrid("../model_data/data0_75", Degrees(0.75))
 }
-class WorldGrid(val name: String, val gridSize: Angle) {
+class WorldGrid(val name: String, val gridSize: Angle, val eroi_min : List[Double] = (0 until 40).map(_*0.5).toList) {
 
-  val grids: List[GridCell] = Helper.getLines(name).map(GridCell(_,gridSize))
+  val grids: List[GridCell] = Helper.getLines(name).map(GridCell(_,gridSize,eroi_min))
   
   // Sum v^2 * Area
   val totalDissipation = Terawatts(875.0/3)
@@ -79,7 +80,6 @@ class WorldGrid(val name: String, val gridSize: Angle) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString +  "\t" +
-        
          g.wind100m.c.value.toString + "\t" +g.wind100m.k.toString +
          "\t" + g.area.toSquareKilometers.toString + "\t" + g.suitableArea.toSquareKilometers.toString+
          "\t" + WindPotential.energyInputs(Megawatts(1), Megawatts(1)*0.2*Hours(365*24*25), g).toMegawattHours.toString +

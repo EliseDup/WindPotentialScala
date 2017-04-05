@@ -14,8 +14,6 @@ import squants.motion.MetersPerSecond
 
 object WindPotential extends EnergyGenerationPotential {
 
-  // def diameterRotor(cell: GridCell) = if (cell.onshore) Meters(80) else Meters(126)
-
   // A turbine occupied nD * nD space
   def nd(cell: GridCell, suitabilityFactor: Option[Double] = None, density: Option[Irradiance] = None) = {
     Math.sqrt(314.0 / density.getOrElse(capacityDensity(cell)).toWattsPerSquareMeter)
@@ -98,10 +96,10 @@ object WindPotential extends EnergyGenerationPotential {
     }
   }
   def energyInputs(installedCapacity: Power, energyOutput: Energy, cell: GridCell) = {
-     (if (cell.onshore) onshoreEnergyInputs(installedCapacity, energyOutput, cell.distanceToCoast)
-      else offshoreEnergyInputs(installedCapacity, energyOutput, cell.distanceToCoast, cell.waterDepth))
+    (if (cell.onshore) onshoreEnergyInputs(installedCapacity, energyOutput, cell.distanceToCoast)
+    else offshoreEnergyInputs(installedCapacity, energyOutput, cell.distanceToCoast, cell.waterDepth))
   }
-  
+
   def offshoreEnergyInputs(installedCapacity: Power, energyOutput: Energy, distanceToCoast: Length, waterDepth: Length) = {
     WindFarmEnergyInputs.offshoreEnergyInputs(installedCapacity, energyOutput, waterDepth, distanceToCoast)
   }
