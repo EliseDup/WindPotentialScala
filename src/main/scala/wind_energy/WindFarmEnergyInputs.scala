@@ -50,10 +50,10 @@ object WindFarmEnergyInputs {
   }
 
   def onshoreEnergyInputs(installedCap: Power, output : Energy, distanceToCoast: Length): Energy = {
-    (installedCap / installedCapacity) * (fixedOnshore + onshoreOperation(output) + onshoreInstallation(distanceToCoast) + onshoreOM(distanceToCoast))
+    (installedCap / installedCapacity) * (fixedOnshore + onshoreInstallation(distanceToCoast) + onshoreOM(distanceToCoast)) + onshoreOperation(output)
   }
   def offshoreEnergyInputs(installedCap: Power, output : Energy, waterDepth: Length, distanceToCoast: Length): Energy = {
-    (installedCap / installedCapacity) * (offshoreConstructionInputs(waterDepth) + offshoreOperation(output) + offshoreInstallation(distanceToCoast) + offshoreCablesEnergyAndInstallation(distanceToCoast) + offshoreOM(distanceToCoast)) // + offshoreDecommissioning(distanceToCoast))
+    (installedCap / installedCapacity) * (offshoreConstructionInputs(waterDepth) + offshoreInstallation(distanceToCoast) + offshoreCablesEnergyAndInstallation(distanceToCoast) + offshoreOM(distanceToCoast) /*+ offshoreDecommissioning(distanceToCoast)*/)  + offshoreOperation(output)
   }
   
   def offshoreConstructionInputs(depth : Length) = {

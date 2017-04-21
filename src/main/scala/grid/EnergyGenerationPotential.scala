@@ -15,11 +15,8 @@ import utils.TerawattHours
 trait EnergyGenerationPotential {
   // [0.0 -> 1.0] a multiplicating factor for the available area, 
   // indicating the part of the grid cell that can be used for the renewable technology
-  def suitabilityFactor(cell: GridCell): Double = {
-    // if (cell.protectedArea) 0.0
-    //else landUseFactor(cell)
-    landUseFactor(cell)
-  }
+  def suitabilityFactor(cell: GridCell): Double = landUseFactor(cell)
+  
   def suitableArea(cell: GridCell) = cell.area * suitabilityFactor(cell)
   // % of area of the cell that is available for this technology
   def landUseFactor(cell: GridCell): Double
