@@ -27,7 +27,7 @@ import com.sun.image.codec.jpeg.JPEGCodec
 
 object PlotHelper {
 
-  val colors = List(Color.RED, Color.BLUE, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
+  val colors = List(Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
 
   var i = 0
   /**
@@ -59,7 +59,7 @@ object PlotHelper {
   def plotXY(xy: List[((List[Double], List[Double]), String)], xLabel: String, yLabel: String) { plotXY(xy.map(i => (i._1._1, i._1._2, i._2)), xLabel = xLabel, yLabel = yLabel) }
 
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
-    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick : (Boolean,Double,Double)=(false,1,1)) {
+    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
       val serie = new XYSeries(xy._3)
@@ -124,11 +124,11 @@ object PlotHelper {
     val chart = new JFreeChart(title, plot);
     createFrame(chart, true, xy = false)
   }
-  
-  def createFrame(chart: JFreeChart, save: Boolean = true, shape: Boolean = false, xy: Boolean = true, tick : (Boolean,Double,Double)=(false,1,1)) {
 
-    applyChartTheme(chart,tick)
-    
+  def createFrame(chart: JFreeChart, save: Boolean = true, shape: Boolean = false, xy: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+
+    applyChartTheme(chart, tick)
+
     if (xy) {
       val n = chart.getXYPlot().getSeriesCount()
       val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
@@ -136,29 +136,29 @@ object PlotHelper {
       chart.getXYPlot().setRenderer(r);
     }
     if (save) {
+      if (chart.getXYPlot().getSeriesCount() == 6) {
+        val dashedStroke = new BasicStroke(
+          1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
+          1.0f, Array(10.0f, 6.0f), 0.0f)
 
-      /*        val dashedStroke = new BasicStroke(
-      1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-      1.0f, Array(10.0f, 6.0f), 0.0f)
+        val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
+        r.setSeriesPaint(0, Color.RED);
+        r.setSeriesPaint(1, Color.RED);
+        r.setSeriesStroke(1, dashedStroke)
+        r.setSeriesPaint(2, Color.GREEN); r.setSeriesPaint(3, Color.GREEN);
+        r.setSeriesStroke(3, dashedStroke)
+        r.setSeriesPaint(4, Color.BLUE); r.setSeriesPaint(5, Color.BLUE);
+        r.setSeriesStroke(5, dashedStroke)
 
-      val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
-      r.setSeriesPaint(0, Color.RED);       
- 	 		r.setSeriesPaint(2, Color.RED);
-      r.setSeriesStroke(2, dashedStroke)
-   		r.setSeriesPaint(1, Color.BLUE); r.setSeriesPaint(3, Color.BLUE);
-      r.setSeriesStroke(3, dashedStroke)
- //    r.setSeriesPaint(4, Color.GREEN); r.setSeriesPaint(5, Color.GREEN);
- //     r.setSeriesStroke(5, dashedStroke)
+        r.setBaseShapesVisible(false);
+        r.setBaseShapesFilled(true);
+        r.setDrawSeriesLineAsPath(true);
 
-      r.setBaseShapesVisible(false);
-      r.setBaseShapesFilled(true);
-      r.setDrawSeriesLineAsPath(true);
- */
-
+      }
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i + ".jpg"), chart, 500, 270, 5, 5)
       i = i + 1
-    }
 
+    }
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
     val frame = new ApplicationFrame("")
@@ -175,13 +175,13 @@ object PlotHelper {
     val chart = ChartFactory.createPolarChart("Wind direction distrubtion", dataSet, true, true, false)
     createFrame(chart)
   }
-  
+
   def barChart(dataset: DefaultCategoryDataset, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = true) {
     val chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, true, false)
     createFrame(chart)
   }
 
-  def applyChartTheme(chart: JFreeChart, tick : (Boolean,Double,Double)) {
+  def applyChartTheme(chart: JFreeChart, tick: (Boolean, Double, Double)) {
     val chartTheme = StandardChartTheme.createJFreeTheme().asInstanceOf[StandardChartTheme]
 
     // The default font used by JFreeChart unable to render Chinese properly.
@@ -202,18 +202,18 @@ object PlotHelper {
     chartTheme.setSmallFont(smallFont);
     chartTheme.apply(chart);
 
-    if(chart.getLegend()!=null) chart.getLegend().setFrame(BlockBorder.NONE);
+    if (chart.getLegend() != null) chart.getLegend().setFrame(BlockBorder.NONE);
     val plot = chart.getPlot()
     plot.setBackgroundPaint(Color.WHITE)
     plot.setOutlinePaint(Color.WHITE)
-    
-    if(tick._1 && plot.isInstanceOf[XYPlot]) {
+
+    if (tick._1 && plot.isInstanceOf[XYPlot]) {
       val xyPlot = chart.getXYPlot
       xyPlot.getDomainAxis().asInstanceOf[NumberAxis].setTickUnit(new NumberTickUnit(tick._2))
       xyPlot.getRangeAxis().asInstanceOf[NumberAxis].setTickUnit(new NumberTickUnit(tick._3))
-      
+
     }
-    
+
   }
 
 }

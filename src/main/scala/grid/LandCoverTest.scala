@@ -1,4 +1,4 @@
-
+package grid
 
 import squants.space.Degrees
 import utils.PlotHelper
@@ -11,77 +11,85 @@ import squants.space.NauticalMiles
 import utils.TerawattHours
 import squants.space.Area
 import utils.Helper
-import grid._
 import wind_energy.WindPotential
 
 object LandCoverTest {
 
   def main(args: Array[String]): Unit = {
-    val world = new WorldGrid("../model_data/data+cd_0_75_23_02.txt", Degrees(0.75))
-    val grids = world.onshoreGrids ++ world.grids.filter(_.offshore).filter(_.waterDepth.toMeters <= 1000)
-    val be = grids.filter(_.country.name.contains("Belgium"))
 
-    println(be.map(WindPotential.energyGeneratedPerYear(_)).foldLeft(TerawattHours(0))(_ + _).to(TerawattHours))
+    val world = WorldGrid.simple()
+    val grids = world.grids
+    world.writeGrid("simple")
+    val onshore = world.onshoreGrids
+    val offshore = world.offshoreGrids
+    val eez = offshore.filter(_.EEZ)
+    
+    println(grids.map(g => g.area*WindPotential.suitabilityFactor(g)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println(Helper.area(offshore).toSquareKilometers/1E6 + "\t" +Helper.area(eez).toSquareKilometers/1E6)
+    
+    println(offshore.map(g => g.area*WindPotential.suitabilityFactor(g)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    
+    println(Helper.area(eez.filter(_.distanceToCoast.toNauticalMiles < 5)).toSquareKilometers/1E6)
+    println(Helper.area(eez.filter(g => g.distanceToCoast.toNauticalMiles >= 5 && g.distanceToCoast.toNauticalMiles <= 20)).toSquareKilometers/1E6)
+    println(Helper.area(eez.filter(_.distanceToCoast.toNauticalMiles > 20)).toSquareKilometers/1E6)
+    println(Helper.area(eez.filter(_.waterDepth.toMeters > 1000)).toSquareKilometers/1E6)
+        
+    
+    println(Helper.area(onshore).toSquareKilometers/1E6 + "\t" + Helper.area(offshore).toSquareKilometers/1E6 + "\t" +Helper.area(offshore.filter(_.EEZ)).toSquareKilometers/1E6)
+    println(onshore.map(g=> g.area(SparseVegetation)+g.area(Grassland)+g.area(BareAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println(onshore.map(g=> g.area(Forests)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println(onshore.map(g=> g.area(CropLands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println(onshore.map(g=> g.area(Shrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println(onshore.map(g=> g.area(MosaicVegetationCroplands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println(onshore.map(g=> g.area(MosaicGrasslandForestShrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println(onshore.map(g=> g.area(UrbanAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println(onshore.map(g=> g.area(FloodedAreas)+g.area(WaterBodies)+ g.area(Ice)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    
+    println("Protected "+onshore.map(g=> g.protectedArea*g.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
+    
+    println("Altitude "+onshore.filter(g => !excludedCountries.contains(g.country.name) && g.altitude.toMeters > 2000).map(_.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println("Excluded Countries "+onshore.filter(cell => excludedCountries.contains(cell.country.name) || cell.country.name.contains("Is.") || cell.country.name.contains("Islands")).map(_.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    
+    println("Excluded Total" +onshore.filter(g => WindPotential.suitabilityFactor(g) == 0).map(_.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println("Suitable Total" +onshore.map(_.suitableArea).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+  
+    
+    
+    
+  }
+  def printRatio(name: String, grids: List[GridCell]) {
+    val thisArea = Helper.area(grids)
+    println(name + "\t" +
+      thisArea.toSquareKilometers / 1E6 + "\t" +
+      grids.map(g => WindPotential.suitabilityFactor(g) * g.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6 + "\t" +
+      grids.map(g => WindPotential.landUseFactor(g) * g.area / thisArea).sum + "\t" +
+      grids.map(g => WindPotential.suitabilityFactor(g) * g.area / thisArea).sum)
 
-    println(grids.map(_.area.toSquareKilometers).sum / grids.size)
-    println(grids.map(_.meanLatDistance.toKilometers).sum / grids.size)
-    println(grids.map(_.meanLonDistance.toKilometers).sum / grids.size)
+  }
+  def ressourcesByDepth(offshore: List[GridCell], minDepth: Int, maxDepth: Int) = {
+    val gr = offshore.filter(g => g.waterDepth.toMeters >= minDepth && g.waterDepth.toMeters < maxDepth)
+    val area = Helper.area(gr)
+    gr.map(g => Thermodynamics.powerDensity(g.wind125m.mean, g.altitude) * g.area).foldLeft(Watts(0))(_ + _) / area
+  }
+  def ressourcesByDistance(offshore: List[GridCell], min: Int, max: Int) = {
+    val gr = offshore.filter(g => g.distanceToCoast.toKilometers >= min && g.distanceToCoast.toKilometers < max)
+    val area = Helper.area(gr)
+    gr.map(g => g.wind125m.mean.toMetersPerSecond * g.area).foldLeft(SquareKilometers(0))(_ + _) / area
+  }
+  def onshoreRepartition(world : WorldGrid) {
+    val onshore = world.grids.filter(_.onshore)
+    val antarctica = world.grids.filter(_.onshore).filter(_.country.name.equals("Antarctica"))
 
-    println(Helper.area(grids) / world.totalArea)
-    println(grids.map(g => WindPotential.suitabilityFactor(g) * g.area).foldLeft(SquareKilometers(0))(_ + _) / Helper.area(grids))
-    println(Helper.area(world.offshoreGrids).toSquareKilometers / 1E6)
-    val offshore = world.grids.filter(_.offshore).filter(_.waterDepth.toMeters <= 1000)
-
-    val a = offshore.filter(_.distanceToCoast.toNauticalMiles <= 5)
-    val b = offshore.filter(g => g.distanceToCoast.toNauticalMiles > 5 && g.distanceToCoast.toNauticalMiles <= 20)
-    val c = offshore.filter(_.distanceToCoast.toNauticalMiles > 20)
-    println(NauticalMiles(5).toKilometers)
-    println(NauticalMiles(20).toKilometers)
-
-    printRatio("< 5 nmi", a)
-    printRatio("5 -20 nmi", b)
-    printRatio(" > 20 nmi", c)
-   // printRatio("Protected", offshore.filter(_.protectedArea))
-    printRatio("Total", offshore)
-    def printRatio(name: String, grids: List[GridCell]) {
-      val thisArea = Helper.area(grids)
-      println(name + "\t" +
-        thisArea.toSquareKilometers / 1E6 + "\t" +
-        grids.map(g => WindPotential.suitabilityFactor(g) * g.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6 + "\t" +
-        grids.map(g => WindPotential.landUseFactor(g) * g.area / thisArea).sum + "\t" +
-        grids.map(g => WindPotential.suitabilityFactor(g) * g.area / thisArea).sum)
-
+    val area = Helper.area(onshore)
+    printRatio("Total", onshore)
+    // printRatio("Bio", onshore.filter(_.protectedArea))
+    def printRes(name: String, area: Area, totalArea: Area) {
+      println(name + "\t" + area.toSquareKilometers / 1E6 + "\t" + area / totalArea + "\t " + "%")
     }
-    def ressourcesByDepth(minDepth: Int, maxDepth: Int) = {
-      val gr = offshore.filter(g => g.waterDepth.toMeters >= minDepth && g.waterDepth.toMeters < maxDepth)
-      val area = Helper.area(gr)
-      gr.map(g => Thermodynamics.powerDensity(g.wind125m.mean, g.altitude) * g.area).foldLeft(Watts(0))(_ + _) / area
-    }
-    def ressourcesByDistance(min: Int, max: Int) = {
-      val gr = offshore.filter(g => g.distanceToCoast.toKilometers >= min && g.distanceToCoast.toKilometers < max)
-      val area = Helper.area(gr)
-      gr.map(g => g.wind125m.mean.toMetersPerSecond * g.area).foldLeft(SquareKilometers(0))(_ + _) / area
-    }
-    val depth = (0 to 2688).toList
-    val i = (0 until depth.size - 1).toList
-    PlotHelper.plotXY(
-      i.map(depth(_).toDouble).toList,
-      i.map(j => (ressourcesByDistance(depth(j), depth(j + 1)))).toList)
-    onshoreRepartition()
-    def onshoreRepartition() {
-      val onshore = world.grids.filter(_.onshore).filter(_.center.latitude.toDegrees >= -60)
-      val antarctica = world.grids.filter(_.onshore).filter(_.center.latitude.toDegrees < -60)
+    printRatio("Antarctica", antarctica)
+    printRatio("Altitude", onshore.filter(_.elevation.toMeters > 2000))
 
-      val area = Helper.area(onshore)
-      printRatio("Total", onshore)
-     // printRatio("Bio", onshore.filter(_.protectedArea))
-      def printRes(name : String, area : Area,totalArea : Area) {
-        println(name + "\t"+ area.toSquareKilometers / 1E6 + "\t" + area/totalArea + "\t "+ "%")
-      }
-      printRatio("Antarctica", antarctica)
-      printRatio("Altitude", onshore.filter(_.elevation.toMeters > 2000))
-
-    }
   }
 
 }

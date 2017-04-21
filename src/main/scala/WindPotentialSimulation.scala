@@ -82,20 +82,20 @@ object WindPotentialSimulation {
   }
 
   def plotEGenVSArea(world: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
-    val list = world.listValueVSArea(gr.map(g => (potential.energyGeneratedPerYear(g).to(Exajoules), WindPotential.suitabilityFactor(g) * g.area)))
+    val list = Helper.listValueVSArea(gr.map(g => (potential.energyGeneratedPerYear(g).to(Exajoules), WindPotential.suitabilityFactor(g) * g.area)))
     PlotHelper.plotXY(List((list._1, list._2, "")), xLabel = "Area [millions km2]", yLabel = "Energy Generated [EJ/year]")
 
   }
   def plotSpeedVSArea(world: WorldGrid, gr: List[GridCell]) {
-    val vHub = world.listValueVSArea(gr.map(g => (g.wind125m.mean.value, g.area)))
-    val vHubGeo = world.listValueVSArea(gr.map(g => (g.wind125m.mean.value, g.area * WindPotential.suitabilityFactor(g))))
+    val vHub = Helper.listValueVSArea(gr.map(g => (g.wind125m.mean.value, g.area)))
+    val vHubGeo = Helper.listValueVSArea(gr.map(g => (g.wind125m.mean.value, g.area * WindPotential.suitabilityFactor(g))))
 
     PlotHelper.plotXY(List((vHub._1, vHub._2, "Total"), (vHubGeo._1, vHubGeo._2, "Suitability Factor")), xLabel = "Area [millions km2]", yLabel = "Wind Speed [m/s]")
   }
 
   def eroi(world: WorldGrid, gr: List[GridCell], potential: EnergyGenerationPotential) {
-    val all = world.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
-    val landUse = world.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g))), potential)
+    val all = Helper.listEROIVSCumulatedProduction(gr.map(g => (g, 1.0)), potential)
+    val landUse = Helper.listEROIVSCumulatedProduction(gr.map(g => (g, potential.suitabilityFactor(g))), potential)
     //  val allEx = world.listEROIVSCumulatedProductionExergy(gr.map(g => (g, 1.0)), potential)
     // val landUseEx = world.listEROIVSCumulatedProductionExergy(gr.map(g => (g, potential.suitabilityFactor(g))), potential)
 
@@ -112,7 +112,7 @@ object WindPotentialSimulation {
 
   def plotSolarPotentialRepartition(world: WorldGrid, grids: List[GridCell]) {
     def listIrradianceVSArea(grids: List[GridCell], name: String) = {
-      val res = world.listValueVSArea(grids.map(g => (g.irradiance.mean.toWattsPerSquareMeter, g.area * SolarPotential.suitabilityFactor(g))))
+      val res = Helper.listValueVSArea(grids.map(g => (g.irradiance.mean.toWattsPerSquareMeter, g.area * SolarPotential.suitabilityFactor(g))))
       (res._1, res._2, name)
     }
     /*   PlotHelper.plotXY(List(listIrradianceVSArea(grids.filter(g => g.lc.croplands || g.lc.mosaicVegetationCropland), "Croplands"),

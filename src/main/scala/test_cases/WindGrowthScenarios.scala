@@ -1,3 +1,4 @@
+package test_cases 
 
 import grid._
 import squants.space._
@@ -16,6 +17,7 @@ import wind_energy.GustavsonWakeEffect
 import squants.radio.Irradiance
 import java.io.PrintStream
 import wind_energy.WindPotential
+import utils.PetawattHours
 
 object WindGrowth {
 
@@ -135,17 +137,22 @@ object GreenPeace {
 
 object IEWA2030 {
   def main(args: Array[String]): Unit = {
+println(Exajoules(750).to(TerawattHours))
+println(Exajoules(750).to(PetawattHours))
+println((Exajoules(750)/Hours(365*24)).to(Terawatts))
 
-    //  val wind = new WorldGrid("results/europeGridWind.txt", Degrees(0.25))
-
-    val cells = new WorldGrid("../model_data/data+cd_0_75_16_02.txt", Degrees(0.75)).grids // OptimalCapacityDensity.loadCells( (0 to 40).map(_*0.5).toList, "../WindPotentialPy/res_optimalCD_europe")
+    println(TerawattHours(4408).to(Exajoules))
+    println(TerawattHours(45000).to(Exajoules))
+    println(TerawattHours(30000).to(Exajoules))
+    val w = WorldGrid()
+    val cells = w.eu28
     val target = Helper.getLines("results/iewa_2030.txt").map(l => (Country(l(0)), Megawatts(l(1).toDouble), GigawattHours(l(1 + 3).toDouble)))
-    val minEROI = 0
-    val density = Some(WattsPerSquareMeter(4))
+    val minEROI = 10
+    // val density = Some(WattsPerSquareMeter(4))
     var res = List[(GridCell, Power)]()
 
     for (i <- target) {
-      val gr = cells.filter(_.country.name.contains(i._1.name)).filter(_.suitableArea.toSquareKilometers > 0).sortBy(-CapacityFactorCalculation(_))
+      val gr = cells.filter(_.country.name.contains(i._1.name)).filter(_.suitableArea.toSquareKilometers > 0).sortBy(-WindPotential.eroi(_,minEROI,true))
       val cellIterator = gr.toIterator
 
       var addedPower = Watts(0)
@@ -153,9 +160,10 @@ object IEWA2030 {
 
       while (cellIterator.hasNext && Math.abs(addedPower.toMegawatts - i._2.toMegawatts) > 0.01) {
         var next = cellIterator.next
-        val pow = List(WindPotential.powerInstalled(next, density = density), i._2 - addedPower).min
+        val pow = List(WindPotential.installedCapacity(next, minEROI, true), i._2 - addedPower).min
         addedPower = addedPower + pow
-        addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * GustavsonWakeEffect.arrayEfficiency(pow / Megawatts(2), lambda(next, density.get)) * Hours(365 * 24) * WindPotential.availabilityFactor(next)
+        addedProduction = addedProduction + pow * Hours(365*24) * CapacityFactorCalculation.cubic(next, next.optimalRatedSpeed(minEROI).toMetersPerSecond) * GustavsonWakeEffect.arrayEfficiency(pow.toMegawatts / 3.0, Math.PI / (4 * Math.pow(next.optimalN(minEROI), 2))) * WindPotential.availabilityFactor(next)
+    
         res = res :+ (next, pow)
       }
 
@@ -163,9 +171,9 @@ object IEWA2030 {
       var extraProduction = WattHours(0)
       while (cellIterator.hasNext && (extraProduction + addedProduction) < i._3) {
         var next = cellIterator.next
-        val prod = List(WindPotential.energyGeneratedPerYear(next, density = density), i._3 - (extraProduction + addedProduction)).min
+        val prod = List(WindPotential.energyPerYear(next, minEROI, true), i._3 - (extraProduction + addedProduction)).min
         extraProduction = extraProduction + prod
-        val pow = (prod / (WindPotential.availabilityFactor(next) * CapacityFactorCalculation(next) * GustavsonWakeEffect.arrayEfficiency(200, lambda(next, density.get)) * Hours(365 * 24)))
+        val pow = prod / ( Hours(365*24) * CapacityFactorCalculation.cubic(next, next.optimalRatedSpeed(minEROI).toMetersPerSecond) * GustavsonWakeEffect.arrayEfficiency(3000, Math.PI / (4 * Math.pow(next.optimalN(minEROI), 2))) * WindPotential.availabilityFactor(next))  
         extraCapacityNeeded = extraCapacityNeeded + pow
         res = res :+ (next, pow)
       }

@@ -13,13 +13,17 @@ object WindTurbineDesign {
 
   def main(args: Array[String]): Unit = {
       
-     val c = (3 to 5).map(_.toDouble).toList; val k = 2.5;
-     val vr = (8 to 16).map(_.toDouble).toList
-     def density(vr : Double, n : Double = 7) = 0.5*0.5*1.225*Math.PI/4*Math.pow(vr,3)/Math.pow(n,2)
-     def outputDensity(vr : Double, n : Double = 7, c : Double) = density(vr,n) * CapacityFactorCalculation.cubic(c, k, 3, vr)
+     val c = (2 to 10).map(_.toDouble).toList; val k = 2.0;
+     val vr = (10 to 14).map(_.toDouble).toList
+     def density(vr : Double, n : Double = 10) = 0.5*0.5*1.225*Math.PI/4*Math.pow(vr,3)/Math.pow(n,2)
+     def outputDensity(vr : Double, n : Double = 10, c : Double) = density(vr,n) * CapacityFactorCalculation.cubic(c, k, 3, vr)
      
      val l = c.map(i => (vr, vr.map(v => outputDensity(v,c=i)),i.toString))
+      val l2 = c.map(i => (vr, vr.map(v => density(v)),i.toString))
+       val l3 = c.map(i => (vr, vr.map(v => CapacityFactorCalculation.cubic(i,k,3,v)),i.toString))
      PlotHelper.plotXY(l, legend=true)
+      PlotHelper.plotXY(l2, legend=true)
+     PlotHelper.plotXY(l3, legend=true)
     
   }
   def test {

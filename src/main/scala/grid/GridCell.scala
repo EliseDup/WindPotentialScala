@@ -47,7 +47,8 @@ class MeteoData[A <: Quantity[_]](val mean: A, val perMonth: Array[A]) {
  * lon-resolution/2				     lon+resolution/2
  *
  */
-class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers: DetailedLandCover, val protectedArea: Double, val country: Country, val elevation: Length, val distanceToCoast : Length) {
+class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers: DetailedLandCover, val protectedArea: Double, val country: Country,
+    val elevation: Length, val distanceToCoast: Length) {
 
   val s = gridSize / 2.0;
 
@@ -59,12 +60,14 @@ class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers:
 
   val onshore = distanceToCoast.value <= 0
   val offshore = !onshore
+  val EEZ = !country.name.equals("NA")
+  val offshoreEEZ = offshore && EEZ
   val altitude = if (offshore) Meters(0) else elevation
   val waterDepth = if (onshore) Meters(0) else -elevation
-  
-  def proportion  (lcType: LandCoverType): Double = landCovers.types.filter(_._2.equals(lcType)).map(_._1).sum
-  def area(lcType: LandCoverType): Area = proportion(lcType) * area
 
+  def proportion(lcType: LandCoverType): Double = landCovers.types.filter(_._2.equals(lcType)).map(_._1).sum
+  def area(lcType: LandCoverType): Area = proportion(lcType) * area
+  
 }
 
 /**
@@ -88,12 +91,12 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     val wind125m: WindProfile,
     val irradiance: MeteoData[Irradiance],
     val optimalCD: Map[Double, (Velocity, Double)],
-    val tau: Pressure) extends DefaultGridCell(center, gridSize, landCovers, protectedArea, country, elevation,distanceToCoast) {
+    val keDissipation: Irradiance) extends DefaultGridCell(center, gridSize, landCovers, protectedArea, country, elevation, distanceToCoast) {
 
   override def toString() = "Grid Object center : " + center
-  
-  val wind100m = new WindProfile( (wind71m.mean+wind125m.mean)/2.0, (wind71m.std+wind125m.std)/2.0, Meters(100))
- 
+
+  val wind100m = new WindProfile((wind71m.mean + wind125m.mean) / 2.0, (wind71m.std + wind125m.std) / 2.0, Meters(100))
+
   def EROI(potential: EnergyGenerationPotential) = potential.EROI(this)
 
   def estimatedDissipation(world: WorldGrid) =
@@ -101,12 +104,16 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     else world.totalDissipation / area * (Math.pow(wind125m.mean.toMetersPerSecond, 2) * area.toSquareMeters / world.totalSquareSpeedArea)
 
   def suitableArea = WindPotential.suitabilityFactor(this) * area
-  def installedCapacityDensity(vr : Velocity, n : Double, cp : Double = 0.5) = WattsPerSquareMeter(cp*0.5*1.225*Math.PI/4*Math.pow(vr.toMetersPerSecond,3) / Math.pow(n,2))
-  
-  def getOptimalCD(e: Double) : Irradiance =
-    if (!optimalCD.keySet.contains(e)) WattsPerSquareMeter(0)
-    else installedCapacityDensity(optimalCD(e)._1,optimalCD(e)._2)
+  def suitableArea(suitable : Boolean): Area = if(suitable) suitableArea else area
+  def installedCapacityDensity(vr: Velocity, n: Double, cp: Double = 0.5) = WattsPerSquareMeter(cp * 0.5 * 1.225 * Math.PI / 4 * Math.pow(vr.toMetersPerSecond, 3) / Math.pow(n, 2))
 
+  def getOptimalCD(e: Double): Irradiance =
+    if (!optimalCD.keySet.contains(e)) WattsPerSquareMeter(0)
+    else installedCapacityDensity(optimalCD(e)._1, optimalCD(e)._2)
+
+  def getOptimalVrN(e: Double): (Velocity, Double) = optimalCD.get(e).getOrElse((MetersPerSecond(0), 15))
+  def optimalRatedSpeed(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15))._1
+  def optimalN(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15.0))._2
 }
 /**
  * Latitude	Longitude	Corine Land Cover	GlobCover	Modis	Urban Factor	Protected area ?	Country	Elevation [m]	Distance to Coast [km]	Uwind	Vwind	Wind	Std Wind	KineticEnergyDissipation Irradiance
@@ -125,25 +132,25 @@ object GridCell {
    * [29] Mean wind 125m , [30] Std wind 125 m,
    * [31] Mean wind 71m, [32] Std wind 71 m
    * [33] Wind turbulent shear stress
-   * 
+   *
    * Then if the optimization was made :
    * [34] -> [116] Pair of (optimal installed capacity, boolean) for EROI 0 -> 20 by 0.5
-   * 
+   *
    */
-  def apply(l: Array[String], gridSize: Angle,eroi_min:List[Double]) = {
+  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double]) = {
     val indexes = Array(11, 14, 20, 30, 40, 50, 60, 70, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230)
     val sumLC = (3 until 26).map(i => l(i).toDouble).sum
-    val lcs = for (i <- (3 until 26); if (l(i).toDouble > 0)) yield (l(i).toDouble / sumLC, indexes(i-3))
-    
+    val lcs = for (i <- (3 until 26); if (l(i).toDouble > 0)) yield (l(i).toDouble / sumLC, indexes(i - 3))
+
     new GridCell(l, center(l), gridSize,
       new DetailedLandCover(lcs.toList),
       l(2).toDouble / 100.0,
       Country(l(28)),
       Meters(l(26).toDouble), Kilometers(l(27).toDouble),
-      new WindProfile(MetersPerSecond(l(31).toDouble), l(32).toDouble,Meters(71)),
-      new WindProfile(MetersPerSecond(l(29).toDouble), l(30).toDouble,Meters(125)),
+      new WindProfile(MetersPerSecond(l(31).toDouble), l(32).toDouble, Meters(71)),
+      new WindProfile(MetersPerSecond(l(29).toDouble), l(30).toDouble, Meters(125)),
       new MeteoData[Irradiance](WattsPerSquareMeter(0), Array()),
-      if (l.size > 34) (for (e <- (0 until eroi_min.size); if (l(e * 3 + 36).toBoolean)) yield (eroi_min(e), (MetersPerSecond(l(e * 3 + 34).toDouble), l(e*3+35).toDouble))).toMap else Map(),
-      Pascals(l(33).toDouble))
+      if (l.size > 34) (for (e <- (0 until eroi_min.size); if (l(e * 3 + 36).toBoolean)) yield (eroi_min(e), (MetersPerSecond(l(e * 3 + 34).toDouble), l(e * 3 + 35).toDouble))).toMap else Map(),
+      WattsPerSquareMeter(l(33).toDouble))
   }
 }

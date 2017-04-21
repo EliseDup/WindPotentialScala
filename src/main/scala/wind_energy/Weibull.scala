@@ -56,7 +56,7 @@ object CapacityFactorCalculation {
   val vf = 25.0 
   def apply(cell: GridCell): Double = cubic(cell)
 
-  def cubic(cell: GridCell, vr : Double = 12.0): Double = {
+  def cubic(cell: GridCell, vr : Double = 11.0): Double = {
    cubic(cell.wind100m.c.toMetersPerSecond, cell.wind100m.k, 3.0, vr)
   }
   

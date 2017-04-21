@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Row
 import squants.motion.Velocity
 import grid._
 import wind_energy.WindPotential
+import squants.radio.Irradiance
 
 object Helper {
   val ressourcesPy = "/Users/Elise/Documents/workspace/resources/"
@@ -168,6 +169,28 @@ object Helper {
   def mean(values: List[(GridCell, Double)]) = {
    val res = values.map(i => i._1.area*i._2).foldLeft(SquareKilometers(0))(_+_) / area(values.map(_._1))
    res
+  }
+  def listValueVSArea(gr: List[(Double, Area)]) = listValueVSCumulated(gr.map(g => (g._1, g._2.to(SquareKilometers) / (1E6))))
+
+  def listEROIVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential, density: Option[Irradiance] = None): (List[Double], List[Double]) = {
+    listValueVSCumulated(gr.map(g => (potential.EROI(g._1, Some(g._2), density), potential.energyGeneratedPerYear(g._1, Some(g._2), density).to(Exajoules))))
+  }
+  def listEROIVSCumulatedPower(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential, density: Option[Irradiance] = None): (List[Double], List[Double]) = {
+    listValueVSCumulated(gr.map(g => (potential.EROI(g._1, Some(g._2), density), potential.powerGenerated(g._1, Some(g._2), density).to(Terawatts))))
+  }
+  def listEnergyGeneratedPerYearVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential) = {
+    val prod = gr.map(g => (potential.energyGeneratedPerYear(g._1, Some(g._2))).to(TerawattHours))
+    listValueVSCumulated(prod.map(i => (i, i)))
+  }
+
+  def listValueVSCumulated(values: List[(Double, Double)]): (List[Double], List[Double]) = {
+    val sorted = values.sortBy(_._1).reverse
+    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ 0.0)
+  }
+
+  def plotEROIVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential) = {
+    val list = listEROIVSCumulatedProduction(gr, potential)
+    PlotHelper.plotXY(List((list._1, list._2, "")), xLabel = "Cumulated Annual Production [TWh]", yLabel = "EROI")
   }
 }
 case class GeoPoint(val latitude: Angle, val longitude: Angle) {

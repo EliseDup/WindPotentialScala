@@ -19,8 +19,14 @@ import org.joda.time.Years
 
 object Test {
   def main(args: Array[String]): Unit = {
-  
-    
+    val w = WorldGrid.simple()
+    val countries = List("Brazil", "Canada", "China", "Denmark", "France", "Germany", "India", "Italy", "Poland", "Portugal", "Spain", "Sweden", "Turkey", "United Kingdom", "United States")
+    for (co <- countries) {
+      val c = w.country(co).filter(_.onshore)
+      println(co + "\t" + 
+          Math.round(Helper.mean(c.filter(_.wind100m.mean.toMetersPerSecond >= 6).map(g => (g,CapacityFactorCalculation.cubic(g,12))))*10000)/100.0
+          + "\t" +Math.round( Helper.mean(c.filter(_.wind100m.mean.toMetersPerSecond >= 7.5).map(g => (g,CapacityFactorCalculation.cubic(g,12))))*10000)/100.0)
+    }
   }
 
   def plotPotentialVSCapacity(grids: List[GridCell], erois: List[Double]) {
@@ -39,7 +45,7 @@ object Test {
   }
 
   // From space between turbine and grid cell -> find density = Power / (n*D)^2
-  def ndensity(cell: GridCell, n: Int) = WattsPerSquareMeter(320 / (n*n))
+  def ndensity(cell: GridCell, n: Int) = WattsPerSquareMeter(320 / (n * n))
 
   def potentialVSCapacity(grids: List[GridCell], eroiMin: Double) = {
     val d = (1 to 100).map(_ * 0.1).toList
