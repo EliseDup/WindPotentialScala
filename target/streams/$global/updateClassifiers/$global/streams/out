@@ -1,6 +1,7 @@
 [0m[[33mwarn[0m] [0mMultiple dependencies with the same organization/name but different versions. To avoid conflict, pick one version:[0m
 [0m[[33mwarn[0m] [0m * org.scala-lang:scala-library:(2.11.8, 2.11.7)[0m
 [0m[[33mwarn[0m] [0m * org.scala-lang:scala-reflect:(2.11.4, 2.11.7)[0m
+[0m[[33mwarn[0m] [0m * org.scala-lang.modules:scala-xml_2.11:(1.0.5, 1.0.4)[0m
 [0m[[0mdebug[0m] [0m:: resolving dependencies :: data#data$sources_javadoc_2.11;1.0[0m
 [0m[[0mdebug[0m] [0m	confs: [compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool][0m
 [0m[[0mdebug[0m] [0m	validate = true[0m
@@ -9,7 +10,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving joda-time#joda-time;2.9 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@1c8c5882[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@341b7b69[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: joda-time#joda-time;2.9[0m
 [0m[[0mdebug[0m] [0m	found joda-time#joda-time;2.9 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [compile->runtime][0m
@@ -17,7 +18,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.poi#poi;3.9 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.apache.poi#poi;3.9 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@1aeb92b4[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@199b2fb1[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.apache.poi#poi;3.9[0m
 [0m[[0mdebug[0m] [0m	found org.apache.poi#poi;3.9 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.poi#poi;3.9 [compile->runtime][0m
@@ -25,7 +26,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.poi#poi;3.9 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->commons-codec#commons-codec;1.5 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving commons-codec#commons-codec;1.5 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@37237e17[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@230e8c3d[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: commons-codec#commons-codec;1.5[0m
 [0m[[0mdebug[0m] [0m	found commons-codec#commons-codec;1.5 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->commons-codec#commons-codec;1.5 [compile->runtime][0m
@@ -33,7 +34,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->commons-codec#commons-codec;1.5 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.github.wookietreiber#scala-chart_2.11;0.5.1 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.github.wookietreiber#scala-chart_2.11;0.5.1 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@4e04078a[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@6f71f959[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.github.wookietreiber#scala-chart_2.11;0.5.1[0m
 [0m[[0mdebug[0m] [0m	found com.github.wookietreiber#scala-chart_2.11;0.5.1 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m	[0.5.1] com.github.wookietreiber#scala-chart_2.11;0.5.1[0m
@@ -42,7 +43,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.github.wookietreiber#scala-chart_2.11;0.5.1 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang#scala-library;2.11.8 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scala-lang#scala-library;2.11.8 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5add76e4[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@63080eb4[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-lang#scala-library;2.11.8[0m
 [0m[[0mdebug[0m] [0m	found org.scala-lang#scala-library;2.11.8 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m	[2.11.8] org.scala-lang#scala-library;2.11.8[0m
@@ -51,7 +52,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang#scala-library;2.11.8 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreechart;1.0.19 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.jfree#jfreechart;1.0.19 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@44d67395[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@6fdefc5a[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.jfree#jfreechart;1.0.19[0m
 [0m[[0mdebug[0m] [0m	found org.jfree#jfreechart;1.0.19 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreechart;1.0.19 [compile->runtime][0m
@@ -59,7 +60,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreechart;1.0.19 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jcommon;1.0.23 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.jfree#jcommon;1.0.23 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@2bb20fed[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@c8a5d69[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.jfree#jcommon;1.0.23[0m
 [0m[[0mdebug[0m] [0m	found org.jfree#jcommon;1.0.23 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jcommon;1.0.23 [compile->runtime][0m
@@ -67,7 +68,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jcommon;1.0.23 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-swing_2.11;1.0.2 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scala-lang.modules#scala-swing_2.11;1.0.2 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@25487ae4[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@65188415[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-lang.modules#scala-swing_2.11;1.0.2[0m
 [0m[[0mdebug[0m] [0m	found org.scala-lang.modules#scala-swing_2.11;1.0.2 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-swing_2.11;1.0.2 [compile->runtime][0m
@@ -75,7 +76,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-swing_2.11;1.0.2 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.itextpdf#itextpdf;5.5.6 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.itextpdf#itextpdf;5.5.6 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@7324fb19[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@30ec4f33[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.itextpdf#itextpdf;5.5.6[0m
 [0m[[0mdebug[0m] [0m	found com.itextpdf#itextpdf;5.5.6 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.itextpdf#itextpdf;5.5.6 [compile->runtime][0m
@@ -83,7 +84,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.itextpdf#itextpdf;5.5.6 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-json_2.11;2.3.4 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.typesafe.play#play-json_2.11;2.3.4 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5574c3df[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@545479d7[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.typesafe.play#play-json_2.11;2.3.4[0m
 [0m[[0mdebug[0m] [0m	found com.typesafe.play#play-json_2.11;2.3.4 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-json_2.11;2.3.4 [compile->runtime][0m
@@ -91,7 +92,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-json_2.11;2.3.4 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-iteratees_2.11;2.3.4 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.typesafe.play#play-iteratees_2.11;2.3.4 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@4135572b[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@537f27c1[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.typesafe.play#play-iteratees_2.11;2.3.4[0m
 [0m[[0mdebug[0m] [0m	found com.typesafe.play#play-iteratees_2.11;2.3.4 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-iteratees_2.11;2.3.4 [compile->runtime][0m
@@ -99,7 +100,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-iteratees_2.11;2.3.4 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-stm#scala-stm_2.11;0.7 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scala-stm#scala-stm_2.11;0.7 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@56a5210c[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@655e9ed[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-stm#scala-stm_2.11;0.7[0m
 [0m[[0mdebug[0m] [0m	found org.scala-stm#scala-stm_2.11;0.7 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-stm#scala-stm_2.11;0.7 [compile->runtime][0m
@@ -107,7 +108,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-stm#scala-stm_2.11;0.7 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe#config;1.2.1 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.typesafe#config;1.2.1 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5d0cf044[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@39cf9543[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.typesafe#config;1.2.1[0m
 [0m[[0mdebug[0m] [0m	found com.typesafe#config;1.2.1 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe#config;1.2.1 [compile->runtime][0m
@@ -115,7 +116,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe#config;1.2.1 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-functional_2.11;2.3.4 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.typesafe.play#play-functional_2.11;2.3.4 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@dfb6866[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@793f9f3b[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.typesafe.play#play-functional_2.11;2.3.4[0m
 [0m[[0mdebug[0m] [0m	found com.typesafe.play#play-functional_2.11;2.3.4 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-functional_2.11;2.3.4 [compile->runtime][0m
@@ -123,7 +124,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-functional_2.11;2.3.4 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-datacommons_2.11;2.3.4 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.typesafe.play#play-datacommons_2.11;2.3.4 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@54f779d8[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@63335248[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.typesafe.play#play-datacommons_2.11;2.3.4[0m
 [0m[[0mdebug[0m] [0m	found com.typesafe.play#play-datacommons_2.11;2.3.4 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-datacommons_2.11;2.3.4 [compile->runtime][0m
@@ -131,7 +132,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.typesafe.play#play-datacommons_2.11;2.3.4 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.joda#joda-convert;1.6 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.joda#joda-convert;1.6 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@47d4a51e[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@7e11e3a6[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.joda#joda-convert;1.6[0m
 [0m[[0mdebug[0m] [0m	found org.joda#joda-convert;1.6 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.joda#joda-convert;1.6 [compile->runtime][0m
@@ -139,7 +140,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.joda#joda-convert;1.6 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-annotations;2.3.2 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.fasterxml.jackson.core#jackson-annotations;2.3.2 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@23b0c6c8[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5f6a21ac[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.fasterxml.jackson.core#jackson-annotations;2.3.2[0m
 [0m[[0mdebug[0m] [0m	found com.fasterxml.jackson.core#jackson-annotations;2.3.2 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-annotations;2.3.2 [compile->runtime][0m
@@ -147,7 +148,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-annotations;2.3.2 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-core;2.3.2 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.fasterxml.jackson.core#jackson-core;2.3.2 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@6976bfbb[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@1236194f[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.fasterxml.jackson.core#jackson-core;2.3.2[0m
 [0m[[0mdebug[0m] [0m	found com.fasterxml.jackson.core#jackson-core;2.3.2 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-core;2.3.2 [compile->runtime][0m
@@ -155,7 +156,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-core;2.3.2 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-databind;2.3.2 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.fasterxml.jackson.core#jackson-databind;2.3.2 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@e14a457[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@3768d843[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.fasterxml.jackson.core#jackson-databind;2.3.2[0m
 [0m[[0mdebug[0m] [0m	found com.fasterxml.jackson.core#jackson-databind;2.3.2 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-databind;2.3.2 [compile->runtime][0m
@@ -163,7 +164,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.fasterxml.jackson.core#jackson-databind;2.3.2 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalanlp#breeze_2.11;0.11.2 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scalanlp#breeze_2.11;0.11.2 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@1fef0479[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@1c22f25[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scalanlp#breeze_2.11;0.11.2[0m
 [0m[[0mdebug[0m] [0m	found org.scalanlp#breeze_2.11;0.11.2 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalanlp#breeze_2.11;0.11.2 [compile->runtime][0m
@@ -171,7 +172,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalanlp#breeze_2.11;0.11.2 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalanlp#breeze-macros_2.11;0.11.2 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scalanlp#breeze-macros_2.11;0.11.2 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5040ae4[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@386075b8[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scalanlp#breeze-macros_2.11;0.11.2[0m
 [0m[[0mdebug[0m] [0m	found org.scalanlp#breeze-macros_2.11;0.11.2 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalanlp#breeze-macros_2.11;0.11.2 [compile->runtime][0m
@@ -179,7 +180,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalanlp#breeze-macros_2.11;0.11.2 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang#scala-reflect;2.11.4 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scala-lang#scala-reflect;2.11.4 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@b9e9942[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@3d8fb636[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-lang#scala-reflect;2.11.4[0m
 [0m[[0mdebug[0m] [0m	found org.scala-lang#scala-reflect;2.11.4 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m	[2.11.4] org.scala-lang#scala-reflect;2.11.4[0m
@@ -188,7 +189,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang#scala-reflect;2.11.4 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.github.fommil.netlib#core;1.1.2 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.github.fommil.netlib#core;1.1.2 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5c879d9e[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@534437df[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.github.fommil.netlib#core;1.1.2[0m
 [0m[[0mdebug[0m] [0m	found com.github.fommil.netlib#core;1.1.2 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.github.fommil.netlib#core;1.1.2 [compile->runtime][0m
@@ -196,7 +197,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.github.fommil.netlib#core;1.1.2 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->net.sourceforge.f2j#arpack_combined_all;0.1 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving net.sourceforge.f2j#arpack_combined_all;0.1 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5172fa15[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@b646106[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: net.sourceforge.f2j#arpack_combined_all;0.1[0m
 [0m[[0mdebug[0m] [0m	found net.sourceforge.f2j#arpack_combined_all;0.1 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->net.sourceforge.f2j#arpack_combined_all;0.1 [compile->runtime][0m
@@ -204,7 +205,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->net.sourceforge.f2j#arpack_combined_all;0.1 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->net.sf.opencsv#opencsv;2.3 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving net.sf.opencsv#opencsv;2.3 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@6d3f56cf[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@40cfd2ca[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: net.sf.opencsv#opencsv;2.3[0m
 [0m[[0mdebug[0m] [0m	found net.sf.opencsv#opencsv;2.3 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->net.sf.opencsv#opencsv;2.3 [compile->runtime][0m
@@ -212,7 +213,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->net.sf.opencsv#opencsv;2.3 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.github.rwl#jtransforms;2.4.0 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.github.rwl#jtransforms;2.4.0 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@6ecd29be[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@7c344947[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.github.rwl#jtransforms;2.4.0[0m
 [0m[[0mdebug[0m] [0m	found com.github.rwl#jtransforms;2.4.0 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.github.rwl#jtransforms;2.4.0 [compile->runtime][0m
@@ -220,7 +221,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.github.rwl#jtransforms;2.4.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->junit#junit;4.8.2 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving junit#junit;4.8.2 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@65309574[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@639721de[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: junit#junit;4.8.2[0m
 [0m[[0mdebug[0m] [0m	found junit#junit;4.8.2 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->junit#junit;4.8.2 [compile->runtime][0m
@@ -228,7 +229,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->junit#junit;4.8.2 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.spire-math#spire_2.11;0.7.4 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.spire-math#spire_2.11;0.7.4 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5558dad6[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@4f4a6a03[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.spire-math#spire_2.11;0.7.4[0m
 [0m[[0mdebug[0m] [0m	found org.spire-math#spire_2.11;0.7.4 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.spire-math#spire_2.11;0.7.4 [compile->runtime][0m
@@ -236,7 +237,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.spire-math#spire_2.11;0.7.4 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.spire-math#spire-macros_2.11;0.7.4 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.spire-math#spire-macros_2.11;0.7.4 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@2335940e[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@519497b4[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.spire-math#spire-macros_2.11;0.7.4[0m
 [0m[[0mdebug[0m] [0m	found org.spire-math#spire-macros_2.11;0.7.4 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.spire-math#spire-macros_2.11;0.7.4 [compile->runtime][0m
@@ -244,7 +245,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.spire-math#spire-macros_2.11;0.7.4 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.slf4j#slf4j-api;1.7.5 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.slf4j#slf4j-api;1.7.5 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@d93ac9d[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@31d52945[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.slf4j#slf4j-api;1.7.5[0m
 [0m[[0mdebug[0m] [0m	found org.slf4j#slf4j-api;1.7.5 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.slf4j#slf4j-api;1.7.5 [compile->runtime][0m
@@ -252,7 +253,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.slf4j#slf4j-api;1.7.5 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.squants#squants_2.11;0.5.3 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.squants#squants_2.11;0.5.3 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@3a1019d3[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@462406c[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.squants#squants_2.11;0.5.3[0m
 [0m[[0mdebug[0m] [0m	found com.squants#squants_2.11;0.5.3 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.squants#squants_2.11;0.5.3 [compile->runtime][0m
@@ -260,12 +261,84 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.squants#squants_2.11;0.5.3 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.apache.commons#commons-math3;3.6 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@614adcd9[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@575b5ab0[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.apache.commons#commons-math3;3.6[0m
 [0m[[0mdebug[0m] [0m	found org.apache.commons#commons-math3;3.6 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving co.theasi#plotly_2.11;0.2.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@7c98bf4f[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: co.theasi#plotly_2.11;0.2.0[0m
+[0m[[0mdebug[0m] [0m	found co.theasi#plotly_2.11;0.2.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.scalaj#scalaj-http_2.11;2.2.1 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@49b8e90[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scalaj#scalaj-http_2.11;2.2.1[0m
+[0m[[0mdebug[0m] [0m	found org.scalaj#scalaj-http_2.11;2.2.1 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.json4s#json4s-native_2.11;3.3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@51ce467e[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.json4s#json4s-native_2.11;3.3.0[0m
+[0m[[0mdebug[0m] [0m	found org.json4s#json4s-native_2.11;3.3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.json4s#json4s-core_2.11;3.3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@257d7e2d[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.json4s#json4s-core_2.11;3.3.0[0m
+[0m[[0mdebug[0m] [0m	found org.json4s#json4s-core_2.11;3.3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.json4s#json4s-ast_2.11;3.3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@278cec3b[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.json4s#json4s-ast_2.11;3.3.0[0m
+[0m[[0mdebug[0m] [0m	found org.json4s#json4s-ast_2.11;3.3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.json4s#json4s-scalap_2.11;3.3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5edf37d2[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.json4s#json4s-scalap_2.11;3.3.0[0m
+[0m[[0mdebug[0m] [0m	found org.json4s#json4s-scalap_2.11;3.3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving com.thoughtworks.paranamer#paranamer;2.8 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@57d59f17[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.thoughtworks.paranamer#paranamer;2.8[0m
+[0m[[0mdebug[0m] [0m	found com.thoughtworks.paranamer#paranamer;2.8 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.scala-lang.modules#scala-xml_2.11;1.0.5 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@1b85e7d9[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-lang.modules#scala-xml_2.11;1.0.5[0m
+[0m[[0mdebug[0m] [0m	found org.scala-lang.modules#scala-xml_2.11;1.0.5 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.jfree#jfreesvg;3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@37710936[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.jfree#jfreesvg;3.0[0m
+[0m[[0mdebug[0m] [0m	found org.jfree#jfreesvg;3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'runtime'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [compile][0m
@@ -397,6 +470,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->default(compile)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->compile][0m
@@ -525,6 +634,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'test'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [test][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [runtime][0m
@@ -657,6 +802,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->default(compile)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->compile][0m
@@ -785,6 +966,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [test->default(compile)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [test->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [test->compile][0m
@@ -913,6 +1130,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'provided'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [provided][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'optional'[0m
@@ -1048,6 +1301,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [optional][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [provided][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [compile-internal->default(compile)][0m
@@ -1178,6 +1467,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile-internal->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile-internal->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile-internal->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'runtime-internal'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [runtime-internal][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [runtime][0m
@@ -1310,6 +1635,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->default(compile)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->compile][0m
@@ -1438,6 +1799,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [optional][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime-internal->default(compile)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime-internal->runtime][0m
@@ -1567,6 +1964,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime-internal->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime-internal->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime-internal->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'test-internal'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [test-internal][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [test][0m
@@ -1700,6 +2133,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->default(compile)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [runtime->compile][0m
@@ -1828,6 +2297,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [runtime->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [test->default(compile)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [test->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [test->compile][0m
@@ -1956,6 +2461,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [optional][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [provided][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->joda-time#joda-time;2.9 [test-internal->default(compile)][0m
@@ -2086,6 +2627,42 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test-internal->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test-internal->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.apache.commons#commons-math3;3.6 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scalaj#scalaj-http_2.11;2.2.1 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-native_2.11;3.3.0 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-core_2.11;3.3.0 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-ast_2.11;3.3.0 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.json4s#json4s-scalap_2.11;3.3.0 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->com.thoughtworks.paranamer#paranamer;2.8 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [test-internal->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test-internal->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test-internal->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test-internal->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data$sources_javadoc_2.11;1.0->org.jfree#jfreesvg;3.0 [test-internal->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'plugin'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data$sources_javadoc_2.11;1.0 [plugin][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'sources'[0m
@@ -2238,6 +2815,45 @@
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.apache.commons#commons-math3;3.6!commons-math3.jar(src)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.apache.commons#commons-math3;3.6!commons-math3.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.apache.commons#commons-math3;3.6!commons-math3.jar(doc)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] co.theasi#plotly_2.11;0.2.0!plotly_2.11.jar(doc)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] co.theasi#plotly_2.11;0.2.0!plotly_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] co.theasi#plotly_2.11;0.2.0!plotly_2.11.jar(src)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scalaj#scalaj-http_2.11;2.2.1!scalaj-http_2.11.jar(src)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scalaj#scalaj-http_2.11;2.2.1!scalaj-http_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scalaj#scalaj-http_2.11;2.2.1!scalaj-http_2.11.jar(doc)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-native_2.11;3.3.0!json4s-native_2.11.jar(src)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-native_2.11;3.3.0!json4s-native_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-native_2.11;3.3.0!json4s-native_2.11.jar(doc)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-core_2.11;3.3.0!json4s-core_2.11.jar(doc)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-core_2.11;3.3.0!json4s-core_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-core_2.11;3.3.0!json4s-core_2.11.jar(src)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-ast_2.11;3.3.0!json4s-ast_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-ast_2.11;3.3.0!json4s-ast_2.11.jar(src)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-ast_2.11;3.3.0!json4s-ast_2.11.jar(doc)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-scalap_2.11;3.3.0!json4s-scalap_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-scalap_2.11;3.3.0!json4s-scalap_2.11.jar(src)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-scalap_2.11;3.3.0!json4s-scalap_2.11.jar(doc)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.thoughtworks.paranamer#paranamer;2.8!paranamer.jar(src)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.thoughtworks.paranamer#paranamer;2.8!paranamer.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.thoughtworks.paranamer#paranamer;2.8!paranamer.jar(doc)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-xml_2.11;1.0.5!scala-xml_2.11.jar(src)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-xml_2.11;1.0.5!scala-xml_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-xml_2.11;1.0.5!scala-xml_2.11.jar(doc)[0m
+[0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/org.jfree/jfreesvg/3.0/srcs/jfreesvg-sources.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.jfree#jfreesvg;3.0!jfreesvg.jar[0m
+[0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/org.jfree/jfreesvg/3.0/docs/jfreesvg-javadoc.jar[0m
+[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-sources.jar[0m
+[0m[[0minfo[0m] [0mdownloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-sources.jar ...[0m
+[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-sources.jar[0m
+[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-sources.jar.sha1[0m
+[0m[[0mdebug[0m] [0msha1 OK for https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-sources.jar[0m
+[0m[[0minfo[0m] [0m	[SUCCESSFUL ] org.jfree#jfreesvg;3.0!jfreesvg.jar(src) (1402ms)[0m
+[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-javadoc.jar[0m
+[0m[[0minfo[0m] [0mdownloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-javadoc.jar ...[0m
+[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-javadoc.jar[0m
+[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-javadoc.jar.sha1[0m
+[0m[[0mdebug[0m] [0msha1 OK for https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0-javadoc.jar[0m
+[0m[[0minfo[0m] [0m	[SUCCESSFUL ] org.jfree#jfreesvg;3.0!jfreesvg.jar(doc) (2016ms)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#scala-compiler;2.11.7!scala-compiler.jar(src)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#scala-compiler;2.11.7!scala-compiler.jar(doc)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#scala-library;2.11.7!scala-library.jar(src)[0m
@@ -2250,7 +2866,7 @@
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-parser-combinators_2.11;1.0.4!scala-parser-combinators_2.11.jar(src)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] jline#jline;2.12.1!jline.jar(src)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] jline#jline;2.12.1!jline.jar(doc)[0m
-[0m[[0mdebug[0m] [0m:: resolution report :: resolve 958ms :: artifacts dl 49ms[0m
+[0m[[0mdebug[0m] [0m:: resolution report :: resolve 1332ms :: artifacts dl 3508ms[0m
 [0m[[0mdebug[0m] [0m	report for data#data$sources_javadoc_2.11;1.0 compile produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data$sources_javadoc_2.11-compile.xml[0m
 [0m[[0mdebug[0m] [0m	report for data#data$sources_javadoc_2.11;1.0 runtime produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data$sources_javadoc_2.11-runtime.xml[0m
 [0m[[0mdebug[0m] [0m	report for data#data$sources_javadoc_2.11;1.0 test produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data$sources_javadoc_2.11-test.xml[0m
@@ -2264,4 +2880,4 @@
 [0m[[0mdebug[0m] [0m	report for data#data$sources_javadoc_2.11;1.0 docs produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data$sources_javadoc_2.11-docs.xml[0m
 [0m[[0mdebug[0m] [0m	report for data#data$sources_javadoc_2.11;1.0 pom produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data$sources_javadoc_2.11-pom.xml[0m
 [0m[[0mdebug[0m] [0m	report for data#data$sources_javadoc_2.11;1.0 scala-tool produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data$sources_javadoc_2.11-scala-tool.xml[0m
-[0m[[0mdebug[0m] [0m	resolve done (958ms resolve - 49ms download)[0m
+[0m[[0mdebug[0m] [0m	resolve done (1332ms resolve - 3508ms download)[0m

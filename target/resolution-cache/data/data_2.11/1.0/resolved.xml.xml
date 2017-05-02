@@ -4,7 +4,7 @@
 		module="data_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20170327144120"
+		publication="20170425152528"
 	>
 		<description>
 		data
@@ -44,5 +44,7 @@
 		<dependency org="net.sf.opencsv" name="opencsv" rev="2.3" conf="compile->default(compile)"/>
 		<dependency org="com.squants" name="squants_2.11" rev="0.5.3" conf="compile->default(compile)"/>
 		<dependency org="org.apache.commons" name="commons-math3" rev="3.6" conf="compile->default(compile)"/>
+		<dependency org="co.theasi" name="plotly_2.11" rev="0.2.0" conf="compile->default(compile)"/>
+		<dependency org="org.jfree" name="jfreesvg" rev="3.0" conf="compile->default(compile)"/>
 	</dependencies>
 </ivy-module>

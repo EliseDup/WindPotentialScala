@@ -16,16 +16,24 @@ import org.junit.experimental.theories.PotentialAssignment
 import squants.radio.Irradiance
 import java.io.PrintStream
 import org.joda.time.Years
+import co.theasi.plotly._
 
 object Test {
   def main(args: Array[String]): Unit = {
+    val xs = (0.0 to 2.0 by 0.1)
+    val ys = xs.map { x => x * x }
+
+    val plot = Plot().withScatter(xs, ys)
+
+    draw(plot, "my-first-plot")
+
     val w = WorldGrid.simple()
     val countries = List("Brazil", "Canada", "China", "Denmark", "France", "Germany", "India", "Italy", "Poland", "Portugal", "Spain", "Sweden", "Turkey", "United Kingdom", "United States")
     for (co <- countries) {
       val c = w.country(co).filter(_.onshore)
-      println(co + "\t" + 
-          Math.round(Helper.mean(c.filter(_.wind100m.mean.toMetersPerSecond >= 6).map(g => (g,CapacityFactorCalculation.cubic(g,12))))*10000)/100.0
-          + "\t" +Math.round( Helper.mean(c.filter(_.wind100m.mean.toMetersPerSecond >= 7.5).map(g => (g,CapacityFactorCalculation.cubic(g,12))))*10000)/100.0)
+      println(co + "\t" +
+        Math.round(Helper.mean(c.filter(_.wind100m.mean.toMetersPerSecond >= 6).map(g => (g, CapacityFactorCalculation.cubic(g, 12)))) * 10000) / 100.0
+        + "\t" + Math.round(Helper.mean(c.filter(_.wind100m.mean.toMetersPerSecond >= 7.5).map(g => (g, CapacityFactorCalculation.cubic(g, 12)))) * 10000) / 100.0)
     }
   }
 

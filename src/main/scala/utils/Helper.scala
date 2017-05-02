@@ -93,9 +93,9 @@ object Helper {
     val wb = new HSSFWorkbook(inp)
     wb.getSheet(sheetName)
   }
- 
+
   // Logarithmic Wind Profile
-  def windSpeedAt(windSpeed0 : Velocity,h0: Length, z0 : Length,height: Length): Velocity = Math.log(height / z0) / Math.log(h0 / z0) * windSpeed0
+  def windSpeedAt(windSpeed0: Velocity, h0: Length, z0: Length, height: Length): Velocity = Math.log(height / z0) / Math.log(h0 / z0) * windSpeed0
 
   /**
    * y(x) = A (x-x1)(x-x2) + B (x-x1)(x-x3) + C (x-x2)(x-x3)
@@ -158,17 +158,17 @@ object Helper {
       Math.abs(lowerLeftCorner.latitude.sin - upperRightCorner.latitude.sin) *
       Math.abs(lowerLeftCorner.longitude.toDegrees - upperRightCorner.longitude.toDegrees))
   }
-  def areaRectangle(center: GeoPoint, resolution: Angle) : Area = {
-    val lowerLeftCorner = GeoPoint(center.latitude - resolution/2.0, center.longitude - resolution/2.0)
-    val upperRightCorner = GeoPoint(center.latitude + resolution/2.0, center.longitude + resolution/2.0)
+  def areaRectangle(center: GeoPoint, resolution: Angle): Area = {
+    val lowerLeftCorner = GeoPoint(center.latitude - resolution / 2.0, center.longitude - resolution / 2.0)
+    val upperRightCorner = GeoPoint(center.latitude + resolution / 2.0, center.longitude + resolution / 2.0)
     areaRectangle(lowerLeftCorner, upperRightCorner)
   }
-  
+
   def area(gr: List[GridCell]) = gr.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
   def suitableArea(gr: List[GridCell], potential: EnergyGenerationPotential) = gr.map(g => g.area * WindPotential.suitabilityFactor(g)).foldLeft(SquareKilometers(0))(_ + _)
   def mean(values: List[(GridCell, Double)]) = {
-   val res = values.map(i => i._1.area*i._2).foldLeft(SquareKilometers(0))(_+_) / area(values.map(_._1))
-   res
+    val res = values.map(i => i._1.area * i._2).foldLeft(SquareKilometers(0))(_ + _) / area(values.map(_._1))
+    res
   }
   def listValueVSArea(gr: List[(Double, Area)]) = listValueVSCumulated(gr.map(g => (g._1, g._2.to(SquareKilometers) / (1E6))))
 

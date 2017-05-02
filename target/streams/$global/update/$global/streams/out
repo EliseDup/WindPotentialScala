@@ -7,7 +7,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.scala-lang#scala-library;2.11.7 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scala-lang#scala-library;2.11.7 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@471a4ca4[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@53cd17a5[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-lang#scala-library;2.11.7[0m
 [0m[[0mdebug[0m] [0m	found org.scala-lang#scala-library;2.11.7 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m	[2.11.7] org.scala-lang#scala-library;2.11.7[0m
@@ -96,10 +96,10 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreechart;1.0.14 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.github.wookietreiber#scala-chart_2.11;latest.integration [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.github.wookietreiber#scala-chart_2.11;latest.integration ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: com.github.wookietreiber#scala-chart_2.11;latest.integration {compile=[default(compile)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@750c1ae8[0m
 [0m[[0mdebug[0m] [0mdefault-cache: cached resolved revision expired for com.github.wookietreiber#scala-chart_2.11;latest.integration[0m
 [0m[[0minfo[0m] [0mResolving com.github.wookietreiber#scala-chart_2.11;latest.integration ...[0m
-[0m[[0mdebug[0m] [0msbt-chain-delegate: Checking cache for: dependency: com.github.wookietreiber#scala-chart_2.11;latest.integration {compile=[default(compile)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain-delegate: Checking cache for: sbt.ivyint.MergedDescriptors@750c1ae8[0m
 [0m[[0mdebug[0m] [0mdefault-cache: cached resolved revision expired for com.github.wookietreiber#scala-chart_2.11;latest.integration[0m
 [0m[[0mdebug[0m] [0mdefault-cache: cached resolved revision expired for com.github.wookietreiber#scala-chart_2.11;latest.integration[0m
 [0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/com.github.wookietreiber/scala-chart_2.11/[revision]/ivys/ivy.xml[0m
@@ -109,36 +109,16 @@
 [0m[[0mdebug[0m] [0m	listing revisions from maven-metadata: https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/maven-metadata.xml[0m
 [0m[[0mdebug[0m] [0m	jcenter: found md file for com.github.wookietreiber#scala-chart_2.11;latest.integration[0m
 [0m[[0mdebug[0m] [0m		=> https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.pom (0.5.1)[0m
-[0m[[0mdebug[0m] [0mdownloading https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.pom ...[0m
-[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.pom[0m
-[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.pom.sha1[0m
-[0m[[0mdebug[0m] [0msha1 OK for https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.pom[0m
-[0m[[0mdebug[0m] [0m	[SUCCESSFUL ] com.github.wookietreiber#scala-chart_2.11;0.5.1!scala-chart_2.11.pom(pom.original) (3713ms)[0m
-[0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/com.github.wookietreiber/scala-chart_2.11/0.5.1/jars/scala-chart_2.11.jar[0m
-[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.jar[0m
-[0m[[0mdebug[0m] [0m		[0.5.1] com.github.wookietreiber#scala-chart_2.11[0m
-[0m[[0mdebug[0m] [0m	found com.github.wookietreiber#scala-chart_2.11;0.5.1 in jcenter[0m
+[0m[[0mdebug[0m] [0m	default-cache: revision in cache: com.github.wookietreiber#scala-chart_2.11;0.5.1[0m
+[0m[[0mdebug[0m] [0m	found com.github.wookietreiber#scala-chart_2.11;0.5.1 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m	[0.5.1] com.github.wookietreiber#scala-chart_2.11;latest.integration[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.github.wookietreiber#scala-chart_2.11;latest.integration [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.github.wookietreiber#scala-chart_2.11;latest.integration [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies com.github.wookietreiber#scala-chart_2.11;latest.integration->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scala-lang#scala-library;2.11.8 ...[0m
 [0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.scala-lang#scala-library;2.11.8 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
-[0m[[0minfo[0m] [0mResolving org.scala-lang#scala-library;2.11.8 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain-delegate: Checking cache for: dependency: org.scala-lang#scala-library;2.11.8 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
-[0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/org.scala-lang/scala-library/2.11.8/ivys/ivy.xml[0m
-[0m[[0mdebug[0m] [0m	local: no ivy file found for org.scala-lang#scala-library;2.11.8[0m
-[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.pom[0m
-[0m[[0mdebug[0m] [0m	jcenter: found md file for org.scala-lang#scala-library;2.11.8[0m
-[0m[[0mdebug[0m] [0m		=> https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.pom (2.11.8)[0m
-[0m[[0mdebug[0m] [0mdownloading https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.pom ...[0m
-[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.pom[0m
-[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.pom.sha1[0m
-[0m[[0mdebug[0m] [0msha1 OK for https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.pom[0m
-[0m[[0mdebug[0m] [0m	[SUCCESSFUL ] org.scala-lang#scala-library;2.11.8!scala-library.pom(pom.original) (1268ms)[0m
-[0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/org.scala-lang/scala-library/2.11.8/jars/scala-library.jar[0m
-[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.jar[0m
-[0m[[0mdebug[0m] [0m	found org.scala-lang#scala-library;2.11.8 in jcenter[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-lang#scala-library;2.11.8[0m
+[0m[[0mdebug[0m] [0m	found org.scala-lang#scala-library;2.11.8 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m	[2.11.8] org.scala-lang#scala-library;2.11.8[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies com.github.wookietreiber#scala-chart_2.11;latest.integration->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies com.github.wookietreiber#scala-chart_2.11;latest.integration->org.scala-lang#scala-library;2.11.8 [compile->runtime(*)][0m
@@ -197,7 +177,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.github.wookietreiber#scala-chart_2.11;latest.integration [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.itextpdf#itextpdf;5.5.6 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.itextpdf#itextpdf;5.5.6 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: com.itextpdf#itextpdf;5.5.6 {compile=[default(compile)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@483e7c9d[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.itextpdf#itextpdf;5.5.6[0m
 [0m[[0mdebug[0m] [0m	found com.itextpdf#itextpdf;5.5.6 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.itextpdf#itextpdf;5.5.6 [compile->runtime][0m
@@ -558,6 +538,144 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master(compile)][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving co.theasi#plotly_2.11;0.2.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: co.theasi#plotly_2.11;0.2.0 {compile=[default(compile)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: co.theasi#plotly_2.11;0.2.0[0m
+[0m[[0mdebug[0m] [0m	found co.theasi#plotly_2.11;0.2.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.scalaj#scalaj-http_2.11;2.2.1 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.scalaj#scalaj-http_2.11;2.2.1 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scalaj#scalaj-http_2.11;2.2.1[0m
+[0m[[0mdebug[0m] [0m	found org.scalaj#scalaj-http_2.11;2.2.1 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.json4s#json4s-native_2.11;3.3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.json4s#json4s-native_2.11;3.3.0 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.json4s#json4s-native_2.11;3.3.0[0m
+[0m[[0mdebug[0m] [0m	found org.json4s#json4s-native_2.11;3.3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.json4s#json4s-core_2.11;3.3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.json4s#json4s-core_2.11;3.3.0 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.json4s#json4s-core_2.11;3.3.0[0m
+[0m[[0mdebug[0m] [0m	found org.json4s#json4s-core_2.11;3.3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.json4s#json4s-ast_2.11;3.3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.json4s#json4s-ast_2.11;3.3.0 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.json4s#json4s-ast_2.11;3.3.0[0m
+[0m[[0mdebug[0m] [0m	found org.json4s#json4s-ast_2.11;3.3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.json4s#json4s-scalap_2.11;3.3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.json4s#json4s-scalap_2.11;3.3.0 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.json4s#json4s-scalap_2.11;3.3.0[0m
+[0m[[0mdebug[0m] [0m	found org.json4s#json4s-scalap_2.11;3.3.0 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master(compile)][0m
+[0m[[0minfo[0m] [0mResolving com.thoughtworks.paranamer#paranamer;2.8 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: com.thoughtworks.paranamer#paranamer;2.8 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.thoughtworks.paranamer#paranamer;2.8[0m
+[0m[[0mdebug[0m] [0m	found com.thoughtworks.paranamer#paranamer;2.8 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.scala-lang.modules#scala-xml_2.11;1.0.5 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.scala-lang.modules#scala-xml_2.11;1.0.5 {compile=[compile(*), master(compile)], runtime=[runtime(*)]}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-lang.modules#scala-xml_2.11;1.0.5[0m
+[0m[[0mdebug[0m] [0m	found org.scala-lang.modules#scala-xml_2.11;1.0.5 in sbt-chain[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0minfo[0m] [0mResolving org.jfree#jfreesvg;3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.jfree#jfreesvg;3.0 {compile=[default(compile)]}[0m
+[0m[[0minfo[0m] [0mResolving org.jfree#jfreesvg;3.0 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain-delegate: Checking cache for: dependency: org.jfree#jfreesvg;3.0 {compile=[default(compile)]}[0m
+[0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/org.jfree/jfreesvg/3.0/ivys/ivy.xml[0m
+[0m[[0mdebug[0m] [0m	local: no ivy file found for org.jfree#jfreesvg;3.0[0m
+[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.pom[0m
+[0m[[0mdebug[0m] [0m	jcenter: found md file for org.jfree#jfreesvg;3.0[0m
+[0m[[0mdebug[0m] [0m		=> https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.pom (3.0)[0m
+[0m[[0mdebug[0m] [0mdownloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.pom ...[0m
+[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.pom[0m
+[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.pom.sha1[0m
+[0m[[0mdebug[0m] [0msha1 OK for https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.pom[0m
+[0m[[0mdebug[0m] [0m	[SUCCESSFUL ] org.jfree#jfreesvg;3.0!jfreesvg.pom(pom.original) (1028ms)[0m
+[0m[[0minfo[0m] [0mResolving org.sonatype.oss#oss-parent;9 ...[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: dependency: org.sonatype.oss#oss-parent;9 {}[0m
+[0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.sonatype.oss#oss-parent;9[0m
+[0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/org.jfree/jfreesvg/3.0/jars/jfreesvg.jar[0m
+[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.jar[0m
+[0m[[0mdebug[0m] [0m	found org.jfree#jfreesvg;3.0 in jcenter[0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'runtime'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [compile][0m
@@ -853,6 +971,88 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'test'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [test][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [runtime][0m
@@ -1149,6 +1349,88 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'provided'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [provided][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'optional'[0m
@@ -1448,6 +1730,88 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [optional][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [provided][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'runtime-internal'[0m
@@ -1746,6 +2110,88 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [optional][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'test-internal'[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [test-internal][0m
@@ -2044,6 +2490,88 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->runtime][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.apache.commons#commons-math3;3.6 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->master(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->master(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [compile->compile(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.scalaj#scalaj-http_2.11;2.2.1 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scalaj#scalaj-http_2.11;2.2.1->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies co.theasi#plotly_2.11;0.2.0->org.json4s#json4s-native_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-native_2.11;3.3.0->org.json4s#json4s-core_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-ast_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-ast_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.json4s#json4s-scalap_2.11;3.3.0 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-scalap_2.11;3.3.0->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->com.thoughtworks.paranamer#paranamer;2.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.json4s#json4s-core_2.11;3.3.0->org.scala-lang.modules#scala-xml_2.11;1.0.5 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.7 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->runtime(*)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies org.scala-lang.modules#scala-xml_2.11;1.0.5->org.scala-lang#scala-library;2.11.8 [runtime->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->co.theasi#plotly_2.11;0.2.0 [compile->master][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->default(compile)][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->runtime][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->compile][0m
+[0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreesvg;3.0 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [optional][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [provided][0m
 [0m[[0mdebug[0m] [0mresolving dependencies for configuration 'plugin'[0m
@@ -2165,25 +2693,22 @@
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#scala-library;2.11.7!scala-library.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] joda-time#joda-time;2.9!joda-time.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.apache.poi#poi;3.9!poi.jar[0m
-[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.jar[0m
-[0m[[0minfo[0m] [0mdownloading https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.jar ...[0m
-[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.jar[0m
-[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.jar.sha1[0m
-[0m[[0mdebug[0m] [0msha1 OK for https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.jar[0m
-[0m[[0minfo[0m] [0m	[SUCCESSFUL ] com.github.wookietreiber#scala-chart_2.11;0.5.1!scala-chart_2.11.jar (16052ms)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.github.wookietreiber#scala-chart_2.11;0.5.1!scala-chart_2.11.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.itextpdf#itextpdf;5.5.6!itextpdf.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.typesafe.play#play-json_2.11;2.3.4!play-json_2.11.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scalanlp#breeze_2.11;0.11.2!breeze_2.11.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] net.sf.opencsv#opencsv;2.3!opencsv.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.squants#squants_2.11;0.5.3!squants_2.11.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.apache.commons#commons-math3;3.6!commons-math3.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] co.theasi#plotly_2.11;0.2.0!plotly_2.11.jar[0m
+[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.jar[0m
+[0m[[0minfo[0m] [0mdownloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.jar ...[0m
+[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.jar[0m
+[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.jar.sha1[0m
+[0m[[0mdebug[0m] [0msha1 OK for https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.jar[0m
+[0m[[0minfo[0m] [0m	[SUCCESSFUL ] org.jfree#jfreesvg;3.0!jfreesvg.jar (1220ms)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] commons-codec#commons-codec;1.5!commons-codec.jar[0m
-[0m[[0mdebug[0m] [0m		tried https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.jar[0m
-[0m[[0minfo[0m] [0mdownloading https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.jar ...[0m
-[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.jar[0m
-[0m[[0mdebug[0m] [0m	jcenter: downloading https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.jar.sha1[0m
-[0m[[0mdebug[0m] [0msha1 OK for https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.jar[0m
-[0m[[0minfo[0m] [0m	[SUCCESSFUL ] org.scala-lang#scala-library;2.11.8!scala-library.jar (15768ms)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#scala-library;2.11.8!scala-library.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.jfree#jfreechart;1.0.19!jfreechart.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-swing_2.11;1.0.2!scala-swing_2.11.jar(bundle)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.jfree#jcommon;1.0.23!jcommon.jar[0m
@@ -2205,12 +2730,19 @@
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#scala-reflect;2.11.4!scala-reflect.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] junit#junit;4.8.2!junit.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.spire-math#spire-macros_2.11;0.7.4!spire-macros_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scalaj#scalaj-http_2.11;2.2.1!scalaj-http_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-native_2.11;3.3.0!json4s-native_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-core_2.11;3.3.0!json4s-core_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-ast_2.11;3.3.0!json4s-ast_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.json4s#json4s-scalap_2.11;3.3.0!json4s-scalap_2.11.jar[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] com.thoughtworks.paranamer#paranamer;2.8!paranamer.jar(bundle)[0m
+[0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-xml_2.11;1.0.5!scala-xml_2.11.jar(bundle)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#scala-compiler;2.11.7!scala-compiler.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang#scala-reflect;2.11.7!scala-reflect.jar[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-xml_2.11;1.0.4!scala-xml_2.11.jar(bundle)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-parser-combinators_2.11;1.0.4!scala-parser-combinators_2.11.jar(bundle)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] jline#jline;2.12.1!jline.jar[0m
-[0m[[0mdebug[0m] [0m:: resolution report :: resolve 12029ms :: artifacts dl 31974ms[0m
+[0m[[0mdebug[0m] [0m:: resolution report :: resolve 4468ms :: artifacts dl 1259ms[0m
 [0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 compile produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data_2.11-compile.xml[0m
 [0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 runtime produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data_2.11-runtime.xml[0m
 [0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 test produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data_2.11-test.xml[0m
@@ -2224,7 +2756,7 @@
 [0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 docs produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data_2.11-docs.xml[0m
 [0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 pom produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data_2.11-pom.xml[0m
 [0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 scala-tool produced in /Users/Elise/ownCloud/Elise/workspace/WindPotential/target/resolution-cache/reports/data-data_2.11-scala-tool.xml[0m
-[0m[[0mdebug[0m] [0m	resolve done (12029ms resolve - 31974ms download)[0m
+[0m[[0mdebug[0m] [0m	resolve done (4468ms resolve - 1259ms download)[0m
 [0m[[0minfo[0m] [0mDone updating.[0m
 [0m[[33mwarn[0m] [0mScala version was updated by one of library dependencies:[0m
 [0m[[33mwarn[0m] [0m	* org.scala-lang:scala-library:(2.11.7, 2.11.6, 2.11.4, 2.11.1, 2.11.0) -> 2.11.8[0m

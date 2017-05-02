@@ -7,8 +7,115 @@
 		revision="1.0"
 		conf="runtime"
 		confs="compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool"
-		date="20170327144120"/>
+		date="20170425152528"/>
 	<dependencies>
+		<module organisation="org.jfree" name="jfreesvg">
+			<revision name="3.0" status="release" pubdate="20150609220100" resolver="jcenter" artresolver="jcenter" homepage="http://www.jfree.org/jfreesvg" downloaded="true" searched="true" default="false" conf="default, compile, runtime, default(compile), master" position="40">
+				<license name="GNU General Public License (GPL)" url="http://www.gnu.org/licenses/gpl.txt"/>
+				<metadata-artifact status="successful" details="" size="3969" time="1028" location="/Users/Elise/.ivy2/cache/org.jfree/jfreesvg/ivy-3.0.xml" searched="true" original-local-location="/Users/Elise/.ivy2/cache/org.jfree/jfreesvg/ivy-3.0.xml.original" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.pom"/>
+				<caller organisation="data" name="data_2.11" conf="compile, runtime" rev="3.0" rev-constraint-default="3.0" rev-constraint-dynamic="3.0" callerrev="1.0"/>
+				<artifacts>
+					<artifact name="jfreesvg" type="jar" ext="jar" status="successful" details="" size="38992" time="1220" location="/Users/Elise/.ivy2/cache/org.jfree/jfreesvg/jars/jfreesvg-3.0.jar">
+						<origin-location is-local="false" location="https://jcenter.bintray.com/org/jfree/jfreesvg/3.0/jfreesvg-3.0.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="co.theasi" name="plotly_2.11">
+			<revision name="0.2.0" status="release" pubdate="20170110081719" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/ASIDataScience/plotly-client" downloaded="false" searched="false" default="false" conf="default, compile, runtime, default(compile), master" position="32">
+				<license name="MIT" url="https://opensource.org/licenses/MIT"/>
+				<metadata-artifact status="no" details="" size="3051" time="0" location="/Users/Elise/.ivy2/cache/co.theasi/plotly_2.11/ivy-0.2.0.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/co/theasi/plotly_2.11/0.2.0/plotly_2.11-0.2.0.pom"/>
+				<caller organisation="data" name="data_2.11" conf="compile, runtime" rev="0.2.0" rev-constraint-default="0.2.0" rev-constraint-dynamic="0.2.0" callerrev="1.0"/>
+				<artifacts>
+					<artifact name="plotly_2.11" type="jar" ext="jar" status="no" details="" size="490829" time="0" location="/Users/Elise/.ivy2/cache/co.theasi/plotly_2.11/jars/plotly_2.11-0.2.0.jar">
+						<origin-location is-local="false" location="https://jcenter.bintray.com/co/theasi/plotly_2.11/0.2.0/plotly_2.11-0.2.0.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.json4s" name="json4s-native_2.11">
+			<revision name="3.3.0" status="release" pubdate="20151003152355" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/json4s/json4s" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master" position="34">
+				<license name="Apache-2.0" url="http://www.apache.org/licenses/LICENSE-2.0"/>
+				<metadata-artifact status="no" details="" size="2802" time="0" location="/Users/Elise/.ivy2/cache/org.json4s/json4s-native_2.11/ivy-3.3.0.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/json4s/json4s-native_2.11/3.3.0/json4s-native_2.11-3.3.0.pom"/>
+				<caller organisation="co.theasi" name="plotly_2.11" conf="default, compile, runtime, master" rev="3.3.0" rev-constraint-default="3.3.0" rev-constraint-dynamic="3.3.0" callerrev="0.2.0"/>
+				<artifacts>
+					<artifact name="json4s-native_2.11" type="jar" ext="jar" status="no" details="" size="73872" time="0" location="/Users/Elise/.ivy2/cache/org.json4s/json4s-native_2.11/jars/json4s-native_2.11-3.3.0.jar">
+						<origin-location is-local="false" location="https://jcenter.bintray.com/org/json4s/json4s-native_2.11/3.3.0/json4s-native_2.11-3.3.0.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.json4s" name="json4s-core_2.11">
+			<revision name="3.3.0" status="release" pubdate="20151003152315" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/json4s/json4s" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master" position="35">
+				<license name="Apache-2.0" url="http://www.apache.org/licenses/LICENSE-2.0"/>
+				<metadata-artifact status="no" details="" size="3249" time="0" location="/Users/Elise/.ivy2/cache/org.json4s/json4s-core_2.11/ivy-3.3.0.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/json4s/json4s-core_2.11/3.3.0/json4s-core_2.11-3.3.0.pom"/>
+				<caller organisation="org.json4s" name="json4s-native_2.11" conf="compile, runtime" rev="3.3.0" rev-constraint-default="3.3.0" rev-constraint-dynamic="3.3.0" callerrev="3.3.0"/>
+				<artifacts>
+					<artifact name="json4s-core_2.11" type="jar" ext="jar" status="no" details="" size="615848" time="0" location="/Users/Elise/.ivy2/cache/org.json4s/json4s-core_2.11/jars/json4s-core_2.11-3.3.0.jar">
+						<origin-location is-local="false" location="https://jcenter.bintray.com/org/json4s/json4s-core_2.11/3.3.0/json4s-core_2.11-3.3.0.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.scala-lang.modules" name="scala-xml_2.11">
+			<revision name="1.0.5" status="release" pubdate="20150724211224" resolver="sbt-chain" artresolver="sbt-chain" homepage="http://www.scala-lang.org/" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master" position="39">
+				<license name="BSD 3-clause" url="http://opensource.org/licenses/BSD-3-Clause"/>
+				<metadata-artifact status="no" details="" size="2987" time="0" location="/Users/Elise/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/ivy-1.0.5.xml" searched="false" origin-is-local="false" origin-location="http://repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.11/1.0.5/scala-xml_2.11-1.0.5.pom"/>
+				<caller organisation="org.json4s" name="json4s-core_2.11" conf="compile, runtime" rev="1.0.5" rev-constraint-default="1.0.5" rev-constraint-dynamic="1.0.5" callerrev="3.3.0"/>
+				<artifacts>
+					<artifact name="scala-xml_2.11" type="bundle" ext="jar" status="no" details="" size="671138" time="0" location="/Users/Elise/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.5.jar">
+						<origin-location is-local="false" location="http://repo1.maven.org/maven2/org/scala-lang/modules/scala-xml_2.11/1.0.5/scala-xml_2.11-1.0.5.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="com.thoughtworks.paranamer" name="paranamer">
+			<revision name="2.8" status="release" pubdate="20150826200215" resolver="sbt-chain" artresolver="sbt-chain" homepage="" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master" position="38">
+				<metadata-artifact status="no" details="" size="4211" time="0" location="/Users/Elise/.ivy2/cache/com.thoughtworks.paranamer/paranamer/ivy-2.8.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.pom"/>
+				<caller organisation="org.json4s" name="json4s-core_2.11" conf="compile, runtime" rev="2.8" rev-constraint-default="2.8" rev-constraint-dynamic="2.8" callerrev="3.3.0"/>
+				<artifacts>
+					<artifact name="paranamer" type="bundle" ext="jar" status="no" details="" size="34654" time="0" location="/Users/Elise/.ivy2/cache/com.thoughtworks.paranamer/paranamer/bundles/paranamer-2.8.jar">
+						<origin-location is-local="false" location="https://jcenter.bintray.com/com/thoughtworks/paranamer/paranamer/2.8/paranamer-2.8.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.json4s" name="json4s-scalap_2.11">
+			<revision name="3.3.0" status="release" pubdate="20151003152316" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/json4s/json4s" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master" position="37">
+				<license name="Apache-2.0" url="http://www.apache.org/licenses/LICENSE-2.0"/>
+				<metadata-artifact status="no" details="" size="2657" time="0" location="/Users/Elise/.ivy2/cache/org.json4s/json4s-scalap_2.11/ivy-3.3.0.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/json4s/json4s-scalap_2.11/3.3.0/json4s-scalap_2.11-3.3.0.pom"/>
+				<caller organisation="org.json4s" name="json4s-core_2.11" conf="compile, runtime" rev="3.3.0" rev-constraint-default="3.3.0" rev-constraint-dynamic="3.3.0" callerrev="3.3.0"/>
+				<artifacts>
+					<artifact name="json4s-scalap_2.11" type="jar" ext="jar" status="no" details="" size="607724" time="0" location="/Users/Elise/.ivy2/cache/org.json4s/json4s-scalap_2.11/jars/json4s-scalap_2.11-3.3.0.jar">
+						<origin-location is-local="false" location="https://jcenter.bintray.com/org/json4s/json4s-scalap_2.11/3.3.0/json4s-scalap_2.11-3.3.0.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.json4s" name="json4s-ast_2.11">
+			<revision name="3.3.0" status="release" pubdate="20151003152317" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/json4s/json4s" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master" position="36">
+				<license name="Apache-2.0" url="http://www.apache.org/licenses/LICENSE-2.0"/>
+				<metadata-artifact status="no" details="" size="2648" time="0" location="/Users/Elise/.ivy2/cache/org.json4s/json4s-ast_2.11/ivy-3.3.0.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/json4s/json4s-ast_2.11/3.3.0/json4s-ast_2.11-3.3.0.pom"/>
+				<caller organisation="org.json4s" name="json4s-core_2.11" conf="compile, runtime" rev="3.3.0" rev-constraint-default="3.3.0" rev-constraint-dynamic="3.3.0" callerrev="3.3.0"/>
+				<artifacts>
+					<artifact name="json4s-ast_2.11" type="jar" ext="jar" status="no" details="" size="87091" time="0" location="/Users/Elise/.ivy2/cache/org.json4s/json4s-ast_2.11/jars/json4s-ast_2.11-3.3.0.jar">
+						<origin-location is-local="false" location="https://jcenter.bintray.com/org/json4s/json4s-ast_2.11/3.3.0/json4s-ast_2.11-3.3.0.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.scalaj" name="scalaj-http_2.11">
+			<revision name="2.2.1" status="release" pubdate="20160105195933" resolver="sbt-chain" artresolver="sbt-chain" homepage="http://github.com/scalaj/scalaj-http" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master" position="33">
+				<license name="Apache 2" url="http://www.apache.org/licenses/LICENSE-2.0"/>
+				<metadata-artifact status="no" details="" size="3158" time="0" location="/Users/Elise/.ivy2/cache/org.scalaj/scalaj-http_2.11/ivy-2.2.1.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/scalaj/scalaj-http_2.11/2.2.1/scalaj-http_2.11-2.2.1.pom"/>
+				<caller organisation="co.theasi" name="plotly_2.11" conf="default, compile, runtime, master" rev="2.2.1" rev-constraint-default="2.2.1" rev-constraint-dynamic="2.2.1" callerrev="0.2.0"/>
+				<artifacts>
+					<artifact name="scalaj-http_2.11" type="jar" ext="jar" status="no" details="" size="120413" time="0" location="/Users/Elise/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-2.2.1.jar">
+						<origin-location is-local="false" location="https://jcenter.bintray.com/org/scalaj/scalaj-http_2.11/2.2.1/scalaj-http_2.11-2.2.1.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
 		<module organisation="com.squants" name="squants_2.11">
 			<revision name="0.5.3" status="release" pubdate="20150611183500" resolver="sbt-chain" artresolver="sbt-chain" homepage="http://www.squants.com/" downloaded="false" searched="false" default="false" conf="default, compile, runtime, default(compile), master" position="31">
 				<license name="Apache 2.0" url="http://www.opensource.org/licenses/Apache-2.0"/>
@@ -325,12 +432,12 @@
 			</revision>
 		</module>
 		<module organisation="com.github.wookietreiber" name="scala-chart_2.11">
-			<revision name="0.5.1" status="release" pubdate="20161107231216" resolver="jcenter" artresolver="jcenter" homepage="https://github.com/wookietreiber/scala-chart" extra-info.apiURL="http://wookietreiber.github.io/scala-chart/0.5.1/api/" downloaded="true" searched="true" default="false" conf="default, compile, runtime, default(compile), master" position="3">
+			<revision name="0.5.1" status="release" pubdate="20161107231216" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/wookietreiber/scala-chart" extra-info.apiURL="http://wookietreiber.github.io/scala-chart/0.5.1/api/" downloaded="false" searched="true" default="false" conf="default, compile, runtime, default(compile), master" position="3">
 				<license name="GNU Lesser General Public Licence" url="http://www.gnu.org/licenses/lgpl.txt"/>
-				<metadata-artifact status="successful" details="" size="2818" time="3713" location="/Users/Elise/.ivy2/cache/com.github.wookietreiber/scala-chart_2.11/ivy-0.5.1.xml" searched="true" original-local-location="/Users/Elise/.ivy2/cache/com.github.wookietreiber/scala-chart_2.11/ivy-0.5.1.xml.original" origin-is-local="false" origin-location="https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.pom"/>
+				<metadata-artifact status="no" details="" size="3539" time="0" location="/Users/Elise/.ivy2/cache/com.github.wookietreiber/scala-chart_2.11/ivy-0.5.1.xml" searched="true" origin-is-local="false" origin-location="https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.pom"/>
 				<caller organisation="data" name="data_2.11" conf="compile, runtime" rev="latest.integration" rev-constraint-default="latest.integration" rev-constraint-dynamic="latest.integration" callerrev="1.0"/>
 				<artifacts>
-					<artifact name="scala-chart_2.11" type="jar" ext="jar" status="successful" details="" size="459114" time="16052" location="/Users/Elise/.ivy2/cache/com.github.wookietreiber/scala-chart_2.11/jars/scala-chart_2.11-0.5.1.jar">
+					<artifact name="scala-chart_2.11" type="jar" ext="jar" status="no" details="" size="459114" time="0" location="/Users/Elise/.ivy2/cache/com.github.wookietreiber/scala-chart_2.11/jars/scala-chart_2.11-0.5.1.jar">
 						<origin-location is-local="false" location="https://jcenter.bintray.com/com/github/wookietreiber/scala-chart_2.11/0.5.1/scala-chart_2.11-0.5.1.jar"/>
 					</artifact>
 				</artifacts>
@@ -391,35 +498,48 @@
 			</revision>
 		</module>
 		<module organisation="org.scala-lang" name="scala-library">
-			<revision name="2.11.8" status="release" pubdate="20160309051604" resolver="jcenter" artresolver="jcenter" homepage="http://www.scala-lang.org/" extra-info.apiURL="http://www.scala-lang.org/api/2.11.8/" downloaded="true" searched="true" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master, default, default(compile)" position="4">
+			<revision name="2.11.8" status="release" pubdate="20160309051604" resolver="sbt-chain" artresolver="sbt-chain" homepage="http://www.scala-lang.org/" extra-info.apiURL="http://www.scala-lang.org/api/2.11.8/" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master, default, master(*), default(compile)" position="4">
 				<license name="BSD 3-Clause" url="http://www.scala-lang.org/license.html"/>
-				<metadata-artifact status="successful" details="" size="1426" time="1268" location="/Users/Elise/.ivy2/cache/org.scala-lang/scala-library/ivy-2.11.8.xml" searched="true" original-local-location="/Users/Elise/.ivy2/cache/org.scala-lang/scala-library/ivy-2.11.8.xml.original" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.pom"/>
+				<metadata-artifact status="no" details="" size="2653" time="0" location="/Users/Elise/.ivy2/cache/org.scala-lang/scala-library/ivy-2.11.8.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.pom"/>
 				<caller organisation="com.typesafe.play" name="play-datacommons_2.11" conf="compile, runtime" rev="2.11.1" rev-constraint-default="2.11.1" rev-constraint-dynamic="2.11.1" callerrev="2.3.4"/>
 				<caller organisation="com.typesafe.play" name="play-functional_2.11" conf="compile, runtime" rev="2.11.1" rev-constraint-default="2.11.1" rev-constraint-dynamic="2.11.1" callerrev="2.3.4"/>
 				<caller organisation="org.spire-math" name="spire_2.11" conf="compile, runtime" rev="2.11.0" rev-constraint-default="2.11.0" rev-constraint-dynamic="2.11.0" callerrev="0.7.4"/>
+				<caller organisation="org.json4s" name="json4s-core_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="3.3.0"/>
+				<caller organisation="org.scalaj" name="scalaj-http_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="2.2.1"/>
+				<caller organisation="org.json4s" name="json4s-native_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="3.3.0"/>
+				<caller organisation="org.scala-lang.modules" name="scala-xml_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="1.0.5"/>
 				<caller organisation="org.scala-lang" name="scala-reflect" conf="compile, runtime" rev="2.11.1" rev-constraint-default="2.11.1" rev-constraint-dynamic="2.11.1" callerrev="2.11.1"/>
 				<caller organisation="com.github.wookietreiber" name="scala-chart_2.11" conf="default, compile, runtime, master" rev="2.11.8" rev-constraint-default="2.11.8" rev-constraint-dynamic="2.11.8" callerrev="0.5.1"/>
 				<caller organisation="com.squants" name="squants_2.11" conf="default, compile, runtime, master" rev="2.11.6" rev-constraint-default="2.11.6" rev-constraint-dynamic="2.11.6" callerrev="0.5.3"/>
 				<caller organisation="org.scala-stm" name="scala-stm_2.11" conf="compile, runtime" rev="2.11.0" rev-constraint-default="2.11.0" rev-constraint-dynamic="2.11.0" callerrev="0.7"/>
 				<caller organisation="org.scala-lang.modules" name="scala-swing_2.11" conf="compile, runtime" rev="2.11.0" rev-constraint-default="2.11.0" rev-constraint-dynamic="2.11.0" callerrev="1.0.2"/>
 				<caller organisation="com.typesafe.play" name="play-json_2.11" conf="default, compile, runtime, master" rev="2.11.1" rev-constraint-default="2.11.1" rev-constraint-dynamic="2.11.1" callerrev="2.3.4"/>
+				<caller organisation="co.theasi" name="plotly_2.11" conf="default, compile, runtime, master" rev="2.11.8" rev-constraint-default="2.11.8" rev-constraint-dynamic="2.11.8" callerrev="0.2.0"/>
 				<caller organisation="org.spire-math" name="spire-macros_2.11" conf="compile, runtime" rev="2.11.0" rev-constraint-default="2.11.0" rev-constraint-dynamic="2.11.0" callerrev="0.7.4"/>
 				<caller organisation="com.typesafe.play" name="play-iteratees_2.11" conf="compile, runtime" rev="2.11.1" rev-constraint-default="2.11.1" rev-constraint-dynamic="2.11.1" callerrev="2.3.4"/>
 				<caller organisation="data" name="data_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="1.0"/>
+				<caller organisation="org.json4s" name="json4s-scalap_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="3.3.0"/>
 				<caller organisation="org.scalanlp" name="breeze_2.11" conf="default, compile, runtime, master" rev="2.11.4" rev-constraint-default="2.11.4" rev-constraint-dynamic="2.11.4" callerrev="0.11.2"/>
+				<caller organisation="org.json4s" name="json4s-ast_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="3.3.0"/>
 				<caller organisation="org.scalanlp" name="breeze-macros_2.11" conf="compile, runtime" rev="2.11.4" rev-constraint-default="2.11.4" rev-constraint-dynamic="2.11.4" callerrev="0.11.2"/>
 				<caller organisation="org.scala-lang" name="scala-reflect" conf="compile, runtime" rev="2.11.4" rev-constraint-default="2.11.4" rev-constraint-dynamic="2.11.4" callerrev="2.11.4"/>
 				<artifacts>
-					<artifact name="scala-library" type="jar" ext="jar" status="successful" details="" size="5744974" time="15768" location="/Users/Elise/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar">
+					<artifact name="scala-library" type="jar" ext="jar" status="no" details="" size="5744974" time="0" location="/Users/Elise/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.8.jar">
 						<origin-location is-local="false" location="https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.8/scala-library-2.11.8.jar"/>
 					</artifact>
 				</artifacts>
 			</revision>
-			<revision name="2.11.7" status="release" pubdate="20151102144750" resolver="sbt-chain" artresolver="sbt-chain" evicted="latest-revision" evicted-reason="" homepage="http://www.scala-lang.org/" extra-info.apiURL="http://www.scala-lang.org/api/2.11.7/" downloaded="false" searched="false" default="false" conf="default, compile, runtime, default(compile), master" position="-1">
+			<revision name="2.11.7" status="release" pubdate="20151102144750" resolver="sbt-chain" artresolver="sbt-chain" evicted="latest-revision" evicted-reason="" homepage="http://www.scala-lang.org/" extra-info.apiURL="http://www.scala-lang.org/api/2.11.7/" downloaded="false" searched="false" default="false" conf="default, master(*), compile, runtime(*), master(compile), runtime, default(compile), compile(*), master" position="-1">
 				<license name="BSD 3-Clause" url="http://www.scala-lang.org/license.html"/>
 				<metadata-artifact status="no" details="" size="2653" time="0" location="/Users/Elise/.ivy2/cache/org.scala-lang/scala-library/ivy-2.11.7.xml" searched="false" origin-is-local="false" origin-location="https://jcenter.bintray.com/org/scala-lang/scala-library/2.11.7/scala-library-2.11.7.pom"/>
 				<evicted-by rev="2.11.8"/>
+				<caller organisation="org.json4s" name="json4s-core_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="3.3.0"/>
+				<caller organisation="org.scalaj" name="scalaj-http_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="2.2.1"/>
+				<caller organisation="org.json4s" name="json4s-native_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="3.3.0"/>
+				<caller organisation="org.scala-lang.modules" name="scala-xml_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="1.0.5"/>
 				<caller organisation="data" name="data_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="1.0"/>
+				<caller organisation="org.json4s" name="json4s-scalap_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="3.3.0"/>
+				<caller organisation="org.json4s" name="json4s-ast_2.11" conf="compile, runtime" rev="2.11.7" rev-constraint-default="2.11.7" rev-constraint-dynamic="2.11.7" callerrev="3.3.0"/>
 				<artifacts>
 				</artifacts>
 			</revision>

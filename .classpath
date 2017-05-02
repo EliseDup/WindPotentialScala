@@ -36,6 +36,15 @@
   <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.spire-math/spire-macros_2.11/srcs/spire-macros_2.11-0.7.4-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.spire-math/spire-macros_2.11/jars/spire-macros_2.11-0.7.4.jar"/>
   <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.slf4j/slf4j-api/srcs/slf4j-api-1.7.5-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.5.jar"/>
   <classpathentry sourcepath="/Users/Elise/.ivy2/cache/com.squants/squants_2.11/srcs/squants_2.11-0.5.3-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/com.squants/squants_2.11/jars/squants_2.11-0.5.3.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/co.theasi/plotly_2.11/srcs/plotly_2.11-0.2.0-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/co.theasi/plotly_2.11/jars/plotly_2.11-0.2.0.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.scalaj/scalaj-http_2.11/srcs/scalaj-http_2.11-2.2.1-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-2.2.1.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.json4s/json4s-native_2.11/srcs/json4s-native_2.11-3.3.0-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.json4s/json4s-native_2.11/jars/json4s-native_2.11-3.3.0.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.json4s/json4s-core_2.11/srcs/json4s-core_2.11-3.3.0-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.json4s/json4s-core_2.11/jars/json4s-core_2.11-3.3.0.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.json4s/json4s-ast_2.11/srcs/json4s-ast_2.11-3.3.0-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.json4s/json4s-ast_2.11/jars/json4s-ast_2.11-3.3.0.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.json4s/json4s-scalap_2.11/srcs/json4s-scalap_2.11-3.3.0-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.json4s/json4s-scalap_2.11/jars/json4s-scalap_2.11-3.3.0.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/com.thoughtworks.paranamer/paranamer/srcs/paranamer-2.8-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/com.thoughtworks.paranamer/paranamer/bundles/paranamer-2.8.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/srcs/scala-xml_2.11-1.0.5-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.5.jar"/>
+  <classpathentry sourcepath="/Users/Elise/.ivy2/cache/org.jfree/jfreesvg/srcs/jfreesvg-3.0-sources.jar" kind="lib" path="/Users/Elise/.ivy2/cache/org.jfree/jfreesvg/jars/jfreesvg-3.0.jar"/>
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
   <classpathentry kind="output" path="bin"/>
 </classpath>

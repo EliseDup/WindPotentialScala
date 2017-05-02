@@ -18,6 +18,9 @@ lazy val root = (project in file(".")).
 	"net.sf.opencsv" % "opencsv" % "2.3",
 	"com.squants"  %% "squants"  % "0.5.3",
 	"org.apache.commons" % "commons-math3" % "3.6"
-	)
-	
+	),
+	libraryDependencies += "co.theasi" %% "plotly" % "0.2.0",
+	libraryDependencies += "com.github.wookietreiber" %% "scala-chart" % "latest.integration",
+	libraryDependencies += "com.itextpdf" % "itextpdf" % "5.5.6",
+	libraryDependencies += "org.jfree" % "jfreesvg" % "3.0"
   )
