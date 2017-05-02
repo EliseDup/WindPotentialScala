@@ -24,10 +24,25 @@ import java.awt.geom._
 import java.awt.BasicStroke
 import java.io.FileOutputStream
 import com.sun.image.codec.jpeg.JPEGCodec
+import org.jfree.util.ShapeUtilities
 
 object PlotHelper {
 
+  def main(args: Array[String]): Unit = {
+    val x = (1 to 1000).map(_ * 0.001).toList
+    plotXY(List((x, x.map(Math.pow(_, 2)), "x^2"), (x, x.map(_ * 3), "3x"), (x, x.map(_ * 2), "2x"), (x, x, "x")), legend = true)
+
+  }
   val colors = List(Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
+  val dashed = List(stroke(Array(1.0f, 0.0f)), stroke(Array(6.0f, 3.0f)), stroke(Array(1.0f, 3.0f)), stroke(Array(6.0f, 3.0f, 1.0f, 3.0f)))
+
+  // val shapes = List(ShapeUtilities.createDiagonalCross(1.0f, 1.0f),ShapeUtilities.createUpTriangle(2.0f),ShapeUtilities.createDiamond(2.0f))
+
+  def stroke(attr: Array[Float], lineWidth: Float = 1.0f) = new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1.0f, attr, 0.0f)
+  def line(lineWidth: Float = 1.0f) = stroke(Array(1.0f, 0.0f), lineWidth)
+  def dash(lineWidth: Float = 1.0f) = stroke(Array(6.0f, 3.0f), lineWidth)
+  def dots(lineWidth: Float = 1.0f) = stroke(Array(1.0f, 3.0f), lineWidth)
+  def dotsDash(lineWidth: Float = 1.0f) = stroke(Array(6.0f, 3.0f, 1.0f, 3.0f), lineWidth)
 
   var i = 0
   /**
@@ -66,12 +81,12 @@ object PlotHelper {
       (0 until xy._1.size).map(i => serie.add(xy._1(i), xy._2(i)))
       dataSet.addSeries(serie)
     }
-    val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataSet, PlotOrientation.VERTICAL, legend, false, false)
+    val chart = ChartFactory.createXYLineChart("", xLabel, yLabel, dataSet, PlotOrientation.VERTICAL, legend, false, false)
     val plot = chart.getXYPlot();
     val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-    createFrame(chart, save, tick = tick)
+    createFrame(chart, name = title, save = save, tick = tick)
   }
 
   def histogram(values: List[Double], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
@@ -98,7 +113,7 @@ object PlotHelper {
       dataset.addSeries(serie)
     })
     val chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
-    createFrame(chart, false)
+    createFrame(chart)
   }
   def repartition(value: List[Double]) { repartition(List((value, ""))) }
 
@@ -122,42 +137,58 @@ object PlotHelper {
     val plot = new FastScatterPlot(Array(values.map(_._1.toFloat).toArray, values.map(_._2.toFloat).toArray),
       new NumberAxis(xLabel), new NumberAxis(yLabel));
     val chart = new JFreeChart(title, plot);
-    createFrame(chart, true, xy = false)
+    createFrame(chart, name = title, save = true, xy = false)
   }
 
-  def createFrame(chart: JFreeChart, save: Boolean = true, shape: Boolean = false, xy: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, shape: Boolean = false, xy: Boolean = true, bw: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
     applyChartTheme(chart, tick)
+    val n = chart.getXYPlot().getSeriesCount()
+    val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
 
-    if (xy) {
-      val n = chart.getXYPlot().getSeriesCount()
-      val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
+    if (xy & !bw) {
       for (i <- 0 until Math.min(n, colors.size)) r.setSeriesPaint(i, colors(i))
       chart.getXYPlot().setRenderer(r);
-    }
-    if (save) {
-      if (chart.getXYPlot().getSeriesCount() == 6) {
-        val dashedStroke = new BasicStroke(
-          1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND,
-          1.0f, Array(10.0f, 6.0f), 0.0f)
-
-        val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
-        r.setSeriesPaint(0, Color.RED);
-        r.setSeriesPaint(1, Color.RED);
-        r.setSeriesStroke(1, dashedStroke)
-        r.setSeriesPaint(2, Color.GREEN); r.setSeriesPaint(3, Color.GREEN);
-        r.setSeriesStroke(3, dashedStroke)
-        r.setSeriesPaint(4, Color.BLUE); r.setSeriesPaint(5, Color.BLUE);
-        r.setSeriesStroke(5, dashedStroke)
-
-        r.setBaseShapesVisible(false);
-        r.setBaseShapesFilled(true);
-        r.setDrawSeriesLineAsPath(true);
-
+    } else if (xy & bw) {
+      for (i <- 0 until Math.min(n, dashed.size)) {
+        r.setSeriesPaint(i, Color.BLACK)
+        r.setSeriesStroke(i, dashed(i))
       }
-      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(i + ".jpg"), chart, 500, 270, 5, 5)
-      i = i + 1
+    }
+    /* if (n == 7) {
+      for (i <- 0 to 6) {
+        r.setSeriesPaint(i, Color.DARK_GRAY)
+      }
+      for (i <- 1 to 5) {
+        r.setSeriesStroke(i, dots(1.0f))
+      }
+      r.setSeriesStroke(0, line(1.0f))
+      r.setSeriesPaint(6, Color.BLACK)
+      r.setSeriesStroke(6, line(1.5f))
+    } else if (n == 1) {
+      r.setSeriesPaint(0, Color.BLACK)
+      r.setSeriesStroke(0, line(1.5f))
+    } else if (n == 2) {
+      r.setSeriesPaint(0, Color.DARK_GRAY)
+      r.setSeriesStroke(1, line(1.0f))
+      r.setSeriesPaint(1, Color.BLACK)
+      r.setSeriesStroke(1, dots(1.5f))
+    } else if (n == 4) {
+      r.setSeriesPaint(0, Color.DARK_GRAY)
+      r.setSeriesStroke(1, line(1.0f))
+      for (i <- 1 to 3) {
+        r.setSeriesPaint(i, Color.BLACK)
+        r.setSeriesStroke(i, dots(1.5f))
+      }
+    }*/
+    r.setBaseShapesVisible(false);
+    r.setBaseShapesFilled(true);
+    r.setDrawSeriesLineAsPath(true);
+    chart.getXYPlot().setRenderer(r);
 
+    if (save) {
+      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream((if (name.isEmpty()) i else name) + ".jpg"), chart, 500, 270, 5, 5)
+      i = i + 1
     }
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
