@@ -52,7 +52,7 @@ object LandCoverTest {
     println("Excluded Countries "+onshore.filter(cell => excludedCountries.contains(cell.country.name) || cell.country.name.contains("Is.") || cell.country.name.contains("Islands")).map(_.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
     
     println("Excluded Total" +onshore.filter(g => WindPotential.suitabilityFactor(g) == 0).map(_.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
-    println("Suitable Total" +onshore.map(_.suitableArea).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
+    println("Suitable Total" +onshore.map(_.suitableArea(WindPotential)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1E6)
   
     
     
@@ -70,7 +70,7 @@ object LandCoverTest {
   def ressourcesByDepth(offshore: List[GridCell], minDepth: Int, maxDepth: Int) = {
     val gr = offshore.filter(g => g.waterDepth.toMeters >= minDepth && g.waterDepth.toMeters < maxDepth)
     val area = Helper.area(gr)
-    gr.map(g => Thermodynamics.powerDensity(g.wind125m.mean, g.altitude) * g.area).foldLeft(Watts(0))(_ + _) / area
+    gr.map(g => Thermodynamics.windPowerDensity(g.wind125m.mean, g.altitude) * g.area).foldLeft(Watts(0))(_ + _) / area
   }
   def ressourcesByDistance(offshore: List[GridCell], min: Int, max: Int) = {
     val gr = offshore.filter(g => g.distanceToCoast.toKilometers >= min && g.distanceToCoast.toKilometers < max)

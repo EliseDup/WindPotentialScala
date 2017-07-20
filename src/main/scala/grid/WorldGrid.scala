@@ -15,18 +15,21 @@ import squants.space._
 import construction._
 import utils._
 import wind_energy._
+import solar_energy.SolarPotential
 
 object WorldGrid {
   def apply(name: String) = new WorldGrid(name, Degrees(0.75))
   def apply() = new WorldGrid("../Model_data/0_20_by0_5_dissipation", Degrees(0.75))
-  def simple() = new WorldGrid("../model_data/data0_75", Degrees(0.75))
+  def bottomUp() = new WorldGrid("../Model_data/0_20_by0_5", Degrees(0.75))
+  def simple() = new WorldGrid("../model_data/wind_solar_0_75", Degrees(0.75))
 }
-class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double] = (0 until 40).map(_ * 0.5).toList) {
+
+class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double] = (2 until 40).map(_ * 0.5).toList) {
 
   val grids: List[GridCell] = Helper.getLines(name).map(GridCell(_, gridSize, eroi_min))
 
   // Sum v^2 * Area
-  val totalDissipation = Terawatts(875.0 / 2.0)
+  val totalDissipation = Terawatts(875.0 / 3.0)
   val totalSquareSpeedArea = grids.map(c => Math.pow(c.wind100m.mean.toMetersPerSecond, 2) * c.area.toSquareMeters).sum
 
   def dissipation(cell: GridCell) =
@@ -62,31 +65,20 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
    * ( Function ../WindPotentialPy/Plot.py )
    * ! All should be double casted to String, otherwise it will not work
    */
-  def writeGrid(name: String, gr: List[GridCell] = grids) {
-    val minLat = minLatitude(gr); val maxLat = maxLatitude(gr); val minLon = minLongitude(gr); val maxLon = maxLongitude(gr);
+  def writeGrid(name: String, gr: List[GridCell] = grids, filter: Boolean = false) {
+
+    val cells = if (filter) {
+      val minLat = minLatitude(gr); val maxLat = maxLatitude(gr); val minLon = minLongitude(gr); val maxLon = maxLongitude(gr);
+      grids.filter(g => (g.center.latitude.toDegrees >= minLat && g.center.latitude.toDegrees <= maxLat && g.center.longitude.toDegrees >= minLon && g.center.longitude.toDegrees <= maxLon))
+    } else grids
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
-    grids.filter(g => (g.center.latitude.toDegrees >= minLat && g.center.latitude.toDegrees <= maxLat && g.center.longitude.toDegrees >= minLon && g.center.longitude.toDegrees <= maxLon)).map(g => {
+    cells.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString)
-      if (g.suitableArea.value > 0 && gr.contains(g)) {
-        out_stream.print("\t" + WindPotential.installedCapacity(g, 2, true).toGigawatts.toString
-          + "\t" + WindPotential.installedCapacity(g, 5, true).toGigawatts.toString
-          + "\t" + WindPotential.installedCapacity(g, 8, true).toGigawatts.toString
-          + "\t" + WindPotential.installedCapacity(g, 10, true).toGigawatts.toString
-          + "\t" + WindPotential.installedCapacity(g, 12, true).toGigawatts.toString
-          + "\t" + WindPotential.capacityDensity(g, 2, true).toWattsPerSquareMeter.toString
-          + "\t" + WindPotential.capacityDensity(g, 5, true).toWattsPerSquareMeter.toString
-          + "\t" + WindPotential.capacityDensity(g, 8, true).toWattsPerSquareMeter.toString
-          + "\t" + WindPotential.capacityDensity(g, 10, true).toWattsPerSquareMeter.toString
-          + "\t" + WindPotential.capacityDensity(g, 12, true).toWattsPerSquareMeter.toString
-          + "\t" + WindPotential.eroi(g, 2, true).toString
-          + "\t" + WindPotential.eroi(g, 5, true).toString
-          + "\t" + WindPotential.eroi(g, 8, true).toString
-          + "\t" + WindPotential.eroi(g, 10, true).toString
-          + "\t" + WindPotential.eroi(g, 12, true).toString)
+      if (!filter || gr.contains(g)) {
+        out_stream.print(
+          "\t" + g.irradiance.mean.toWattsPerSquareMeter.toString + "\t" + SolarPotential.eroi(g,5,true).toString + "\t" + (SolarPotential.performanceRatio * SolarPotential.technologyEfficiency*g.irradiance.mean).toWattsPerSquareMeter.toString )
       } else {
-        out_stream.print("\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" +
-          "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" +
-          "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0")
+        out_stream.print("\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0")
       }
       out_stream.print("\n")
 
@@ -130,12 +122,13 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
     gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" +
         g.wind100m.c.value.toString + "\t" + g.wind100m.k.toString + "\t" +
-        g.area.toSquareKilometers.toString + "\t" + g.suitableArea.toSquareKilometers.toString + "\t" +
+        g.area.toSquareKilometers.toString + "\t" + g.suitableArea(WindPotential).toSquareKilometers.toString + "\t" +
         WindPotential.energyInputs(Megawatts(1), Joules(0), g).to(MegawattHours).toString + "\t" +
         (if (g.onshore) WindFarmEnergyInputs.onshoreOperation(MegawattHours(1)).to(MegawattHours).toString
         else WindFarmEnergyInputs.offshoreOperation(MegawattHours(1)).to(MegawattHours).toString) +
         "\t" + WindPotential.availabilityFactor(g).toString
-        + "\t" + dissipation(g).toWattsPerSquareMeter.toString + "\n")
+        + "\t" + dissipation(g).toWattsPerSquareMeter.toString +
+        "\t" + Thermodynamics.airDensity(g.hubAltitude).toKilogramsPerCubicMeter.toString + "\n")
 
     })
     out_stream.close()

@@ -30,7 +30,7 @@ object WindGrowth {
       var addedProduction = WattHours(0)
       while (cellIterator.hasNext && Math.abs(addedPower.toGigawatts - annualGrowth.toGigawatts) > 0.01) {
         var next = cellIterator.next
-        val pow = List(WindPotential.powerInstalled(next), annualGrowth - addedPower).min
+        val pow = List(WindPotential.installedCapacity(next,0,true), annualGrowth - addedPower).min
         addedPower = addedPower + pow
         addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * Hours(365 * 24)
       }
@@ -68,7 +68,7 @@ object WindGrowth {
       var addedProduction = WattHours(0)
       while (cellIterator.hasNext && Math.abs(addedPower.toMegawatts - currentGrowth.toMegawatts) > 0.01) {
         var next = cellIterator.next
-        val pow = List(WindPotential.powerInstalled(next), currentGrowth - addedPower).min
+        val pow = List(WindPotential.installedCapacity(next,0,true), currentGrowth - addedPower).min
         addedPower = addedPower + pow
         addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * Hours(365 * 24)
       }
@@ -109,23 +109,23 @@ object GreenPeace {
   
     val cells = new WorldGrid("../model_data/data_0_75.txt", Degrees(0.75)).grids // OptimalCapacityDensity.loadCells( (0 to 40).map(_*0.5).toList, "../WindPotentialPy/res_optimalCD_europe") 
     val target = Helper.getLines("results/GreenPeace.txt").map(l => (Country(l(0)), Gigawatts(l(1).toDouble)))
-    val density = Some(WattsPerSquareMeter(4))
+    val density = WattsPerSquareMeter(4)
     var res = List[(GridCell, Power)]()
 
     for (i <- target) {
-      val gr = cells.filter(_.country.name.contains(i._1.name)).filter(_.suitableArea.toSquareKilometers > 0).sortBy(-CapacityFactorCalculation(_))
+      val gr = cells.filter(_.country.name.contains(i._1.name)).filter(_.suitableArea(WindPotential).toSquareKilometers > 0).sortBy(-CapacityFactorCalculation(_))
       val cellIterator = gr.toIterator
 
       var addedPower = Watts(0)
       var addedProduction = WattHours(0)
       while (cellIterator.hasNext && Math.abs(addedPower.toGigawatts - i._2.toGigawatts) > 0.01) {
         var next = cellIterator.next
-        val pow = List(WindPotential.powerInstalled(next, density = density), i._2 - addedPower).min
+        val pow = List(next.suitableArea(WindPotential)*density, i._2 - addedPower).min
         addedPower = addedPower + pow
-        addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * GustavsonWakeEffect.arrayEfficiency(pow / Megawatts(2), lambda(next, density.get)) * Hours(365 * 24) * WindPotential.availabilityFactor(next)
+        addedProduction = addedProduction + pow * CapacityFactorCalculation(next) * GustavsonWakeEffect.arrayEfficiency(pow / Megawatts(2), lambda(next, density)) * Hours(365 * 24) * WindPotential.availabilityFactor(next)
         res = res :+ (next, addedPower)
       }
-   println(i._1.name + "\t" + gr.map(_.suitableArea).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1000  + "\t" + 
+   println(i._1.name + "\t" + gr.map(_.suitableArea(WindPotential)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers/1000  + "\t" + 
           addedPower.toGigawatts + "\t" + addedProduction.to(TerawattHours))
 
     }
@@ -152,7 +152,7 @@ println((Exajoules(750)/Hours(365*24)).to(Terawatts))
     var res = List[(GridCell, Power)]()
 
     for (i <- target) {
-      val gr = cells.filter(_.country.name.contains(i._1.name)).filter(_.suitableArea.toSquareKilometers > 0).sortBy(-WindPotential.eroi(_,minEROI,true))
+      val gr = cells.filter(_.country.name.contains(i._1.name)).filter(_.suitableArea(WindPotential).toSquareKilometers > 0).sortBy(-WindPotential.eroi(_,minEROI,true))
       val cellIterator = gr.toIterator
 
       var addedPower = Watts(0)
@@ -177,7 +177,7 @@ println((Exajoules(750)/Hours(365*24)).to(Terawatts))
         extraCapacityNeeded = extraCapacityNeeded + pow
         res = res :+ (next, pow)
       }
-      println(i._1.name + "\t" + gr.map(_.suitableArea).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers + "\t" + i._2.toMegawatts + "\t" + i._3.toGigawattHours + "\t" + addedPower.toMegawatts + "\t" + addedProduction.to(GigawattHours) + "\t" + extraCapacityNeeded.toMegawatts + "\t" + extraProduction.toGigawattHours)
+      println(i._1.name + "\t" + gr.map(_.suitableArea(WindPotential)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers + "\t" + i._2.toMegawatts + "\t" + i._3.toGigawattHours + "\t" + addedPower.toMegawatts + "\t" + addedProduction.to(GigawattHours) + "\t" + extraCapacityNeeded.toMegawatts + "\t" + extraProduction.toGigawattHours)
     
     }
     val out_stream = new PrintStream(new java.io.FileOutputStream("res_iewa2030"))

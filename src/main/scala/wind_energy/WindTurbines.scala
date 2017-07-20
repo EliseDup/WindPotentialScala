@@ -61,6 +61,20 @@ class WindTurbine(val specs: WindTurbineComponents, val powerCoefficient: Double
   override def toString() = specs.toString()
 }
 
+object NormalizedPowerCurve {
+  val vc = 3.0; val vr = 11.0; val vf = 25.0
+  def plot{
+    val v = (0 to 260).map(_*0.1).toList
+    PlotHelper.plotXY(List ((v, v.map(normalizedPower(_)),"")), xLabel="Wind Speed [m/s]", yLabel="Power / Rated Power")
+  }
+  def normalizedPower(v : Double) = {
+    if(v < vc) 0.0
+    else if(v <= vr) (Math.pow(v,3) - Math.pow(vc,3)) / (Math.pow(vr,3) - Math.pow(vc,3)) 
+    else if(v <= vf) 1.0
+    else 0.0
+  }
+}
+
 /**
  * When the power curve is available, use this
  */

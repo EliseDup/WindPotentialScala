@@ -33,7 +33,7 @@ object PlotHelper {
     plotXY(List((x, x.map(Math.pow(_, 2)), "x^2"), (x, x.map(_ * 3), "3x"), (x, x.map(_ * 2), "2x"), (x, x, "x")), legend = true)
 
   }
-  val colors = List(Color.RED, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
+  val colors = List(Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
   val dashed = List(stroke(Array(1.0f, 0.0f)), stroke(Array(6.0f, 3.0f)), stroke(Array(1.0f, 3.0f)), stroke(Array(6.0f, 3.0f, 1.0f, 3.0f)))
 
   // val shapes = List(ShapeUtilities.createDiagonalCross(1.0f, 1.0f),ShapeUtilities.createUpTriangle(2.0f),ShapeUtilities.createDiamond(2.0f))
@@ -75,6 +75,7 @@ object PlotHelper {
 
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
     legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
       val serie = new XYSeries(xy._3)
@@ -86,7 +87,39 @@ object PlotHelper {
     val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
+     //plot.getRangeAxis().setRange(1, 20)
+    //plot.getDomainAxis().setRange(0,800)
     createFrame(chart, name = title, save = save, tick = tick)
+  }
+  
+
+  def dualAxisPlot(x: List[Double], y1: List[Double], y2: List[Double], xLabel: String, yLabel1: String, yLabel2: String) {
+    val dataSet1 = new XYSeriesCollection(); val dataSet2 = new XYSeriesCollection();
+    val serie1 = new XYSeries("Primary Axis"); val serie2 = new XYSeries("Secondary Axis");
+    (0 until x.size).map { i =>
+      serie1.add(x(i), y1(i))
+      serie2.add(x(i), y2(i))
+    }
+    dataSet1.addSeries(serie1); dataSet2.addSeries(serie2);
+    val chart = ChartFactory.createXYLineChart("", xLabel, yLabel1, dataSet1, PlotOrientation.VERTICAL, false, false, false)
+    val axis2 = new NumberAxis(yLabel2);
+    val plot = chart.getXYPlot();
+    val r1 = new XYLineAndShapeRenderer(); val r2 = new XYLineAndShapeRenderer();
+    r1.setSeriesPaint(1, Color.BLUE);
+    r2.setSeriesPaint(1, Color.GREEN);
+    r1.setBaseShapesVisible(false);
+    r1.setBaseShapesFilled(true);
+    r1.setDrawSeriesLineAsPath(true);
+    r2.setBaseShapesVisible(false);
+    r2.setBaseShapesFilled(true);
+    r2.setDrawSeriesLineAsPath(true);
+
+    plot.setRenderer(0, r1); plot.setRenderer(1, r2);
+    plot.setRangeAxis(1, axis2);
+    plot.setDataset(1, dataSet2);
+    plot.mapDatasetToRangeAxis(1, 1);
+    createFrame(chart)
+
   }
 
   def histogram(values: List[Double], n: Int = 100, title: String = "", xLabel: String = "", yLabel: String = "", legend: Boolean = false) {
@@ -134,8 +167,9 @@ object PlotHelper {
     createFrame(chart, save = false, xy = false)
   }
   def scatterPlot(values: List[(Double, Double)], title: String = "", xLabel: String = "", yLabel: String = "") {
-    val plot = new FastScatterPlot(Array(values.map(_._1.toFloat).toArray, values.map(_._2.toFloat).toArray),
-      new NumberAxis(xLabel), new NumberAxis(yLabel));
+    val y = new LogarithmicAxis(yLabel)
+    val x = new NumberAxis(xLabel)
+    val plot = new FastScatterPlot(Array(values.map(_._1.toFloat).toArray, values.map(_._2.toFloat).toArray), x, y);
     val chart = new JFreeChart(title, plot);
     createFrame(chart, name = title, save = true, xy = false)
   }
@@ -143,49 +177,46 @@ object PlotHelper {
   def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, shape: Boolean = false, xy: Boolean = true, bw: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
     applyChartTheme(chart, tick)
-    val n = chart.getXYPlot().getSeriesCount()
-    val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
 
-    if (xy & !bw) {
-      for (i <- 0 until Math.min(n, colors.size)) r.setSeriesPaint(i, colors(i))
+    if (xy) {
+      val n = chart.getXYPlot().getSeriesCount()
+      val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
+      if (!bw) {
+        for (i <- 0 until Math.min(n, colors.size)) r.setSeriesPaint(i, colors(i))
+        chart.getXYPlot().setRenderer(r);
+      } else {
+        for (i <- 0 until Math.min(n, dashed.size)) {
+          r.setSeriesPaint(i, Color.BLACK)
+          r.setSeriesStroke(i, dashed(i))
+        }
+      }
+      r.setBaseShapesVisible(false);
+      r.setBaseShapesFilled(true);
+      r.setDrawSeriesLineAsPath(true);
       chart.getXYPlot().setRenderer(r);
-    } else if (xy & bw) {
-      for (i <- 0 until Math.min(n, dashed.size)) {
-        r.setSeriesPaint(i, Color.BLACK)
-        r.setSeriesStroke(i, dashed(i))
-      }
+/*
+      if (n == 7) {
+        for (i <- 0 to 5) {
+          r.setSeriesPaint(i, Color.DARK_GRAY)
+        }
+        for (i <- 1 to 5) {
+          r.setSeriesStroke(i, dots(1.0f))
+        }
+        r.setSeriesStroke(0, line(1.0f))
+        r.setSeriesPaint(6, Color.BLACK)
+        r.setSeriesStroke(6, line(1.5f))
+      } else if (n == 1) {
+        r.setSeriesPaint(0, Color.BLACK)
+        r.setSeriesStroke(0, line(1.5f))
+      } else if (n <= 6) {
+        r.setSeriesPaint(0, Color.DARK_GRAY)
+        r.setSeriesStroke(1, line(1.0f))
+        for (i <- 1 to n - 1) {
+          r.setSeriesPaint(i, Color.BLACK)
+          r.setSeriesStroke(i, dots(1.5f))
+        }
+      }*/
     }
-    /* if (n == 7) {
-      for (i <- 0 to 6) {
-        r.setSeriesPaint(i, Color.DARK_GRAY)
-      }
-      for (i <- 1 to 5) {
-        r.setSeriesStroke(i, dots(1.0f))
-      }
-      r.setSeriesStroke(0, line(1.0f))
-      r.setSeriesPaint(6, Color.BLACK)
-      r.setSeriesStroke(6, line(1.5f))
-    } else if (n == 1) {
-      r.setSeriesPaint(0, Color.BLACK)
-      r.setSeriesStroke(0, line(1.5f))
-    } else if (n == 2) {
-      r.setSeriesPaint(0, Color.DARK_GRAY)
-      r.setSeriesStroke(1, line(1.0f))
-      r.setSeriesPaint(1, Color.BLACK)
-      r.setSeriesStroke(1, dots(1.5f))
-    } else if (n == 4) {
-      r.setSeriesPaint(0, Color.DARK_GRAY)
-      r.setSeriesStroke(1, line(1.0f))
-      for (i <- 1 to 3) {
-        r.setSeriesPaint(i, Color.BLACK)
-        r.setSeriesStroke(i, dots(1.5f))
-      }
-    }*/
-    r.setBaseShapesVisible(false);
-    r.setBaseShapesFilled(true);
-    r.setDrawSeriesLineAsPath(true);
-    chart.getXYPlot().setRenderer(r);
-
     if (save) {
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream((if (name.isEmpty()) i else name) + ".jpg"), chart, 500, 270, 5, 5)
       i = i + 1
@@ -222,10 +253,10 @@ object PlotHelper {
     val oldRegularFont = chartTheme.getRegularFont();
     val oldSmallFont = chartTheme.getSmallFont();
 
-    val extraLargeFont = new Font("Palatino", oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
-    val largeFont = new Font("Palatino", oldLargeFont.getStyle(), oldLargeFont.getSize());
-    val regularFont = new Font("Palatino", oldRegularFont.getStyle(), oldRegularFont.getSize());
-    val smallFont = new Font("Palatino", oldSmallFont.getStyle(), oldSmallFont.getSize());
+    val extraLargeFont = new Font("Avenir", oldExtraLargeFont.getStyle(), oldExtraLargeFont.getSize());
+    val largeFont = new Font("Avenir", oldLargeFont.getStyle(), oldLargeFont.getSize());
+    val regularFont = new Font("Avenir", oldRegularFont.getStyle(), oldRegularFont.getSize());
+    val smallFont = new Font("Avenir", oldSmallFont.getStyle(), oldSmallFont.getSize());
 
     chartTheme.setExtraLargeFont(extraLargeFont);
     chartTheme.setLargeFont(largeFont);
