@@ -22,7 +22,7 @@ import scala.collection.mutable.ListBuffer
 import squants.radio.WattsPerSquareMeter
 import sun.awt.X11.XLabelPeer
 
-object WindPotentialSimulation {
+/*object WindPotentialSimulation {
 
   def main(args: Array[String]): Unit = {
     val world = new WorldGrid("results/worldGridWind.txt", Degrees(0.5))
@@ -164,4 +164,4 @@ object WindPotentialSimulation {
     PlotHelper.plotXY(month.map(_.toDouble), month.map(energyGenerated(_)))
 
   }
-}
+}*/

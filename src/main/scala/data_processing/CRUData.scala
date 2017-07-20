@@ -7,7 +7,7 @@ object DataPreprocessing {
 
   def main(args: Array[String]): Unit = {
   
-    readCRUData("../ressources/CRU/cwnd6190.dat","wind")
+    readCRUData("../resources/cru_data/crad6190/crad6190.dat","solar")
     // readIrradianceData()
     /* val res = Helper.getLines(Helper.resultsPy + "irradiance").map(l => (l(0).toDouble, l(1).toDouble, l(2).toDouble))
 
