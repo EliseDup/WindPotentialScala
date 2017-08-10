@@ -30,8 +30,6 @@ import wind_energy.GustavsonWakeEffect
 import wind_energy.WindProfile
 import wind_energy.WindFarmEnergyInputs
 import utils.PetawattHours
-import co.theasi.plotly._
-import utils.PlotlyHelper
 import wind_energy.NormalizedPowerCurve
 import squants.space.Kilometers
 
