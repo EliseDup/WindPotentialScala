@@ -18,7 +18,6 @@ object LandUseFactor {
 
 abstract class LandCoverType(val name : String, val windFactor : LandUseFactor = LandUseFactor(0.0), val solarFactor : LandUseFactor = LandUseFactor(0.0))
 
-
 object CropLands extends LandCoverType("Croplands", LandUseFactor(0.7), LandUseFactor(0.01))
 object SparseVegetation extends LandCoverType("Sparse Vegetation", LandUseFactor(0.9), LandUseFactor(0.05))
 object Grassland extends LandCoverType("Grassland", LandUseFactor(0.9), LandUseFactor(0.01))

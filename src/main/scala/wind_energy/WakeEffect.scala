@@ -20,6 +20,7 @@ object GustavsonWakeEffect {
   val aInf = 0.9619; val bInf = 88.9204;
 
   def exp(lambda: Double, a: Double, b: Double) = a * Math.exp(-b * lambda)
+  
   def arrayEfficiency(nT: Double, lambda: Double, inf: Boolean = false) = {
     if (nT <= 25) exp(lambda, a5, b5)
     else if (nT <= 100) exp(lambda, a10, b10)

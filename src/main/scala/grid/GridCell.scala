@@ -116,9 +116,10 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
 
   override def toString() = "Grid Object center : " + center
 
+  /**
+   * WIND
+   */
   val wind100m = new WindProfile((wind71m.mean + wind125m.mean) / 2.0, (wind71m.std + wind125m.std) / 2.0, Meters(100))
-
- // def eroi(potential: EnergyGenerationPotential) = potential.eroi(this)
 
   def estimatedDissipation(world: WorldGrid) =
     if (area.toSquareKilometers == 0) WattsPerSquareMeter(0)
@@ -136,7 +137,12 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
   def optimalRatedSpeed(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15))._1
   def optimalN(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15.0))._2
   
-
+ /**
+  * SOLAR
+  */
+  def clearnessIndex(month : Int) =  irradiance.perMonth(month) / Thermodynamics.monthlyRadiation(month, center.latitude)
+  def annualClearnessIndex = irradiance.mean /  Thermodynamics.yearlyRadiation(center.latitude)
+  // def directRadiation = Thermodynamics.diffuseFraction(clearnessIndex, d, h)
 }
 /**
  * Latitude	Longitude	Corine Land Cover	GlobCover	Modis	Urban Factor	Protected area ?	Country	Elevation [m]	Distance to Coast [km]	Uwind	Vwind	Wind	Std Wind	KineticEnergyDissipation Irradiance
@@ -155,7 +161,7 @@ object GridCell {
    * [34] -> [116] Pair of (optimal installed capacity, boolean) for EROI 0 -> 20 by 0.5
    *
    */
-  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex : Int = 40, optiWind : Boolean = false, solar : Boolean = true) = {
+  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex : Int = 40, optiWind : Boolean = true, solar : Boolean = false) = {
     
     new GridCell(l, DefaultGridCell.center(l), gridSize,
       DefaultGridCell.lcs(l),
