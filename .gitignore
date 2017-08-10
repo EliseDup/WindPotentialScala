@@ -1,1 +1,9 @@
-/target/
+/target/ 
+target/* 
+.metadata 
+tar.gz 
+.classpath 
+.project 
+*/.settings/ 
+.class
+.DS_Store
