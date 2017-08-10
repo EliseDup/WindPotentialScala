@@ -73,11 +73,17 @@ object Thermodynamics {
   def atan(d: Double) = Radians(Math.atan(d))
 
   // SOLAR
-  val meanRadiation = WattsPerSquareMeter(1353);
-  val albedo = 0.35
-  def incidentRadiation(d: Int) = meanRadiation * (1 + 0.033 * cos(Degrees(360 / 365.0 * d)))
+  val solarConstant = WattsPerSquareMeter(1353);
+  // val albedo = 0.35
+  
+  def inverseRelativeDistanceEarthSun(d: Int) =  (1 + 0.033 * cos(Degrees(360 / 365.0 * d)))
+  def incidentRadiation(d: Int) = solarConstant * inverseRelativeDistanceEarthSun(d)
+  
   // Declination is the angle made between the plane of the equator and the line joining the two centres of the earth and the sun
   def solarDeclination(d: Int) = Degrees(23.45) * sin(Degrees(360.0 * (284 + d) / 365.0))
+  // The sunset hour angle,when the incidence angle is 90°
+  def sunsetHourAngle(d : Int, lat : Angle) = acos(-tan(lat)*tan(solarDeclination(d)))
+  
   def hourAngle(d: Int, h: Int) = Radians(2 * Math.PI * (12.0 - h) / 24.0 /*- (latitude - latitude_zone)*/ - TEQ(d)) //Degrees(15) * (hourOfDay - 12)
   // The correction TEQ (“equationof time”) accounts for the variations in solar time caused by changes in the rotational and orbital motion of the Earth
   def TEQ(d: Int) = {
@@ -92,11 +98,25 @@ object Thermodynamics {
   def zenith(d: Int, h: Int, lat: Angle) = acos(cosZenith(d, h, lat))
 
   def radiation(d: Int, h: Int, lat: Angle) = Math.max(0, cosZenith(d, h, lat)) * incidentRadiation(d)
-  def dailyRadiation(d: Int, lat: Angle) = (1 - albedo) * 1.0 / 24 * (0 until 24).map(radiation(d, _, lat)).foldLeft(WattsPerSquareMeter(0))(_ + _)
+  def dailyRadiation(d: Int, lat: Angle) = 1.0 / 24 * (0 until 24).map(radiation(d, _, lat)).foldLeft(WattsPerSquareMeter(0))(_ + _)
+  val dayInMonth = List(31,28,31,30,31,30,31,31,30,31,30,31)
+  val firstDayMonth = dayInMonth.scanLeft(0)(_ + _)
   def monthlyRadiation(m: Int, lat: Angle) = {
-    val n = 31
-    1.0 / n * (0 until n).map(i => dailyRadiation(m * 31 + i, lat)).foldLeft(WattsPerSquareMeter(0))(_ + _)
+    1.0 / dayInMonth(m) * (0 until dayInMonth(m)).map(i => dailyRadiation(firstDayMonth(m) + i, lat)).foldLeft(WattsPerSquareMeter(0))(_ + _)
   }
+ 
   def yearlyRadiation(lat: Angle) = 1.0 / 365 * (0 until 365).map(dailyRadiation(_, lat)).foldLeft(WattsPerSquareMeter(0))(_ + _)
 
+  // The daily diffuse irradiation (Hd) isdefined by the Erbs correlations [39]: 
+  // the daily total diffuse fraction depends on the sunset hour angle (ws) and is defined as:
+  def dailyDiffuseFraction(clearnessIndex: Double, d: Int, lat : Angle) = {
+    val angle = sunsetHourAngle(d, lat)
+    if (angle.toDegrees <= 81.4) {
+      if (clearnessIndex < 0.715) 1 - 0.2727 * clearnessIndex + 2.4495 * Math.pow(clearnessIndex, 2) + 9.3879 * Math.pow(clearnessIndex, 4)
+      else 0.143
+    } else {
+      if (clearnessIndex < 0.715) 1 + 0.2832 * clearnessIndex - 2.557 * Math.pow(clearnessIndex, 2) + 0.8448 * Math.pow(clearnessIndex, 3)
+      else 0.175
+    }
+  }
 }

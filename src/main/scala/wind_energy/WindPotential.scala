@@ -11,23 +11,12 @@ import utils.Thermodynamics
 import squants.time.Hours
 import squants.motion.Velocity
 import squants.motion.MetersPerSecond
+import utils.Helper
 
 object WindPotential extends EnergyGenerationPotential {
 
   val lifeTimeYears = 25.0
-  
-  // A turbine occupied nD * nD space
- /* def nd(cell: GridCell, density: Option[Irradiance] = None) = Math.sqrt(314.0 / density.getOrElse(capacityDensity(cell)).toWattsPerSquareMeter)
-  def gustavsonArrayEffect(cell: GridCell, suitable: Boolean = true, density: Option[Irradiance] = None) = {
-    val lambda = Math.PI / Math.pow(nd(cell, density) * 2, 2)
-    GustavsonWakeEffect.arrayEfficiency(nTurbines(cell, suitable, density), lambda)
-  }
-
-  def capacityDensity(cell: GridCell, maxDensity: Double = 5.0) = WattsPerSquareMeter(2)
-
-  def nominalPower(cell: GridCell) = if (cell.onshore) Megawatts(3) else Megawatts(8)
-  def nTurbines(cell: GridCell, suitable: Boolean, density: Option[Irradiance] = None) = cell.suitableArea(suitable) * density.getOrElse(capacityDensity(cell)) / nominalPower(cell)
-*/
+  val cp_max: Double = 0.59
   // Estimation of wind speed is for 100 metres height
   def powerDensity(cell: GridCell, wind: WindProfile) = Thermodynamics.windPowerDensity(wind.mean, wind.height + cell.altitude)
   def powerDensity(cell: GridCell) = powerDensity(cell, cell.wind100m)
@@ -44,7 +33,6 @@ object WindPotential extends EnergyGenerationPotential {
   }
 
   val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
-
   def landUseFactor(cell: GridCell): Double = {
     if (excludedCountries.contains(cell.country.name) || cell.country.name.contains("Is.") || cell.country.name.contains("Islands")) 0.0
     else {
@@ -63,14 +51,11 @@ object WindPotential extends EnergyGenerationPotential {
 
   // EU Report
   def availabilityFactor(cell: GridCell): Double = if (cell.offshore) 0.95 else 0.97
- // def lossFactor(cell: GridCell, suitable: Boolean = true, density: Option[Irradiance] = None): Double = gustavsonArrayEffect(cell, suitable, density)
-//  def lossFactor(cell: GridCell): Double = gustavsonArrayEffect(cell)
 
   def energyInputs(installedCapacity: Power, energyOutput: Energy, cell: GridCell) = {
     (if (cell.onshore) onshoreEnergyInputs(installedCapacity, energyOutput, cell.distanceToCoast)
     else offshoreEnergyInputs(installedCapacity, energyOutput, cell.distanceToCoast, cell.waterDepth))
   }
-
   def offshoreEnergyInputs(installedCapacity: Power, energyOutput: Energy, distanceToCoast: Length, waterDepth: Length) = {
     WindFarmEnergyInputs.offshoreEnergyInputs(installedCapacity, energyOutput, waterDepth, distanceToCoast)
   }
@@ -79,8 +64,7 @@ object WindPotential extends EnergyGenerationPotential {
   }
 
   // Relationship between rated power, rotor diameter and rated wind speed
-  val cp = 0.5
-  def coeff(elevation: Length) = 0.5 * cp * Thermodynamics.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI / 4
+  def coeff(elevation: Length) = 0.5 * cp_max * Thermodynamics.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI / 4
   val defaultVr = MetersPerSecond(11)
 
   def rotorDiameter(ratedPower: Power, ratedSpeed: Velocity, hubAltitude: Length) = Meters(Math.sqrt(ratedPower.toWatts / (coeff(hubAltitude) * Math.pow(ratedSpeed.toMetersPerSecond, 3))))
@@ -103,6 +87,7 @@ object WindPotential extends EnergyGenerationPotential {
     if (topDown && res / cell.suitableArea(suitable) > cell.keDissipation) cell.keDissipation * cell.suitableArea(suitable)
     else res
   }
+
   def power(cell: GridCell, eroi_min: Double, suitable: Boolean): Power = power(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min), suitable)
 
   def powerDensity(cell: GridCell, eroi_min: Double, suitable: Boolean): Irradiance = {
@@ -140,8 +125,32 @@ object WindPotential extends EnergyGenerationPotential {
 
   // RESULTS
   def potentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true, topDown: Boolean = true): Energy =
-    grids.map(g => (if (WindPotential.eroi(g, density, suitable, topDown) >= eroi_min) energyPerYear(g, density, suitable, topDown) else Joules(0))).foldLeft(Joules(0))(_ + _)
+    grids.map(g => (if (eroi(g, density, suitable, topDown) >= eroi_min) energyPerYear(g, density, suitable, topDown) else Joules(0))).foldLeft(Joules(0))(_ + _)
   def netPotentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true, topDown: Boolean = true): Energy =
-    grids.map(g => (if (WindPotential.eroi(g, density, suitable, topDown) >= eroi_min) netEnergyPerYear(g, density, suitable, topDown) else Joules(0))).foldLeft(Joules(0))(_ + _)
+    grids.map(g => (if (eroi(g, density, suitable, topDown) >= eroi_min) netEnergyPerYear(g, density, suitable, topDown) else Joules(0))).foldLeft(Joules(0))(_ + _)
+
+  def meanCfCountry(world: WorldGrid, country: String, meanSpeed: Velocity) = {
+    val c = world.country(country).filter(_.wind100m.mean >= meanSpeed)
+    Math.round(Helper.mean(c.map(g => (g, CapacityFactorCalculation(g) * 1000)))) / 10.0
+  }
+
+  def meanEfficiency(cells: List[GridCell], eroi_min: Double) = {
+    Math.round(Helper.mean(cells.map(g => (g, ((installedCapacity(g, eroi_min, true) * Hours(365 * 24)) / energyPerYear(g, eroi_min, true)) * 1000)))) / 10.0
+  }
+  def meanCf(cells: List[GridCell]) = {
+    Math.round(Helper.mean(cells.map(g => (g, CapacityFactorCalculation(g) * 1000)))) / 10.0
+  }
+  def meanProductionDensity(cells: List[GridCell], e: Double) = {
+    Helper.mean(cells.filter(_.optimalRatedSpeed(e).toMetersPerSecond > 0).map(g => (g, powerDensity(g, e, true).toWattsPerSquareMeter)))
+  }
+  def minProductionDensity(cells: List[GridCell], e: Double) = cells.filter(_.optimalRatedSpeed(e).toMetersPerSecond > 0).map(powerDensity(_, e, true).toWattsPerSquareMeter).min
+  def maxProductionDensity(cells: List[GridCell], e: Double) = cells.filter(_.optimalRatedSpeed(e).toMetersPerSecond > 0).map(powerDensity(_, e, true).toWattsPerSquareMeter).max
+  def minCapacityDensity(cells: List[GridCell], e: Double) = cells.filter(_.optimalRatedSpeed(e).toMetersPerSecond > 0).map(capacityDensity(_, e, true).toWattsPerSquareMeter).min
+  def maxCapacityDensity(cells: List[GridCell], e: Double) = cells.filter(_.optimalRatedSpeed(e).toMetersPerSecond > 0).map(capacityDensity(_, e, true).toWattsPerSquareMeter).max
+  def meanCapacityDensity(cells: List[GridCell], e: Double) = {
+    Helper.mean(cells.filter(_.optimalRatedSpeed(e).toMetersPerSecond > 0).map(g => (g, capacityDensity(g, e, true).toWattsPerSquareMeter)))
+  }
+  def powerInstalled(eroi_min: Double, suitable: Boolean, grids: List[GridCell]): Power = grids.map(g => installedCapacity(g, eroi_min, suitable)).foldLeft(Watts(0))(_ + _)
+  def area(eroi_min: Double, suitable: Boolean, grids: List[GridCell]): Area = grids.map(g => if (g.optimalRatedSpeed(eroi_min).value > 0) (g.suitableArea(suitable, this)) else SquareKilometers(0)).foldLeft(SquareKilometers(0))(_ + _)
 
 }
