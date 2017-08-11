@@ -165,7 +165,7 @@ object Helper {
   }
 
   def area(gr: List[GridCell]) = gr.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
-  def suitableArea(gr: List[GridCell], potential: EnergyGenerationPotential) = gr.map(g => g.area * WindPotential.suitabilityFactor(g)).foldLeft(SquareKilometers(0))(_ + _)
+  def suitableArea(gr: List[GridCell], potential: EnergyGenerationPotential) = gr.map(g => g.area * WindPotential().suitabilityFactor(g)).foldLeft(SquareKilometers(0))(_ + _)
   def mean(values: List[(GridCell, Double)]) = {
     val res = values.map(i => i._1.area * i._2).foldLeft(SquareKilometers(0))(_ + _) / area(values.map(_._1))
     res
