@@ -18,6 +18,7 @@ import wind_energy._
 import solar_energy.SolarPotential
 
 object WorldGrid {
+  
   def apply(name: String) = new WorldGrid(name, Degrees(0.75))
   def apply() = new WorldGrid("../Model_data/0_20_by0_5_dissipation", Degrees(0.75))
   def bottomUp() = new WorldGrid("../Model_data/0_20_by0_5", Degrees(0.75))
@@ -85,32 +86,7 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
     })
     out_stream.close()
   }
-  def writeEROI(name: String, gr: List[GridCell] = grids, cd: List[Double]) {
-    val out_stream = new PrintStream(new java.io.FileOutputStream(name))
-    gr.map(g => {
-      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" +
-        WindPotential.eroi(g, 0, true).toString)
-      cd.map(e => out_stream.print("\t" + WindPotential.eroi(g, WattsPerSquareMeter(e), true, true).toString))
-      out_stream.print("\n")
-    })
-    out_stream.close()
-  }
-  def writeEROIEU(name: String, gr: List[GridCell] = grids, cd: List[Double]) {
-    val out_stream = new PrintStream(new java.io.FileOutputStream(name))
-    gr.map(g => {
-      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString)
-      if (eu28countries.contains(g.country.name)) {
-        out_stream.print("\t" + WindPotential.eroi(g, 0, true).toString)
-        cd.map(e => out_stream.print("\t" + WindPotential.eroi(g, WattsPerSquareMeter(e), true, true).toString))
-      } else {
-        out_stream.print("\t" + "0.0")
-        cd.map(e => out_stream.print("\t" + "0.0"))
-      }
-      out_stream.print("\n")
-
-    })
-    out_stream.close()
-  }
+  
   /**
    *  lats = data[:, 0]; lon = data[:, 1]
    *  cfs = data[:, 2]; totalArea = data[:, 3]; suitableArea = data[:, 4];
@@ -122,11 +98,11 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
     gr.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" +
         g.wind100m.c.value.toString + "\t" + g.wind100m.k.toString + "\t" +
-        g.area.toSquareKilometers.toString + "\t" + g.suitableArea(WindPotential).toSquareKilometers.toString + "\t" +
-        WindPotential.energyInputs(Megawatts(1), Joules(0), g).to(MegawattHours).toString + "\t" +
+        g.area.toSquareKilometers.toString + "\t" + g.suitableArea(WindPotential()).toSquareKilometers.toString + "\t" +
+        WindPotential().energyInputs(Megawatts(1), Joules(0), g).to(MegawattHours).toString + "\t" +
         (if (g.onshore) WindFarmEnergyInputs.onshoreOperation(MegawattHours(1)).to(MegawattHours).toString
         else WindFarmEnergyInputs.offshoreOperation(MegawattHours(1)).to(MegawattHours).toString) +
-        "\t" + WindPotential.availabilityFactor(g).toString
+        "\t" + WindPotential().availabilityFactor(g).toString
         + "\t" + dissipation(g).toWattsPerSquareMeter.toString +
         "\t" + Thermodynamics.airDensity(g.hubAltitude).toKilogramsPerCubicMeter.toString + "\n")
 

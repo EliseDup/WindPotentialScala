@@ -13,7 +13,7 @@ import utils.PlotHelper
  *
  * Values are found for arrays of 5x5, 10x10, 50x50 and ~ Infinite size
  */
-object GustavsonWakeEffect {
+object WakeEffect {
   val a5 = 0.9943; val b5 = 5.2661;
   val a10 = 0.9871; val b10 = 11.7542;
   val a50 = 0.9838; val b50 = 42.5681;
@@ -50,7 +50,7 @@ object GustavsonWakeEffect {
  *
  */
 
-object WakeEffect {
+object WakeEffect_Old {
 
   // We have to fix a spacing and then we wan evalate the number of turbines in the area and the corresponding array efficieny
   // So to put one wind turbine one need a space of nD * nD (a square surrounding the wind turbine)

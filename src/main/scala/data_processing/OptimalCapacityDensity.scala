@@ -26,7 +26,7 @@ println(TonOilEquivalent(9425E6).to(Exajoules))
     val out_stream = new PrintStream(new java.io.FileOutputStream("eroi_12_bis"))
     cells.map(g => {
       out_stream.print(g.latitude.toString + "\t" + g.longitude.toString +  "\t" + g.annualProduction(true, 12).to(TerawattHours).toString+ "\t" + g.annualProduction(false, 12).to(TerawattHours).toString + 
-          "\t" + GustavsonWakeEffect.arrayEfficiency(200, g.lambda(g.getOptimalCD(12))).toString + "\n")
+          "\t" + WakeEffect.arrayEfficiency(200, g.lambda(g.getOptimalCD(12))).toString + "\n")
     })
    // println(cells.map(_.totalArea).foldLeft(SquareKilometers(0))(_ + _))
     val onshore = cells.filter(_.onshore)
@@ -138,15 +138,15 @@ println(TonOilEquivalent(9425E6).to(Exajoules))
   def areaCovered(cells: List[Cell], eroi_min: Double, suitable: Boolean = true) = cells.map(c => if (c.getOptimalCD(eroi_min).toWattsPerSquareMeter > 0) c.area(suitable) else SquareKilometers(0)).foldLeft(SquareKilometers(0))(_ + _)
   def energyProducedFixedCD(cells: List[Cell], cd: Irradiance, eroi_min: Double, suitable: Boolean = true) = {
     cells.map(c =>
-      if (c.cf * GustavsonWakeEffect.arrayEfficiency(200, c.lambda(cd)) * 20 * 365 * 24 >= eroi_min * c.embodiedEnergy.to(MegawattHours))
-        c.cf * c.area(suitable) * cd * GustavsonWakeEffect.arrayEfficiency(200, c.lambda(cd)) * Hours(365 * 24)
+      if (c.cf * WakeEffect.arrayEfficiency(200, c.lambda(cd)) * 20 * 365 * 24 >= eroi_min * c.embodiedEnergy.to(MegawattHours))
+        c.cf * c.area(suitable) * cd * WakeEffect.arrayEfficiency(200, c.lambda(cd)) * Hours(365 * 24)
       else Joules(0)).foldLeft(Joules(0))(_ + _)
 
   }
   def powerFixedCD(cells: List[Cell], cd: Irradiance, eroi_min: Double, suitable: Boolean = true) = {
     cells.map(c =>
-      if (c.cf * GustavsonWakeEffect.arrayEfficiency(200, c.lambda(cd)) * 20 * 365 * 24 >= eroi_min * c.embodiedEnergy.to(MegawattHours))
-        c.cf * c.area(suitable) * cd * GustavsonWakeEffect.arrayEfficiency(200, c.lambda(cd))
+      if (c.cf * WakeEffect.arrayEfficiency(200, c.lambda(cd)) * 20 * 365 * 24 >= eroi_min * c.embodiedEnergy.to(MegawattHours))
+        c.cf * c.area(suitable) * cd * WakeEffect.arrayEfficiency(200, c.lambda(cd))
       else Watts(0)).foldLeft(Watts(0))(_ + _)
 
   }
@@ -172,7 +172,7 @@ class Cell(val latitude: Double, val longitude: Double, val cf: Double, val tota
   def powerInstalled(cd: Irradiance, suitable: Boolean, eroimin: Double): Power = cd * area(suitable)
   def power(suitable: Boolean, eroimin: Double): Power = power(getOptimalCD(eroimin), suitable, eroimin)
   def power(cd: Irradiance, suitable: Boolean, eroimin: Double): Power = {
-    powerInstalled(cd, suitable, eroimin) * cf * GustavsonWakeEffect.arrayEfficiency(200, lambda(cd))
+    powerInstalled(cd, suitable, eroimin) * cf * WakeEffect.arrayEfficiency(200, lambda(cd))
   }
   def annualProduction(suitable: Boolean, eroimin: Double): Energy = annualProduction(getOptimalCD(eroimin), suitable, eroimin)
   def annualProduction(cd: Irradiance, suitable: Boolean, eroimin: Double): Energy = power(cd, suitable, eroimin) * Hours(365 * 24)

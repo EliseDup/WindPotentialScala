@@ -126,7 +126,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     else world.totalDissipation / area * (Math.pow(wind125m.mean.toMetersPerSecond, 2) * area.toSquareMeters / world.totalSquareSpeedArea)
 
   def suitableArea(potential : EnergyGenerationPotential) = potential.suitabilityFactor(this) * area
-  def suitableArea(suitable: Boolean,potential : EnergyGenerationPotential = WindPotential): Area = if (suitable) suitableArea(potential) else area
+  def suitableArea(suitable: Boolean,potential : EnergyGenerationPotential = WindPotential()): Area = if (suitable) suitableArea(potential) else area
   def installedCapacityDensity(vr: Velocity, n: Double, cp: Double = 0.5) = WattsPerSquareMeter(cp * 0.5 * 1.225 * Math.PI / 4 * Math.pow(vr.toMetersPerSecond, 3) / Math.pow(n, 2))
 
   def getOptimalCD(e: Double): Irradiance =
@@ -159,7 +159,8 @@ object GridCell {
    * TODO FIX THIS !
    * Then if the optimization was made :
    * [34] -> [116] Pair of (optimal installed capacity, boolean) for EROI 0 -> 20 by 0.5
-   *
+   * 
+   * So 40 is te first with old version !
    */
   def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex : Int = 40, optiWind : Boolean = true, solar : Boolean = false) = {
     

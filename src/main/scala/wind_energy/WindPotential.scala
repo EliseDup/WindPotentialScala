@@ -13,10 +13,15 @@ import squants.motion.Velocity
 import squants.motion.MetersPerSecond
 import utils.Helper
 
-object WindPotential extends EnergyGenerationPotential {
+object WindPotential {
+  def apply() = new WindPotential()
+  def apply(cp_max: Double) = new WindPotential(cp_max)
+}
+
+class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = false) extends EnergyGenerationPotential {
 
   val lifeTimeYears = 25.0
-  val cp_max: Double = 0.59
+
   // Estimation of wind speed is for 100 metres height
   def powerDensity(cell: GridCell, wind: WindProfile) = Thermodynamics.windPowerDensity(wind.mean, wind.height + cell.altitude)
   def powerDensity(cell: GridCell) = powerDensity(cell, cell.wind100m)
@@ -26,9 +31,7 @@ object WindPotential extends EnergyGenerationPotential {
    * We exclude all the areas that are protected
    */
   def elevationFactor(cell: GridCell): Double = {
-    if (cell.onshore) 1.0
-    else if (cell.offshore && cell.EEZ)
-      if (cell.waterDepth.toMeters <= 1000) 1.0 else 0.0
+    if (cell.onshore || (cell.offshore && cell.EEZ && cell.waterDepth.toMeters <= 1000)) 1.0
     else 0.0
   }
 
@@ -49,7 +52,6 @@ object WindPotential extends EnergyGenerationPotential {
     }
   }
 
-  // EU Report
   def availabilityFactor(cell: GridCell): Double = if (cell.offshore) 0.95 else 0.97
 
   def energyInputs(installedCapacity: Power, energyOutput: Energy, cell: GridCell) = {
@@ -64,12 +66,17 @@ object WindPotential extends EnergyGenerationPotential {
   }
 
   // Relationship between rated power, rotor diameter and rated wind speed
+  // Power_rated = 1/2 * Cp_max * rho * PI / 4 * D^2 * v_rated^3
+  // => v_rated = (Power_rated / (1/2 * Cp_max * rho * PI / 4 * D^2) )^(1/3)
+  // => D = (Power_rated / (1/2 * Cp_max * rho * PI / 4 * v^3) )^(1/2)
   def coeff(elevation: Length) = 0.5 * cp_max * Thermodynamics.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI / 4
   val defaultVr = MetersPerSecond(11)
 
+  def ratedPower(rotorDiameter: Length, ratedSpeed: Velocity, hubAltitude: Length) = Watts(coeff(hubAltitude) * Math.pow(rotorDiameter.toMeters, 2) * Math.pow(ratedSpeed.toMetersPerSecond, 3))
   def rotorDiameter(ratedPower: Power, ratedSpeed: Velocity, hubAltitude: Length) = Meters(Math.sqrt(ratedPower.toWatts / (coeff(hubAltitude) * Math.pow(ratedSpeed.toMetersPerSecond, 3))))
   def ratedSpeed(ratedPower: Power, rotorDiameter: Length, hubAltitude: Length) = MetersPerSecond(Math.pow(ratedPower.toWatts / (coeff(hubAltitude) * Math.pow(rotorDiameter.toMeters, 2)), 1.0 / 3))
-  def ratedPower(rotorDiameter: Length, ratedSpeed: Velocity, hubAltitude: Length) = Watts(coeff(hubAltitude) * Math.pow(rotorDiameter.toMeters, 2) * Math.pow(ratedSpeed.toMetersPerSecond, 3))
+  // Capacity Density = W/m^2, with nD*nD between 2 turbines
+  // Rated Power / (nD*nD) = 1/2 * Cp_max * rho * PI / 4 * D^2 * v_rated^3 / (nD*nD) = 1/2 * Cp_max * rho * PI / 4 * v_rated^3  / n^2
   def capacityDensity(ratedSpeed: Velocity, n: Double, hubAltitude: Length): Irradiance = WattsPerSquareMeter(coeff(hubAltitude) * Math.pow(ratedSpeed.toMetersPerSecond, 3) / (n * n))
   def capacityDensity(cell: GridCell, eroi_min: Double, suitable: Boolean): Irradiance = {
     if (cell.suitableArea(suitable).value > 0) capacityDensity(cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min), cell.hubAltitude)
@@ -77,14 +84,13 @@ object WindPotential extends EnergyGenerationPotential {
   }
 
   def spacingParameter(ratedSpeed: Velocity, density: Irradiance, hubAltitude: Length) = Math.sqrt(coeff(hubAltitude) * Math.pow(ratedSpeed.toMetersPerSecond, 3) / density.toWattsPerSquareMeter)
-
   def installedCapacity(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean): Power = cell.suitableArea(suitable) * capacityDensity(vr, n, cell.hubAltitude)
   def installedCapacity(cell: GridCell, eroi_min: Double, suitable: Boolean): Power = installedCapacity(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min), suitable)
 
-  def power(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean, topDown: Boolean = false): Power = {
+  def power(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean): Power = {
     val wi = installedCapacity(cell, vr, n, suitable)
-    val res = wi * CapacityFactorCalculation.cubic(cell, vr.toMetersPerSecond) * GustavsonWakeEffect.arrayEfficiency(wi.toMegawatts / 3.0, Math.PI / (4 * Math.pow(n, 2))) * availabilityFactor(cell)
-    if (topDown && res / cell.suitableArea(suitable) > cell.keDissipation) cell.keDissipation * cell.suitableArea(suitable)
+    val res = wi * CapacityFactorCalculation.cubic(cell, vr.toMetersPerSecond) * WakeEffect.arrayEfficiency(wi.toMegawatts / 3.0, Math.PI / (4 * Math.pow(n, 2))) * availabilityFactor(cell)
+    if (top_down && res / cell.suitableArea(suitable) > cell.keDissipation) cell.keDissipation * cell.suitableArea(suitable)
     else res
   }
 
@@ -94,40 +100,40 @@ object WindPotential extends EnergyGenerationPotential {
     if (cell.suitableArea(suitable).value > 0) power(cell, eroi_min, suitable) / cell.suitableArea(suitable) else WattsPerSquareMeter(0)
   }
 
-  def energyPerYear(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean, topDown: Boolean = false): Energy = {
-    power(cell, vr, n, suitable, topDown) * Hours(365 * 24)
+  def energyPerYear(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean): Energy = {
+    power(cell, vr, n, suitable) * Hours(365 * 24)
   }
-  def energyPerYear(cell: GridCell, density: Irradiance, suitable: Boolean, topDown: Boolean): Energy = {
-    energyPerYear(cell, defaultVr, spacingParameter(defaultVr, density, cell.hubAltitude), suitable, topDown)
+  def energyPerYear(cell: GridCell, density: Irradiance, suitable: Boolean): Energy = {
+    energyPerYear(cell, defaultVr, spacingParameter(defaultVr, density, cell.hubAltitude), suitable)
   }
-  def netEnergyPerYear(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean, topDown: Boolean = false): Energy = {
+  def netEnergyPerYear(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean): Energy = {
     val wi = installedCapacity(cell, vr, n, suitable)
-    val out = energyPerYear(cell, vr, n, suitable, topDown) * 25
-    (out - energyInputs(wi, out, cell)) / 25.0
+    val out = energyPerYear(cell, vr, n, suitable) * lifeTimeYears
+    (out - energyInputs(wi, out, cell)) / lifeTimeYears
   }
   def netEnergyPerYear(cell: GridCell, eroi_min: Double, suitable: Boolean): Energy = netEnergyPerYear(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min), suitable)
-  def netEnergyPerYear(cell: GridCell, density: Irradiance, suitable: Boolean, topDown: Boolean): Energy = netEnergyPerYear(cell, defaultVr, spacingParameter(defaultVr, density, cell.hubAltitude), suitable, topDown)
+  def netEnergyPerYear(cell: GridCell, density: Irradiance, suitable: Boolean): Energy = netEnergyPerYear(cell, spacingParameter(defaultVr, density, cell.hubAltitude), suitable)
 
-  def eroi(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean, topDown: Boolean = false): Double = {
+  def eroi(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean): Double = {
     val wi = installedCapacity(cell, vr, n, suitable)
     if (wi.value == 0) 0
     else {
-      val out = energyPerYear(cell, vr, n, suitable, topDown) * 25
+      val out = energyPerYear(cell, vr, n, suitable) * lifeTimeYears
       out / energyInputs(wi, out, cell)
     }
   }
   def eroi(cell: GridCell, eroi_min: Double, suitable: Boolean): Double = eroi(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min), suitable)
-  def eroi(cell: GridCell, density: Irradiance, suitable: Boolean, topDown: Boolean): Double = eroi(cell, defaultVr, spacingParameter(defaultVr, density, cell.hubAltitude), suitable, topDown)
+  def eroi(cell: GridCell, density: Irradiance, suitable: Boolean): Double = eroi(cell, defaultVr, spacingParameter(defaultVr, density, cell.hubAltitude), suitable)
 
   def minimumEfficiency(cell: GridCell, eroi_min: Double): Double = {
     eroi_min * energyInputs(Megawatts(1), 0.2 * Megawatts(1) * Hours(365 * 24 * 25), cell) / (Megawatts(1) * Hours(365 * 24 * 25))
   }
 
   // RESULTS
-  def potentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true, topDown: Boolean = true): Energy =
-    grids.map(g => (if (eroi(g, density, suitable, topDown) >= eroi_min) energyPerYear(g, density, suitable, topDown) else Joules(0))).foldLeft(Joules(0))(_ + _)
-  def netPotentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true, topDown: Boolean = true): Energy =
-    grids.map(g => (if (eroi(g, density, suitable, topDown) >= eroi_min) netEnergyPerYear(g, density, suitable, topDown) else Joules(0))).foldLeft(Joules(0))(_ + _)
+  def potentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true): Energy =
+    grids.map(g => (if (eroi(g, density, suitable) >= eroi_min) energyPerYear(g, density, suitable) else Joules(0))).foldLeft(Joules(0))(_ + _)
+  def netPotentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true): Energy =
+    grids.map(g => (if (eroi(g, density, suitable) >= eroi_min) netEnergyPerYear(g, density, suitable) else Joules(0))).foldLeft(Joules(0))(_ + _)
 
   def meanCfCountry(world: WorldGrid, country: String, meanSpeed: Velocity) = {
     val c = world.country(country).filter(_.wind100m.mean >= meanSpeed)
@@ -150,7 +156,12 @@ object WindPotential extends EnergyGenerationPotential {
   def meanCapacityDensity(cells: List[GridCell], e: Double) = {
     Helper.mean(cells.filter(_.optimalRatedSpeed(e).toMetersPerSecond > 0).map(g => (g, capacityDensity(g, e, true).toWattsPerSquareMeter)))
   }
+
   def powerInstalled(eroi_min: Double, suitable: Boolean, grids: List[GridCell]): Power = grids.map(g => installedCapacity(g, eroi_min, suitable)).foldLeft(Watts(0))(_ + _)
   def area(eroi_min: Double, suitable: Boolean, grids: List[GridCell]): Area = grids.map(g => if (g.optimalRatedSpeed(eroi_min).value > 0) (g.suitableArea(suitable, this)) else SquareKilometers(0)).foldLeft(SquareKilometers(0))(_ + _)
+
+}
+
+object WTSpecifications {
 
 }
