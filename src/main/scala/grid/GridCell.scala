@@ -160,7 +160,7 @@ object GridCell {
    * Then if the optimization was made :
    * [34] -> [116] Pair of (optimal installed capacity, boolean) for EROI 0 -> 20 by 0.5
    * 
-   * So 40 is te first with old version !
+   * So 40 is the first with old version !
    */
   def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex : Int = 40, optiWind : Boolean = true, solar : Boolean = false) = {
     

@@ -87,7 +87,7 @@ object PlotHelper {
     val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-     plot.getRangeAxis().setRange(1, 20)
+    plot.getRangeAxis().setRange(1, 20)
     //plot.getDomainAxis().setRange(0,800)
     createFrame(chart, name = title, save = save, tick = tick)
   }
@@ -194,7 +194,7 @@ object PlotHelper {
       r.setBaseShapesFilled(true);
       r.setDrawSeriesLineAsPath(true);
       chart.getXYPlot().setRenderer(r);
-/*
+
       if (n == 7) {
         for (i <- 0 to 5) {
           r.setSeriesPaint(i, Color.DARK_GRAY)
@@ -215,7 +215,7 @@ object PlotHelper {
           r.setSeriesPaint(i, Color.BLACK)
           r.setSeriesStroke(i, dots(1.5f))
         }
-      }*/
+      }
     }
     if (save) {
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream((if (name.isEmpty()) i else name) + ".jpg"), chart, 500, 270, 5, 5)

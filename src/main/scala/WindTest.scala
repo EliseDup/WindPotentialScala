@@ -6,27 +6,20 @@ import squants.radio.WattsPerSquareMeter
 import wind_energy.CapacityFactorCalculation
 import utils.PlotHelper
 import squants.space.Degrees
+import utils.Exajoules
+import utils.PetawattHours
 
 object WindTest {
-  import WindPotential._
 
   def main(args: Array[String]): Unit = {
   
-    val e = (0 until 10).map(_ * 2.0 + 1).toList
-    val w = new WorldGrid("../model_data/Wind_optimization/1_19_by2_dissipation", Degrees(0.75), e)
-   // val w2 = new WorldGrid("../model_data/Wind_optimization/1_19_by2_double_dissipation", Degrees(0.75), e)
-  //  val w3 = new WorldGrid("../model_data/Wind_optimization/1_19_by2_1Wem2", Degrees(0.75), e)
-    val w4 = new WorldGrid("../model_data/Wind_optimization/1_19_by2_1_5_dissipation", Degrees(0.75), e)
-    
-    //  w.optimizationInputs("optimization_inputs")
-    val p = WindPotential()
-
-    PlotHelper.plotXY(List(p.potential_eroi(e, true, w.grids, "KE Dissipation"),
-      p.potential_eroi(e, true, w4.grids, "1.5 * Dissipation")),
-     // p.potential_eroi(e, true, w2.grids, "Double KE Dissipation"),
-     // p.potential_eroi(e, true, w3.grids, "1 We/m2")),
-      xLabel = "Gross Potential [EJ/year]", yLabel = "EROI", legend = true)
-
+    println(TerawattHours(586750).to(Exajoules))
+  println(PetawattHours(755.48).to(Exajoules))
+  val e = (2 to 40).map(_*0.5).toList
+  val w = WorldGrid()
+  val g = w.grids.filter(_.EEZ)
+PlotHelper.plotXY(List(WindPotential().potential_eroi(e, true, g, "Cp,max=0.5"),
+    WindPotential(16.0/27).potential_eroi(e, true, g, "Betz Limit")), xLabel = "Wind Potential [EJ/year]", yLabel="EROImin")
   /*
    *   val countries = Helper.getLines("../countries_test").map(i => i(0).toString)
     for (c <- countries) {
