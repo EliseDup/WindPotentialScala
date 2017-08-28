@@ -77,9 +77,9 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString)
       if (!filter || gr.contains(g)) {
         out_stream.print(
-          "\t" + g.annualClearnessIndex)
+          "\t" + g.irradiance.month(0).toWattsPerSquareMeter.toString + "\t" +  g.irradiance.month(6).toWattsPerSquareMeter.toString )
       } else {
-        out_stream.print("\t" + "0.0")
+        out_stream.print("\t" + "0.0" +"\t" +  "0.0")
       }
       out_stream.print("\n")
 

@@ -13,6 +13,7 @@ import construction.Material
 import utils.TerawattHours
 
 trait EnergyGenerationPotential {
+  
   val lifeTimeYears: Double
   def lifeTime = lifeTimeYears * Hours(365 * 24)
 
