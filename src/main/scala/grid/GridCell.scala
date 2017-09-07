@@ -69,7 +69,7 @@ class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers:
 
   def proportion(lcType: LandCoverType): Double = landCovers.types.filter(_._2.equals(lcType)).map(_._1).sum
   def area(lcType: LandCoverType): Area = proportion(lcType) * area
-
+  val protectedA = area * protectedArea
 }
 
 object DefaultGridCell {
@@ -153,8 +153,9 @@ object GridCell {
   /**
    * [29] Mean wind 125m , [30] Std wind 125 m,
    * [31] Mean wind 71m, [32] Std wind 71 m
-   * [33] Yearly Irradiance
-   * [34 -> 34+11] Monthly Irradiance
+   * [33] KE dissipation
+   * [34] Yearly Irradiance
+   * [35 -> 35+12] Monthly Irradiance
    * 
    * TODO FIX THIS !
    * Then if the optimization was made :
@@ -162,8 +163,7 @@ object GridCell {
    * 
    * So 40 is the first with old version !
    */
-  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex : Int = 40, optiWind : Boolean = true, solar : Boolean = false) = {
-    
+  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex : Int = 34, optiWind : Boolean = true, solar : Boolean = false) = {
     new GridCell(l, DefaultGridCell.center(l), gridSize,
       DefaultGridCell.lcs(l),
       l(2).toDouble / 100.0,
@@ -175,7 +175,7 @@ object GridCell {
       if(solar) new MeteoData[Irradiance](DefaultGridCell.irradiance(l, 34), (1 to 12).toList.map(i => DefaultGridCell.irradiance(l, i+34)).toArray)
       else new MeteoData(WattsPerSquareMeter(0),Array()),
       
-      if (optiWind && l.size > optiIndex) (for (e <- (0 until eroi_min.size); if (l(e * 3 + optiIndex+2).toBoolean)) yield (eroi_min(e), (MetersPerSecond(l(e * 3 + optiIndex).toDouble), l(e * 3 + optiIndex+1).toDouble))).toMap else Map(),
+      if (optiWind && l.size > optiIndex+1) (for (e <- (0 until eroi_min.size); if (l(e * 3 + optiIndex+2).toBoolean)) yield (eroi_min(e), (MetersPerSecond(l(e * 3 + optiIndex).toDouble), l(e * 3 + optiIndex+1).toDouble))).toMap else Map(),
       WattsPerSquareMeter(l(33).toDouble))
   }
 }

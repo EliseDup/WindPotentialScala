@@ -33,38 +33,31 @@ import utils.PetawattHours
 import wind_energy.NormalizedPowerCurve
 import squants.space.Kilometers
 
-
 object Data {
-  
+
   import WindPotential._
-  
+
   def main(args: Array[String]): Unit = {
-    
+
     println("Start")
 
     val eroi = (2 to 40).map(_ * 0.5.toDouble).toList
     val t0 = System.currentTimeMillis
     val world = WorldGrid()
+
     println("Load Grid in " + (System.currentTimeMillis() - t0) / 1000.0 + " seconds")
-    
+
     val c = world.grids.filter(_.EEZ)
-    
-   /* for(country <- world.eu28countries){
+    plotPotential(c, eroi, 100)
+    for (country <- world.eu28countries) {
       val g = c.filter(_.country.name.contains(country))
-      println(country + "\t" 
-          + WindPotential().potential(1.0, true, g.filter(_.onshore)).to(Exajoules) + "\t" +
-          + WindPotential().potential(1.0, true, g.filter(_.offshore)).to(Exajoules))
+      println(country + "\t"
+        + WindPotential().potential(1.0, true, g.filter(_.onshore)).to(Exajoules) + "\t" +
+        +WindPotential().potential(1.0, true, g.filter(_.offshore)).to(Exajoules))
     }
-    */
-    plotEnveloppe(c, eroi)
-    plotPotential(c,eroi,100.0,true)
- /*   val total = (eroi.map(e => WindPotential().potential(e, true, c).to(Exajoules)),eroi, "Total")
-    val on = (eroi.map(e => WindPotential().potential(e, true, c.filter(_.onshore)).to(Exajoules)),eroi, "Onshore")
-    val off = (eroi.map(e => WindPotential().potential(e, true, c.filter(_.offshore)).to(Exajoules)),eroi, "Offshore")
-    PlotHelper.plotXY(List(total,on,off), xLabel = "Energie Brute Produite [EJ/an]", yLabel = "TRE", tick = (true, 100, 4), legend = true)
-*/
+
   }
-  
+
   def oneCellTest(cf: Double) {
     val area = SquareKilometers(1000)
     val ratedPower = Megawatts(2)
@@ -93,6 +86,7 @@ object Data {
       cd.map(_.toWattsPerSquareMeter), cd.map(netEnergy(_).to(Petajoules)), cd.map(eroiTot(_)), "Installed Capacity Density [Wi/m2]", "Net Energy [PJ/year]", "EROI")
 
   }
+
   def printNetOnshoreOffshore(grids: List[GridCell], eroi: List[Double] = List(5, 8, 10, 12)) {
     eroi.map(e => print(Math.round(WindPotential().netPotential(e, true, grids).to(Exajoules)) + ","))
     println()
@@ -102,69 +96,70 @@ object Data {
     println()
 
   }
+
   def plotEnveloppe(grids: List[GridCell], eroi: List[Double], tick: (Boolean, Double, Double) = (true, 100, 2)) {
-    val total = WindPotential().eroiFunction(grids, 1, true,"Net Energy Maximization")
-    PlotHelper.plotXY(List(total, WindPotential().eroiFunction(grids, 1,true,"EROImin = 1"),
-      WindPotential().eroiFunction(grids, 8,true,"EROImin = 8"),
-      WindPotential().eroiFunction(grids, 5,true,"EROImin = 5"),
-      WindPotential().eroiFunction(grids, 10,true,"EROImin = 10"),
-      WindPotential().eroiFunction(grids, 12,true,"EROImin = 12"),
-      WindPotential().eroiFunction(grids, 14,true,"EROImin = 14"),
-      (eroi.map(e => WindPotential().potential(e, true, grids).to(Exajoules)), eroi, "Enveloppe")), "enveloppe",
+    val total = WindPotential().eroiFunction(grids, 1, true, "Net Energy Maximization")
+
+    PlotHelper.plotXY(List(WindPotential().eroiFunction(grids, 1, true, "EROImin = 1"),
+      WindPotential().eroiFunction(grids, 8, true, "EROImin = 8"),
+      WindPotential().eroiFunction(grids, 5, true, "EROImin = 5"),
+      WindPotential().eroiFunction(grids, 10, true, "EROImin = 10"),
+      WindPotential().eroiFunction(grids, 12, true, "EROImin = 12"),
+      WindPotential().eroiFunction(grids, 14, true, "EROImin = 14"),
+      (eroi.map(e => WindPotential().potential(e, true, grids).to(Exajoules)), eroi, "Enveloppe")), "paper/enveloppe_bw",
       xLabel = "Wind Potential [EJ/year]", yLabel = "EROImin", tick = tick)
-      
-    PlotHelper.plotXY(List(WindPotential().eroiFunctionNet(grids, 1,true,"EROImin = 1"),
-      WindPotential().eroiFunction(grids, 8,true,"EROImin = 8"),
-      WindPotential().eroiFunction(grids, 5,true,"EROImin = 5"),
-      WindPotential().eroiFunction(grids, 10,true,"EROImin = 10"),
-      WindPotential().eroiFunction(grids, 12,true,"EROImin = 12"),
-      WindPotential().eroiFunction(grids, 14,true,"EROImin = 14")),
+
+    PlotHelper.plotXY(List(WindPotential().eroiFunction(grids, 1, true, "EROImin = 1"),
+      WindPotential().eroiFunction(grids, 8, true, "EROImin = 8")), "paper/eroiFunction_8_bw",
       xLabel = "Cumulated  Production [EJ/year]", yLabel = "EROI", tick = tick)
-    PlotHelper.plotXY(List(WindPotential().eroiFunction(grids, 1,true,"EROImin = 1"), WindPotential().eroiFunction(grids, 8,true,"EROImin = 8")), "eroiFunction_8",
+
+    PlotHelper.plotXY(List(WindPotential().eroiFunction(grids, 1, true, "EROImin = 1"),
+      WindPotential().eroiFunction(grids, 8, true, "EROImin = 8"),
+      WindPotential().eroiFunction(grids, 5, true, "EROImin = 5"),
+      WindPotential().eroiFunction(grids, 12, true, "EROImin = 12")), "paper/eroiFunction_5_8_12_bw",
       xLabel = "Cumulated  Production [EJ/year]", yLabel = "EROI", tick = tick)
-    PlotHelper.plotXY(List(WindPotential().eroiFunction(grids, 1,true,"EROImin = 1"), WindPotential().eroiFunction(grids, 8,true,"EROImin = 8"), WindPotential().eroiFunction(grids, 5,true,"EROImin = 5"), WindPotential().eroiFunction(grids, 12,true,"EROImin = 12")), "eroiFunction_5_8_12",
-      xLabel = "Cumulated  Production [EJ/year]", yLabel = "EROI", tick = tick)
-    PlotHelper.plotXY(List(WindPotential().eroiFunction(grids, 1,true,"EROImin = 1")), "eroiFunction",
-      xLabel = "Cumulated Production [EJ/year]", yLabel = "EROI", tick = tick)
   }
-  def plotPotential(world: List[GridCell], eroi: List[Double], tick: Double, topDown: Boolean) {
+  
+  def plotPotential(world: List[GridCell], eroi: List[Double], tick: Double) {
+    
     val offshore = world.filter(_.offshoreEEZ).filter(_.waterDepth.toMeters <= 1000); val onshore = world.filter(_.onshore); val grids = offshore ++ onshore
-    val total =  WindPotential().potential_eroi(eroi, true, grids, "Total")
+    val total = WindPotential().potential_eroi(eroi, true, grids, "Optimization")
+    
     PlotHelper.plotXY(List(
       total,
       WindPotential().potential_eroi(eroi, true, onshore, "Onshore"),
-      WindPotential().potential_eroi(eroi, true, offshore, "Offshore")), title = "potential_bw", legend = true,
-      xLabel = "Maximum Global Potential [EJ/year]", yLabel = "EROImin", tick = (true, tick, 2.5))
+      WindPotential().potential_eroi(eroi, true, offshore, "Offshore")), title = "paper/potential_bw", legend = true,
+      xLabel = "Maximum Global Potential [EJ/year]", yLabel = "EROImin", tick = (true, 100.0, 2.0))
 
     val fixed = List(2, 4, 9)
-    val listFixed = fixed.map(cd => (eroi.map(e => WindPotential().potentialFixedDensity(WattsPerSquareMeter(cd), e, grids, true).to(Exajoules)), eroi, cd.toString + "MW/km2"))
-    PlotHelper.plotXY(total +: listFixed, title = "potential_fixed_bw", xLabel = "Maximum Global Potential [EJ/year]", yLabel = "EROImin", tick = (true, tick, 2.5), legend = true)
+    val listFixed = fixed.map(cd => (eroi.map(e => WindPotential(0.5,true).potentialFixedDensity(WattsPerSquareMeter(cd), e, grids, true).to(Exajoules)), eroi, cd.toString + "MW/km2"))
+    PlotHelper.plotXY(total +: listFixed, title = "paper/potential_fixed_bw", xLabel = "Maximum Global Potential [EJ/year]", yLabel = "EROImin", tick = (true, 100.0, 2.0), legend = true)
 
     PlotHelper.plotXY(List(
-      WindPotential().potential_eroi(eroi,true, offshore.filter(_.waterDepth.toMeters <= 50), "Water depth < 50 m"),
-      WindPotential().potential_eroi(eroi,true, offshore.filter(g => g.waterDepth.toMeters > 50 && g.waterDepth.toMeters <= 200), "50 - 200 m"),
-      WindPotential().potential_eroi(eroi,true, offshore.filter(g => g.waterDepth.toMeters > 200 && g.waterDepth.toMeters <= 1000), "200 - 1000 m")), title = "offshorePotential_bw", legend = true,
-      xLabel = "Maximum Offshore Potential [EJ/year]", yLabel = "EROImin", tick = (true, 20, 2.5))
+      WindPotential().potential_eroi(eroi, true, offshore.filter(_.waterDepth.toMeters <= 50), "Water depth < 50 m"),
+      WindPotential().potential_eroi(eroi, true, offshore.filter(g => g.waterDepth.toMeters > 50 && g.waterDepth.toMeters <= 200), "50 - 200 m"),
+      WindPotential().potential_eroi(eroi, true, offshore.filter(g => g.waterDepth.toMeters > 200 && g.waterDepth.toMeters <= 1000), "200 - 1000 m")), title = "paper/offshorePotential_bw", legend = true,
+      xLabel = "Maximum Offshore Potential [EJ/year]", yLabel = "EROImin", tick = (true, 20.0, 2.0))
 
   }
-  def plotPotentialEEAReport(eu: List[GridCell], eroi: List[Double], tick: Double, topDown: Boolean) {
+  def plotPotentialEEAReport(eu: List[GridCell], eroi: List[Double], tick: Double) {
     val offshore = eu.filter(_.offshoreEEZ).filter(_.waterDepth.toMeters <= 1000); val onshore = eu.filter(_.onshore); val grids = offshore ++ onshore
     val total = (eroi.map(e => WindPotential().potential(e, true, grids).to(Exajoules)), eroi, "Total")
 
     PlotHelper.plotXY(List(
       (eroi.map(e => WindPotential().potentialFixedDensity(WattsPerSquareMeter(10), e, onshore).to(Exajoules) + WindPotential().potentialFixedDensity(WattsPerSquareMeter(8.0 / 1.25), e, offshore).to(Exajoules)), eroi, "Total"),
       (eroi.map(e => WindPotential().potentialFixedDensity(WattsPerSquareMeter(10), e, onshore).to(Exajoules)), eroi, "Onshore"),
-      (eroi.map(e => WindPotential().potentialFixedDensity(WattsPerSquareMeter(8.0 / 1.25), e, offshore).to(Exajoules)), eroi, "Offshore")), legend = true, title = "eu_eea",
-      xLabel = "Maximum EU-28 Potential [EJ/year]", yLabel = "EROImin", tick = (true, tick, 2.5))
+      (eroi.map(e => WindPotential().potentialFixedDensity(WattsPerSquareMeter(8.0 / 1.25), e, offshore).to(Exajoules)), eroi, "Offshore")), legend = true, title = "paper/eu_eea",
+      xLabel = "Maximum EU-28 Potential [EJ/year]", yLabel = "EROImin", tick = (true, 5.0, 2.0))
 
     PlotHelper.plotXY(List(
       WindPotential().potential_eroi(eroi, true, grids, "Total"),
       WindPotential().potential_eroi(eroi, true, onshore, "Onshore"),
-      WindPotential().potential_eroi(eroi, true, offshore, "Offshore")), legend = true, title = "eu",
-      xLabel = "Maximum EU-28 Potential [EJ/year]", yLabel = "EROImin", tick = (true, tick, 2.5))
+      WindPotential().potential_eroi(eroi, true, offshore, "Offshore")), legend = true, title = "paper/eu",
+      xLabel = "Maximum EU-28 Potential [EJ/year]", yLabel = "EROImin", tick = (true, 5, 2.0))
 
   }
-  
+
   def printTable(grids: List[GridCell], eroi: List[Double] = List(2, 5, 8, 10, 12, 15)) {
     val offshore = grids.filter(_.offshoreEEZ).filter(_.waterDepth.toMeters <= 1000); val onshore = grids.filter(_.onshore);
     eroi.map(e =>
@@ -178,7 +173,7 @@ object Data {
     eroi.map(e => println(e + "\t" + round(WindPotential().netPotential(e, true, grids).to(Exajoules)) + "\t" + round(WindPotential().netPotential(e, true, onshore).to(Exajoules)) + "\t" + round(WindPotential().netPotential(e, true, offshore).to(Exajoules))))
   }
 
-  def round(value: Double) = Math.round(value)
+  def round(value: Double) = (Math.round(value * 100) / 100.0) // Math.round(value)
   def round2Dec(value: Double) = (Math.round(value * 100) / 100.0)
 
   def testOCDE(world: WorldGrid) {
@@ -206,7 +201,7 @@ object Data {
         capTot = capTot + capCell / 100.0
         if (prodTot >= max) {
           max = max + 50
-         // println(Math.round(prodTot) + "\t" + meanCf(listCells) + "\t" + meanEfficiency(listCells, density) + "\t" + Math.round(capTot.to(Gigawatts)) + "\t" + Math.round(area.toSquareKilometers / 1E3))
+          // println(Math.round(prodTot) + "\t" + meanCf(listCells) + "\t" + meanEfficiency(listCells, density) + "\t" + Math.round(capTot.to(Gigawatts)) + "\t" + Math.round(area.toSquareKilometers / 1E3))
           listCells = List()
         }
       }

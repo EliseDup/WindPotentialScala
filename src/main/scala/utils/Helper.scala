@@ -185,7 +185,7 @@ object Helper {
 
   def listValueVSCumulated(values: List[(Double, Double)]): (List[Double], List[Double]) = {
     val sorted = values.sortBy(_._1).reverse
-   (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ 0.0)
+    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ 0.0)
   }
 
   /*def plotEROIVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential) = {

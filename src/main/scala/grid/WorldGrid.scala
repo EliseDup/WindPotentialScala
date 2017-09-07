@@ -18,10 +18,10 @@ import wind_energy._
 import solar_energy.SolarPotential
 
 object WorldGrid {
-  
+
   def apply(name: String) = new WorldGrid(name, Degrees(0.75))
-  def apply() = new WorldGrid("../Model_data/0_20_by0_5_dissipation", Degrees(0.75))
-  def bottomUp() = new WorldGrid("../Model_data/0_20_by0_5", Degrees(0.75))
+  def apply() = new WorldGrid("../Model_data/Wind_Optimization/1_20_by0_5", Degrees(0.75))
+  def bottomUp() = new WorldGrid("../Model_data//Wind_Optimization/1_20_by0_5_bottom_up", Degrees(0.75))
   def simple() = new WorldGrid("../model_data/wind_solar_0_75", Degrees(0.75))
 }
 
@@ -77,16 +77,42 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString)
       if (!filter || gr.contains(g)) {
         out_stream.print(
-          "\t" + g.irradiance.month(0).toWattsPerSquareMeter.toString + "\t" +  g.irradiance.month(6).toWattsPerSquareMeter.toString )
+          "\t" + WindPotential().capacityDensity(g, 8, true).toWattsPerSquareMeter.toString + "\t" + WindPotential().capacityDensity(g, 12, true).toWattsPerSquareMeter.toString)
       } else {
-        out_stream.print("\t" + "0.0" +"\t" +  "0.0")
+        out_stream.print("\t" + "0.0" + "\t" + "0.0")
       }
       out_stream.print("\n")
 
     })
     out_stream.close()
   }
-  
+  /*
+ * latStart = lat-resolution
+   lonStart = long-resolution
+   arcsec = resolution / 15
+   for i in range(0,15):
+   for j in range(0,15):
+   	latIt = latStart + i*arcsec
+   	lonIt = lonStart + j*arcsec
+              
+ */
+  def writeSubGrid(n: Int) {
+    val out_stream = new PrintStream(new java.io.FileOutputStream("subGrid" + n))
+    val step = 0.75 / n.toDouble
+    out_stream.print("Latitude" + "\t" + "Longitude" + "\n")
+    grids.map(g => {
+      val lat = g.center.latitude.value; val lon = g.center.longitude.value
+      if(lat!=90 && lat!=(-90) && lon!=180 && lon!=(-180)){
+      val latStart = lat + 0.75 / 2.0 + step / 2.0; val lonStart = lon + 0.75 / 2.0 + step / 2.0
+      for (i <- 1 to n) {
+        for (j <- 1 to n) {
+            out_stream.print((latStart - i * step).toString + "\t" + (lonStart - j * step).toString + "\n")
+        }
+      }
+    
+      }})
+    out_stream.close()
+  }
   /**
    *  lats = data[:, 0]; lon = data[:, 1]
    *  cfs = data[:, 2]; totalArea = data[:, 3]; suitableArea = data[:, 4];
@@ -109,6 +135,23 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
     })
     out_stream.close()
   }
-
+  def writeEU28grids(name: String) {
+    val eu = eu28
+    val cells = {
+      val minLat = minLatitude(eu28); val maxLat = maxLatitude(eu28); val minLon = minLongitude(eu28); val maxLon = maxLongitude(eu28);
+      grids.filter(g => (g.center.latitude.toDegrees >= minLat && g.center.latitude.toDegrees <= maxLat && g.center.longitude.toDegrees >= minLon && g.center.longitude.toDegrees <= maxLon))
+    }
+    val out_stream = new PrintStream(new java.io.FileOutputStream(name))
+    cells.map(g => {
+      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t")
+      if (eu28.contains(g)) {
+        out_stream.print(WindPotential().capacityDensity(g, 5, true).toWattsPerSquareMeter.toString + "\t" +
+          WindPotential().capacityDensity(g, 8, true).toWattsPerSquareMeter.toString + "\t" + WindPotential().capacityDensity(g, 12, true).toWattsPerSquareMeter.toString)
+      } else {
+        out_stream.print("0.0" + "\t" + "0.0" + "\t" + "0.0")
+      }
+      out_stream.print("\n")
+    })
+  }
 }
 
