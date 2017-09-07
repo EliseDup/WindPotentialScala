@@ -8,7 +8,7 @@ import grid.GridCell
 object WindFarmEnergyInputs {
 def main(args: Array[String]): Unit = {
   test
-}  
+}
   // Energy inputs in transport is in MJ / tkm
   def truckTransport(weight: Mass, distance: Length) = Megajoules(1.25) * weight.toTonnes * Math.abs(distance.toKilometers)
   def shipTransport(weight: Mass, distance: Length) = Megajoules(0.29) * weight.toTonnes * Math.abs(distance.toKilometers)
@@ -16,9 +16,9 @@ def main(args: Array[String]): Unit = {
   val installedCapacity = Gigawatts(1)
 
   // Fixed value for onshore / offshore bottom fixed / offshore floating
-  val fixedOnshore = Gigajoules(13737625)
-  val fixedOffshoreFixed = Gigajoules(18185974) // Gigajoules(16902974) 
-  val fixedOffshoreFloating = Gigajoules(26670974) //Gigajoules(25387974)
+  val fixedOnshore = Gigajoules(13744075)
+  val fixedOffshoreFixed =  Gigajoules(18185974)
+  val fixedOffshoreFloating = Gigajoules(26670974)
 
   def offshoreFixedFoundations(depth: Length) = scalingFactorFixedFoundations(depth) * (Gigajoules(16173 + 361962 + 10326 + 3477293))
   // For water depth up to 40 m
@@ -44,7 +44,7 @@ def main(args: Array[String]): Unit = {
   def offshoreOM(distanceToCoast: Length) = Gigajoules(6615) * Math.abs(distanceToCoast.toKilometers)
   def onshoreOM(distanceToCoast: Length) = Gigajoules(21.3) * Math.abs(distanceToCoast.toKilometers)
   // Decommissioning
-  def offshoreDecommissioning(distanceToCoast: Length) = Gigajoules(12678) * Math.abs(distanceToCoast.toKilometers)
+  // def offshoreDecommissioning(distanceToCoast: Length) = Gigajoules(12678) * Math.abs(distanceToCoast.toKilometers)
 
   def windFarmEnergyInputs(cell: GridCell, installedCapacity: Power, output : Energy): Energy = {
     if (cell.onshore) onshoreEnergyInputs(installedCapacity, output, -cell.distanceToCoast)
@@ -55,7 +55,7 @@ def main(args: Array[String]): Unit = {
     (installedCap / installedCapacity) * (fixedOnshore + onshoreInstallation(distanceToCoast) + onshoreOM(distanceToCoast)) + onshoreOperation(output)
   }
   def offshoreEnergyInputs(installedCap: Power, output : Energy, waterDepth: Length, distanceToCoast: Length): Energy = {
-    (installedCap / installedCapacity) * (offshoreConstructionInputs(waterDepth) + offshoreInstallation(distanceToCoast) + offshoreCablesEnergyAndInstallation(distanceToCoast) + offshoreOM(distanceToCoast) + offshoreDecommissioning(distanceToCoast))  + offshoreOperation(output)
+    (installedCap / installedCapacity) * (offshoreConstructionInputs(waterDepth) + offshoreInstallation(distanceToCoast) + offshoreCablesEnergyAndInstallation(distanceToCoast) + offshoreOM(distanceToCoast) /*+ offshoreDecommissioning(distanceToCoast)*/)  + offshoreOperation(output)
   }
   
   def offshoreConstructionInputs(depth : Length) = {

@@ -91,7 +91,6 @@ object PlotHelper {
     //plot.getDomainAxis().setRange(0,800)
     createFrame(chart, name = title, save = save, tick = tick)
   }
-  
 
   def dualAxisPlot(x: List[Double], y1: List[Double], y2: List[Double], xLabel: String, yLabel1: String, yLabel2: String) {
     val dataSet1 = new XYSeriesCollection(); val dataSet2 = new XYSeriesCollection();
@@ -181,21 +180,7 @@ object PlotHelper {
     if (xy) {
       val n = chart.getXYPlot().getSeriesCount()
       val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
-      if (!bw) {
-        for (i <- 0 until Math.min(n, colors.size)) r.setSeriesPaint(i, colors(i))
-        chart.getXYPlot().setRenderer(r);
-      } else {
-        for (i <- 0 until Math.min(n, dashed.size)) {
-          r.setSeriesPaint(i, Color.BLACK)
-          r.setSeriesStroke(i, dashed(i))
-        }
-      }
-      r.setBaseShapesVisible(false);
-      r.setBaseShapesFilled(true);
-      r.setDrawSeriesLineAsPath(true);
-      chart.getXYPlot().setRenderer(r);
-
-      if (n == 7) {
+    /*  if (n == 7) {
         for (i <- 0 to 5) {
           r.setSeriesPaint(i, Color.DARK_GRAY)
         }
@@ -205,7 +190,34 @@ object PlotHelper {
         r.setSeriesStroke(0, line(1.0f))
         r.setSeriesPaint(6, Color.BLACK)
         r.setSeriesStroke(6, line(1.5f))
-      } else if (n == 1) {
+
+      } else if (n == 2) {
+        r.setSeriesStroke(0, line(1.0f))
+        r.setSeriesPaint(0, Color.BLACK)
+
+        r.setSeriesStroke(1, dots(1.0f))
+        r.setSeriesPaint(1, Color.BLACK)
+
+      } else if (n == 4) {
+        r.setSeriesStroke(0, line(1.0f))
+        r.setSeriesPaint(0, Color.BLACK)
+
+        for (i <- 1 to 4) {
+          r.setSeriesStroke(i, dots(1.0f))
+          r.setSeriesPaint(i, Color.BLACK)
+        }
+      } else */
+      if (!bw) {
+        for (i <- 0 until Math.min(n, colors.size)) r.setSeriesPaint(i, colors(i))
+        chart.getXYPlot().setRenderer(r);
+      } else {
+        for (i <- 0 until Math.min(n, dashed.size)) {
+          r.setSeriesPaint(i, Color.BLACK)
+          r.setSeriesStroke(i, dashed(i))
+        }
+      }
+
+      /* else if (n == 1) {
         r.setSeriesPaint(0, Color.BLACK)
         r.setSeriesStroke(0, line(1.5f))
       } else if (n <= 6) {
@@ -215,7 +227,12 @@ object PlotHelper {
           r.setSeriesPaint(i, Color.BLACK)
           r.setSeriesStroke(i, dots(1.5f))
         }
-      }
+      }*/
+      r.setBaseShapesVisible(false);
+      r.setBaseShapesFilled(true);
+      r.setDrawSeriesLineAsPath(true);
+      chart.getXYPlot().setRenderer(r);
+
     }
     if (save) {
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream((if (name.isEmpty()) i else name) + ".jpg"), chart, 500, 270, 5, 5)

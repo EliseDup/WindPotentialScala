@@ -35,6 +35,7 @@ object Exajoules extends EnergyUnit {
   val conversionFactor = Joules.conversionFactor * MetricSystem.Exa
   val symbol = "EJ"
 }
+
 object Petajoules extends EnergyUnit {
   val conversionFactor = Joules.conversionFactor * MetricSystem.Peta
   val symbol = "PJ"
