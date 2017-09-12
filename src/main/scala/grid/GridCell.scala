@@ -19,7 +19,21 @@ import wind_energy._
 import squants.UnitOfMeasure
 import squants.Quantity
 
-case class Country(val name: String)
+case class Country(val name: String, val map: List[(String, Double)] = List()) {
+  val countries = map.map(_._1)
+  def proportion(c: String): Double = {
+    if (map.nonEmpty && countries.contains(c)) map.find(_._1.equals(c)).get._2
+    else if (name == "c") 1.0 else 0.0
+  }
+  def proportion(c: List[String]): Double = c.map(proportion(_)).sum
+  def isCountry(c: String): Boolean = if (map.nonEmpty) countries.contains(c) else name.equals(c)
+
+  def isCountry(c: List[String]): Boolean = {
+    if (map.isEmpty) name.equals(c)
+    else if (c.size == 1) isCountry(c(0))
+    else c.exists(i => countries.contains(i))
+  }
+}
 /**
  * Class to model observations with a global mean and a mean per month (useful for solar irradiance !)
  */
@@ -70,6 +84,10 @@ class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers:
   def proportion(lcType: LandCoverType): Double = landCovers.types.filter(_._2.equals(lcType)).map(_._1).sum
   def area(lcType: LandCoverType): Area = proportion(lcType) * area
   val protectedA = area * protectedArea
+  
+  def isCountry(c : String) = country.isCountry(c);def isCountry(c : List[String]) = country.isCountry(c);
+  def proportion(c : String): Double = country.proportion(c)
+  def area(c : String):Area = country.proportion(c)*area;def area(c : List[String]):Area = country.proportion(c)*area
 }
 
 object DefaultGridCell {
@@ -125,8 +143,10 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     if (area.toSquareKilometers == 0) WattsPerSquareMeter(0)
     else world.totalDissipation / area * (Math.pow(wind125m.mean.toMetersPerSecond, 2) * area.toSquareMeters / world.totalSquareSpeedArea)
 
-  def suitableArea(potential : EnergyGenerationPotential) = potential.suitabilityFactor(this) * area
-  def suitableArea(suitable: Boolean,potential : EnergyGenerationPotential = WindPotential()): Area = if (suitable) suitableArea(potential) else area
+  def countrySuitableArea(c: List[String]) = WindPotential().suitabilityFactor(this) * area * country.proportion(c)
+
+  def suitableArea(potential: EnergyGenerationPotential) = potential.suitabilityFactor(this) * area
+  def suitableArea(suitable: Boolean, potential: EnergyGenerationPotential = WindPotential()): Area = if (suitable) suitableArea(potential) else area
   def installedCapacityDensity(vr: Velocity, n: Double, cp: Double = 0.5) = WattsPerSquareMeter(cp * 0.5 * 1.225 * Math.PI / 4 * Math.pow(vr.toMetersPerSecond, 3) / Math.pow(n, 2))
 
   def getOptimalCD(e: Double): Irradiance =
@@ -136,12 +156,12 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
   def getOptimalVrN(e: Double): (Velocity, Double) = optimalCD.get(e).getOrElse((MetersPerSecond(0), 15))
   def optimalRatedSpeed(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15))._1
   def optimalN(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15.0))._2
-  
- /**
-  * SOLAR
-  */
-  def clearnessIndex(month : Int) =  irradiance.perMonth(month) / Thermodynamics.monthlyRadiation(month, center.latitude)
-  def annualClearnessIndex = irradiance.mean /  Thermodynamics.yearlyRadiation(center.latitude)
+
+  /**
+   * SOLAR
+   */
+  def clearnessIndex(month: Int) = irradiance.perMonth(month) / Thermodynamics.monthlyRadiation(month, center.latitude)
+  def annualClearnessIndex = irradiance.mean / Thermodynamics.yearlyRadiation(center.latitude)
   // def directRadiation = Thermodynamics.diffuseFraction(clearnessIndex, d, h)
 }
 /**
@@ -156,26 +176,34 @@ object GridCell {
    * [33] KE dissipation
    * [34] Yearly Irradiance
    * [35 -> 35+12] Monthly Irradiance
-   * 
+   *
    * TODO FIX THIS !
    * Then if the optimization was made :
    * [34] -> [116] Pair of (optimal installed capacity, boolean) for EROI 0 -> 20 by 0.5
-   * 
+   *
    * So 40 is the first with old version !
    */
-  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex : Int = 34, optiWind : Boolean = true, solar : Boolean = false) = {
+  def countryList(l: Array[String]): List[(String, Double)] = {
+    val countryIndex = 47
+    if (l.size > countryIndex + 1) {
+      val xs = (countryIndex until l.size).map(i => l(i).toString).filter(i => !i.equals("")).toList
+      xs.toList.distinct.map(x => (x.toString, xs.count(_ == x.toString) / 9.0))
+      
+    } else List()
+  }
+  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex: Int = 34, optiWind: Boolean = false, solar: Boolean = true) = {
     new GridCell(l, DefaultGridCell.center(l), gridSize,
       DefaultGridCell.lcs(l),
       l(2).toDouble / 100.0,
-      Country(l(28)),
+      Country(l(28), countryList(l)),
       Meters(l(26).toDouble), Kilometers(l(27).toDouble),
       new WindProfile(MetersPerSecond(l(31).toDouble), l(32).toDouble, Meters(71)),
       new WindProfile(MetersPerSecond(l(29).toDouble), l(30).toDouble, Meters(125)),
-      
-      if(solar) new MeteoData[Irradiance](DefaultGridCell.irradiance(l, 34), (1 to 12).toList.map(i => DefaultGridCell.irradiance(l, i+34)).toArray)
-      else new MeteoData(WattsPerSquareMeter(0),Array()),
-      
-      if (optiWind && l.size > optiIndex+1) (for (e <- (0 until eroi_min.size); if (l(e * 3 + optiIndex+2).toBoolean)) yield (eroi_min(e), (MetersPerSecond(l(e * 3 + optiIndex).toDouble), l(e * 3 + optiIndex+1).toDouble))).toMap else Map(),
+
+      if (solar) new MeteoData[Irradiance](DefaultGridCell.irradiance(l, 34), (1 to 12).toList.map(i => DefaultGridCell.irradiance(l, i + 34)).toArray)
+      else new MeteoData(WattsPerSquareMeter(0), Array()),
+
+      if (optiWind && l.size > optiIndex + 1 && !l(optiIndex).equals("")) (for (e <- (0 until eroi_min.size); if (l(e * 3 + optiIndex + 2).toBoolean)) yield (eroi_min(e), (MetersPerSecond(l(e * 3 + optiIndex).toDouble), l(e * 3 + optiIndex + 1).toDouble))).toMap else Map(),
       WattsPerSquareMeter(l(33).toDouble))
   }
 }

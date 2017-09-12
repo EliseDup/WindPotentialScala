@@ -24,6 +24,7 @@ import utils.Terawatts
 import squants.space.NauticalMiles
 import squants.space.Meters
 import grid._
+import squants.energy.Joules
 
 object WindTest {
 
@@ -32,50 +33,15 @@ object WindTest {
     val folder = "../model_data/countries"
     val e = (2 to 40).map(_ * 0.5).toList
     val p = WindPotential(0.5, false)
-    val w = WorldGrid()
-    val g = w.grids.filter(_.EEZ)
-w.writeSubGrid(1)
-    val cd = g.filter(p.energyPerYear(_,1,true).value > 0).map(_.getOptimalCD(1).toWattsPerSquareMeter)
-    println(cd.min +"\t"+ cd.max + "\t" + cd.sum/cd.size)
+    val w = WorldGrid.simple()
+    printArea(w, "Mexico")
+    printArea(w, "Saudi Arabia")
+    printArea(w, "Russia")
     
-     val n = g.filter(p.energyPerYear(_,1,true).value > 0).map(_.optimalN(1))
-    println(n.min +"\t"+ n.max + "\t" + n.sum/n.size)
-   
-   
-    val on = g.filter(_.onshore).filter(CapacityFactorCalculation(_) >= 0.15).filter(p.energyPerYear(_, 1.0, true).value > 0)
-    println(p.meanArrayEffect(on, 1.0) + "\t" + p.meanArrayEffect(on, 5.0) + "\t" + p.meanArrayEffect(on, 12.0))
-
-    println(p.meanEfficiency(on, 1.0) + "\t" + p.meanCapacityDensity(on, 1.0))
-
-    println(on.map(p.capacityDensity(_, 1.0, true).toWattsPerSquareMeter).min + "\t" +
-      on.map(p.capacityDensity(_, 1.0, true).toWattsPerSquareMeter).max
-      + "\t" + on.map(p.capacityDensity(_, 1.0, true).toWattsPerSquareMeter).sum / on.size)
-
-    for (f <- Helper.getLines(folder + "/regions", "\t").map(_(0))) {
-      val list = Helper.getLines(folder + "/" + f, "\t").map(_(0))
-      printOnshorePotential(w, list, 0.15, f)
-    }
-    printOnshorePotential(w, List(), 0.15, "Total")
-    /* val list = List(w.eu28countries ++ List("Norway"), List("Norway"), List("United Kingdom"), List("United States", "Canada"), List("Canada"), Helper.getLines(folder + "/RestofAfrica").map(_(0)), List("Argentina", "Chile"), List("Russia"),
-      Helper.getLines(folder + "/Oceania").map(_(0)), List("New Zealand"), List("Australia"), List("Japan"), List("Iceland"), List("China"), List("Brazil"), List("Venezuela"), List("Kazakhstan"))
-    list.map(l =>
-      printSimplePotential(w, l, 12, l(0)))
-
-
-    // w.writeSubGrid(5)
-    val eu28 = w.eu28
-    for (c <- w.eu28countries) {
-      val cells = eu28.filter(_.country.name.contains(c))
-      println(c + "\t" +
-        round(p.potential(5.0, true, cells)) + "\t" +
-        round(p.potential(5.0, true, cells.filter(_.onshore))) + "\t" +
-        round(p.potential(5.0, true, cells.filter(_.offshore))) + "\t" +
-        round(p.potential(12.0, true, cells)) + "\t" +
-        round(p.potential(12.0, true, cells.filter(_.onshore))) + "\t" +
-        round(p.potential(12.0, true, cells.filter(_.offshore))))
-    }*/
   }
-
+def printArea(w : WorldGrid, c : String) {
+  println(c + "\t" + w.grids.filter(_.onshore).map(_.area(c).toSquareKilometers).sum)
+}
   def printPotential(g: List[GridCell], c: String, eroi: Double) {
     val x = g.filter(_.country.name.contains(c)).filter(_.EEZ)
     val on = x.filter(_.onshore)
@@ -95,15 +61,26 @@ w.writeSubGrid(1)
   def printSimplePotential(w: WorldGrid, c: List[String], eroi: Double, name: String) {
     val g = if (c.isEmpty) w.grids else w.countries(c)
     val p = WindPotential(0.5, true)
-    println(name + "\t" + round2Dec(p.potential(eroi, true, g)) + "\t" + round2Dec(p.potential(eroi, true, g.filter(_.onshore))) + "\t" + round2Dec(p.potential(eroi, true, g.filter(_.offshore))))
+    println(name + "\t" +
+      round2Dec(potential(p, eroi, true, g, c)) + "\t" + round2Dec(potential(p, eroi, true, g.filter(_.onshore), c)) + "\t" + round2Dec(potential(p, eroi, true, g.filter(_.offshore), c)))
   }
   def printOnshorePotential(w: WorldGrid, c: List[String], cf: Double, name: String) {
     val p = WindPotential(0.5, true)
-
-    val g = (if (c.isEmpty) w.grids else w.countries(c)).filter(_.EEZ).filter(_.onshore).filter(CapacityFactorCalculation(_) >= 0.15)
-    println(name + "\t" + math.round(g.map(_.suitableArea(p).toSquareKilometers).sum) + "\t" + round(p.potential(1.0, true, g))
-      + "\t" + g.filter(p.energyPerYear(_, 1.0, true).value > 0).map(p.eroi(_, 1.0, true) * 100).min)
+    val tot = (if (c.isEmpty) w.grids else w.countries(c)).filter(_.EEZ).filter(_.onshore)
+    val g = tot.filter(CapacityFactorCalculation(_) >= 0.15)
+   if(c.isEmpty) println(name + "\t" + 
+        math.round(tot.map(x => x.area.toSquareKilometers).sum) + "\t" +
+        math.round(g.map(x => x.suitableArea(p).toSquareKilometers).sum) + "\t" + round(potential(p, 1.0, true, g, c)))
+  else
+    println(name + "\t" + 
+        math.round(tot.map(x => x.area.toSquareKilometers * x.country.proportion(c)).sum) + "\t" +
+        math.round(g.map(x => x.suitableArea(p).toSquareKilometers * x.country.proportion(c)).sum) + "\t" + round(potential(p, 1.0, true, g, c)))
   }
+
+  def potential(p: WindPotential, eroi_min: Double, suitable: Boolean = true, grids: List[GridCell], c: List[String]): Energy =
+    if(c.isEmpty) grids.map(g => p.energyPerYear(g, eroi_min, suitable)).foldLeft(Joules(0))(_ + _)
+    else grids.map(g => p.energyPerYear(g, eroi_min, suitable) * g.country.proportion(c)).foldLeft(Joules(0))(_ + _)
+
   def plotPotentialTDBU {
     val e = (2 to 40).map(_ * 0.5).toList
     val p = WindPotential(0.5, false)
@@ -133,7 +110,7 @@ w.writeSubGrid(1)
     val e = (2 to 40).map(_ * 0.5).toList
     val w = WorldGrid()
     val g = w.grids.filter(_.EEZ)
-   // Data.plotEnveloppe(g, e)
+    // Data.plotEnveloppe(g, e)
     Data.plotPotential(g, e, 100.0)
     Data.plotPotentialEEAReport(w.eu28, e, 5.0)
     plotPotentialTDBU
@@ -207,8 +184,8 @@ w.writeSubGrid(1)
     // 
 
   }
-  def round(e: Energy) = Math.round(e.to(TerawattHours)).toInt
-  def round2Dec(e: Energy) = (Math.round(e.to(TerawattHours) * 100) / 100.0)
+  def round(e: Energy) = Math.round(e.to(Exajoules)).toInt
+  def round2Dec(e: Energy) = (Math.round(e.to(Exajoules) * 100) / 100.0)
   def round2Dec(value: Double) = (Math.round(value * 100) / 100.0)
 
 }

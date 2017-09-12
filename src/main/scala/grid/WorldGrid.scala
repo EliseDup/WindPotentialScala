@@ -46,9 +46,9 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
 
   val totalArea = Helper.area(grids)
 
-  def country(c: Country) = grids.filter(_.country.equals(c))
-  def country(c: String) = grids.filter(_.country.name.contains(c))
-  def countries(c: List[String]) = grids.filter(g => c.contains(g.country.name))
+  def country(c: Country) = grids.filter(_.country.isCountry(c.name))
+  def country(c: String) = grids.filter(_.country.isCountry(c))
+  def countries(c: List[String]) = grids.filter(_.country.isCountry(c))
 
   def europe = grids.filter(g => g.center.longitude.toDegrees >= -35.25 && g.center.longitude.toDegrees <= 34.5 && g.center.latitude.toDegrees >= 24.75 && g.center.latitude.toDegrees <= 69.75)
 
@@ -77,7 +77,8 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString)
       if (!filter || gr.contains(g)) {
         out_stream.print(
-          "\t" + WindPotential().capacityDensity(g, 8, true).toWattsPerSquareMeter.toString + "\t" + WindPotential().capacityDensity(g, 12, true).toWattsPerSquareMeter.toString)
+        "\t" + (if(g.onshore) g.proportion("Canada").toString else "0.0") + "\t" + 
+        (if(g.onshore) g.proportion("United States").toString else "0.0") )
       } else {
         out_stream.print("\t" + "0.0" + "\t" + "0.0")
       }
