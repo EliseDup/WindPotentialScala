@@ -7,7 +7,7 @@ import squants.space._
 import squants.radio._
 import construction.Material
 import grid.WorldGrid
-import utils.Thermodynamics
+import utils.WindPower
 import squants.time.Hours
 import squants.motion.Velocity
 import squants.motion.MetersPerSecond
@@ -24,7 +24,7 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
   val lifeTimeYears = 25.0
 
   // Estimation of wind speed is for 100 metres height
-  def powerDensity(cell: GridCell, wind: WindProfile) = Thermodynamics.windPowerDensity(wind.mean, wind.height + cell.altitude)
+  def powerDensity(cell: GridCell, wind: WindProfile) = WindPower.windPowerDensity(wind.mean, wind.height + cell.altitude)
   def powerDensity(cell: GridCell) = powerDensity(cell, cell.wind100m)
 
   /**
@@ -70,7 +70,7 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
   // Power_rated = 1/2 * Cp_max * rho * PI / 4 * D^2 * v_rated^3
   // => v_rated = (Power_rated / (1/2 * Cp_max * rho * PI / 4 * D^2) )^(1/3)
   // => D = (Power_rated / (1/2 * Cp_max * rho * PI / 4 * v^3) )^(1/2)
-  def coeff(elevation: Length) = 0.5 * cp_max * Thermodynamics.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI / 4
+  def coeff(elevation: Length) = 0.5 * cp_max * WindPower.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI / 4
   val defaultVr = MetersPerSecond(11)
 
   def ratedPower(rotorDiameter: Length, ratedSpeed: Velocity, hubAltitude: Length) = Watts(coeff(hubAltitude) * Math.pow(rotorDiameter.toMeters, 2) * Math.pow(ratedSpeed.toMetersPerSecond, 3))

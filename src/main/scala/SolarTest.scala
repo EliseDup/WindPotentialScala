@@ -10,35 +10,29 @@ import solar_energy.SolarPotential
 
 object SolarTest {
   def main(args: Array[String]): Unit = {
-    import SolarPotential._
 
-    /*    val c = w.grids.filter(_.onshore)
-    val b = w.country("South Africa")
-    
-    PlotHelper.plotXY( (0 until 12).map(_.toDouble).toList, (0 until 12).toList.map(b(0).clearnessIndex(_)))
-    
-    plotEROIFunction(c, 0, true)
+    import SolarPower._
 
-    val meanU = Helper.listValueVSArea(c.map(i => (i.irradiance.mean.toWattsPerSquareMeter, i.suitableArea(SolarPotential))))
-    val meanEROIU = Helper.listValueVSArea(c.map(i => (SolarPotential.eroi(i, 0, true), i.suitableArea(SolarPotential))))
+    PlotHelper.plotXY(List(((0 to 1000).map(i => i / 1000.0).toList, (0 to 1000).map(i => i / 1000.0).toList.map(1 - diffuseFraction(_)), "")),
+      xLabel = "Clearness Index", yLabel = "Direct Fraction")
 
-    PlotHelper.dualAxisPlot(meanU._1, meanU._2, meanEROIU._2, "Surface Cumulée [Millions km2]", "Irradiation Annuelle [kWh/m2]", "EROI")
+    val w = WorldGrid.simple()
 
-    println(c.map(_.suitableArea(SolarPotential)).foldLeft(SquareKilometers(0))(_ + _))
+    w.writeGrid("annual_k")
+  }
 
-    val min = Helper.listValueVSArea(c.map(i => (i.irradiance.perMonth.map(_.toWattsPerSquareMeter).min, i.area(BareAreas))))
-    val max = Helper.listValueVSArea(c.map(i => (i.irradiance.perMonth.map(_.toWattsPerSquareMeter).max, i.area(BareAreas))))
-*/
+  def plotByLatitude {
+    import SolarPower._
     val months = (0 until 12).toList.map(_.toDouble)
     val days = (0 until 365).toList.map(_.toDouble)
     val hours = (0 until 24).toList.map(_.toDouble)
 
     val l = List(Degrees(-40), Degrees(-20), Degrees(0), Degrees(20), Degrees(40))
-    val res = l.map(i => (days, days.map(m => Thermodynamics.dailyRadiation(m.toInt, i).toWattsPerSquareMeter*24.0/1000), i.toString))
-    PlotHelper.plotXY(res, legend=true)
-    
-      val w = WorldGrid.simple()
-  
+    val res = l.map(i => (days, days.map(m => dailyRadiation(m.toInt, i).toWattsPerSquareMeter * 24.0 / 1000), i.toString))
+    PlotHelper.plotXY(res, legend = true)
+
+    val w = WorldGrid.simple()
+
     val lats = (0 to 66).toList.map(_ * 0.75) // (-120 to 120).toList.map(_ * 0.75)
     val latsCRU = (0 to 100).toList.map(_ * 0.5 + 0.25) // (-112 to 166).toList.map(_ * 0.5 + 0.25)
     val latsNASA = (0 to 50).toList.map(_.toDouble)
@@ -67,7 +61,7 @@ object SolarTest {
     }
 
     PlotHelper.plotXY(List(
-      (lats, lats.map(l => Thermodynamics.yearlyRadiation(Degrees(l)).toWattsPerSquareMeter), "Theoretical"),
+      (lats, lats.map(l => yearlyRadiation(Degrees(l)).toWattsPerSquareMeter), "Theoretical"),
       (lats, lats.map(l => meanRadiation(Degrees(l), data).toWattsPerSquareMeter), "ERA-Interim"),
       (lats, lats.map(l => meanRadiation(Degrees(l), dataNet).toWattsPerSquareMeter), "ERA-Interim Net"),
       (lats, lats.map(l => meanFromCells(Degrees(l), w.grids).toWattsPerSquareMeter), "Grid"),

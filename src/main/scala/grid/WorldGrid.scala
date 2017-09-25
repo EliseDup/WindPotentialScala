@@ -76,11 +76,10 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
     cells.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString)
       if (!filter || gr.contains(g)) {
-        out_stream.print(
-        "\t" + (if(g.onshore) g.proportion("Canada").toString else "0.0") + "\t" + 
-        (if(g.onshore) g.proportion("United States").toString else "0.0") )
+        out_stream.print("\t" + g.yearlyClearnessIndex.toString + "\t" + g.irradiance.mean.toWattsPerSquareMeter.toString + "\t" + SolarPower.yearlyRadiation(g.center.latitude).toWattsPerSquareMeter.toString)
+       // "\t" + (g.irradiance.mean.toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(0).toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(6).toWattsPerSquareMeter*8.76).toString)
       } else {
-        out_stream.print("\t" + "0.0" + "\t" + "0.0")
+        out_stream.print("\t" + "0.0" + "\t" + "0.0"+ "\t" + "0.0")
       }
       out_stream.print("\n")
 
@@ -131,7 +130,7 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
         else WindFarmEnergyInputs.offshoreOperation(MegawattHours(1)).to(MegawattHours).toString) +
         "\t" + WindPotential().availabilityFactor(g).toString
         + "\t" + dissipation(g).toWattsPerSquareMeter.toString +
-        "\t" + Thermodynamics.airDensity(g.hubAltitude).toKilogramsPerCubicMeter.toString + "\n")
+        "\t" + WindPower.airDensity(g.hubAltitude).toKilogramsPerCubicMeter.toString + "\n")
 
     })
     out_stream.close()
