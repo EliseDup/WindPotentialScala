@@ -16,6 +16,7 @@ import construction._
 import utils._
 import org.apache.commons.math3.special.Gamma
 import wind_energy._
+import solar_energy._
 import squants.UnitOfMeasure
 import squants.Quantity
 

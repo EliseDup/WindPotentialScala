@@ -4,11 +4,13 @@ import squants.energy._
 import squants.mass._
 import squants.space._
 import squants.motion._
-
 import utils._
-
 import construction._
 import utils.Transport
+import squants.energy.Power.apply
+import squants.mass.Mass.apply
+import squants.motion.Velocity.apply
+import squants.space.Length.apply
 
 /**
  * The list of components of a wind turbines, mainly : Tower, Foundation, Rotor and Nacelle

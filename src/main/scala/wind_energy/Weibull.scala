@@ -9,13 +9,6 @@ import grid._
 import utils._
 import squants.radio.Irradiance
 
-
-class WindProfile(val mean: Velocity, val std: Double, val height : Length) {
-  val k = Weibull.shapeParameter(mean, std)
-  val c = Weibull.scaleParameter(mean, k)
-  override def toString() = "Wind Profile at "+ height + " : mean speed " + mean + ", weibull parameters = k :" + k + ", c: " + c
-}
-
 /**
  * Weibull distribution at 10 m height
  *

@@ -7,7 +7,6 @@ import squants.space._
 import squants.radio._
 import construction.Material
 import grid.WorldGrid
-import utils.WindPower
 import squants.time.Hours
 import squants.motion.Velocity
 import squants.motion.MetersPerSecond
