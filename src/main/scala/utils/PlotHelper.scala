@@ -87,7 +87,7 @@ object PlotHelper {
     val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-    plot.getRangeAxis().setRange(1, 20)
+    //plot.getRangeAxis().setRange(1, 20)
     //plot.getDomainAxis().setRange(0,800)
     createFrame(chart, name = title, save = save, tick = tick)
   }

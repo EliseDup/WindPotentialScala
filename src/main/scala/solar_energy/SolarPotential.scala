@@ -20,13 +20,13 @@ class SolarPotential(val efficiency: Double = 0.17, val inputs1MW: Energy = Giga
   def powerDensity(cell: GridCell) = cell.irradiance.mean
 
   val performanceRatio = 0.81
-
+  val degradationFactor = 0.5/100
   def power(cell: GridCell, eroi_min: Double, suitable: Boolean) = {
     if (power(cell, suitable) * lifeTime / energyInputs(cell, suitable) >= eroi_min) power(cell, suitable)
     else Watts(0)
   }
   def power(cell: GridCell, suitable: Boolean) = {
-    powerDensity(cell) * cell.suitableArea(suitable, this) * performanceRatio * efficiency
+    powerDensity(cell) * cell.suitableArea(suitable, this) * performanceRatio * efficiency * Math.pow(1 - degradationFactor, lifeTimeYears)
   }
 
   val size1MW = Megawatts(1) / (WattsPerSquareMeter(1000) * efficiency)

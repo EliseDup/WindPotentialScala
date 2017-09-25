@@ -5,7 +5,7 @@ import utils.PlotHelper
 import org.jfree.data.category.DefaultCategoryDataset
 import squants.space.SquareKilometers
 import squants.radio.WattsPerSquareMeter
-import utils.Thermodynamics
+import utils.WindPower
 import squants.energy.Watts
 import squants.space.NauticalMiles
 import utils.TerawattHours
@@ -70,7 +70,7 @@ object LandCoverTest {
   def ressourcesByDepth(offshore: List[GridCell], minDepth: Int, maxDepth: Int) = {
     val gr = offshore.filter(g => g.waterDepth.toMeters >= minDepth && g.waterDepth.toMeters < maxDepth)
     val area = Helper.area(gr)
-    gr.map(g => Thermodynamics.windPowerDensity(g.wind125m.mean, g.altitude) * g.area).foldLeft(Watts(0))(_ + _) / area
+    gr.map(g => WindPower.windPowerDensity(g.wind125m.mean, g.altitude) * g.area).foldLeft(Watts(0))(_ + _) / area
   }
   def ressourcesByDistance(offshore: List[GridCell], min: Int, max: Int) = {
     val gr = offshore.filter(g => g.distanceToCoast.toKilometers >= min && g.distanceToCoast.toKilometers < max)

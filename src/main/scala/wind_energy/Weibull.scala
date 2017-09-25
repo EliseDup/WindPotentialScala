@@ -28,7 +28,7 @@ object Weibull {
   
   // Maximum instant power = 1/2 rho A int0^infty P(v) v^3 dv
   def maxPower(meanSpeed: Velocity, k: Double, d: Length = Meters(80), elevation : Length = Meters(100)): Power = 
-    Watts(16.0 / 27 * 0.5 * Thermodynamics.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI * Math.pow(d.toMeters/2,2) * Math.pow(meanSpeed.toMetersPerSecond, 3) *  Gamma.gamma(1 + 3.0 / k) / Math.pow( Gamma.gamma(1 + 1.0 / k),3))
+    Watts(16.0 / 27 * 0.5 * WindPower.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI * Math.pow(d.toMeters/2,2) * Math.pow(meanSpeed.toMetersPerSecond, 3) *  Gamma.gamma(1 + 3.0 / k) / Math.pow( Gamma.gamma(1 + 1.0 / k),3))
 }
 
 object WeibullParametersExtrapolation {

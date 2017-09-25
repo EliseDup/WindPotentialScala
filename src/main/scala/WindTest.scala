@@ -37,11 +37,12 @@ object WindTest {
     printArea(w, "Mexico")
     printArea(w, "Saudi Arabia")
     printArea(w, "Russia")
-    
   }
-def printArea(w : WorldGrid, c : String) {
-  println(c + "\t" + w.grids.filter(_.onshore).map(_.area(c).toSquareKilometers).sum)
-}
+
+  def printArea(w: WorldGrid, c: String) {
+    println(c + "\t" + w.grids.filter(_.onshore).map(_.area(c).toSquareKilometers).sum)
+  }
+
   def printPotential(g: List[GridCell], c: String, eroi: Double) {
     val x = g.filter(_.country.name.contains(c)).filter(_.EEZ)
     val on = x.filter(_.onshore)
@@ -56,8 +57,8 @@ def printArea(w : WorldGrid, c : String) {
       round2Dec(off.map(p.suitableArea(_)).foldLeft(SquareKilometers(0))(_ + _).to(SquareKilometers) / 1E6) + " & " +
       round2Dec(p.installedCapacity(eroi, true, off).to(Terawatts)) + "&" +
       round2Dec(p.potential(eroi, true, off).to(PetawattHours)) + "\\" + "\\")
-
   }
+
   def printSimplePotential(w: WorldGrid, c: List[String], eroi: Double, name: String) {
     val g = if (c.isEmpty) w.grids else w.countries(c)
     val p = WindPotential(0.5, true)
@@ -68,17 +69,17 @@ def printArea(w : WorldGrid, c : String) {
     val p = WindPotential(0.5, true)
     val tot = (if (c.isEmpty) w.grids else w.countries(c)).filter(_.EEZ).filter(_.onshore)
     val g = tot.filter(CapacityFactorCalculation(_) >= 0.15)
-   if(c.isEmpty) println(name + "\t" + 
-        math.round(tot.map(x => x.area.toSquareKilometers).sum) + "\t" +
-        math.round(g.map(x => x.suitableArea(p).toSquareKilometers).sum) + "\t" + round(potential(p, 1.0, true, g, c)))
-  else
-    println(name + "\t" + 
+    if (c.isEmpty) println(name + "\t" +
+      math.round(tot.map(x => x.area.toSquareKilometers).sum) + "\t" +
+      math.round(g.map(x => x.suitableArea(p).toSquareKilometers).sum) + "\t" + round(potential(p, 1.0, true, g, c)))
+    else
+      println(name + "\t" +
         math.round(tot.map(x => x.area.toSquareKilometers * x.country.proportion(c)).sum) + "\t" +
         math.round(g.map(x => x.suitableArea(p).toSquareKilometers * x.country.proportion(c)).sum) + "\t" + round(potential(p, 1.0, true, g, c)))
   }
 
   def potential(p: WindPotential, eroi_min: Double, suitable: Boolean = true, grids: List[GridCell], c: List[String]): Energy =
-    if(c.isEmpty) grids.map(g => p.energyPerYear(g, eroi_min, suitable)).foldLeft(Joules(0))(_ + _)
+    if (c.isEmpty) grids.map(g => p.energyPerYear(g, eroi_min, suitable)).foldLeft(Joules(0))(_ + _)
     else grids.map(g => p.energyPerYear(g, eroi_min, suitable) * g.country.proportion(c)).foldLeft(Joules(0))(_ + _)
 
   def plotPotentialTDBU {

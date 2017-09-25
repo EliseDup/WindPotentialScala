@@ -84,10 +84,10 @@ class DefaultGridCell(val center: GeoPoint, val gridSize: Angle, val landCovers:
   def proportion(lcType: LandCoverType): Double = landCovers.types.filter(_._2.equals(lcType)).map(_._1).sum
   def area(lcType: LandCoverType): Area = proportion(lcType) * area
   val protectedA = area * protectedArea
-  
-  def isCountry(c : String) = country.isCountry(c);def isCountry(c : List[String]) = country.isCountry(c);
-  def proportion(c : String): Double = country.proportion(c)
-  def area(c : String):Area = country.proportion(c)*area;def area(c : List[String]):Area = country.proportion(c)*area
+
+  def isCountry(c: String) = country.isCountry(c); def isCountry(c: List[String]) = country.isCountry(c);
+  def proportion(c: String): Double = country.proportion(c)
+  def area(c: String): Area = country.proportion(c) * area; def area(c: List[String]): Area = country.proportion(c) * area
 }
 
 object DefaultGridCell {
@@ -134,6 +134,8 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
 
   override def toString() = "Grid Object center : " + center
 
+  import SolarPower._
+  import WindPower._
   /**
    * WIND
    */
@@ -160,8 +162,26 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
   /**
    * SOLAR
    */
-  def clearnessIndex(month: Int) = irradiance.perMonth(month) / Thermodynamics.monthlyRadiation(month, center.latitude)
-  def annualClearnessIndex = irradiance.mean / Thermodynamics.yearlyRadiation(center.latitude)
+  val yearlyClearnessIndex = {
+    if (Math.abs(center.latitude.toDegrees) >= 65) 0.0
+    else irradiance.mean / yearlyRadiation(center.latitude)
+  }
+  val monthlyClearnessIndex =
+    if (Math.abs(center.latitude.toDegrees) >= 65) (0 until 12).map(m => 0.0).toList
+    else (0 until 12).map(m => irradiance.perMonth(m) / monthlyRadiation(m, center.latitude)).toList
+
+  // Daily Clearness Index 
+  val kmin = 0.05; val kmax = monthlyClearnessIndex.map(kav => 0.613 + 0.267 * kav - 11.9 * Math.pow(kav - 0.75, 8))
+  val epsilon = (0 until 12).map(i => (kmax(i) - kmin) / (kmax(i) - monthlyClearnessIndex(i))).toList
+  val sigma = (0 until 12).map(i => -1.498 + (1.184 * epsilon(i) - 27.182 * Math.exp(-1.5 * epsilon(i))) / (kmax(i) - kmin)).toList
+  def dailyClearnessIndex(ndk: Int, ndm: Int, m: Int) = {
+    val alpha = (ndk - 0.5) / ndm
+    (1 / sigma(m)) * (Math.log((1 - alpha) * Math.exp(sigma(m) * kmin) + alpha * (Math.exp(sigma(m) * kmax(m)))))
+  }
+  
+  val directIrradiance = irradiance.mean * (1 - diffuseFraction(yearlyClearnessIndex))
+  val monthlyDirectIrradiance = (0 until 12).map(m => irradiance.month(m) * (1 - diffuseFraction(monthlyClearnessIndex(m)))).toList
+
   // def directRadiation = Thermodynamics.diffuseFraction(clearnessIndex, d, h)
 }
 /**
@@ -188,7 +208,7 @@ object GridCell {
     if (l.size > countryIndex + 1) {
       val xs = (countryIndex until l.size).map(i => l(i).toString).filter(i => !i.equals("")).toList
       xs.toList.distinct.map(x => (x.toString, xs.count(_ == x.toString) / 9.0))
-      
+
     } else List()
   }
   def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex: Int = 34, optiWind: Boolean = false, solar: Boolean = true) = {
