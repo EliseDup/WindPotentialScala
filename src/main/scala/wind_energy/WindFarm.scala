@@ -5,6 +5,10 @@ import squants.space.Length
 import construction._
 import squants.SquantifiedDouble
 import grid.GridCell
+import wind_energy.WindPowerTransmission
+import wind_energy.OffshoreFoundations
+import wind_energy.WindTurbineComponents
+import wind_energy.OffshoreWindTurbineComponents
 
 /**
  * A wind farm consists of windmills, highvoltage transformer stations and transmission grid.

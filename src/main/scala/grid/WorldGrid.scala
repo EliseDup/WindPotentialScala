@@ -15,8 +15,7 @@ import squants.space._
 import construction._
 import utils._
 import wind_energy._
-import solar_energy.SolarPotential
-
+import solar_energy.SolarPower._
 object WorldGrid {
 
   def apply(name: String) = new WorldGrid(name, Degrees(0.75))
@@ -76,7 +75,7 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
     cells.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString)
       if (!filter || gr.contains(g)) {
-        out_stream.print("\t" + g.yearlyClearnessIndex.toString + "\t" + g.irradiance.mean.toWattsPerSquareMeter.toString + "\t" + SolarPower.yearlyRadiation(g.center.latitude).toWattsPerSquareMeter.toString)
+        out_stream.print("\t" + g.yearlyClearnessIndex.toString + "\t" + g.irradiance.mean.toWattsPerSquareMeter.toString + "\t" + yearlyRadiation(g.center.latitude).toWattsPerSquareMeter.toString)
        // "\t" + (g.irradiance.mean.toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(0).toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(6).toWattsPerSquareMeter*8.76).toString)
       } else {
         out_stream.print("\t" + "0.0" + "\t" + "0.0"+ "\t" + "0.0")

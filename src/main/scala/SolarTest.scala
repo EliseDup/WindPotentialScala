@@ -1,5 +1,4 @@
 
-
 import utils._
 import squants.space._
 import squants.energy._
@@ -7,11 +6,10 @@ import squants.time._
 import squants.radio._
 import grid._
 import solar_energy.SolarPotential
+import solar_energy.SolarPower._
 
 object SolarTest {
   def main(args: Array[String]): Unit = {
-
-    import SolarPower._
 
     PlotHelper.plotXY(List(((0 to 1000).map(i => i / 1000.0).toList, (0 to 1000).map(i => i / 1000.0).toList.map(1 - diffuseFraction(_)), "")),
       xLabel = "Clearness Index", yLabel = "Direct Fraction")
@@ -22,7 +20,6 @@ object SolarTest {
   }
 
   def plotByLatitude {
-    import SolarPower._
     val months = (0 until 12).toList.map(_.toDouble)
     val days = (0 until 365).toList.map(_.toDouble)
     val hours = (0 until 24).toList.map(_.toDouble)

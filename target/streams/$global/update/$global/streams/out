@@ -1,4 +1,4 @@
-[0m[[0minfo[0m] [0mUpdating {file:/Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/}root...[0m
+[0m[[0minfo[0m] [0mUpdating {file:/Users/Elise/workspace/WindPotentialScala/}root...[0m
 [0m[[0mdebug[0m] [0m:: resolving dependencies :: data#data_2.11;1.0[0m
 [0m[[0mdebug[0m] [0m	confs: [compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool][0m
 [0m[[0mdebug[0m] [0m	validate = true[0m
@@ -7,7 +7,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies for data#data_2.11;1.0 [compile][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.scala-lang#scala-library;2.11.7 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving org.scala-lang#scala-library;2.11.7 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@2fd3f2dd[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@129aaa88[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: org.scala-lang#scala-library;2.11.7[0m
 [0m[[0mdebug[0m] [0m	found org.scala-lang#scala-library;2.11.7 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m	[2.11.7] org.scala-lang#scala-library;2.11.7[0m
@@ -96,10 +96,10 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->org.jfree#jfreechart;1.0.14 [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.github.wookietreiber#scala-chart_2.11;latest.integration [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.github.wookietreiber#scala-chart_2.11;latest.integration ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@42b39835[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@5df0a632[0m
 [0m[[0mdebug[0m] [0mdefault-cache: cached resolved revision expired for com.github.wookietreiber#scala-chart_2.11;latest.integration[0m
 [0m[[0minfo[0m] [0mResolving com.github.wookietreiber#scala-chart_2.11;latest.integration ...[0m
-[0m[[0mdebug[0m] [0msbt-chain-delegate: Checking cache for: sbt.ivyint.MergedDescriptors@42b39835[0m
+[0m[[0mdebug[0m] [0msbt-chain-delegate: Checking cache for: sbt.ivyint.MergedDescriptors@5df0a632[0m
 [0m[[0mdebug[0m] [0mdefault-cache: cached resolved revision expired for com.github.wookietreiber#scala-chart_2.11;latest.integration[0m
 [0m[[0mdebug[0m] [0mdefault-cache: cached resolved revision expired for com.github.wookietreiber#scala-chart_2.11;latest.integration[0m
 [0m[[0mdebug[0m] [0m		tried /Users/Elise/.ivy2/local/com.github.wookietreiber/scala-chart_2.11/[revision]/ivys/ivy.xml[0m
@@ -177,7 +177,7 @@
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.github.wookietreiber#scala-chart_2.11;latest.integration [compile->master][0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.itextpdf#itextpdf;5.5.6 [compile->default(compile)][0m
 [0m[[0minfo[0m] [0mResolving com.itextpdf#itextpdf;5.5.6 ...[0m
-[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@711f07c[0m
+[0m[[0mdebug[0m] [0msbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@2e7400fe[0m
 [0m[[0mdebug[0m] [0msbt-chain: module revision found in cache: com.itextpdf#itextpdf;5.5.6[0m
 [0m[[0mdebug[0m] [0m	found com.itextpdf#itextpdf;5.5.6 in sbt-chain[0m
 [0m[[0mdebug[0m] [0m== resolving dependencies data#data_2.11;1.0->com.itextpdf#itextpdf;5.5.6 [compile->runtime][0m
@@ -2721,21 +2721,21 @@
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-xml_2.11;1.0.4!scala-xml_2.11.jar(bundle)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] org.scala-lang.modules#scala-parser-combinators_2.11;1.0.4!scala-parser-combinators_2.11.jar(bundle)[0m
 [0m[[0mdebug[0m] [0m	[NOT REQUIRED] jline#jline;2.12.1!jline.jar[0m
-[0m[[0mdebug[0m] [0m:: resolution report :: resolve 5183ms :: artifacts dl 126ms[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 compile produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-compile.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 runtime produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-runtime.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 test produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-test.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 provided produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-provided.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 optional produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-optional.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 compile-internal produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-compile-internal.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 runtime-internal produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-runtime-internal.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 test-internal produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-test-internal.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 plugin produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-plugin.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 sources produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-sources.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 docs produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-docs.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 pom produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-pom.xml[0m
-[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 scala-tool produced in /Users/Elise/ownCloud/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-scala-tool.xml[0m
-[0m[[0mdebug[0m] [0m	resolve done (5183ms resolve - 126ms download)[0m
+[0m[[0mdebug[0m] [0m:: resolution report :: resolve 3949ms :: artifacts dl 38ms[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 compile produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-compile.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 runtime produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-runtime.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 test produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-test.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 provided produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-provided.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 optional produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-optional.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 compile-internal produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-compile-internal.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 runtime-internal produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-runtime-internal.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 test-internal produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-test-internal.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 plugin produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-plugin.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 sources produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-sources.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 docs produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-docs.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 pom produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-pom.xml[0m
+[0m[[0mdebug[0m] [0m	report for data#data_2.11;1.0 scala-tool produced in /Users/Elise/workspace/WindPotentialScala/target/resolution-cache/reports/data-data_2.11-scala-tool.xml[0m
+[0m[[0mdebug[0m] [0m	resolve done (3949ms resolve - 38ms download)[0m
 [0m[[0minfo[0m] [0mDone updating.[0m
 [0m[[33mwarn[0m] [0mScala version was updated by one of library dependencies:[0m
 [0m[[33mwarn[0m] [0m	* org.scala-lang:scala-library:(2.11.7, 2.11.6, 2.11.4, 2.11.1, 2.11.0) -> 2.11.8[0m
