@@ -1,5 +1,7 @@
-target/*
-project/target/*
+target/resolution-cache/*
+target/streams/*
+target/scala-2.11/*
+project/target/config-classes/*
 *.class
 .DS_Store
 .project
