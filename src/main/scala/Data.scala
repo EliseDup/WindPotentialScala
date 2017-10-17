@@ -123,7 +123,7 @@ object Data {
   def plotPotential(world: List[GridCell], eroi: List[Double], tick: Double) {
     
     val offshore = world.filter(_.offshoreEEZ).filter(_.waterDepth.toMeters <= 1000); val onshore = world.filter(_.onshore); val grids = offshore ++ onshore
-    val total = WindPotential().potential_eroi(eroi, true, grids, "Optimization")
+    val total = WindPotential().potential_eroi(eroi, true, grids, "Total")
     
     PlotHelper.plotXY(List(
       total,

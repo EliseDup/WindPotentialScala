@@ -66,21 +66,23 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
    * ! All should be double casted to String, otherwise it will not work
    */
   def writeGrid(name: String, gr: List[GridCell] = grids, filter: Boolean = false) {
-
+val p= WindPotential(0.5,false)
     val cells = if (filter) {
       val minLat = minLatitude(gr); val maxLat = maxLatitude(gr); val minLon = minLongitude(gr); val maxLon = maxLongitude(gr);
       grids.filter(g => (g.center.latitude.toDegrees >= minLat && g.center.latitude.toDegrees <= maxLat && g.center.longitude.toDegrees >= minLon && g.center.longitude.toDegrees <= maxLon))
     } else grids
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     cells.map(g => {
-      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString)
-      if (!filter || gr.contains(g)) {
+      out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" +
+         (100*p.suitabilityFactor(g)).toString + "\t" + g.wind100m.mean.toMetersPerSecond.toString + "\t" + (CapacityFactorCalculation(g)*100).toString + "\t" +
+         p.capacityDensity(g, 5, true).toWattsPerSquareMeter.toString + "\t" + p.capacityDensity(g, 12, true).toWattsPerSquareMeter.toString + "\n")
+      /*if (!filter || gr.contains(g)) {
         out_stream.print("\t" + g.yearlyClearnessIndex.toString + "\t" + g.irradiance.mean.toWattsPerSquareMeter.toString + "\t" + yearlyRadiation(g.center.latitude).toWattsPerSquareMeter.toString)
        // "\t" + (g.irradiance.mean.toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(0).toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(6).toWattsPerSquareMeter*8.76).toString)
       } else {
         out_stream.print("\t" + "0.0" + "\t" + "0.0"+ "\t" + "0.0")
-      }
-      out_stream.print("\n")
+      }*/
+      //out_stream.print("\n")
 
     })
     out_stream.close()

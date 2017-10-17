@@ -7,16 +7,16 @@ import squants.radio._
 import grid._
 import solar_energy.SolarPotential
 import solar_energy.SolarPower._
-
+import solar_energy.EmbodiedEnergyPV
 object SolarTest {
   def main(args: Array[String]): Unit = {
-
-    PlotHelper.plotXY(List(((0 to 1000).map(i => i / 1000.0).toList, (0 to 1000).map(i => i / 1000.0).toList.map(1 - diffuseFraction(_)), "")),
-      xLabel = "Clearness Index", yLabel = "Direct Fraction")
-
+   println(TonOilEquivalent(1062*1E9).to(Exajoules))
     val w = WorldGrid.simple()
-
-    w.writeGrid("annual_k")
+    
+    PlotHelper.plotXY(List(SolarPotential.eff_17.eroiFunction(w.eu28, 0, true, "17 %"),
+        SolarPotential.eff_24.eroiFunction(w.eu28, 0, true, "24 %")),
+        xLabel = "Centralised PV Potential [EJ/year]", yLabel ="EROI", legend=true, save= true)
+    
   }
 
   def plotByLatitude {
