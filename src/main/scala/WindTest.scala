@@ -29,14 +29,7 @@ import squants.energy.Joules
 object WindTest {
 
   def main(args: Array[String]): Unit = {
-
-    val folder = "../model_data/countries"
-    val e = (2 to 40).map(_ * 0.5).toList
-    val p = WindPotential(0.5, false)
-    val w = WorldGrid.simple()
-    printArea(w, "Mexico")
-    printArea(w, "Saudi Arabia")
-    printArea(w, "Russia")
+ plotForPaper
   }
 
   def printArea(w: WorldGrid, c: String) {
@@ -111,10 +104,10 @@ object WindTest {
     val e = (2 to 40).map(_ * 0.5).toList
     val w = WorldGrid()
     val g = w.grids.filter(_.EEZ)
-    // Data.plotEnveloppe(g, e)
-    Data.plotPotential(g, e, 100.0)
-    Data.plotPotentialEEAReport(w.eu28, e, 5.0)
-    plotPotentialTDBU
+    //Data.plotEnveloppe(g, e)
+   Data.plotPotential(g, e, 100.0)
+   // Data.plotPotentialEEAReport(w.eu28, e, 5.0)
+   // plotPotentialTDBU
   }
 
   def printResultsForPaper {

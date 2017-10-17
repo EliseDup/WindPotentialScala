@@ -167,7 +167,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     if (Math.abs(center.latitude.toDegrees) >= 65) 0.0
     else irradiance.mean / yearlyRadiation(center.latitude)
   }
-  val monthlyClearnessIndex =
+ /* val monthlyClearnessIndex =
     if (Math.abs(center.latitude.toDegrees) >= 65) (0 until 12).map(m => 0.0).toList
     else (0 until 12).map(m => irradiance.perMonth(m) / monthlyRadiation(m, center.latitude)).toList
 
@@ -182,7 +182,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
   
   val directIrradiance = irradiance.mean * (1 - diffuseFraction(yearlyClearnessIndex))
   val monthlyDirectIrradiance = (0 until 12).map(m => irradiance.month(m) * (1 - diffuseFraction(monthlyClearnessIndex(m)))).toList
-
+*/
   // def directRadiation = Thermodynamics.diffuseFraction(clearnessIndex, d, h)
 }
 /**

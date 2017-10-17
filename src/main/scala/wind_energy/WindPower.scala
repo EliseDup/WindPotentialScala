@@ -50,6 +50,6 @@ object WakeEffect {
     val n = (500 to 2500).map(_ * 0.01).toList
     def eff(size: Int) = n.map(i => arrayEfficiency(size, Math.PI/(4*i*i), true)*100)
     val list = List(5, 10, 50, 1000).map(s => (n, eff(s*s), if(s<100) s.toString + "x" + s.toString else "Infinite"))
-    PlotHelper.plotXY(list, xLabel = "Turbine Spacing [RD]", yLabel = "Array Efficiency [%]", legend = true, tick = (true,5,20))
+    PlotHelper.plotXY(list, xLabel = "Turbine Spacing [D]", yLabel = "Array Efficiency [%]", legend = true, tick = (true,5,20))
   }
 }

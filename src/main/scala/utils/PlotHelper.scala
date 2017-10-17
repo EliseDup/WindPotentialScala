@@ -25,6 +25,11 @@ import java.awt.BasicStroke
 import java.io.FileOutputStream
 import com.sun.image.codec.jpeg.JPEGCodec
 import org.jfree.util.ShapeUtilities
+import com.itextpdf.text.Rectangle
+import com.itextpdf.text.Document
+import com.itextpdf.text.pdf.PdfWriter
+import com.itextpdf.awt.DefaultFontMapper
+import com.itextpdf.text.pdf.codec.Base64.OutputStream
 
 object PlotHelper {
 
@@ -87,7 +92,7 @@ object PlotHelper {
     val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-    //plot.getRangeAxis().setRange(1, 20)
+    plot.getRangeAxis().setRange(1, 8)
     //plot.getDomainAxis().setRange(0,800)
     createFrame(chart, name = title, save = save, tick = tick)
   }
@@ -175,12 +180,12 @@ object PlotHelper {
 
   def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, shape: Boolean = false, xy: Boolean = true, bw: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
-    applyChartTheme(chart, tick)
+     applyChartTheme(chart, tick)
 
     if (xy) {
       val n = chart.getXYPlot().getSeriesCount()
       val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
-    /*  if (n == 7) {
+       if (n == 7) {
         for (i <- 0 to 5) {
           r.setSeriesPaint(i, Color.DARK_GRAY)
         }
@@ -206,7 +211,7 @@ object PlotHelper {
           r.setSeriesStroke(i, dots(1.0f))
           r.setSeriesPaint(i, Color.BLACK)
         }
-      } else */
+      } else 
       if (!bw) {
         for (i <- 0 until Math.min(n, colors.size)) r.setSeriesPaint(i, colors(i))
         chart.getXYPlot().setRenderer(r);
@@ -235,6 +240,8 @@ object PlotHelper {
 
     }
     if (save) {
+      println("Name =" + name)
+      writeAsPDF(chart, new FileOutputStream((if (name.isEmpty()) i else name) + ".pdf"),  500, 270)
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream((if (name.isEmpty()) i else name) + ".jpg"), chart, 500, 270, 5, 5)
       i = i + 1
     }
@@ -294,5 +301,18 @@ object PlotHelper {
     }
 
   }
-
+  def writeAsPDF(chart: JFreeChart, out: FileOutputStream, width: Int, height: Int) {
+    val pagesize = new Rectangle(width, height);
+    val document = new Document(pagesize, 50, 50, 50, 50);
+    val writer = PdfWriter.getInstance(document, out);
+    document.open();
+    val cb = writer.getDirectContent();
+    val tp = cb.createTemplate(width, height);
+    val g2 = tp.createGraphics(width, height, new DefaultFontMapper());
+    val r2D = new Rectangle2D.Double(0, 0, width, height);
+    chart.draw(g2, r2D);
+    g2.dispose();
+    cb.addTemplate(tp, 0, 0);
+    document.close();
+  }
 }
