@@ -48,12 +48,22 @@ object Data {
     println("Load Grid in " + (System.currentTimeMillis() - t0) / 1000.0 + " seconds")
 
     val c = world.grids.filter(_.EEZ)
-    plotPotential(c, eroi, 100)
-    for (country <- world.eu28countries) {
-      val g = c.filter(_.country.name.contains(country))
+  //  plotPotential(c, eroi, 100)
+    for (country <- List("Belgium")) { //world.eu28countries) {
+      val g = c.filter(_.country.map.map(_._1).contains(country))
       println(country + "\t"
-        + WindPotential().potential(1.0, true, g.filter(_.onshore)).to(Exajoules) + "\t" +
-        +WindPotential().potential(1.0, true, g.filter(_.offshore)).to(Exajoules))
+        + WindPotential().potential(1.0, true, g.filter(_.onshore)).to(TerawattHours) + "\t" +
+        + WindPotential().potential(1.0, true, g.filter(_.offshore)).to(TerawattHours) + "\n" +
+g.filter(_.onshore).map(c => c.proportion(country)*WindPotential().installedCapacity(c, 5.0, true).to(Megawatts)).sum +"\t"+
+g.filter(_.onshore).map(c => c.proportion(country)*WindPotential().installedCapacity(c, 12.0, true).to(Megawatts)).sum +"\n"+
+g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().installedCapacity(c, 5.0, true).to(Megawatts)).sum +"\t"+
+g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().installedCapacity(c, 12.0, true).to(Megawatts)).sum +"\n"+
+
+g.filter(_.onshore).map(c => c.proportion(country)*WindPotential().energyPerYear(c, 5.0, true).to(TerawattHours)).sum +"\t"+
+g.filter(_.onshore).map(c => c.proportion(country)*WindPotential().energyPerYear(c, 12.0, true).to(TerawattHours)).sum +"\n"+
+g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().energyPerYear(c, 5.0, true).to(TerawattHours)).sum +"\t"+
+g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().energyPerYear(c, 12.0, true).to(TerawattHours)).sum
+      )
     }
 
   }
@@ -123,8 +133,12 @@ object Data {
   def plotPotential(world: List[GridCell], eroi: List[Double], tick: Double) {
     
     val offshore = world.filter(_.offshoreEEZ).filter(_.waterDepth.toMeters <= 1000); val onshore = world.filter(_.onshore); val grids = offshore ++ onshore
-    val total = WindPotential().potential_eroi(eroi, true, grids, "Total")
     
+    val total = WindPotential().potential_eroi(eroi, true, grids, "Total")
+       PlotHelper.plotXY(List(
+      total), title = "RegardsEco_Figure4",
+      xLabel = "Energie Brute Produite [EJ/an]", yLabel = "TRE", tick = (true, 100.0, 2.0))
+
     PlotHelper.plotXY(List(
       total,
       WindPotential().potential_eroi(eroi, true, onshore, "Onshore"),

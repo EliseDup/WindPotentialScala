@@ -31,7 +31,7 @@ class SolarPotential(val efficiency: Double = 0.17, val inputs1MW: Energy = Giga
 
   val size1MW = Megawatts(1) / (WattsPerSquareMeter(1000) * efficiency)
 
-  def energyInputs(cell: GridCell, suitable: Boolean) = cell.suitableArea(suitable, this) / size1MW * EmbodiedEnergyPV.inputs(Megawatts(1), powerDensity(cell) * cell.suitableArea(suitable, this) * performanceRatio * efficiency * lifeTime) //  Megajoules(2750)
+  def energyInputs(cell: GridCell, suitable: Boolean) = cell.suitableArea(suitable, this) / size1MW *  EmbodiedEnergyPV.inputs(Megawatts(1), powerDensity(cell) * cell.suitableArea(suitable, this) * performanceRatio * efficiency * lifeTime) //  Megajoules(2750)
   // For 1MW as an example
   def capacityFactor(cell: GridCell) = (size1MW * powerDensity(cell) * efficiency * performanceRatio) / Megawatts(1)
 
