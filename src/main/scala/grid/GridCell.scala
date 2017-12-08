@@ -212,7 +212,8 @@ object GridCell {
 
     } else List()
   }
-  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex: Int = 34, optiWind: Boolean = false, solar: Boolean = true) = {
+  
+  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex: Int = 34, optiWind: Boolean = true, solar: Boolean = false) = {
     new GridCell(l, DefaultGridCell.center(l), gridSize,
       DefaultGridCell.lcs(l),
       l(2).toDouble / 100.0,
