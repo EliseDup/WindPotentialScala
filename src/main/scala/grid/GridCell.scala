@@ -204,8 +204,8 @@ object GridCell {
    *
    * So 40 is the first with old version !
    */
-  def countryList(l: Array[String]): List[(String, Double)] = {
-    val countryIndex = 47
+  def countryList(l: Array[String], countryIndex : Int): List[(String, Double)] = {
+    // val countryIndex = 47
     if (l.size > countryIndex + 1) {
       val xs = (countryIndex until l.size).map(i => l(i).toString).filter(i => !i.equals("")).toList
       xs.toList.distinct.map(x => (x.toString, xs.count(_ == x.toString) / 9.0))
@@ -213,11 +213,13 @@ object GridCell {
     } else List()
   }
   
-  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex: Int = 34, optiWind: Boolean = true, solar: Boolean = false) = {
+  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex: Int/* = 34*/, countryIndex : Int, optiWind: Boolean /*= true*/, solar: Boolean /*= false*/) = {
+    
     new GridCell(l, DefaultGridCell.center(l), gridSize,
+      
       DefaultGridCell.lcs(l),
       l(2).toDouble / 100.0,
-      Country(l(28), countryList(l)),
+      Country(l(28), countryList(l,countryIndex)),
       Meters(l(26).toDouble), Kilometers(l(27).toDouble),
       new WindProfile(MetersPerSecond(l(31).toDouble), l(32).toDouble, Meters(71)),
       new WindProfile(MetersPerSecond(l(29).toDouble), l(30).toDouble, Meters(125)),
