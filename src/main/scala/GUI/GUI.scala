@@ -35,8 +35,8 @@ object GUI extends SimpleSwingApplication {
 
     reactions += {
       case ButtonClicked(start) =>
-        val wind = new WorldGrid("results/" +
-          simu.area.selection.item.toLowerCase() + "5yearslc", Degrees(0.25))
+        //val wind = new WorldGrid("results/" +
+        //  simu.area.selection.item.toLowerCase() + "5yearslc", Degrees(0.25))
         
     }
   }

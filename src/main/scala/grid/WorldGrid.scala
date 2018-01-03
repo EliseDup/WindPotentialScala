@@ -18,17 +18,18 @@ import wind_energy._
 import solar_energy.SolarPower._
 object WorldGrid {
 
-  def apply(name: String) = new WorldGrid(name, Degrees(0.75))
-  def apply() = new WorldGrid("../Model_data/detailedCountries", Degrees(0.75))
-  
+  def apply(name: String) = new WorldGrid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, true, false)
+  def apply(): WorldGrid = apply("../Model_data/detailedCountries")
   //def apply() = new WorldGrid("../Model_data/Wind_Optimization/1_20_by0_5", Degrees(0.75))
-  def bottomUp() = new WorldGrid("../Model_data//Wind_Optimization/1_20_by0_5_bottom_up", Degrees(0.75))
-  def simple() = new WorldGrid("../model_data/wind_solar_0_75", Degrees(0.75))
+  def bottomUp() = new WorldGrid("../Model_data//Wind_Optimization/1_20_by0_5_bottom_up", Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, true, false)
+  def simple() = new WorldGrid("../model_data/wind_solar_0_75", Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, false, true)
+
 }
 
-class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double] = (2 until 40).map(_ * 0.5).toList) {
+class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double],
+    val optiIndex: Int, val countryListIndex: Int, val optiWind: Boolean, val solar: Boolean) {
 
-  val grids: List[GridCell] = Helper.getLines(name).map(GridCell(_, gridSize, eroi_min))
+  val grids: List[GridCell] = Helper.getLines(name).map(GridCell(_, gridSize, eroi_min, optiIndex, countryListIndex, optiWind, solar))
 
   // Sum v^2 * Area
   val totalDissipation = Terawatts(875.0 / 3.0)
@@ -68,7 +69,7 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
    * ! All should be double casted to String, otherwise it will not work
    */
   def writeGrid(name: String, gr: List[GridCell] = grids, filter: Boolean = false) {
-val p= WindPotential(0.5,false)
+    val p = WindPotential(0.5, false)
     val cells = if (filter) {
       val minLat = minLatitude(gr); val maxLat = maxLatitude(gr); val minLon = minLongitude(gr); val maxLon = maxLongitude(gr);
       grids.filter(g => (g.center.latitude.toDegrees >= minLat && g.center.latitude.toDegrees <= maxLat && g.center.longitude.toDegrees >= minLon && g.center.longitude.toDegrees <= maxLon))
@@ -76,8 +77,8 @@ val p= WindPotential(0.5,false)
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     cells.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" +
-         (100*p.suitabilityFactor(g)).toString + "\t" + g.wind100m.mean.toMetersPerSecond.toString + "\t" + (CapacityFactorCalculation(g)*100).toString + "\t" +
-         p.capacityDensity(g, 5, true).toWattsPerSquareMeter.toString + "\t" + p.capacityDensity(g, 12, true).toWattsPerSquareMeter.toString + "\n")
+        (100 * p.suitabilityFactor(g)).toString + "\t" + g.wind100m.mean.toMetersPerSecond.toString + "\t" + (CapacityFactorCalculation(g) * 100).toString + "\t" +
+        p.capacityDensity(g, 5, true).toWattsPerSquareMeter.toString + "\t" + p.capacityDensity(g, 12, true).toWattsPerSquareMeter.toString + "\n")
       /*if (!filter || gr.contains(g)) {
         out_stream.print("\t" + g.yearlyClearnessIndex.toString + "\t" + g.irradiance.mean.toWattsPerSquareMeter.toString + "\t" + yearlyRadiation(g.center.latitude).toWattsPerSquareMeter.toString)
        // "\t" + (g.irradiance.mean.toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(0).toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(6).toWattsPerSquareMeter*8.76).toString)
@@ -105,15 +106,16 @@ val p= WindPotential(0.5,false)
     out_stream.print("Latitude" + "\t" + "Longitude" + "\n")
     grids.map(g => {
       val lat = g.center.latitude.value; val lon = g.center.longitude.value
-      if(lat!=90 && lat!=(-90) && lon!=180 && lon!=(-180)){
-      val latStart = lat + 0.75 / 2.0 + step / 2.0; val lonStart = lon + 0.75 / 2.0 + step / 2.0
-      for (i <- 1 to n) {
-        for (j <- 1 to n) {
+      if (lat != 90 && lat != (-90) && lon != 180 && lon != (-180)) {
+        val latStart = lat + 0.75 / 2.0 + step / 2.0; val lonStart = lon + 0.75 / 2.0 + step / 2.0
+        for (i <- 1 to n) {
+          for (j <- 1 to n) {
             out_stream.print((latStart - i * step).toString + "\t" + (lonStart - j * step).toString + "\n")
+          }
         }
+
       }
-    
-      }})
+    })
     out_stream.close()
   }
   /**
