@@ -99,8 +99,6 @@ object WindPotential_12_2017 {
 
   }
 
- 
-
   def printResultsForPaper {
     val p = WindPotential(0.5, false)
     val g = results.grids.filter(_.EEZ)

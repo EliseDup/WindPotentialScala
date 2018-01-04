@@ -19,9 +19,7 @@ import solar_energy.SolarPower._
 object WorldGrid {
 
   def apply(name: String) = new WorldGrid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, true, false)
-  def apply(): WorldGrid = apply("../Model_data/detailedCountries")
-  //def apply() = new WorldGrid("../Model_data/Wind_Optimization/1_20_by0_5", Degrees(0.75))
-  def bottomUp() = new WorldGrid("../Model_data//Wind_Optimization/1_20_by0_5_bottom_up", Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, true, false)
+  def apply(): WorldGrid = apply("runs_history/wind_2017/results_wind_2017")
   def simple() = new WorldGrid("../model_data/wind_solar_0_75", Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, false, true)
 
 }
