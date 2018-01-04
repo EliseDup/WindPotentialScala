@@ -20,11 +20,7 @@ object Test {
      
     PlotHelper.cumulativeDensity(List( (g.map(_.irradiance.month(0).toWattsPerSquareMeter),"January") ,(g.map(_.irradiance.month(6).toWattsPerSquareMeter),"July")),legend=true,
         xLabel = "% Sites", yLabel="Monthly Irradiance [W/m²]")
-    
         w.writeGrid("jan_ju")
-        
-        
-   
 
     println( g.map(_.keDissipation.toWattsPerSquareMeter*1.5).sum / g.size)
     
