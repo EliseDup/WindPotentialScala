@@ -19,6 +19,7 @@ import wind_energy._
 import solar_energy._
 import squants.UnitOfMeasure
 import squants.Quantity
+import utils.DayMonth
 
 case class Country(val name: String, val map: List[(String, Double)] = List()) {
   val countries = map.map(_._1)
@@ -137,6 +138,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
 
   import SolarPower._
   import WindPower._
+  import DayMonth._
   /**
    * WIND
    */
@@ -167,7 +169,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
     if (Math.abs(center.latitude.toDegrees) >= 65) 0.0
     else irradiance.mean / yearlyRadiation(center.latitude)
   }
- /* val monthlyClearnessIndex =
+  val monthlyClearnessIndex =
     if (Math.abs(center.latitude.toDegrees) >= 65) (0 until 12).map(m => 0.0).toList
     else (0 until 12).map(m => irradiance.perMonth(m) / monthlyRadiation(m, center.latitude)).toList
 
@@ -175,15 +177,17 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
   val kmin = 0.05; val kmax = monthlyClearnessIndex.map(kav => 0.613 + 0.267 * kav - 11.9 * Math.pow(kav - 0.75, 8))
   val epsilon = (0 until 12).map(i => (kmax(i) - kmin) / (kmax(i) - monthlyClearnessIndex(i))).toList
   val sigma = (0 until 12).map(i => -1.498 + (1.184 * epsilon(i) - 27.182 * Math.exp(-1.5 * epsilon(i))) / (kmax(i) - kmin)).toList
-  def dailyClearnessIndex(ndk: Int, ndm: Int, m: Int) = {
+  
+  def dailyClearnessIndex(n : Int) = {
+    val (m, ndm, ndk) = month_dayInMonth(n)
     val alpha = (ndk - 0.5) / ndm
     (1 / sigma(m)) * (Math.log((1 - alpha) * Math.exp(sigma(m) * kmin) + alpha * (Math.exp(sigma(m) * kmax(m)))))
   }
   
   val directIrradiance = irradiance.mean * (1 - diffuseFraction(yearlyClearnessIndex))
   val monthlyDirectIrradiance = (0 until 12).map(m => irradiance.month(m) * (1 - diffuseFraction(monthlyClearnessIndex(m)))).toList
-*/
-  // def directRadiation = Thermodynamics.diffuseFraction(clearnessIndex, d, h)
+
+  def directRadiation(n : Int) = dailyClearnessIndex(n)*dailyRadiation(n, center.latitude)
 }
 /**
  * Latitude	Longitude	Corine Land Cover	GlobCover	Modis	Urban Factor	Protected area ?	Country	Elevation [m]	Distance to Coast [km]	Uwind	Vwind	Wind	Std Wind	KineticEnergyDissipation Irradiance
