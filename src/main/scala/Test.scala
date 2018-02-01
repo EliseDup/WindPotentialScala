@@ -2,45 +2,47 @@
 
 import utils.PlotHelper
 import grid.WorldGrid
-import solar_energy.SolarPotential
+import solar_energy._
 import squants.energy._
 import utils._
 import squants.time.Hours
-import squants.space.SquareMeters
+import squants.space._
 import squants.radio.WattsPerSquareMeter
 import squants.space.SquareKilometers
 import solar_energy.EmbodiedEnergyPV
 
 object Test {
   import DayMonth._
+  import SolarPower._
+import PlotHelper._
   def main(args: Array[String]): Unit = {
-test
-    println(66 + "\t" + month_dayInMonth(66))
-    println(144 + "\t" + month_dayInMonth(144))
-    println(200 + "\t" + month_dayInMonth(200))
-    println(250 + "\t" + month_dayInMonth(250))
-    println(360 + "\t" + month_dayInMonth(360))
-    
     val w = WorldGrid.simple()
+    val cell = w.grids.filter(c => c.center.latitude.toDegrees == 32.25 && c.center.longitude.toDegrees == -111)(0)
+    println(cell.country.countries)
+       
+    val days = (1 to 31).map(_.toDouble).toList
+     val h = (1 to 24 * 31).map(_.toDouble).toList
+    val rad = days.map(d => (0 to 24).map(h => cell.hourlyRadiation(d.toInt, h).toWattsPerSquareMeter)).flatten.toList
+    PlotHelper.plotXY(h, rad)
+
     val g = w.grids.filter(i => i.EEZ)
 
     // w.writeGrid("k_av")
-  val countries: List[(String,Double)]  = List(("Puerto Rico",18.4),
-("Mexico",19.4),
-("Argentina",-34.6),
-("Chile",-33),
-("Ecuador",-0.4),
-("Peru",-12.1),
-("Venezuela",10.5),
-("Venezuela",10.6))
-    countries.map(c =>{
-      print(c._1 +"\t")
-val cell =    g.filter(_.country.countries.contains(c._1)).filter(i => Math.abs(i.center.latitude.toDegrees-c._2) < 0.5)(0)
-print(cell.center.latitude.toDegrees + "\t" )
-cell.monthlyClearnessIndex.map(k => print(k +"\t"))
-    println()
-    }
-  )
+    val countries: List[(String, Double)] = List(("Puerto Rico", 18.4),
+      ("Mexico", 19.4),
+      ("Argentina", -34.6),
+      ("Chile", -33),
+      ("Ecuador", -0.4),
+      ("Peru", -12.1),
+      ("Venezuela", 10.5),
+      ("Venezuela", 10.6))
+    countries.map(c => {
+      print(c._1 + "\t")
+      val cell = g.filter(_.country.countries.contains(c._1)).filter(i => Math.abs(i.center.latitude.toDegrees - c._2) < 0.5)(0)
+      print(cell.center.latitude.toDegrees + "\t")
+      cell.monthlyClearnessIndex.map(k => print(k + "\t"))
+      println()
+    })
     def plotEROI {
 
       PlotHelper.cumulativeDensity(List((g.map(_.irradiance.month(0).toWattsPerSquareMeter), "January"), (g.map(_.irradiance.month(6).toWattsPerSquareMeter), "July")), legend = true,

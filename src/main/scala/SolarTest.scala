@@ -44,7 +44,7 @@ object SolarTest {
     val hours = (0 until 24).toList.map(_.toDouble)
 
     val l = List(Degrees(-40), Degrees(-20), Degrees(0), Degrees(20), Degrees(40))
-    val res = l.map(i => (days, days.map(m => dailyRadiation(m.toInt, i).toWattsPerSquareMeter * 24.0 / 1000), i.toString))
+    val res = l.map(i => (days, days.map(m => dailyExtraterrestrialRadiation(m.toInt, i).toWattsPerSquareMeter * 24.0 / 1000), i.toString))
     PlotHelper.plotXY(res, legend = true)
 
     val w = WorldGrid.simple()
@@ -77,7 +77,7 @@ object SolarTest {
     }
 
     PlotHelper.plotXY(List(
-      (lats, lats.map(l => yearlyRadiation(Degrees(l)).toWattsPerSquareMeter), "Theoretical"),
+      (lats, lats.map(l => yearlyExtraterrestrialRadiation(Degrees(l)).toWattsPerSquareMeter), "Theoretical"),
       (lats, lats.map(l => meanRadiation(Degrees(l), data).toWattsPerSquareMeter), "ERA-Interim"),
       (lats, lats.map(l => meanRadiation(Degrees(l), dataNet).toWattsPerSquareMeter), "ERA-Interim Net"),
       (lats, lats.map(l => meanFromCells(Degrees(l), w.grids).toWattsPerSquareMeter), "Grid"),

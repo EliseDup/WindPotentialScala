@@ -167,11 +167,11 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
    */
   val yearlyClearnessIndex = {
     if (Math.abs(center.latitude.toDegrees) >= 65) 0.0
-    else irradiance.mean / yearlyRadiation(center.latitude)
+    else irradiance.mean / yearlyExtraterrestrialRadiation(center.latitude)
   }
   val monthlyClearnessIndex =
     if (Math.abs(center.latitude.toDegrees) >= 65) (0 until 12).map(m => 0.0).toList
-    else (0 until 12).map(m => irradiance.perMonth(m) / monthlyRadiation(m, center.latitude)).toList
+    else (0 until 12).map(m => irradiance.perMonth(m) / monthlyExtraterrestrialRadiation(m, center.latitude)).toList
 
   // Daily Clearness Index 
   val kmin = 0.05; val kmax = monthlyClearnessIndex.map(kav => 0.613 + 0.267 * kav - 11.9 * Math.pow(kav - 0.75, 8))
@@ -186,8 +186,17 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
   
   val directIrradiance = irradiance.mean * (1 - diffuseFraction(yearlyClearnessIndex))
   val monthlyDirectIrradiance = (0 until 12).map(m => irradiance.month(m) * (1 - diffuseFraction(monthlyClearnessIndex(m)))).toList
-
-  def directRadiation(n : Int) = dailyClearnessIndex(n)*dailyRadiation(n, center.latitude)
+  
+  // Daily global, direct and diffuse radiation is computed base on the estimated daily clearness index and diffuse to global ratio
+  def dailyRadiation(n : Int) = dailyClearnessIndex(n)*dailyExtraterrestrialRadiation(n, center.latitude)
+  def dailyDirectRadiation(n : Int) = (1 - dailyDiffuseFraction(dailyClearnessIndex(n),n,center.latitude))*dailyRadiation(n)
+  def dailyDiffuseRadiation(n : Int) = dailyDiffuseFraction(dailyClearnessIndex(n),n,center.latitude)*dailyRadiation(n)
+  
+  // Ratio of the global daily (kWh/m^2/day) for a day. So to get a value in W/m^2 = ratio * 24
+  def hourlyRadiation(n : Int, h : Int) = dailyRadiation(n)*ratioHourlyToDailyGlobalRadiation(n,h,center.latitude)*24
+  def hourlyDiffuseRadiation(n : Int, h : Int) = dailyDiffuseRadiation(n)*ratioHourlyToDailyDiffuseRadiation(n,h,center.latitude)*24
+  def hourlyDirectRadiation(n : Int, h : Int) = hourlyRadiation(n, h) - hourlyDiffuseRadiation(n, h)
+  
 }
 /**
  * Latitude	Longitude	Corine Land Cover	GlobCover	Modis	Urban Factor	Protected area ?	Country	Elevation [m]	Distance to Coast [km]	Uwind	Vwind	Wind	Std Wind	KineticEnergyDissipation Irradiance
