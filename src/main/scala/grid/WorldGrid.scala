@@ -52,9 +52,9 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
 
   def europe = grids.filter(g => g.center.longitude.toDegrees >= -35.25 && g.center.longitude.toDegrees <= 34.5 && g.center.latitude.toDegrees >= 24.75 && g.center.latitude.toDegrees <= 69.75)
 
-  val eu28countries = Helper.getLines("../model_data/EU28", "\t").map(_(0))
+  val eu28countries = Helper.getLines("../model_data/countries/EU28", "\t").map(_(0))
   def eu28 = grids.filter(g => eu28countries.contains(g.country.name))
-  val ieaCountries = Helper.getLines("../model_data/ieaCountries", "\t").map(_(0))
+  val ieaCountries = Helper.getLines("../model_data/countries/ieaCountries", "\t").map(_(0))
   def iea = grids.filter(g => ieaCountries.contains(g.country.name))
   def minLatitude(grids: List[GridCell]) = grids.map(_.center.latitude.toDegrees).min
   def maxLatitude(grids: List[GridCell]) = grids.map(_.center.latitude.toDegrees).max
@@ -75,9 +75,8 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     cells.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" +
-        (100 * p.suitabilityFactor(g)).toString + "\t" + g.wind100m.mean.toMetersPerSecond.toString + "\t" + (CapacityFactorCalculation(g) * 100).toString + "\t" +
-        p.capacityDensity(g, 5, true).toWattsPerSquareMeter.toString + "\t" + p.capacityDensity(g, 12, true).toWattsPerSquareMeter.toString + "\n")
-      /*if (!filter || gr.contains(g)) {
+       g.yearlyClearnessIndex.toString  + "\t" + g.monthlyClearnessIndex(0).toString + "\t" + g.monthlyClearnessIndex(6).toString + "\n")
+        /*if (!filter || gr.contains(g)) {
         out_stream.print("\t" + g.yearlyClearnessIndex.toString + "\t" + g.irradiance.mean.toWattsPerSquareMeter.toString + "\t" + yearlyRadiation(g.center.latitude).toWattsPerSquareMeter.toString)
        // "\t" + (g.irradiance.mean.toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(0).toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(6).toWattsPerSquareMeter*8.76).toString)
       } else {

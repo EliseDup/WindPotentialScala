@@ -41,6 +41,7 @@ object SolarPower {
     if (sunsetHourAngle(d, lat).value.isNaN()) WattsPerSquareMeter(0)
     else 1.0 / Math.PI * incidentRadiation(d) * (cos(lat) * cos(solarDeclination(d)) * sin(sunsetHourAngle(d, lat)) + sunsetHourAngle(d, lat).toRadians * sin(lat) * sin(solarDeclination(d)))
   }
+  
   def monthlyRadiation(m: Int, lat: Angle) = dailyRadiation(dayMiddleMonth(m), lat)
   def yearlyRadiation(lat: Angle) = 1.0 / 12 * (0 until 12).map(monthlyRadiation(_, lat)).foldLeft(WattsPerSquareMeter(0))(_ + _)
 
