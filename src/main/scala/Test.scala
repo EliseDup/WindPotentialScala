@@ -10,40 +10,25 @@ import squants.space._
 import squants.radio.WattsPerSquareMeter
 import squants.space.SquareKilometers
 import solar_energy.EmbodiedEnergyPV
+import squants.radio.Irradiance
+import grid.GridCell
+import grid.GlobCoverClasses
+import scala.io.Source
 
 object Test {
   import DayMonth._
   import SolarPower._
-import PlotHelper._
+  import PlotHelper._
   def main(args: Array[String]): Unit = {
-    val w = WorldGrid.simple()
-    val cell = w.grids.filter(c => c.center.latitude.toDegrees == 32.25 && c.center.longitude.toDegrees == -111)(0)
-    println(cell.country.countries)
-       
-    val days = (1 to 31).map(_.toDouble).toList
-     val h = (1 to 24 * 31).map(_.toDouble).toList
-    val rad = days.map(d => (0 to 24).map(h => cell.hourlyRadiation(d.toInt, h).toWattsPerSquareMeter)).flatten.toList
-    PlotHelper.plotXY(h, rad)
 
-    val g = w.grids.filter(i => i.EEZ)
+    val l = Source.fromFile("../WindPotentialPython/solar_0_05deg").getLines()
+    val list = l.map(i => i.split("\t")).map(i => (GeoPoint(Degrees(i(0).toDouble), Degrees(i(1).toDouble)),
+      WattsPerSquareMeter(i(2).toDouble / 24 * 1000), WattsPerSquareMeter(i(3).toDouble / 24 * 1000), GlobCoverClasses.landCoverType(i(4).toInt))).toList
+    println(list.size)
 
-    // w.writeGrid("k_av")
-    val countries: List[(String, Double)] = List(("Puerto Rico", 18.4),
-      ("Mexico", 19.4),
-      ("Argentina", -34.6),
-      ("Chile", -33),
-      ("Ecuador", -0.4),
-      ("Peru", -12.1),
-      ("Venezuela", 10.5),
-      ("Venezuela", 10.6))
-    countries.map(c => {
-      print(c._1 + "\t")
-      val cell = g.filter(_.country.countries.contains(c._1)).filter(i => Math.abs(i.center.latitude.toDegrees - c._2) < 0.5)(0)
-      print(cell.center.latitude.toDegrees + "\t")
-      cell.monthlyClearnessIndex.map(k => print(k + "\t"))
-      println()
-    })
-    def plotEROI {
+    PlotHelper.cumulativeDensity(List((list.map(_._2.toWattsPerSquareMeter), "Global"), (list.map(_._3.toWattsPerSquareMeter), "Direct")))
+
+    def plotEROI(w: WorldGrid, g: List[GridCell]) {
 
       PlotHelper.cumulativeDensity(List((g.map(_.irradiance.month(0).toWattsPerSquareMeter), "January"), (g.map(_.irradiance.month(6).toWattsPerSquareMeter), "July")), legend = true,
         xLabel = "% Sites", yLabel = "Monthly Irradiance [W/m²]")
