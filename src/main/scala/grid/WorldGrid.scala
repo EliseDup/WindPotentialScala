@@ -17,11 +17,9 @@ import utils._
 import wind_energy._
 import solar_energy.SolarPower._
 object WorldGrid {
-
   def apply(name: String) = new WorldGrid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, true, false)
   def apply(): WorldGrid = apply("runs_history/wind_2017/results_wind_2017")
   def simple() = new WorldGrid("../model_data/wind_solar_0_75", Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, false, true)
-
 }
 
 class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double],
@@ -75,7 +73,7 @@ class WorldGrid(val name: String, val gridSize: Angle, val eroi_min: List[Double
     val out_stream = new PrintStream(new java.io.FileOutputStream(name))
     cells.map(g => {
       out_stream.print(g.center.latitude.value.toString + "\t" + g.center.longitude.value.toString + "\t" +
-       g.yearlyClearnessIndex.toString  + "\t" + g.monthlyClearnessIndex(0).toString + "\t" + g.monthlyClearnessIndex(6).toString + "\n")
+       (g.irradiance.mean.toWattsPerSquareMeter*8.76).toString  + "\t" + (g.directIrradiance.toWattsPerSquareMeter*8.76).toString + "\n")
         /*if (!filter || gr.contains(g)) {
         out_stream.print("\t" + g.yearlyClearnessIndex.toString + "\t" + g.irradiance.mean.toWattsPerSquareMeter.toString + "\t" + yearlyRadiation(g.center.latitude).toWattsPerSquareMeter.toString)
        // "\t" + (g.irradiance.mean.toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(0).toWattsPerSquareMeter*8.76).toString + "\t" + (g.irradiance.month(6).toWattsPerSquareMeter*8.76).toString)

@@ -65,14 +65,14 @@ object SolarPower {
     }
   }
 
-  def ratioHourlyToDailyDiffuseRadiation(d: Int, h: Int, lat: Angle)={
+  def ratioHourlyToDailyDiffuseRadiation(d: Int, h: Int, lat: Angle) = {
     val ws = sunsetHourAngle(d, lat); val w = hourAngle(d, h)
     (Math.PI / 24.0) * ((cos(w) - cos(ws)) / (sin(ws) - ws.toRadians * cos(ws)))
   }
-  def ratioHourlyToDailyGlobalRadiation(d: Int, h: Int, lat: Angle)={
+  def ratioHourlyToDailyGlobalRadiation(d: Int, h: Int, lat: Angle) = {
     val ws = sunsetHourAngle(d, lat); val w = hourAngle(d, h);
     val a = 0.409 + 0.5016 * sin(Radians(ws.toRadians - 1.047)); val b = 0.6609 - 0.4767 * sin(Radians(ws.toRadians - 1.047));
- Math.max(0, (Math.PI / 24.0) * (a + b * cos(w)) * ((cos(w) - cos(ws)) / (sin(ws) - ws.toRadians * cos(ws))))
+    Math.max(0, (Math.PI / 24.0) * (a + b * cos(w)) * ((cos(w) - cos(ws)) / (sin(ws) - ws.toRadians * cos(ws))))
 
   }
 }
