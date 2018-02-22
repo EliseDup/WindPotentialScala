@@ -1,3 +1,4 @@
 grid_0_05deg filter=lfs diff=lfs merge=lfs -text
 solar_countries* filter=lfs diff=lfs merge=lfs -text
 data_solar/* filter=lfs diff=lfs merge=lfs -text
+data_solar/solar_countries_0_05deg filter=lfs diff=lfs merge=lfs -text
