@@ -19,7 +19,9 @@ object Test {
   import SolarGrid._
   def main(args: Array[String]): Unit = {
    
-    val grid = _0_1deg
+    val grid = _0_5deg
+    val BE = grid.country("Belgium")
+    BE.map(i => println(i.ghi.toWattsPerSquareMeter*8760/1000))
     //EROIPV(grid.cells)
     // PlotHelper.histogram(potential)
     println( grid.cells.map(c => c.slope_geq0_5 * c.area.toSquareKilometers).sum / 1E6)
