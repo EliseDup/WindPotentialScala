@@ -37,22 +37,21 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
     val country: String, val protected_area: Boolean = false) {
 
   val area = Helper.areaRectangle(center, resolution)
-  val suitableArea = if (protected_area) SquareKilometers(0) else landCover.solarFactor.mean * area * (1 - slope_geq45)
+  val suitableArea = if (protected_area) SquareKilometers(0) else landCover.solarFactor.mean * area * (1.0 - slope_geq45)
   def area(lcType: LandCoverType): Area = if (lcType.equals(landCover)) area else SquareKilometers(0)
 
-  def powerDensity(tech: Technology) = 1.0 / tech.occupationRatio * (if (tech.directOnly) dni else ghi) * tech.efficiency * tech.performanceRatio
+  // Actual area occupied by pv panles / heliostat / ...
+  def panelArea(tech: Technology) = suitableArea / tech.occupationRatio
+  def potential(tech: Technology) = panelArea(tech) * (if (tech.directOnly) dni else ghi) * tech.efficiency * tech.performanceRatio
 
-  val pvPotential = suitableArea * powerDensity(PVTechnology)
-  val installedPV = suitableArea * PVTechnology.efficiency * WattsPerSquareMeter(1000) / PVTechnology.occupationRatio
-
-  val cspPotential = suitableArea * powerDensity(CSPTechnology)
-  val maxPotential = if (powerDensity(PVTechnology) > powerDensity(CSPTechnology)) pvPotential else cspPotential
+  val pvPotential = potential(PVTechnology)
+  val installedPV = panelArea(PVTechnology) * PVTechnology.efficiency * WattsPerSquareMeter(1000)
 
   def eroiPV: Double = {
     if (ghi.value == 0 || suitableArea.value == 0) 0.0
     else {
       val out = Hours(25 * 365 * 24) * pvPotential
-      out / EmbodiedEnergyPV.inputs(installedPV, out)
+      out / PVPoly.embodiedEnergy(installedPV, out)
     }
   }
 }

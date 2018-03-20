@@ -18,52 +18,36 @@ object Test {
   import SolarPotential._
   import SolarGrid._
   import Helper._
+  import wind_energy.WindFarmEnergyInputs._
+
   def main(args: Array[String]): Unit = {
 
-    val grid = _0_1deg
-    println(areaList(grid.cells.filter(_.protected_area)))
+   val grid = _0_5deg
+    EROIPV(grid.cells)
 
-    val countries = Helper.getLines("../countries_WWS2050", "\t").map(_(0))
-    val wp = 239.1751749
-    val efficiency = wp / 1000
-    countries.map(c => {
-      val x = grid.country(c)
-      //  println(x(0).ghi.toWattsPerSquareMeter)
-      println(c + "\t" + areaList(x).toSquareKilometers + "\t" +
-        x.map(_.suitableArea.toSquareKilometers).sum + "\t" +
-        x.map(_.installedPV.toMegawatts).sum + "\t" +
-        x.map(_.pvPotential.toMegawatts).sum + "\t"
-        + x.map(i => i.ghi.toWattsPerSquareMeter * efficiency / wp).sum / x.size)
-    })
-  }
-  def area_min_ghi(grid: SolarGrid, c: String) {
-    val country = grid.country(c)
-    if (country.size == 0) println(c + "\t" + "---")
-    else println(c + "\t" + areaList(country.filter(i => i.ghi.value * 24 >= 4000)).toSquareKilometers
-      + "\t" + areaList(country.filter(i => i.ghi.value * 24 >= 5000)).toSquareKilometers
-      + "\t" + areaList(country.filter(_.ghi.value * 24 >= 6000)).toSquareKilometers)
   }
 
   def printMeanGHI(c: String, grid: SolarGrid) {
     val cells = grid.country(c)
     println(c + "\t" + cells.map(_.ghi.toWattsPerSquareMeter).sum / cells.size)
   }
-  def printArea(list: List[SolarCell]) {
+  
+  def printArea(list: List[SolarCell], factor: Double = 1 / 1E6) {
 
     println(list.size)
-    println("Total " + areaList(list).toSquareKilometers / 1E6)
-    println("Slope > 45 " + list.map(i => i.area.toSquareKilometers * i.slope_geq45).sum / 1E6)
-    println("Slope > 0.5 " + list.map(i => i.area.toSquareKilometers * i.slope_geq0_5).sum / 1E6)
+    println("Total " + areaList(list).toSquareKilometers * factor)
+    println("Slope > 45 " + list.map(i => i.area.toSquareKilometers * i.slope_geq45).sum * factor)
+    println("Slope > 0.5 " + list.map(i => i.area.toSquareKilometers * i.slope_geq0_5).sum * factor)
 
-    println("Suitable " + list.map(_.suitableArea.toSquareKilometers).sum / 1E6)
-    println("Sparse " + list.map(g => g.area(SparseVegetation) + g.area(Grassland) + g.area(BareAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6)
-    println("Forest " + list.map(g => g.area(Forests)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6)
-    println("Croplands " + list.map(g => g.area(CropLands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6)
-    println("Shrubland " + list.map(g => g.area(Shrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6)
-    println("MosaicVegetationCroplands " + list.map(g => g.area(MosaicVegetationCroplands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6)
-    println("MosaicGrasslandForestShrubland" + list.map(g => g.area(MosaicGrasslandForestShrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6)
-    println("Urban " + list.map(g => g.area(UrbanAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6)
-    println("Flooded + Waters + Ice " + list.map(g => g.area(FloodedAreas) + g.area(WaterBodies) + g.area(Ice)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers / 1E6)
+    println("Suitable " + list.map(_.suitableArea.toSquareKilometers).sum * factor)
+    println("Sparse " + list.map(g => g.area(SparseVegetation) + g.area(Grassland) + g.area(BareAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
+    println("Forest " + list.map(g => g.area(Forests)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
+    println("Croplands " + list.map(g => g.area(CropLands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
+    println("Shrubland " + list.map(g => g.area(Shrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
+    println("MosaicVegetationCroplands " + list.map(g => g.area(MosaicVegetationCroplands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
+    println("MosaicGrasslandForestShrubland" + list.map(g => g.area(MosaicGrasslandForestShrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
+    println("Urban " + list.map(g => g.area(UrbanAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
+    println("Flooded + Waters + Ice " + list.map(g => g.area(FloodedAreas) + g.area(WaterBodies) + g.area(Ice)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
   }
 
   def plotEROI(w: WorldGrid, g: List[GridCell]) {

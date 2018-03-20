@@ -7,14 +7,19 @@ class EmbodiedEnergy(val raw_materials : Energy,
     val construction_decomissioning : Energy, val transport_materials : Energy, val O_M_fixed : Energy,
     val O_M_output : Energy, val lifeTime : Int = 25) {
   
-  def embodiedEnergy1GW(output_year : Energy) = raw_materials+construction_decomissioning+transport_materials+lifeTime*(O_M_fixed+output_year.toGigajoules*O_M_output)
-  def embodiedEnergy(rated_power : Power, output_year : Energy) = {
-    rated_power.toGigawatts * embodiedEnergy1GW(output_year)
+  def embodiedEnergy1GW(output_1GW_year : Energy) = {
+    raw_materials+construction_decomissioning+transport_materials+
+    lifeTime*(O_M_fixed + output_1GW_year.toGigajoules*O_M_output)
   }
-  def embodiedEnergy(rated_power : Power, capacity_factor : Double) {
-    rated_power.toGigawatts * embodiedEnergy1GW(rated_power*capacity_factor*Hours(24*365))
+  def embodiedEnergy(rated_power : Power, output_year : Energy) = {
+    val ratio = rated_power.toGigawatts
+    ratio * embodiedEnergy1GW(output_year/ratio)
+  }
+  def embodiedEnergy(rated_power : Power, capacity_factor : Double) = {
+    rated_power.toGigawatts * embodiedEnergy1GW(Gigawatts(1)*capacity_factor*Hours(24*365))
   }
 }
+
 
 object PVPoly extends EmbodiedEnergy(Gigajoules(16605974),Gigajoules(143305),Gigajoules(653102),Gigajoules(52911),Gigajoules(0.0097))
 object PVMono extends EmbodiedEnergy(Gigajoules(14477204),Gigajoules(122559),Gigajoules(469376),Gigajoules(45251),Gigajoules(0.0097))
