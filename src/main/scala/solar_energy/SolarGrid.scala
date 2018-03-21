@@ -41,19 +41,29 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
   def area(lcType: LandCoverType): Area = if (lcType.equals(landCover)) area else SquareKilometers(0)
 
   // Actual area occupied by pv panles / heliostat / ...
-  def panelArea(tech: Technology) = suitableArea / tech.occupationRatio
-  def potential(tech: Technology) = panelArea(tech) * (if (tech.directOnly) dni else ghi) * tech.efficiency * tech.performanceRatio
+  def panelArea(tech: SolarTechnology) = suitableArea / tech.occupationRatio
+  def potential(tech: SolarTechnology) = panelArea(tech) * (if (tech.directOnly) dni else ghi) * tech.efficiency * tech.performanceRatio
 
-  val pvPotential = potential(PVTechnology)
-  val installedPV = panelArea(PVTechnology) * PVTechnology.efficiency * WattsPerSquareMeter(1000)
+  val installedPV = panelArea(PVPoly) * PVPoly.efficiency * WattsPerSquareMeter(1000)
 
   def eroiPV: Double = {
     if (ghi.value == 0 || suitableArea.value == 0) 0.0
     else {
-      val out = Hours(25 * 365 * 24) * pvPotential
+      val out = Hours(25 * 365 * 24) * potential(PVPoly)
       out / PVPoly.embodiedEnergy(installedPV, out)
     }
   }
+  
+  // Aperture Area = Power designed * Solar Multiple / ( Solar to elec efficiency * Mean DNI )
+  val installedCSP = panelArea(CSPParabolic) * dni * CSPParabolic.efficiency / 1.2
+  def eroiCSP : Double = {
+    if (dni.value == 0 || suitableArea.value == 0) 0.0
+    else {
+      val out = Hours(25 * 365 * 24) * potential(CSPParabolic)
+      out / CSPParabolic.embodiedEnergy(installedCSP, out)
+    }
+  }
+  def eroi(tech : SolarTechnology) = if(tech.directOnly) eroiCSP else eroiPV
 }
 
 object SolarCell {
@@ -76,8 +86,3 @@ object SolarUtils {
   def areaList(list: List[SolarCell]) = list.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
   def suitableAreaList(list: List[SolarCell]) = list.map(_.suitableArea).foldLeft(SquareKilometers(0))(_ + _)
 }
-
-class Technology(val efficiency: Double, val performanceRatio: Double, val occupationRatio: Double, val directOnly: Boolean)
-
-object PVTechnology extends Technology(0.24, 0.883, 5, false)
-object CSPTechnology extends Technology(0.16, 1, 7.5, true)

@@ -22,8 +22,13 @@ object Test {
 
   def main(args: Array[String]): Unit = {
 
-   val grid = _0_5deg
-    EROIPV(grid.cells)
+    val cf = (0 to 100).toList.map(_ * 0.01)
+    PlotHelper.plotXY(List((cf, cf.map(PVPoly.eroi(_)), "PV Poly"), (cf, cf.map(PVMono.eroi(_)), "PV Mono"), (cf, cf.map(CSPParabolic.eroi(_)), "CSP Parabolic")), legend = true)
+
+    val grid = _0_5deg
+    plotEROI(grid.cells, PVPoly)
+    plotEROI(grid.cells, PVMono)
+    plotEROI(grid.cells, CSPParabolic)
 
   }
 
@@ -31,7 +36,7 @@ object Test {
     val cells = grid.country(c)
     println(c + "\t" + cells.map(_.ghi.toWattsPerSquareMeter).sum / cells.size)
   }
-  
+
   def printArea(list: List[SolarCell], factor: Double = 1 / 1E6) {
 
     println(list.size)
@@ -64,11 +69,11 @@ object Test {
       SolarPotential.eff_24.potential_eroi((2 to 2 * eroiMax2).map(_ * 0.5).toList, true, g, "0.24")),
       xLabel = "Solar Potential [EJ/year]", yLabel = "EROI",
       legend = true)
-
   }
-  def EROIPV(g: List[SolarCell]) = {
-    val res = Helper.listValueVSCumulated(g.filter(g => g.pvPotential.value > 0 && g.eroiPV >= 1).map(g => (g.eroiPV, (g.pvPotential * Hours(365 * 24)).to(TerawattHours))))
-    PlotHelper.plotXY(List((res._1, res._2, "PV")), xLabel = "PV Potential [TWh/year]", yLabel = "EROI")
+  
+  def plotEROI(g: List[SolarCell], tech: SolarTechnology) = {
+    val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroiPV, (g.potential(tech) * Hours(365 * 24)).to(TerawattHours))))
+    PlotHelper.plotXY(List((res._1, res._2, "PV")), xLabel = "Potential [TWh/year]", yLabel = "EROI")
     //  PlotHelper.cumulativeDensity(List( (g.map(c => (c.pvPotential *Hours(365*24)).to(TerawattHours)),"PV")), yLabel="PV Potential [TWh]")
     //  PlotHelper.cumulativeDensity(g.map(c => (c.cspPotential *Hours(365*24)).to(TerawattHours)))
   }
