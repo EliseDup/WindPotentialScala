@@ -12,6 +12,7 @@ import scala.io.Source
 import java.io.PrintStream
 
 object Test {
+
   import SolarUtils._
   import DayMonth._
   import PlotHelper._
@@ -19,16 +20,49 @@ object Test {
   import SolarGrid._
   import Helper._
   import wind_energy.WindFarmEnergyInputs._
+  import SolarPower._
+  import CSP._
 
   def main(args: Array[String]): Unit = {
+    println(SlopeGradients.degreesToPercent(Degrees(26.6)))
+    println(SlopeGradients.degreesToPercent(Degrees(45)))
+    println(SlopeGradients.percentToDegrees(2.1).toDegrees)
+    println(SlopeGradients.percentToDegrees(50).toDegrees)
+    println(SlopeGradients.percentToDegrees(100).toDegrees)
+    
+    PlotHelper.plotXY((1 to 100).toList.map(_.toDouble), (1 to 100).toList.map(i => SlopeGradients.percentToDegrees(i.toDouble).toDegrees))
+    PlotHelper.plotXY((1 to 45).toList.map(_.toDouble), (1 to 45).toList.map(i => SlopeGradients.degreesToPercent(Degrees(i))))
+    
+ val grid = _0_5deg
+ val classes = SlopeGradients.classes.map(_._2)
+ val list = classes.map(c => grid.cells.map(i => i.area.toSquareKilometers * i.slope.slope_leq(c)).sum/1E6)
+ PlotHelper.plotXY(classes,list)
+   PlotHelper.cumulativeDensity(grid.cells.map(_.slope.total))
+    val sm = List(1.3, 1.7, 2, 2.3, 2.7)
+    val dni = (2000 to 2800).map(_.toDouble).toList
 
-    val cf = (0 to 100).toList.map(_ * 0.01)
-    PlotHelper.plotXY(List((cf, cf.map(PVPoly.eroi(_)), "PV Poly"), (cf, cf.map(PVMono.eroi(_)), "PV Mono"), (cf, cf.map(CSPParabolic.eroi(_)), "CSP Parabolic")), legend = true)
+    val res = sm.map(i => (dni.map(fullLoadHours(_, i) / 8760.0), dni, i.toString))
+    PlotHelper.plotXY(res, legend = true)
 
+    val res2 = sm.map(i => -0.0371 * i * i + 0.4171 * i - 0.0744)
+    PlotHelper.plotXY(sm, res2)
+
+    val res3 = dni.map(i => 2.5717 * i - 694)
+    PlotHelper.plotXY(dni, res3)
+
+    /*    
     val grid = _0_5deg
-    plotEROI(grid.cells, PVPoly)
-    plotEROI(grid.cells, PVMono)
-    plotEROI(grid.cells, CSPParabolic)
+     PlotHelper.cumulativeDensity(grid.cells.map(_.dni.toWattsPerSquareMeter))
+   
+    
+    val ghi = listValueVSCumulated(grid.cells.map(c => (c.ghi.toWattsPerSquareMeter,c.area.toSquareKilometers/1E6)))
+    val sui = listValueVSCumulated(grid.cells.map(c => (c.ghi.toWattsPerSquareMeter,c.suitableArea.toSquareKilometers/1E6)))
+       
+    plotXY(List( (ghi._1,ghi._2,"Total"),(sui._1,sui._2,"Suitable")), yLabel = "GHI [W/m2]", xLabel = "Cumulated Area [Millions km2]")
+    */
+    //plotEROI(grid.cells, PVPoly)
+    //plotEROI(grid.cells, PVMono)
+    //plotEROI(grid.cells, CSPParabolic)
 
   }
 
@@ -41,8 +75,8 @@ object Test {
 
     println(list.size)
     println("Total " + areaList(list).toSquareKilometers * factor)
-    println("Slope > 45 " + list.map(i => i.area.toSquareKilometers * i.slope_geq45).sum * factor)
-    println("Slope > 0.5 " + list.map(i => i.area.toSquareKilometers * i.slope_geq0_5).sum * factor)
+   // println("Slope > 45 " + list.map(i => i.area.toSquareKilometers * i.slope.cl8/100).sum * factor)
+   // println("Slope > 0.5 " + list.map(i => i.area.toSquareKilometers * i.slope.cl1/100).sum * factor)
 
     println("Suitable " + list.map(_.suitableArea.toSquareKilometers).sum * factor)
     println("Sparse " + list.map(g => g.area(SparseVegetation) + g.area(Grassland) + g.area(BareAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor)
@@ -70,9 +104,9 @@ object Test {
       xLabel = "Solar Potential [EJ/year]", yLabel = "EROI",
       legend = true)
   }
-  
+
   def plotEROI(g: List[SolarCell], tech: SolarTechnology) = {
-    val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroiPV, (g.potential(tech) * Hours(365 * 24)).to(TerawattHours))))
+    val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.potential(tech) * Hours(365 * 24)).to(TerawattHours))))
     PlotHelper.plotXY(List((res._1, res._2, "PV")), xLabel = "Potential [TWh/year]", yLabel = "EROI")
     //  PlotHelper.cumulativeDensity(List( (g.map(c => (c.pvPotential *Hours(365*24)).to(TerawattHours)),"PV")), yLabel="PV Potential [TWh]")
     //  PlotHelper.cumulativeDensity(g.map(c => (c.cspPotential *Hours(365*24)).to(TerawattHours)))
