@@ -10,6 +10,7 @@ object PVPoly extends  SolarTechnology{
   val performanceRatio = 0.883;
   val occupationRatio =5.0;
   val directOnly = false;
+  val maximumSlope = 30.0
 }
 
 object PVMono extends SolarTechnology {
@@ -18,6 +19,7 @@ object PVMono extends SolarTechnology {
   val performanceRatio = 0.883;
   val occupationRatio =5.0;
   val directOnly = false;
+  val maximumSlope = 30.0
 }
 
 object CSP {
@@ -31,6 +33,7 @@ object CSPParabolic extends SolarTechnology {
   val performanceRatio = 1.0;
   val occupationRatio = 7.5;
   val directOnly = true;
+  val maximumSlope = 2.0
 }
 
 trait SolarTechnology {
@@ -39,7 +42,7 @@ trait SolarTechnology {
   val performanceRatio: Double;
   val occupationRatio: Double;
   val directOnly: Boolean
-  
+  val maximumSlope : Double
   def eroi(cf : Double) = ee.eroi(cf)
 }
 

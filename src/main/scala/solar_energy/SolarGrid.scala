@@ -10,8 +10,9 @@ import scala.io.Source
 import java.io.PrintStream
 
 object SolarGrid {
-  def _0_1deg = apply("../resources/data_solar/0_1deg_protected", Degrees(0.1))
-  def _0_5deg = apply("../resources/data_solar/0_5deg_slopes", Degrees(0.5))
+  def _0_1deg = apply("../resources/data_solar/0_1deg", Degrees(0.1))
+  def _0_5deg = apply("../resources/data_solar/0_5deg", Degrees(0.5))
+  def _0_5deg_total = apply("../resources/data_solar/0_5deg_total", Degrees(0.5))
 
   def apply(name: String, res: Angle) = {
     val list = Source.fromFile(name).getLines().toList
@@ -26,32 +27,38 @@ class SolarGrid(val cells: List[SolarCell]) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(logFile))
 
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-      c.distanceToCoast.toKilometers + "\n"))
+      c.distanceToCoast.toKilometers + "\t" + (c.slope.slope_leq(2, true) * 100) + "\t" + (c.slope.slope_leq(30, true) * 100) +
+      "\t" + c.suitabilityFactor(PVMono) + "\t" + c.suitabilityFactor(CSPParabolic) + "\n"))
     out_stream.close()
   }
 }
 
 class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance, val dni: Irradiance,
     val landCover: LandCoverType, val distanceToCoast: Length, val elevation: Length,
-    val country: String, val protected_area: Boolean = false, val slope : SlopeGradients) {
+    val country: String, val protected_area: Boolean = false, val slope: SlopeGradients) {
 
+  def suitabilityFactor(tech: SolarTechnology) =
+    if (protected_area) 0.0
+    else landCover.solarFactor.mean * slope.slope_leq(tech.maximumSlope)
+    
   val area = Helper.areaRectangle(center, resolution)
-  val suitableArea = if (protected_area) SquareKilometers(0) else landCover.solarFactor.mean * area * (1.0 - slope.slope_leq(5, true))
+  def suitableArea(tech: SolarTechnology) = suitabilityFactor(tech)*area
+    
   def area(lcType: LandCoverType): Area = if (lcType.equals(landCover)) area else SquareKilometers(0)
 
   // Actual area occupied by pv panles / heliostat / ...
-  def panelArea(tech: SolarTechnology) = suitableArea / tech.occupationRatio
+  def panelArea(tech: SolarTechnology) = suitableArea(tech) / tech.occupationRatio
   def potential(tech: SolarTechnology) = panelArea(tech) * (if (tech.directOnly) dni else ghi) * tech.efficiency * tech.performanceRatio
-  def installedCapacity(tech : SolarTechnology) = panelArea(tech) * tech.efficiency * (if(tech.directOnly) dni else WattsPerSquareMeter(1000))
- 
-  def eroi(tech: SolarTechnology) : Double = {
-    if((tech.directOnly && dni.value == 0)||ghi.value == 0 || suitableArea.value == 0) 0.0
+  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.efficiency * (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
+
+  def eroi(tech: SolarTechnology): Double = {
+    if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0
     else {
       val out_year = Hours(365 * 24) * potential(tech)
-      tech.ee.lifeTime* (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
+      tech.ee.lifeTime * (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
     }
   }
-  
+
 }
 
 object SolarCell {
@@ -71,7 +78,7 @@ object SolarCell {
 
 object SolarUtils {
   def areaList(list: List[SolarCell]) = list.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
-  def suitableAreaList(list: List[SolarCell]) = list.map(_.suitableArea).foldLeft(SquareKilometers(0))(_ + _)
+  def suitableAreaList(list: List[SolarCell],tech : SolarTechnology) = list.map(_.suitableArea(tech)).foldLeft(SquareKilometers(0))(_ + _)
 }
 
 /*SLOPES	Slope class
@@ -84,31 +91,35 @@ CL6	15 % ≤ slope ≤ 30 %
 CL7	30 % ≤ slope ≤ 45 %
 CL8	Slope > 45 %*/
 
-class SlopeGradients(val gradients : List[((Double,Double),Double)]) {
+class SlopeGradients(val gradients: List[((Double, Double), Double)]) {
   // Count the percentage of area with slope less that a given threshold
   // If include, the interval contains the given percentage, if not it is strictly less
   val total = gradients.map(_._2).sum
-  def slope_leq(percent : Double, include : Boolean = true) = {
+  def slope_leq(percent: Double, include: Boolean = true) = {
     assert(percent <= 100)
-    val lastIndex = 
-      if(gradients.exists(_._1._2 == percent)) gradients.indexWhere(i => i._1._2 == percent)
-      else if(include) gradients.indexWhere(i => percent >= i._1._1 && percent < i._1._2)
-      else if(percent <= 0.5/100) 0
+    val lastIndex =
+      if (gradients.exists(_._1._2 == percent)) gradients.indexWhere(i => i._1._2 == percent)
+      else if (include) gradients.indexWhere(i => percent >= i._1._1 && percent < i._1._2)
+      else if (percent <= 0.5 / 100) 0
       else gradients.indexWhere(i => percent >= i._1._1 && percent < i._1._2) - 1
-      
     (0 to lastIndex).map(gradients(_)._2).sum
+  }
+  override def toString() = {
+    var res = "Slope Gradients, total = " + total * 100 + "% \n"
+    for (g <- gradients) res = res + (g._1._1.toString + "<=slope<=" + g._1._2.toString + " : " + (math.ceil(g._2 * 100).toInt).toString + "%" + "\n")
+    res
   }
 }
 object SlopeGradients {
-  val classes = List((0.0,0.5),(0.5,2.0),(2.0,5.0),(5.0,10.0),(10.0,15.0),(15.0,30.0),(30.0,45.0),(45.10,100.0))
-  def degreesToPercent(d : Angle) : Double = math.tan(d.toRadians)*100
-  def percentToDegrees(p : Double) : Angle = {
+  val classes = List((0.0, 0.5), (0.5, 2.0), (2.0, 5.0), (5.0, 10.0), (10.0, 15.0), (15.0, 30.0), (30.0, 45.0), (45.0, 100.0))
+  def degreesToPercent(d: Angle): Double = math.tan(d.toRadians) * 100
+  def percentToDegrees(p: Double): Angle = {
     assert(p <= 100)
-    Radians(math.atan(p/100.0))
+    Radians(math.atan(p / 100.0))
   }
-  def apply(line : Array[String]) = {
-    val slopes = (9 to 16).toList.map(line(_).toDouble/10000.0)
-    new SlopeGradients((0 to 7).toList.map(i => (classes(i),slopes(i)))) 
+  def apply(line: Array[String]) = {
+    val slopes = (9 to 16).toList.map(line(_).toDouble / 10000.0)
+    new SlopeGradients((0 to 7).toList.map(i => (classes(i), slopes(i))))
   }
 }
     
