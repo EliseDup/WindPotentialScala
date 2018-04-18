@@ -27,8 +27,15 @@ class SolarGrid(val cells: List[SolarCell]) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(logFile))
 
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-      c.distanceToCoast.toKilometers + "\t" + (c.slope.slope_leq(2, true) * 100) + "\t" + (c.slope.slope_leq(30, true) * 100) +
-      "\t" + c.suitabilityFactor(PVMono) + "\t" + c.suitabilityFactor(CSPParabolic) + "\n"))
+      (if (c.protected_area) 1.0 else 0.0) + "\t" +
+      (100 * c.slope.slope_leq(0.5, true)) + "\t" +
+      (100 * c.slope.slope_geq(45, true)) + "\t" +
+      c.elevation.toMeters + "\t" +
+      c.distanceToCoast.toKilometers + "\t" +
+      (c.slope.slope_leq(2, true) * 100) + "\t" +
+      (c.slope.slope_leq(30, true) * 100) + "\t" +
+      (c.suitabilityFactor(PVMono) * 100) + "\t" +
+      (c.suitabilityFactor(CSPParabolic) * 100) + "\n"))
     out_stream.close()
   }
 }
@@ -37,25 +44,28 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
     val landCover: LandCoverType, val distanceToCoast: Length, val elevation: Length,
     val country: String, val protected_area: Boolean = false, val slope: SlopeGradients) {
 
-  def suitabilityFactor(tech: SolarTechnology) =
-    if (protected_area) 0.0
+  val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
+
+  def suitabilityFactor(tech: SolarTechnology) = {
+    if (protected_area || excludedCountries.contains(country) || country.contains("Is.") || country.contains("Islands")) 0.0
     else landCover.solarFactor.mean * slope.slope_leq(tech.maximumSlope)
-    
+  }
+  
   val area = Helper.areaRectangle(center, resolution)
-  def suitableArea(tech: SolarTechnology) = suitabilityFactor(tech)*area
-    
+  def suitableArea(tech: SolarTechnology) = suitabilityFactor(tech) * area
   def area(lcType: LandCoverType): Area = if (lcType.equals(landCover)) area else SquareKilometers(0)
 
-  // Actual area occupied by pv panles / heliostat / ...
+  // Actual area occupied by pv panels / heliostat / ...
   def panelArea(tech: SolarTechnology) = suitableArea(tech) / tech.occupationRatio
-  def potential(tech: SolarTechnology) = panelArea(tech) * (if (tech.directOnly) dni else ghi) * tech.efficiency * tech.performanceRatio
-  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.efficiency * (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
+  def potential(tech: SolarTechnology) = tech.potential(if (tech.directOnly) dni else ghi, installedCapacity(tech))
+  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.efficiency * tech.designPointIrradiance //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
 
   def eroi(tech: SolarTechnology): Double = {
     if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0
     else {
-      val out_year = Hours(365 * 24) * potential(tech)
-      tech.ee.lifeTime * (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
+      tech.eroi(if(tech.directOnly) dni else ghi)
+ //     val out_year = Hours(365 * 24) * potential(tech)
+ //     tech.ee.lifeTime * (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
     }
   }
 
@@ -78,7 +88,7 @@ object SolarCell {
 
 object SolarUtils {
   def areaList(list: List[SolarCell]) = list.map(_.area).foldLeft(SquareKilometers(0))(_ + _)
-  def suitableAreaList(list: List[SolarCell],tech : SolarTechnology) = list.map(_.suitableArea(tech)).foldLeft(SquareKilometers(0))(_ + _)
+  def suitableAreaList(list: List[SolarCell], tech: SolarTechnology) = list.map(_.suitableArea(tech)).foldLeft(SquareKilometers(0))(_ + _)
 }
 
 /*SLOPES	Slope class
@@ -103,6 +113,15 @@ class SlopeGradients(val gradients: List[((Double, Double), Double)]) {
       else if (percent <= 0.5 / 100) 0
       else gradients.indexWhere(i => percent >= i._1._1 && percent < i._1._2) - 1
     (0 to lastIndex).map(gradients(_)._2).sum
+  }
+  def slope_geq(percent: Double, include: Boolean = true) = {
+    assert(percent <= 100)
+    val lastIndex =
+      if (gradients.exists(_._1._1 == percent)) gradients.indexWhere(i => i._1._1 == percent)
+      else if (include) gradients.indexWhere(i => percent >= i._1._1 && percent < i._1._2)
+      else if (percent >= 45) gradients.size - 1
+      else gradients.indexWhere(i => percent >= i._1._1 && percent < i._1._2) + 1
+    (lastIndex until gradients.size).map(gradients(_)._2).sum
   }
   override def toString() = {
     var res = "Slope Gradients, total = " + total * 100 + "% \n"

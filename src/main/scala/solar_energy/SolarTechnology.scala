@@ -3,73 +3,116 @@ package solar_energy
 import squants.energy._
 import squants.time.Hours
 import squants.radio.Irradiance
+import squants.space.Area
+import squants.radio.WattsPerSquareMeter
+import squants.space.SquareMeters
+import squants.time.Time
 
-object PVPoly extends  SolarTechnology{
-  val ee = new EmbodiedEnergy(Gigajoules(16605974),Gigajoules(143305),Gigajoules(653102),Gigajoules(52911),Gigajoules(0.0097))
+object PVPoly extends SolarTechnology {
+   val name = "PV Poly 17 %"
+  val ee = new EmbodiedEnergy(Gigajoules(16605974), Gigajoules(143305), Gigajoules(653102), Gigajoules(52911), Gigajoules(0.0097), 25)
   val efficiency = 0.17;
   val performanceRatio = 0.883;
-  val occupationRatio =5.0;
+  val occupationRatio = 5.0;
   val directOnly = false;
   val maximumSlope = 30.0
 }
 
 object PVMono extends SolarTechnology {
-  val ee = new EmbodiedEnergy(Gigajoules(14477204),Gigajoules(122559),Gigajoules(469376),Gigajoules(45251),Gigajoules(0.0097))
+  val name = "PV Mono 24 %"
+  val ee = new EmbodiedEnergy(Gigajoules(14477204), Gigajoules(122559), Gigajoules(469376), Gigajoules(45251), Gigajoules(0.0097), 25)
   val efficiency = 0.24;
   val performanceRatio = 0.883;
-  val occupationRatio =5.0;
+  val occupationRatio = 5.0;
   val directOnly = false;
   val maximumSlope = 30.0
 }
 
 object CSP {
-  def fullLoadHours(dni : Irradiance, sm : Double):Double  = fullLoadHours(dni.toWattsPerSquareMeter*8.76, sm)
-  def fullLoadHours(dni_kWh_year : Double, sm : Double):Double  =  (2.5717*dni_kWh_year - 694)*(-0.0371*sm*sm + 0.4171*sm - 0.0744)
+  def fullLoadHours(dni: Irradiance, sm: Double): Time = fullLoadHours(dni.toWattsPerSquareMeter * 8.76, sm)
+  def fullLoadHours(dni_kWh_year: Double, sm: Double): Time = Hours((2.5717 * dni_kWh_year - 694) * (-0.0371 * sm * sm + 0.4171 * sm - 0.0744))
 }
 
 object CSPParabolic extends SolarTechnology {
-  val ee = new EmbodiedEnergy(Gigajoules(20122927),Gigajoules(220400),Gigajoules(837985),Gigajoules(89118),Gigajoules(0.072)) 
+  import CSP._
+  val name = "CSP Parabolic"
+  override val designPointIrradiance = WattsPerSquareMeter(950)
+  val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270 + 49617), Gigajoules(89118), Gigajoules(0.072), 30, Gigajoules(1348389), Gigajoules(49617), SquareMeters(981000))
   val efficiency = 0.16;
   val performanceRatio = 1.0;
   val occupationRatio = 7.5;
   val directOnly = true;
   val maximumSlope = 2.0
+
+  // Aperture Area is the area needed to reach the rated power under a given irradiance conditions (dni design point) : Power = Area * DNI * efficiency
+  // Then we add a solar multiple (in general 1,3 without storage) to have a security
+  def apertureArea(ratedPower: Power, sm: Double = 1.3, designDNI: Irradiance = WattsPerSquareMeter(950)): Area = ratedPower / (designDNI * efficiency) * sm
+  override def panelArea(ratedPower: Power) = apertureArea(ratedPower)
+  override def eroi(cf: Double) = ee.eroi(cf, apertureArea(Gigawatts(1)))
+  override def eroi(solar: Irradiance) = {
+    val power = Gigawatts(1)
+    val yearProd = yearlyProduction(solar, power)
+    yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, apertureArea(power))
+  }
+  
+  def eroi(solar: Irradiance, sm: Double) = {
+    val power = Gigawatts(1)
+    val yearProd =  power * fullLoadHours(solar,sm) //apertureArea(power, sm) * solar * efficiency * performanceRatio * Hours(365 * 24)
+    yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, apertureArea(power, sm))
+  }
+
 }
 
 trait SolarTechnology {
-  val ee : EmbodiedEnergy
+  val name : String;
+  val ee: EmbodiedEnergy;
   val efficiency: Double;
+  val designPointIrradiance: Irradiance = WattsPerSquareMeter(1000);
   val performanceRatio: Double;
   val occupationRatio: Double;
   val directOnly: Boolean
-  val maximumSlope : Double
-  def eroi(cf : Double) = ee.eroi(cf)
+  val maximumSlope: Double
+  def panelArea(ratedPower: Power): Area = ratedPower / (WattsPerSquareMeter(1000) * efficiency)
+  def potential(solar: Irradiance, ratedPower: Power) : Power = panelArea(ratedPower) * solar * efficiency * performanceRatio
+  def yearlyProduction(solar: Irradiance, ratedPower: Power): Energy = potential(solar,ratedPower) * Hours(365 * 24)
+  def eroi(cf: Double) = ee.eroi(cf)
+  def eroi(solar: Irradiance) = {
+    val power = Gigawatts(1)
+    val yearProd = yearlyProduction(solar, power)
+    yearProd * ee.lifeTime / ee.embodiedEnergy(power, yearProd)
+  }
 }
-
-
 
 //object CSPParabolicStorage extends EmbodiedEnergy(Gigajoules(23097102),Gigajoules(457757),Gigajoules(1372567),Gigajoules(183720),Gigajoules(0.12))
 //object CSPTowerStorage extends EmbodiedEnergy(Gigajoules(30601229),Gigajoules(457757),Gigajoules(1088293),Gigajoules(183720),Gigajoules(0.12))
 
-class EmbodiedEnergy(val raw_materials : Energy,
-    val construction_decomissioning : Energy, val transport_materials : Energy, val O_M_fixed : Energy,
-    val O_M_output : Energy, val lifeTime : Int = 25){
-    
-  def eroi(cf : Double) = (lifeTime * Gigawatts(1) * cf * Hours(24*365))/embodiedEnergy1GW(cf)
-  
-  def embodiedEnergy1GW(cf : Double) = {
-    raw_materials+construction_decomissioning+transport_materials+
-    lifeTime*(O_M_fixed + (Gigawatts(1)*cf*Hours(24*365)).to(Gigajoules) *O_M_output)
+class EmbodiedEnergy(val raw_materials: Energy,
+    val construction_decomissioning: Energy, val transport_materials: Energy, val O_M_fixed: Energy,
+    val O_M_output: Energy, val lifeTime: Int, val construction_variable: Energy = Joules(0), val transport_variable: Energy = Joules(0), val default_area: Area = SquareMeters(1)) {
+
+  def eroi(cf: Double) = (lifeTime * Gigawatts(1) * cf * Hours(24 * 365)) / embodiedEnergy1GW(cf)
+  def eroi(cf: Double, area: Area) = {
+    val output_year = Gigawatts(1) * cf * Hours(24 * 365)
+    output_year * lifeTime / embodiedEnergyArea(Gigawatts(1), output_year, area)
   }
-  def embodiedEnergy1GW(output_1GW_year : Energy) = {
-    raw_materials+construction_decomissioning+transport_materials+
-    lifeTime*(O_M_fixed + output_1GW_year.toGigajoules*O_M_output)
-  }
-  def embodiedEnergy(rated_power : Power, output_year : Energy): Energy = {
+
+  def embodiedEnergy1GW(output_1GW_year: Energy) =
+    raw_materials + construction_decomissioning + transport_materials +
+      lifeTime * (O_M_fixed + output_1GW_year.toGigajoules * O_M_output)
+
+  def embodiedEnergy1GW(cf: Double): Energy = embodiedEnergy1GW(Gigawatts(1) * cf * Hours(24 * 365))
+
+  def embodiedEnergy(rated_power: Power, output_year: Energy): Energy = {
     val ratio = rated_power.toGigawatts
-    ratio * embodiedEnergy1GW(output_year*ratio)
+    ratio * embodiedEnergy1GW(output_year * ratio)
   }
-  def embodiedEnergy(rated_power : Power, capacity_factor : Double) = {
-    rated_power.toGigawatts * embodiedEnergy1GW(Gigawatts(1)*capacity_factor*Hours(24*365))
+
+  def embodiedEnergy(rated_power: Power, capacity_factor: Double) = {
+    rated_power.toGigawatts * embodiedEnergy1GW(capacity_factor)
+  }
+  // For CSP, the embodied energy was calculated for a default aperture area !
+  def embodiedEnergyArea(rated_power: Power, output_year: Energy, area: Area): Energy = {
+    val area_ratio = area / default_area
+    embodiedEnergy(rated_power, output_year) + rated_power.toGigawatts * area_ratio * (transport_variable + construction_variable)
   }
 }

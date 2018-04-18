@@ -18,11 +18,11 @@ object LandUseFactor {
 
 abstract class LandCoverType(val name : String, val windFactor : LandUseFactor = LandUseFactor(0.0), val solarFactor : LandUseFactor = LandUseFactor(0.0))
 
-object CropLands extends LandCoverType("Croplands", LandUseFactor(0.7), LandUseFactor(0.01))
-object SparseVegetation extends LandCoverType("Sparse Vegetation", LandUseFactor(0.9), LandUseFactor(0.05))
-object Grassland extends LandCoverType("Grassland", LandUseFactor(0.9), LandUseFactor(0.05))
-object BareAreas extends LandCoverType("Bare Areas", LandUseFactor(0.9), LandUseFactor(0.05))
-object Shrubland extends LandCoverType("Shrubland", LandUseFactor(0.5), LandUseFactor(0.05))
+object CropLands extends LandCoverType("Croplands", LandUseFactor(0.7), LandUseFactor(0.1))
+object SparseVegetation extends LandCoverType("Sparse Vegetation", LandUseFactor(0.9), LandUseFactor(0.1))
+object Grassland extends LandCoverType("Grassland", LandUseFactor(0.9), LandUseFactor(0.1))
+object BareAreas extends LandCoverType("Bare Areas", LandUseFactor(0.9), LandUseFactor(0.1))
+object Shrubland extends LandCoverType("Shrubland", LandUseFactor(0.5), LandUseFactor(0.1))
 object MosaicGrasslandForestShrubland extends LandCoverType("Mosaic Grassland / Forest / Shrubland", LandUseFactor((1.0/3*(0.1+0.5+0.9))), LandUseFactor(0.05))
 object MosaicVegetationCroplands extends LandCoverType("Mosaic Vegetation / Croplands", LandUseFactor((0.5 * 0.5 + 0.5 * 0.7)), LandUseFactor(0.05))
 object Forests extends LandCoverType("Forest", LandUseFactor(0.1), LandUseFactor(0))

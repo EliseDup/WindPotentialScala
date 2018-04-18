@@ -24,22 +24,42 @@ object Test {
   import CSP._
 
   def main(args: Array[String]): Unit = {
- //   printArea(_0_1deg.cells)
-    printArea(_0_5deg.cells)
-    val classes = SlopeGradients.classes
-    val grid = _0_5deg_total
+    val grid = _0_5deg
+    
+    PlotHelper.plotXY(List(listEROI(grid.cells, PVMono),listEROI(grid.cells, PVPoly),listEROI(grid.cells, CSPParabolic)),legend=true, xLabel = "Potential [EJ/year]", yLabel = "EROI")
+  
+    plotEROI(grid.cells, CSPParabolic)
 
-    for (i <- (0 to 7)) {
-      println(classes(i) + "\t" + grid.cells.map(x => x.area.toSquareKilometers * x.slope.gradients(i)._2).sum / 1E6)
-    }
-    println("Unclassified" + "\t" + grid.cells.map(x => x.area.toSquareKilometers * (1.0 - x.slope.total)).sum / 1E6)
-    println("<= 2%" + "\t" + grid.cells.map(x => x.area.toSquareKilometers * x.slope.slope_leq(2, true)).sum / 1E6)
-    println("<= 30%" + "\t" + grid.cells.map(x => x.area.toSquareKilometers * x.slope.slope_leq(30, true)).sum / 1E6)
+    val cf = (0 to 40).map(_ / 100.0).toList
+    /* PlotHelper.plotXY(List( (cf.map(_*100), 
+        cf.map(PVPoly.eroi(_)),"PV Poly 17%"),(cf.map(_*100), 
+            cf.map(PVMono.eroi(_)),"PV Mono 24%"),(cf.map(_*100), 
+                cf.map(CSPParabolic.eroi(_)),"CSP Parabolic Through")), legend=true, xLabel ="Load Factor [%]", yLabel = "EROI")
+  */
+    val x = (50 to 400).map(_.toDouble).toList
+    PlotHelper.plotXY(List(
+      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(i)), "Simple"),
+      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 1.3)), "SM = 1.3"),
+      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 1.7)), "SM = 1.7"),
+      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 2)), "SM = 2"),
+      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 2.3)), "SM = 2.3"),
+      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 2.7)), "SM = 2.7")),
+      legend = true, xLabel = "Mean annual DNI [kWh/m2/y]",
+      yLabel = "EROI")
 
-    val BE = grid.country("Belgium")(0)
-    println(BE.slope.slope_leq(2, true) * 100)
-    println(BE.slope)
-    grid.write("slope")
+    PlotHelper.plotXY(List(
+      (x.map(_ * 8.76), x.map(i => PVMono.eroi(WattsPerSquareMeter(i))), "Mono 24%"),
+      (x.map(_ * 8.76), x.map(i => PVPoly.eroi(WattsPerSquareMeter(i))), "Poly 17%")),
+      legend = true, xLabel = "Mean annual GHI [kWh/m2/y]",
+      yLabel = "EROI")
+  }
+
+  def listEROIVSGHI(tech: SolarTechnology, ghi: List[Double], ratedPower: Power) = {
+    val prodPerArea = ghi.map(i => i * 365 * 24 * tech.efficiency * tech.performanceRatio)
+    val area_17 = ratedPower.toWatts / (1000 * tech.efficiency)
+    val prodPerYear = prodPerArea.map(i => WattHours(i * area_17))
+    val ee = prodPerYear.map(i => tech.ee.embodiedEnergy(ratedPower, i))
+    prodPerYear.map(i => (i * 30) / tech.ee.embodiedEnergy(ratedPower, i))
   }
 
   def printMeanGHI(c: String, grid: SolarGrid) {
@@ -51,8 +71,8 @@ object Test {
 
     println(list.size)
     println("Total " + "\t" + areaList(list).toSquareKilometers * factor)
-    println("Slope > 2% " + "\t" + list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(2, true)).sum * factor)
-    println("Slope > 30% " + "\t" + list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(30, true)).sum * factor)
+    println("Slope <= 2% " + "\t" + list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(2, true)).sum * factor)
+    println("Slope <= 30% " + "\t" + list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(30, true)).sum * factor)
 
     println("Suitable PV" + "\t" + list.map(_.suitableArea(PVMono).toSquareKilometers).sum * factor)
     println("Suitable CSP" + "\t" + list.map(_.suitableArea(CSPParabolic).toSquareKilometers).sum * factor)
@@ -82,10 +102,13 @@ object Test {
       xLabel = "Solar Potential [EJ/year]", yLabel = "EROI",
       legend = true)
   }
-
+  def listEROI(g: List[SolarCell], tech: SolarTechnology) = {
+    val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.potential(tech) * Hours(365 * 24)).to(Exajoules))))
+    (res._1, res._2, tech.name)
+  }
   def plotEROI(g: List[SolarCell], tech: SolarTechnology) = {
-    val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.potential(tech) * Hours(365 * 24)).to(TerawattHours))))
-    PlotHelper.plotXY(List((res._1, res._2, "PV")), xLabel = "Potential [TWh/year]", yLabel = "EROI")
+    val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.potential(tech) * Hours(365 * 24)).to(Exajoules))))
+    PlotHelper.plotXY(List((res._1, res._2, tech.name)), xLabel = "Potential " + tech.name + "[EJ/year]", yLabel = "EROI")
     //  PlotHelper.cumulativeDensity(List( (g.map(c => (c.pvPotential *Hours(365*24)).to(TerawattHours)),"PV")), yLabel="PV Potential [TWh]")
     //  PlotHelper.cumulativeDensity(g.map(c => (c.cspPotential *Hours(365*24)).to(TerawattHours)))
   }
