@@ -36,7 +36,6 @@ object PlotHelper {
   def main(args: Array[String]): Unit = {
     val x = (1 to 1000).map(_ * 0.001).toList
     plotXY(List((x, x.map(Math.pow(_, 2)), "x^2"), (x, x.map(_ * 3), "3x"), (x, x.map(_ * 2), "2x"), (x, x, "x")), legend = true)
-
   }
   val colors = List(Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
   val dashed = List(stroke(Array(1.0f, 0.0f)), stroke(Array(6.0f, 3.0f)), stroke(Array(1.0f, 3.0f)), stroke(Array(6.0f, 3.0f, 1.0f, 3.0f)))
@@ -240,9 +239,8 @@ object PlotHelper {
 
     }
     if (save) {
-      println("Name =" + name)
-      writeAsPDF(chart, new FileOutputStream((if (name.isEmpty()) i else name) + ".pdf"),  500, 270)
-      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream((if (name.isEmpty()) i else name) + ".jpg"), chart, 500, 270, 5, 5)
+      writeAsPDF(chart, new FileOutputStream(("images/"+ (if (name.isEmpty()) i else name)) + ".pdf"),  500, 270)
+      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(("images/"+ (if (name.isEmpty()) i else name)) + ".jpg"), chart, 500, 270, 5, 5)
       i = i + 1
     }
     val chartPanel = new ChartPanel(chart)

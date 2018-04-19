@@ -171,6 +171,7 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
   }
   val monthlyClearnessIndex =
     if (Math.abs(center.latitude.toDegrees) >= 65) (0 until 12).map(m => 0.0).toList
+    else if(irradiance.perMonth.size == 0) (0 until 12).map(m => 0.0).toList
     else (0 until 12).map(m => irradiance.perMonth(m) / monthlyExtraterrestrialRadiation(m, center.latitude)).toList
 
   // Daily Clearness Index 

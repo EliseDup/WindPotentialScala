@@ -172,26 +172,15 @@ object Helper {
   }
   def listValueVSArea(gr: List[(Double, Area)]) = listValueVSCumulated(gr.map(g => (g._1, g._2.to(SquareKilometers) / (1E6))))
 
-  /*def listEROIVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential, density: Option[Irradiance] = None): (List[Double], List[Double]) = {
-    listValueVSCumulated(gr.map(g => (potential.EROI(g._1, Some(g._2), density), potential.energyGeneratedPerYear(g._1, Some(g._2), density).to(Exajoules))))
-  }
-  def listEROIVSCumulatedPower(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential, density: Option[Irradiance] = None): (List[Double], List[Double]) = {
-    listValueVSCumulated(gr.map(g => (potential.EROI(g._1, Some(g._2), density), potential.powerGenerated(g._1, Some(g._2), density).to(Terawatts))))
-  }
-  def listEnergyGeneratedPerYearVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential) = {
-    val prod = gr.map(g => (potential.energyGeneratedPerYear(g._1, Some(g._2))).to(TerawattHours))
-    listValueVSCumulated(prod.map(i => (i, i)))
-  }*/
-
   def listValueVSCumulated(values: List[(Double, Double)]): (List[Double], List[Double]) = {
     val sorted = values.sortBy(_._1).reverse
     (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ 0.0)
   }
-
-  /*def plotEROIVSCumulatedProduction(gr: List[(GridCell, Double)], potential: EnergyGenerationPotential) = {
-    val list = listEROIVSCumulatedProduction(gr, potential)
-    PlotHelper.plotXY(List((list._1, list._2, "")), xLabel = "Cumulated Annual Production [TWh]", yLabel = "EROI")
-  }*/
+def countriesByContinent =  {
+  val data_location = "/Users/Elise/Nextcloud/Doctorat/Data/countries/world/"
+    val continentsName = getLines(data_location + "Continents", "\t").toList.map(_(0))
+   continentsName.map(i => (i, getLines(data_location + i, "\t").toList.map(_(0))))
+}
 }
 case class GeoPoint(val latitude: Angle, val longitude: Angle) {
   override def toString() = "Point of latitude " + latitude + ", longitude :" + longitude

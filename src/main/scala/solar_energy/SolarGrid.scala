@@ -22,6 +22,7 @@ object SolarGrid {
 
 class SolarGrid(val cells: List[SolarCell]) {
   def country(c: String) = cells.filter(_.country.equalsIgnoreCase(c))
+  def countries(c: List[String]) = cells.filter(x => c.contains(x.country))
 
   def write(logFile: String) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(logFile))
@@ -45,12 +46,12 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
     val country: String, val protected_area: Boolean = false, val slope: SlopeGradients) {
 
   val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
-
+val onshore = distanceToCoast.value <= 0
   def suitabilityFactor(tech: SolarTechnology) = {
     if (protected_area || excludedCountries.contains(country) || country.contains("Is.") || country.contains("Islands")) 0.0
     else landCover.solarFactor.mean * slope.slope_leq(tech.maximumSlope)
   }
-  
+
   val area = Helper.areaRectangle(center, resolution)
   def suitableArea(tech: SolarTechnology) = suitabilityFactor(tech) * area
   def area(lcType: LandCoverType): Area = if (lcType.equals(landCover)) area else SquareKilometers(0)
@@ -63,9 +64,9 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
   def eroi(tech: SolarTechnology): Double = {
     if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0
     else {
-      tech.eroi(if(tech.directOnly) dni else ghi)
- //     val out_year = Hours(365 * 24) * potential(tech)
- //     tech.ee.lifeTime * (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
+      tech.eroi(if (tech.directOnly) dni else ghi)
+      //     val out_year = Hours(365 * 24) * potential(tech)
+      //     tech.ee.lifeTime * (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
     }
   }
 

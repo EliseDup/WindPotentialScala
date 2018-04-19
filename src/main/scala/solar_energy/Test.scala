@@ -10,6 +10,7 @@ import squants.radio._
 import grid._
 import scala.io.Source
 import java.io.PrintStream
+import wind_energy.WindPotential
 
 object Test {
 
@@ -24,36 +25,43 @@ object Test {
   import CSP._
 
   def main(args: Array[String]): Unit = {
-    val grid = _0_5deg
+    // WIND
+    val eroi_min = (2 until 40).map(_ * 0.5).toList
+    val results = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 47, true, false)
+    def windPotential(countries : List[String]) ={
+        val g = if (countries.isEmpty) results.grids else results.countries(countries)
+    val p = WindPotential(0.5, true)
+   
+    }
+      
     
-    PlotHelper.plotXY(List(listEROI(grid.cells, PVMono),listEROI(grid.cells, PVPoly),listEROI(grid.cells, CSPParabolic)),legend=true, xLabel = "Potential [EJ/year]", yLabel = "EROI")
-  
-    plotEROI(grid.cells, CSPParabolic)
+    
+    
+    
+    val grid = _0_1deg
 
-    val cf = (0 to 40).map(_ / 100.0).toList
-    /* PlotHelper.plotXY(List( (cf.map(_*100), 
-        cf.map(PVPoly.eroi(_)),"PV Poly 17%"),(cf.map(_*100), 
-            cf.map(PVMono.eroi(_)),"PV Mono 24%"),(cf.map(_*100), 
-                cf.map(CSPParabolic.eroi(_)),"CSP Parabolic Through")), legend=true, xLabel ="Load Factor [%]", yLabel = "EROI")
-  */
-    val x = (50 to 400).map(_.toDouble).toList
-    PlotHelper.plotXY(List(
-      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(i)), "Simple"),
-      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 1.3)), "SM = 1.3"),
-      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 1.7)), "SM = 1.7"),
-      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 2)), "SM = 2"),
-      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 2.3)), "SM = 2.3"),
-      (x.map(_ * 8.76), x.map(i => CSPParabolic.eroi(WattsPerSquareMeter(i), 2.7)), "SM = 2.7")),
-      legend = true, xLabel = "Mean annual DNI [kWh/m2/y]",
-      yLabel = "EROI")
-
-    PlotHelper.plotXY(List(
-      (x.map(_ * 8.76), x.map(i => PVMono.eroi(WattsPerSquareMeter(i))), "Mono 24%"),
-      (x.map(_ * 8.76), x.map(i => PVPoly.eroi(WattsPerSquareMeter(i))), "Poly 17%")),
-      legend = true, xLabel = "Mean annual GHI [kWh/m2/y]",
-      yLabel = "EROI")
+val countries = getLines("countries_students").map(_(0))
+countries.map(c =>customArea(c,grid.country(c).filter(_.onshore)))
   }
 
+  def customArea(country : String, c : List[SolarCell]) {
+    pr(country)
+    pr(areaList(c).toSquareKilometers)
+    pr(suitableAreaList(c, PVMono).toSquareKilometers)
+    pr(areaList(c.filter(_.protected_area)).toSquareKilometers)
+    pr(c.map(g => g.slope.slope_geq(30)*g.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    pr(c.map(g => g.area(SparseVegetation) + g.area(Grassland) + g.area(BareAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    pr(c.map(_.area(Forests)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    pr(c.map(_.area(CropLands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    pr(c.map(_.area(Shrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    pr(c.map(_.area(MosaicVegetationCroplands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    pr(c.map(_.area(MosaicGrasslandForestShrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    pr(c.map(_.area(UrbanAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    pr(c.map(g => g.area(FloodedAreas) + g.area(WaterBodies) + g.area(Ice)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
+    println()
+    } 
+  def pr(s : String)= print(s + "\t")
+  def pr(s : Double)= print(s + "\t")
   def listEROIVSGHI(tech: SolarTechnology, ghi: List[Double], ratedPower: Power) = {
     val prodPerArea = ghi.map(i => i * 365 * 24 * tech.efficiency * tech.performanceRatio)
     val area_17 = ratedPower.toWatts / (1000 * tech.efficiency)
@@ -73,7 +81,7 @@ object Test {
     println("Total " + "\t" + areaList(list).toSquareKilometers * factor)
     println("Slope <= 2% " + "\t" + list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(2, true)).sum * factor)
     println("Slope <= 30% " + "\t" + list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(30, true)).sum * factor)
-
+    println("Protected" +  "\t" + list.filter(_.protected_area).map(i => i.area.toSquareKilometers).sum * factor)
     println("Suitable PV" + "\t" + list.map(_.suitableArea(PVMono).toSquareKilometers).sum * factor)
     println("Suitable CSP" + "\t" + list.map(_.suitableArea(CSPParabolic).toSquareKilometers).sum * factor)
 
@@ -105,6 +113,10 @@ object Test {
   def listEROI(g: List[SolarCell], tech: SolarTechnology) = {
     val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.potential(tech) * Hours(365 * 24)).to(Exajoules))))
     (res._1, res._2, tech.name)
+  }
+  def listEROI(g: List[SolarCell], tech: SolarTechnology, name: String) = {
+    val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.potential(tech) * Hours(365 * 24)).to(Exajoules))))
+    (res._1, res._2, name)
   }
   def plotEROI(g: List[SolarCell], tech: SolarTechnology) = {
     val res = Helper.listValueVSCumulated(g.filter(g => g.potential(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.potential(tech) * Hours(365 * 24)).to(Exajoules))))
