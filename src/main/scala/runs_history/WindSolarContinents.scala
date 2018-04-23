@@ -30,21 +30,23 @@ object WindSolarContinents {
   import solar_energy.CSP._
 
   def main(args: Array[String]): Unit = {
-printAreaRepartition(getLines("countries_students").map(_(0)))
+    plotComparisonByContinents
   }
   def plotComparisonByContinents {
     // Load solar and wind grid
     val solar = _0_5deg
     val eroi_min = (2 until 40).map(_ * 0.5).toList
-    val wind = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 47, true, false)
+    val wind = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 151, true, false)
     val continents = countriesByContinent
     println("Missing Countries in Wind Model")
     continents.map(c => c._2.map(i => if (wind.country(i).isEmpty) println(i)))
     println("Missing Countries in Solar Model")
     continents.map(c => c._2.map(i => if (solar.country(i).isEmpty) println(i)))
+
     plotTotal(solar, wind)
     continents.map(c => plotSolarWind(solar, wind, c))
   }
+
   def plotSolarWind(solar: SolarGrid, wind: WorldGrid, continent: (String, List[String])) {
     val eroiSolar = listEROISolar(solar.countries(continent._2), PVMono)
     val eroiWind = listEROIWind(wind.countries(continent._2))
@@ -67,22 +69,22 @@ printAreaRepartition(getLines("countries_students").map(_(0)))
   def printAreaRepartition(countries: List[String]) {
     val solar = _0_5deg
     println("Solar")
-    printAreaSolar("Total",solar.cells, 1E6, "\t", true)
-    countries.map(c => printAreaSolar(c,solar.country(c), 1, "\t", false))
+    printAreaSolar("Total", solar.cells, 1 / 1E6, "\t", true)
+    countries.map(c => printAreaSolar(c, solar.country(c), 1, "\t", false))
     println("Wind")
     val eroi_min = (2 until 40).map(_ * 0.5).toList
     val wind = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 47, true, false)
-    printAreaWind("Total",wind.grids.filter(_.onshore), 1E6, "\t", true)
-    countries.map(c => printAreaWind(c,wind.country(c), 1, "\t", false))
+    printAreaWind("Total", wind.grids.filter(_.onshore), 1 / 1E6, "\t", true)
+    countries.map(c => printAreaWind(c, wind.country(c).filter(_.onshore), 1, "\t", false))
 
   }
 
-  def printAreaSolar(name : String, list: List[SolarCell], factor: Double = 1 / 1E6, sep: String, header: Boolean) {
+  def printAreaSolar(name: String, list: List[SolarCell], factor: Double = 1 / 1E6, sep: String, header: Boolean) {
     if (header)
-      println("" + "\t" +"Total" + "\t" + "Slope <= 2%" + "\t" + "Slope <= 30%" + "\t" + "Protected"
+      println("" + "\t" + "Total" + "\t" + "Slope <= 2%" + "\t" + "Slope <= 30%" + "\t" + "Protected"
         + "\t" + "Suitable PV" + "\t" + "Suitable CSP" + "\t" + "Sparse " + "\t" + "Forest" + "\t" + "Croplands" + "\t" +
         "Shrubland" + "\t" + "MosaicVegetationCroplands" + "\t" + "MosaicGrasslandForestShrubland" + "\t" + "Urban" + "\t" + "Flooded + Waters + Ice")
-pr(name,sep)
+    pr(name, sep)
     pr(areaList(list).toSquareKilometers * factor, sep)
     pr(list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(2, true)).sum * factor, sep)
     pr(list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(30, true)).sum * factor, sep)
@@ -99,13 +101,13 @@ pr(name,sep)
     pr(list.map(g => g.area(FloodedAreas) + g.area(WaterBodies) + g.area(Ice)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor, sep)
     println()
   }
-  def printAreaWind(name:String,list: List[GridCell], factor: Double = 1 / 1E6, sep: String, header: Boolean) {
+  def printAreaWind(name: String, list: List[GridCell], factor: Double = 1 / 1E6, sep: String, header: Boolean) {
     if (header)
-      println("" + "\t" +"Total" + "\t" + "Protected"
+      println("" + "\t" + "Total" + "\t" + "Protected"
         + "\t" + "Suitable Wind" + "\t" + "Sparse " + "\t" + "Forest" + "\t" + "Croplands" + "\t" +
         "Shrubland" + "\t" + "MosaicVegetationCroplands" + "\t" + "MosaicGrasslandForestShrubland" + "\t" + "Urban" + "\t" + "Flooded + Waters + Ice")
-pr(name,sep)
-    pr(area(list).toSquareKilometers * factor, sep)
+    pr(name, sep)
+    pr(list.map(_.area(name).toSquareKilometers * factor).sum, sep)
     pr(list.map(i => i.protectedArea).sum * factor, sep)
     pr(list.map(_.suitableArea(true).toSquareKilometers).sum * factor, sep)
     pr(list.map(g => g.area(SparseVegetation) + g.area(Grassland) + g.area(BareAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers * factor, sep)

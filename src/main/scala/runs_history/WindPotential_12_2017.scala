@@ -14,10 +14,10 @@ import squants.radio.WattsPerSquareMeter
 object WindPotential_12_2017 {
   val eroi_min = (2 until 40).map(_ * 0.5).toList
 
-  val results = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 47, true, false)
-  def results_bottom_up = new WorldGrid("runs_history/wind_2017/results_wind_2017_bottom_up", Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, true, false)
-  def results_1_5_dissipation = new WorldGrid("runs_history/wind_2017/results_wind_2017_1_5_dissipation", Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, true, false)
-  def results_max1we = new WorldGrid("runs_history/wind_2017/results_wind_2017_max1we", Degrees(0.75), (2 until 40).map(_ * 0.5).toList, 34, 47, true, false)
+  val results = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 151, true, false)
+  def results_bottom_up = new WorldGrid("runs_history/wind_2017/results_wind_2017_bottom_up", Degrees(0.75), eroi_min, 34, 151, true, false)
+  def results_1_5_dissipation = new WorldGrid("runs_history/wind_2017/results_wind_2017_1_5_dissipation", Degrees(0.75), eroi_min, 34, 151, true, false)
+  def results_max1we = new WorldGrid("runs_history/wind_2017/results_wind_2017_max1we", Degrees(0.75), eroi_min, 34, 151, true, false)
 
   def main(args: Array[String]): Unit = {
     plotForPaper

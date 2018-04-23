@@ -31,9 +31,9 @@ case class Country(val name: String, val map: List[(String, Double)] = List()) {
   def isCountry(c: String): Boolean = if (map.nonEmpty) countries.contains(c) else name.equals(c)
 
   def isCountry(c: List[String]): Boolean = {
-    if (map.isEmpty) name.equals(c)
-    else if (c.size == 1) isCountry(c(0))
-    else c.exists(i => countries.contains(i))
+      if (map.isEmpty) c.contains(name)
+      else if (c.size == 1) isCountry(c(0))
+      else c.exists(i => countries.contains(i))
   }
 }
 /**
@@ -171,33 +171,33 @@ class GridCell(val csvLine: Array[String], center: GeoPoint, gridSize: Angle,
   }
   val monthlyClearnessIndex =
     if (Math.abs(center.latitude.toDegrees) >= 65) (0 until 12).map(m => 0.0).toList
-    else if(irradiance.perMonth.size == 0) (0 until 12).map(m => 0.0).toList
+    else if (irradiance.perMonth.size == 0) (0 until 12).map(m => 0.0).toList
     else (0 until 12).map(m => irradiance.perMonth(m) / monthlyExtraterrestrialRadiation(m, center.latitude)).toList
 
   // Daily Clearness Index 
   val kmin = 0.05; val kmax = monthlyClearnessIndex.map(kav => 0.613 + 0.267 * kav - 11.9 * Math.pow(kav - 0.75, 8))
   val epsilon = (0 until 12).map(i => (kmax(i) - kmin) / (kmax(i) - monthlyClearnessIndex(i))).toList
   val sigma = (0 until 12).map(i => -1.498 + (1.184 * epsilon(i) - 27.182 * Math.exp(-1.5 * epsilon(i))) / (kmax(i) - kmin)).toList
-  
-  def dailyClearnessIndex(n : Int) = {
+
+  def dailyClearnessIndex(n: Int) = {
     val (m, ndm, ndk) = month_dayInMonth(n)
     val alpha = (ndk - 0.5) / ndm
     (1 / sigma(m)) * (Math.log((1 - alpha) * Math.exp(sigma(m) * kmin) + alpha * (Math.exp(sigma(m) * kmax(m)))))
   }
-  
+
   val directIrradiance = irradiance.mean * (1 - diffuseFraction(yearlyClearnessIndex))
   val monthlyDirectIrradiance = (0 until 12).map(m => irradiance.month(m) * (1 - diffuseFraction(monthlyClearnessIndex(m)))).toList
-  
+
   // Daily global, direct and diffuse radiation is computed base on the estimated daily clearness index and diffuse to global ratio
-  def dailyRadiation(n : Int) = dailyClearnessIndex(n)*dailyExtraterrestrialRadiation(n, center.latitude)
-  def dailyDirectRadiation(n : Int) = (1 - dailyDiffuseFraction(dailyClearnessIndex(n),n,center.latitude))*dailyRadiation(n)
-  def dailyDiffuseRadiation(n : Int) = dailyDiffuseFraction(dailyClearnessIndex(n),n,center.latitude)*dailyRadiation(n)
-  
+  def dailyRadiation(n: Int) = dailyClearnessIndex(n) * dailyExtraterrestrialRadiation(n, center.latitude)
+  def dailyDirectRadiation(n: Int) = (1 - dailyDiffuseFraction(dailyClearnessIndex(n), n, center.latitude)) * dailyRadiation(n)
+  def dailyDiffuseRadiation(n: Int) = dailyDiffuseFraction(dailyClearnessIndex(n), n, center.latitude) * dailyRadiation(n)
+
   // Ratio of the global daily (kWh/m^2/day) for a day. So to get a value in W/m^2 = ratio * 24
-  def hourlyRadiation(n : Int, h : Int) = dailyRadiation(n)*ratioHourlyToDailyGlobalRadiation(n,h,center.latitude)*24
-  def hourlyDiffuseRadiation(n : Int, h : Int) = dailyDiffuseRadiation(n)*ratioHourlyToDailyDiffuseRadiation(n,h,center.latitude)*24
-  def hourlyDirectRadiation(n : Int, h : Int) = hourlyRadiation(n, h) - hourlyDiffuseRadiation(n, h)
-  
+  def hourlyRadiation(n: Int, h: Int) = dailyRadiation(n) * ratioHourlyToDailyGlobalRadiation(n, h, center.latitude) * 24
+  def hourlyDiffuseRadiation(n: Int, h: Int) = dailyDiffuseRadiation(n) * ratioHourlyToDailyDiffuseRadiation(n, h, center.latitude) * 24
+  def hourlyDirectRadiation(n: Int, h: Int) = hourlyRadiation(n, h) - hourlyDiffuseRadiation(n, h)
+
 }
 /**
  * Latitude	Longitude	Corine Land Cover	GlobCover	Modis	Urban Factor	Protected area ?	Country	Elevation [m]	Distance to Coast [km]	Uwind	Vwind	Wind	Std Wind	KineticEnergyDissipation Irradiance
@@ -218,7 +218,7 @@ object GridCell {
    *
    * So 40 is the first with old version !
    */
-  def countryList(l: Array[String], countryIndex : Int): List[(String, Double)] = {
+  def countryList(l: Array[String], countryIndex: Int): List[(String, Double)] = {
     // val countryIndex = 47
     if (l.size > countryIndex + 1) {
       val xs = (countryIndex until l.size).map(i => l(i).toString).filter(i => !i.equals("")).toList
@@ -226,14 +226,14 @@ object GridCell {
 
     } else List()
   }
-  
-  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex: Int/* = 34*/, countryIndex : Int, optiWind: Boolean /*= true*/, solar: Boolean /*= false*/) = {
-    
+
+  def apply(l: Array[String], gridSize: Angle, eroi_min: List[Double], optiIndex: Int /* = 34*/ , countryIndex: Int, optiWind: Boolean /*= true*/ , solar: Boolean /*= false*/ ) = {
+
     new GridCell(l, DefaultGridCell.center(l), gridSize,
-      
+
       DefaultGridCell.lcs(l),
       l(2).toDouble / 100.0,
-      Country(l(28), countryList(l,countryIndex)),
+      Country(l(28), countryList(l, countryIndex)),
       Meters(l(26).toDouble), Kilometers(l(27).toDouble),
       new WindProfile(MetersPerSecond(l(31).toDouble), l(32).toDouble, Meters(71)),
       new WindProfile(MetersPerSecond(l(29).toDouble), l(30).toDouble, Meters(125)),
