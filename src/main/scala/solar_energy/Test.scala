@@ -22,46 +22,17 @@ object Test {
   import Helper._
   import wind_energy.WindFarmEnergyInputs._
   import SolarPower._
-  import CSP._
+  import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-    // WIND
-    val eroi_min = (2 until 40).map(_ * 0.5).toList
-    val results = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 47, true, false)
-    def windPotential(countries : List[String]) ={
-        val g = if (countries.isEmpty) results.grids else results.countries(countries)
-    val p = WindPotential(0.5, true)
-   
-    }
-      
+    val grid = _0_5deg
+    plotXY(List(listEROI(grid.cells, PVPoly),listEROI(grid.cells, PVMono),listEROI(grid.cells, CSPParabolic), listEROI(grid.cells, CSPParabolicStorage12h),listEROI(grid.cells, CSPTowerStorage12h)), 
+        xLabel = "Potential [EJ/year]", yLabel="EROI",legend=true)
     
-    
-    
-    
-    val grid = _0_1deg
-
-val countries = getLines("countries_students").map(_(0))
-countries.map(c =>customArea(c,grid.country(c).filter(_.onshore)))
   }
 
-  def customArea(country : String, c : List[SolarCell]) {
-    pr(country)
-    pr(areaList(c).toSquareKilometers)
-    pr(suitableAreaList(c, PVMono).toSquareKilometers)
-    pr(areaList(c.filter(_.protected_area)).toSquareKilometers)
-    pr(c.map(g => g.slope.slope_geq(30)*g.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    pr(c.map(g => g.area(SparseVegetation) + g.area(Grassland) + g.area(BareAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    pr(c.map(_.area(Forests)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    pr(c.map(_.area(CropLands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    pr(c.map(_.area(Shrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    pr(c.map(_.area(MosaicVegetationCroplands)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    pr(c.map(_.area(MosaicGrasslandForestShrubland)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    pr(c.map(_.area(UrbanAreas)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    pr(c.map(g => g.area(FloodedAreas) + g.area(WaterBodies) + g.area(Ice)).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers)
-    println()
-    } 
-  def pr(s : String)= print(s + "\t")
-  def pr(s : Double)= print(s + "\t")
+  def pr(s: String) = print(s + "\t")
+  def pr(s: Double) = print(s + "\t")
   def listEROIVSGHI(tech: SolarTechnology, ghi: List[Double], ratedPower: Power) = {
     val prodPerArea = ghi.map(i => i * 365 * 24 * tech.efficiency * tech.performanceRatio)
     val area_17 = ratedPower.toWatts / (1000 * tech.efficiency)
@@ -81,7 +52,7 @@ countries.map(c =>customArea(c,grid.country(c).filter(_.onshore)))
     println("Total " + "\t" + areaList(list).toSquareKilometers * factor)
     println("Slope <= 2% " + "\t" + list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(2, true)).sum * factor)
     println("Slope <= 30% " + "\t" + list.map(i => i.area.toSquareKilometers * i.slope.slope_leq(30, true)).sum * factor)
-    println("Protected" +  "\t" + list.filter(_.protected_area).map(i => i.area.toSquareKilometers).sum * factor)
+    println("Protected" + "\t" + list.filter(_.protected_area).map(i => i.area.toSquareKilometers).sum * factor)
     println("Suitable PV" + "\t" + list.map(_.suitableArea(PVMono).toSquareKilometers).sum * factor)
     println("Suitable CSP" + "\t" + list.map(_.suitableArea(CSPParabolic).toSquareKilometers).sum * factor)
 

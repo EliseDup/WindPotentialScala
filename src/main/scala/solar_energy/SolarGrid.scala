@@ -28,7 +28,8 @@ class SolarGrid(val cells: List[SolarCell]) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(logFile))
 
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-      (if (c.protected_area) 1.0 else 0.0) + "\t" +
+      c.ghi.toWattsPerSquareMeter + "\t" +c.dni.toWattsPerSquareMeter + "\t" +
+        (if (c.protected_area) 1.0 else 0.0) + "\t" +
       (100 * c.slope.slope_leq(0.5, true)) + "\t" +
       (100 * c.slope.slope_geq(45, true)) + "\t" +
       c.elevation.toMeters + "\t" +

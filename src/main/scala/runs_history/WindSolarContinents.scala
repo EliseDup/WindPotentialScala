@@ -27,7 +27,7 @@ object WindSolarContinents {
   import Helper._
   import wind_energy.WindFarmEnergyInputs._
   import solar_energy.SolarPower._
-  import solar_energy.CSP._
+  import solar_energy.CSPParabolic._
 
   def main(args: Array[String]): Unit = {
     plotComparisonByContinents

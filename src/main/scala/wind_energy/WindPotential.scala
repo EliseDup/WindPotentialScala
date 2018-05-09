@@ -133,7 +133,8 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
   // RESULTS
   def potentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true): Energy =
     grids.map(g => (if (eroi(g, density, suitable) >= eroi_min) energyPerYear(g, density, suitable) else Joules(0))).foldLeft(Joules(0))(_ + _)
-  def netPotentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true): Energy =
+ 
+    def netPotentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true): Energy =
     grids.map(g => (if (eroi(g, density, suitable) >= eroi_min) netEnergyPerYear(g, density, suitable) else Joules(0))).foldLeft(Joules(0))(_ + _)
 
   def meanCfCountry(world: WorldGrid, country: String, meanSpeed: Velocity) = {

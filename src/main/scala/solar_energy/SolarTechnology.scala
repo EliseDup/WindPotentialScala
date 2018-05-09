@@ -28,16 +28,23 @@ object PVMono extends SolarTechnology {
   val maximumSlope = 30.0
 }
 
-object CSP {
+/**
+ * Calculation Energy ADJUSTMENT FACTOR
+ * 
+ * Ea = Actual Area / Reference Area = Rated Power * Solar Multiple / (Reference DNI * efficiency) / Reference Area
+ * 
+ * CSP parabolic trough excl. storage :  Ea = (1E9*1.3/(950*0.15)) / 697286 = 15.02
+ * CSP-Parabolic trough + 12 h molten salt: Ea = (1E9*2.7/(950*0.15)) / 1261286 = 15.02
+ * CSP-Power tower + 12 h molten salt: Ea = (1E9*2.7/(950*0.15)) / 1443932 = 15.02
+ */
+ 
+
+trait CSP extends SolarTechnology {
   def fullLoadHours(dni: Irradiance, sm: Double): Time = fullLoadHours(dni.toWattsPerSquareMeter * 8.76, sm)
   def fullLoadHours(dni_kWh_year: Double, sm: Double): Time = Hours((2.5717 * dni_kWh_year - 694) * (-0.0371 * sm * sm + 0.4171 * sm - 0.0744))
-}
 
-object CSPParabolic extends SolarTechnology {
-  import CSP._
-  val name = "CSP Parabolic"
   override val designPointIrradiance = WattsPerSquareMeter(950)
-  val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270 + 49617), Gigajoules(89118), Gigajoules(0.072), 30, Gigajoules(1348389), Gigajoules(49617), SquareMeters(981000))
+  val solar_multiple : Double
   val efficiency = 0.16;
   val performanceRatio = 1.0;
   val occupationRatio = 7.5;
@@ -46,7 +53,8 @@ object CSPParabolic extends SolarTechnology {
 
   // Aperture Area is the area needed to reach the rated power under a given irradiance conditions (dni design point) : Power = Area * DNI * efficiency
   // Then we add a solar multiple (in general 1,3 without storage) to have a security
-  def apertureArea(ratedPower: Power, sm: Double = 1.3, designDNI: Irradiance = WattsPerSquareMeter(950)): Area = ratedPower / (designDNI * efficiency) * sm
+  def apertureArea(ratedPower: Power, sm: Double = solar_multiple): Area = ratedPower * sm / (designPointIrradiance * efficiency)
+  // override def yearlyProduction(solar : Irradiance, ratedPower : Power) = fullLoadHours(solar, solar_multiple) *ratedPower
   override def panelArea(ratedPower: Power) = apertureArea(ratedPower)
   override def eroi(cf: Double) = ee.eroi(cf, apertureArea(Gigawatts(1)))
   override def eroi(solar: Irradiance) = {
@@ -60,7 +68,25 @@ object CSPParabolic extends SolarTechnology {
     val yearProd =  power * fullLoadHours(solar,sm) //apertureArea(power, sm) * solar * efficiency * performanceRatio * Hours(365 * 24)
     yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, apertureArea(power, sm))
   }
+}
 
+object CSPParabolic extends CSP {
+  val name = "CSP Parabolic through, no storage"
+  val solar_multiple = 1.3
+  val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619+5215+89118), Gigajoules(0.05+0.05), 30, 
+      Gigajoules(1348389), Gigajoules(49617), SquareMeters(697286))
+}
+object CSPParabolicStorage12h extends CSP {
+  val name = "CSP Parabolic through, 12 hours of storage"
+  val solar_multiple = 2.7
+  val ee = new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985+3838+183720), Gigajoules(0.05+0.023), 30, 
+      Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))
+}
+object CSPTowerStorage12h extends CSP {
+  val name = "CSP Power Tower, 12 hours of storage"
+  val solar_multiple = 2.7
+  val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(1985+3838+183720), Gigajoules(0.05+0.023), 30, 
+      Gigajoules(2116786), Gigajoules(52168), SquareMeters(1443932))
 }
 
 trait SolarTechnology {
