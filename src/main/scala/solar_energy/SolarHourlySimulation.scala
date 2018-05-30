@@ -10,7 +10,7 @@ object SolarHourlySimulation {
   import SolarPower._
   import Helper._
   import DayMonth._
-  
+  import PlotHelper._
   def main(args: Array[String]): Unit = {
     val maxDay = 365
     val d = (1 to maxDay).toList
@@ -22,10 +22,12 @@ object SolarHourlySimulation {
     println("Data loaded" + "\t" + solar.size)
   val out_stream = new PrintStream(new java.io.FileOutputStream("test"))
 
-    val test = solar.filter(i => math.abs(i._1.latitude.value)<=45)
+    val test = solar.filter(i => math.abs(i._1.latitude.value)<=20)
+    println(test.size)
     test.map(t => {
-      val res = simulate(t,2,0)
-      out_stream.print(t._1.latitude.value +"\t" + t._1.longitude.value +"\t" + t._2(0).value + "\t" + res._1 + "\t" + res._2 +"\n")
+      val res = simulate(t,2.7,12)
+      out_stream.print(t._1.latitude.value +"\t" + t._1.longitude.value +"\t" + 
+          t._2(0).value + "\t" + directIrradiance(t._1.latitude, t._2(0)).value + "\t" + res._1 + "\t" + res._2 +"\n")
     }
   )
   out_stream.close()
@@ -63,7 +65,16 @@ object SolarHourlySimulation {
         (p, MegawattHours(0), storage, WattHours(0))
       }
     })
-    (totalProd / (Megawatts(1) * Hours(365 * 24)), area * irradiance_year * 0.15 * Hours(365 * 24) / (Megawatts(1) * Hours(365 * 24)))
+    val h_year = (0 until 8760).map(_.toDouble).toList
+    plotXY(List( (h_year, prod.map(_._1.toMegawattHours),"Production"),(h_year, prod.map(_._2.toMegawattHours),"Energy Stored"),
+        (h_year, prod.map(_._3.toMegawattHours),"Total Storage"),(h_year, prod.map(_._4.toMegawattHours),"Energy Lost")), legend=true) 
+    val simulatedCF = totalProd / (Megawatts(1) * Hours(365 * 24))
+    val calculatedCFDir = area * directIrradiance(latitude, irradiance_year) * 0.15 * Hours(365 * 24) / (Megawatts(1) * Hours(365 * 24))
+    val calculatedCF = area * irradiance_year * 0.15 * Hours(365 * 24) / (Megawatts(1) * Hours(365 * 24))
+    
+    println(latitude + "\t" + simulatedCF*100 +"\t" + calculatedCF*100 +"\t" + calculatedCFDir*100)
+    (simulatedCF,calculatedCF)
+        
   }
 
 }

@@ -73,6 +73,50 @@ object SolarPower {
     val ws = sunsetHourAngle(d, lat); val w = hourAngle(d, h);
     val a = 0.409 + 0.5016 * sin(Radians(ws.toRadians - 1.047)); val b = 0.6609 - 0.4767 * sin(Radians(ws.toRadians - 1.047));
     Math.max(0, (Math.PI / 24.0) * (a + b * cos(w)) * ((cos(w) - cos(ws)) / (sin(ws) - ws.toRadians * cos(ws))))
-
   }
+
+  /**
+   * Value for a given, latitude, irradiance (mean by year) or irradiance_month (mean by month), month index = 0 to 11
+   */
+  def yearlyClearnessIndex(latitude: Angle, irradiance: Irradiance) = {
+    if (Math.abs(latitude.toDegrees) >= 65 || yearlyExtraterrestrialRadiation(latitude).value == 0) 0.0
+    else irradiance / yearlyExtraterrestrialRadiation(latitude)
+  }
+  def monthlyClearnessIndex(latitude: Angle, irradiance_month: Irradiance, month: Int) = {
+    if (Math.abs(latitude.toDegrees) >= 65 || monthlyExtraterrestrialRadiation(month, latitude).value == 0) 0.0
+    else irradiance_month / monthlyExtraterrestrialRadiation(month, latitude)
+  }
+  // Daily Clearness Index 
+  val kmin = 0.05; def kmax(latitude: Angle, irradiance_month: Irradiance, month: Int) = {
+    val kav = monthlyClearnessIndex(latitude, irradiance_month, month)
+    0.613 + 0.267 * kav - 11.9 * Math.pow(kav - 0.75, 8)
+  }
+  def epsilon(latitude: Angle, irradiance_month: Irradiance, month: Int) = {
+    val k = kmax(latitude, irradiance_month, month)
+    (k - kmin) / (k - monthlyClearnessIndex(latitude, irradiance_month, month))
+  }
+  def sigma(latitude: Angle, irradiance_month: Irradiance, month: Int) = {
+    val eps = epsilon(latitude, irradiance_month, month)
+    -1.498 + (1.184 * eps - 27.182 * Math.exp(-1.5 * eps)) / (kmax(latitude, irradiance_month, month) - kmin)
+  }
+  def dailyClearnessIndex(latitude: Angle, irradiance_month: Irradiance, n: Int) = {
+    val (m, ndm, ndk) = month_dayInMonth(n)
+    val alpha = (ndk - 0.5) / ndm
+    val sig = sigma(latitude, irradiance_month, m)
+    (1 / sig) * (Math.log((1 - alpha) * Math.exp(sig * kmin) + alpha * (Math.exp(sig * kmax(latitude, irradiance_month, m)))))
+  }
+
+  def directIrradiance(latitude: Angle, irradiance: Irradiance) = irradiance * (1 - diffuseFraction(yearlyClearnessIndex(latitude, irradiance)))
+  def monthlyDirectIrradiance(latitude: Angle, irradiance_month: Irradiance, month: Int) = irradiance_month * (1 - diffuseFraction(monthlyClearnessIndex(latitude, irradiance_month, month)))
+
+  // Daily global, direct and diffuse radiation is computed base on the estimated daily clearness index and diffuse to global ratio
+  def dailyRadiation(latitude: Angle, irradiance_month: Irradiance, n: Int) = dailyClearnessIndex(latitude, irradiance_month, n) * dailyExtraterrestrialRadiation(n, latitude)
+  def dailyDirectRadiation(latitude: Angle, irradiance_month: Irradiance, n: Int) = (1 - dailyDiffuseFraction(dailyClearnessIndex(latitude, irradiance_month, n), n, latitude)) * dailyRadiation(latitude, irradiance_month, n)
+  def dailyDiffuseRadiation(latitude: Angle, irradiance_month: Irradiance, n: Int) = dailyDiffuseFraction(dailyClearnessIndex(latitude, irradiance_month, n), n, latitude) * dailyRadiation(latitude, irradiance_month, n)
+
+  // Ratio of the global daily (kWh/m^2/day) for a day. So to get a value in W/m^2 = ratio * 24
+  def hourlyRadiation(latitude: Angle, irradiance_month: Irradiance, n: Int, h: Int) = dailyRadiation(latitude, irradiance_month, n) * ratioHourlyToDailyGlobalRadiation(n, h, latitude) * 24
+  def hourlyDiffuseRadiation(latitude: Angle, irradiance_month: Irradiance, n: Int, h: Int) = dailyDiffuseRadiation(latitude, irradiance_month, n) * ratioHourlyToDailyDiffuseRadiation(n, h, latitude) * 24
+  def hourlyDirectRadiation(latitude: Angle, irradiance_month: Irradiance, n: Int, h: Int) = hourlyRadiation(latitude, irradiance_month, n, h) - hourlyDiffuseRadiation(latitude, irradiance_month, n, h)
+
 }

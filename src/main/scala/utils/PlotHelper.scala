@@ -98,13 +98,13 @@ object PlotHelper {
 
   def dualAxisPlot(x: List[Double], y1: List[Double], y2: List[Double], xLabel: String, yLabel1: String, yLabel2: String) {
     val dataSet1 = new XYSeriesCollection(); val dataSet2 = new XYSeriesCollection();
-    val serie1 = new XYSeries("Primary Axis"); val serie2 = new XYSeries("Secondary Axis");
+    val serie1 = new XYSeries("CSP Output"); val serie2 = new XYSeries("Efficiency");
     (0 until x.size).map { i =>
       serie1.add(x(i), y1(i))
       serie2.add(x(i), y2(i))
     }
     dataSet1.addSeries(serie1); dataSet2.addSeries(serie2);
-    val chart = ChartFactory.createXYLineChart("", xLabel, yLabel1, dataSet1, PlotOrientation.VERTICAL, false, false, false)
+    val chart = ChartFactory.createXYLineChart("", xLabel, yLabel1, dataSet1, PlotOrientation.VERTICAL, true, false, false)
     val axis2 = new NumberAxis(yLabel2);
     val plot = chart.getXYPlot();
     val r1 = new XYLineAndShapeRenderer(); val r2 = new XYLineAndShapeRenderer();
