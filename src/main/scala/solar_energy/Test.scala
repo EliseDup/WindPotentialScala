@@ -25,50 +25,18 @@ object Test {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-    val dni = (500 to 3500).map(_.toDouble).toList 
-    plotXY(dni, dni.map(d => (2.5715*d-694)/8760))
-    val sm = (5 to 50).map(_*0.1).toList
-    plotXY(sm,sm.map(s => -0.0371*s*s+0.4171*s-0.0744))
-    
-println(CSPTowerStorage12h.ee.embodiedEnergy(Megawatts(115), 0.25).to(Terajoules))
+     
     val grid = _0_5deg
-    plotXY(List(listEROI(grid.cells, PVPoly), listEROI(grid.cells, PVMono), listEROI(grid.cells, CSPParabolic), listEROI(grid.cells, CSPParabolicStorage12h), listEROI(grid.cells, CSPTowerStorage12h)),
+ plotXY(List(listEROI(grid.cells, PVPoly), listEROI(grid.cells, PVMono), listEROI(grid.cells, CSPParabolic), listEROI(grid.cells, CSPParabolicStorage12h), listEROI(grid.cells, CSPTowerStorage12h)),
       xLabel = "Potential [EJ/year]", yLabel = "EROI", legend = true)
 
-    val solar = _0_1deg
-    val continents = countriesByContinent
-    val dni_classes = List(2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 10000).map(_ / 8.76)
-    (0 until dni_classes.size - 1).map(i =>
-      println(dni_classes(i) * 8.76 + "\t" + dni_classes(i + 1) * 8.76))
-    continents.map(c => {
-      print(c._1 + "\t")
-      val cells = solar.countries(c._2)
-      (0 until dni_classes.size - 1).map(i => {
-        val down = dni_classes(i); val up = dni_classes(i + 1);
-        print(cells.filter(_.dni.value >= down).filter(_.dni.value < up).map(_.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers + "\t")
-      })
-      println()
-    })
-    val list = List("Australia", "Canada", "China", "India", "Japan", "Mexico", "Russia", "United States")
-    list.map(c => {
-      print(c + "\t")
-      val cells = solar.country(c)
-      (0 until dni_classes.size - 1).map(i => {
-        val down = dni_classes(i); val up = dni_classes(i + 1);
-        print(cells.filter(_.dni.value >= down).filter(_.dni.value < up).map(_.area).foldLeft(SquareKilometers(0))(_ + _).toSquareKilometers + "\t")
-      })
-      println()
-    })
-    /*      val dni = (2 to 11).map(_.toDouble).toList
-    dualAxisPlot(dni.map(_*365), dni.map(_*0.2-0.4).map(_*365), dni.map(i => 100*(0.2-0.4/i)), xLabel="DNI [kWh/m2/year]", yLabel1="CSP Output [kWh/m2/year]",yLabel2="Efficiency [%]")
-     */
   }
 
   def pr(s: String) = print(s + "\t")
   def pr(s: Double) = print(s + "\t")
   def listEROIVSGHI(tech: SolarTechnology, ghi: List[Double], ratedPower: Power) = {
-    val prodPerArea = ghi.map(i => i * 365 * 24 * tech.efficiency * tech.performanceRatio)
-    val area_17 = ratedPower.toWatts / (1000 * tech.efficiency)
+    val prodPerArea = ghi.map(i => i * 365 * 24 * tech.designEfficiency * tech.performanceRatio)
+    val area_17 = ratedPower.toWatts / (1000 * tech.designEfficiency)
     val prodPerYear = prodPerArea.map(i => WattHours(i * area_17))
     val ee = prodPerYear.map(i => tech.ee.embodiedEnergy(ratedPower, i))
     prodPerYear.map(i => (i * 30) / tech.ee.embodiedEnergy(ratedPower, i))

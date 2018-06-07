@@ -27,17 +27,8 @@ class SolarGrid(val cells: List[SolarCell]) {
   def write(logFile: String) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(logFile))
 
-    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-      c.ghi.toWattsPerSquareMeter + "\t" +c.dni.toWattsPerSquareMeter + "\t" +
-        (if (c.protected_area) 1.0 else 0.0) + "\t" +
-      (100 * c.slope.slope_leq(0.5, true)) + "\t" +
-      (100 * c.slope.slope_geq(45, true)) + "\t" +
-      c.elevation.toMeters + "\t" +
-      c.distanceToCoast.toKilometers + "\t" +
-      (c.slope.slope_leq(2, true) * 100) + "\t" +
-      (c.slope.slope_leq(30, true) * 100) + "\t" +
-      (c.suitabilityFactor(PVMono) * 100) + "\t" +
-      (c.suitabilityFactor(CSPParabolic) * 100) + "\n"))
+    cells.filter(_.dni.toWattsPerSquareMeter >= 200).map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
+       + c.dni.toWattsPerSquareMeter*8.76 + "\n"))
     out_stream.close()
   }
 }
@@ -60,7 +51,7 @@ val onshore = distanceToCoast.value <= 0
   // Actual area occupied by pv panels / heliostat / ...
   def panelArea(tech: SolarTechnology) = suitableArea(tech) / tech.occupationRatio
   def potential(tech: SolarTechnology) = tech.potential(if (tech.directOnly) dni else ghi, installedCapacity(tech))
-  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.efficiency * tech.designPointIrradiance //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
+  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
 
   def eroi(tech: SolarTechnology): Double = {
     if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0
