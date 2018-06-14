@@ -91,7 +91,7 @@ object PlotHelper {
     val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-    // plot.getRangeAxis().setRange(1, 20)
+    //plot.getRangeAxis().setRange(2,8)
     //plot.getDomainAxis().setRange(0,800)
     createFrame(chart, name = title, save = save, tick = tick)
   }
@@ -170,7 +170,7 @@ object PlotHelper {
     createFrame(chart, save = false, xy = false)
   }
   def scatterPlot(values: List[(Double, Double)], title: String = "", xLabel: String = "", yLabel: String = "") {
-    val y = new LogarithmicAxis(yLabel)
+    val y = new NumberAxis(yLabel)
     val x = new NumberAxis(xLabel)
     val plot = new FastScatterPlot(Array(values.map(_._1.toFloat).toArray, values.map(_._2.toFloat).toArray), x, y);
     val chart = new JFreeChart(title, plot);

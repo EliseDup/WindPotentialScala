@@ -27,8 +27,8 @@ object Test {
   def main(args: Array[String]): Unit = {
      
     val grid = _0_5deg
- plotXY(List(listEROI(grid.cells, PVPoly), listEROI(grid.cells, PVMono), listEROI(grid.cells, CSPParabolic), listEROI(grid.cells, CSPParabolicStorage12h), listEROI(grid.cells, CSPTowerStorage12h)),
-      xLabel = "Potential [EJ/year]", yLabel = "EROI", legend = true)
+ // plotXY(List(listEROI(grid.cells, PVPoly), listEROI(grid.cells, PVMono), listEROI(grid.cells, CSPParabolic), listEROI(grid.cells, CSPParabolicStorage12h), listEROI(grid.cells, CSPTowerStorage12h)),xLabel = "Potential [EJ/year]", yLabel = "EROI", legend = true)
+plotXY(List(listEROI(grid.cells, CSPParabolic), listEROI(grid.cells, CSPParabolicStorage12h)),xLabel = "Potential [EJ/year]", yLabel = "EROI", legend = true)
 
   }
 

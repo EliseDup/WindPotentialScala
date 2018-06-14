@@ -82,21 +82,15 @@ object CSPParabolic extends CSP {
   val name = "CSP Parabolic through, no storage"
   val designEfficiency = 0.22
   val solar_multiple = 1.615 // Optimized via SAM simulations
-  override def efficiency(dni : Irradiance) = {
-    val dni_year = dni.toWattsPerSquareMeter*8.76
-    (5.252*math.log(dni_year) - 26.28)*0.92641688479/100
-  }
+  override def efficiency(dni : Irradiance) = 5.483*math.log(dni.toWattsPerSquareMeter*8.76) - 28.34 // 7.349*math.log(dni.toWattsPerSquareMeter*8.76) - 42.12
   val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30,
     Gigajoules(1348389), Gigajoules(49617), SquareMeters(697286))
 }
 object CSPParabolicStorage12h extends CSP {
   val name = "CSP Parabolic through, 12 hours of storage"
   val designEfficiency = 0.22
-  override def efficiency(dni : Irradiance) = {
-    val dni_year = dni.toWattsPerSquareMeter*8.76
-    (4.731*math.log(dni_year) - 21.22)*0.906973994753/100
-  }
-  val solar_multiple = 3.602 // Optimized via SAM simulations
+  override def efficiency(dni : Irradiance) =5.963*math.log(dni.toWattsPerSquareMeter*8.76) - 32.51 //  6.747*math.log(dni.toWattsPerSquareMeter*8.76) - 36.72
+  val solar_multiple = 3.6 // Optimized via SAM simulations
 
   val ee = new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))
@@ -105,6 +99,7 @@ object CSPTowerStorage12h extends CSP {
   val name = "CSP Power Tower, 12 hours of storage"
   val designEfficiency = 0.21
   val solar_multiple = 2.7
+  override def efficiency(dni : Irradiance) = 4.339*math.log(dni.toWattsPerSquareMeter*8.76) - 16.97
   val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(2116786), Gigajoules(52168), SquareMeters(1443932))
 }
@@ -156,7 +151,7 @@ class EmbodiedEnergy(val raw_materials: Energy,
 
   def embodiedEnergy(rated_power: Power, output_year: Energy): Energy = {
     val ratio = rated_power.toGigawatts
-    ratio * embodiedEnergy1GW(output_year * ratio)
+    ratio * embodiedEnergy1GW(output_year/ratio)
   }
 
   def embodiedEnergy(rated_power: Power, capacity_factor: Double) = {
@@ -165,7 +160,7 @@ class EmbodiedEnergy(val raw_materials: Energy,
   // For CSP, the embodied energy was calculated for a default aperture area !
   def embodiedEnergyArea(rated_power: Power, output_year: Energy, area: Area): Energy = {
     val area_ratio = area / default_area
-    embodiedEnergy(rated_power, output_year) + rated_power.toGigawatts * area_ratio * (transport_variable + construction_variable)
+    embodiedEnergy(rated_power, output_year) + area_ratio * (transport_variable + construction_variable)
   }
   // For csp optimzation
   val fixed1MW = Megawatts(1).toGigawatts * (raw_materials + construction_decomissioning + transport_materials + O_M_fixed * lifeTime)
