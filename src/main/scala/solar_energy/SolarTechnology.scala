@@ -82,24 +82,25 @@ object CSPParabolic extends CSP {
   val name = "CSP Parabolic through, no storage"
   val designEfficiency = 0.22
   val solar_multiple = 1.615 // Optimized via SAM simulations
-  override def efficiency(dni : Irradiance) = 5.483*math.log(dni.toWattsPerSquareMeter*8.76) - 28.34 // 7.349*math.log(dni.toWattsPerSquareMeter*8.76) - 42.12
+  override def efficiency(dni : Irradiance) = (5.483*math.log(dni.toWattsPerSquareMeter*8.76) - 28.34)/100.0 // 7.349*math.log(dni.toWattsPerSquareMeter*8.76) - 42.12
   val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30,
     Gigajoules(1348389), Gigajoules(49617), SquareMeters(697286))
 }
 object CSPParabolicStorage12h extends CSP {
   val name = "CSP Parabolic through, 12 hours of storage"
   val designEfficiency = 0.22
-  override def efficiency(dni : Irradiance) =5.963*math.log(dni.toWattsPerSquareMeter*8.76) - 32.51 //  6.747*math.log(dni.toWattsPerSquareMeter*8.76) - 36.72
+  override def efficiency(dni : Irradiance) = (5.963*math.log(dni.toWattsPerSquareMeter*8.76) - 32.51)/100.0 //  6.747*math.log(dni.toWattsPerSquareMeter*8.76) - 36.72
   val solar_multiple = 3.6 // Optimized via SAM simulations
 
   val ee = new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))
 }
+
 object CSPTowerStorage12h extends CSP {
   val name = "CSP Power Tower, 12 hours of storage"
   val designEfficiency = 0.21
   val solar_multiple = 2.7
-  override def efficiency(dni : Irradiance) = 4.339*math.log(dni.toWattsPerSquareMeter*8.76) - 16.97
+  override def efficiency(dni : Irradiance) = (4.339*math.log(dni.toWattsPerSquareMeter*8.76) - 16.97)/100.0
   val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(2116786), Gigajoules(52168), SquareMeters(1443932))
 }
@@ -119,7 +120,7 @@ trait SolarTechnology {
   def lifeTimeEfficiency(i : Irradiance) =
     if (degradationRate == 0) efficiency(i) * performanceRatio
     else efficiency(i) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
-  def panelArea(ratedPower: Power): Area = ratedPower / (WattsPerSquareMeter(1000) * designEfficiency)
+  def panelArea(ratedPower: Power): Area = ratedPower / (designPointIrradiance * designEfficiency)
   def potential(solar: Irradiance, ratedPower: Power): Power = panelArea(ratedPower) * solar * lifeTimeEfficiency(solar)
   def yearlyProduction(solar: Irradiance, ratedPower: Power): Energy = potential(solar, ratedPower) * Hours(365 * 24)
   def eroi(cf: Double) = ee.eroi(cf)

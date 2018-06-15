@@ -49,10 +49,17 @@ val onshore = distanceToCoast.value <= 0
   def area(lcType: LandCoverType): Area = if (lcType.equals(landCover)) area else SquareKilometers(0)
 
   // Actual area occupied by pv panels / heliostat / ...
-  def panelArea(tech: SolarTechnology) = suitableArea(tech) / tech.occupationRatio
-  def potential(tech: SolarTechnology) = tech.potential(if (tech.directOnly) dni else ghi, installedCapacity(tech))
+  def panelArea(tech: SolarTechnology): Area = suitableArea(tech) / tech.occupationRatio
+  def potential(tech: SolarTechnology): Power = tech.potential(if (tech.directOnly) dni else ghi, installedCapacity(tech))
+  
+  def potential(techs: List[SolarTechnology]): Power = {
+    val index_max_eroi = techs.zipWithIndex.map(i => (eroi(i._1),i._2)).maxBy(_._1)._2
+    potential(techs(index_max_eroi))
+  }
+  
   def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
-
+  
+  def eroi(techs: List[SolarTechnology]): Double = techs.map(eroi(_)).max
   def eroi(tech: SolarTechnology): Double = {
     if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0
     else {
