@@ -29,13 +29,13 @@ object Plot {
   def plotSimulations(file: String, storage: Int, technology: SolarTechnology) {
     // SM - Hours storage - DNI - efficiency
     val trough = Helper.getLines(file, "\t").map(i => new SAMData(i(0).toDouble, i(1).toInt, i(2).toDouble, i(3).toDouble)).filter(_.hours_storage == storage)
-    val dni = (Set() ++ trough.map(_.daily_dni)).filter(_ * 365 >= 1500)
-    val list = dni.toList.map(d => {
+    val dni = (Set() ++ trough.map(_.daily_dni)).filter(_ * 365 >= 1500).toList.sorted
+    val list = dni.map(d => {
       val x = trough.filter(_.daily_dni == d)
       val eff1_3 = x.find(_.sm == 1).get.efficiency
       (x.map(_.sm), x.map(_.efficiency), (d * 365).toInt + " kWh/m2/year")
     })
-    val listEROI = dni.toList.map(d => {
+    val listEROI = dni.map(d => {
       val x = trough.filter(_.daily_dni == d)
       val eff1_3 = x.find(_.sm == 1).get.efficiency
       (x.map(_.sm), x.map(i => eroi(i.daily_dni * 365, i.sm, i.efficiency, technology)), (d * 365).toInt + " kWh/m2/year")
