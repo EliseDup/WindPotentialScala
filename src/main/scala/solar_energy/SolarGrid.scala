@@ -26,9 +26,12 @@ class SolarGrid(val cells: List[SolarCell]) {
 
   def write(logFile: String) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(logFile))
-
-    cells.filter(_.dni.toWattsPerSquareMeter >= 200).map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-       + c.dni.toWattsPerSquareMeter*8.76 + "\n"))
+    val techs = List(PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
+    
+    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
+      + (techs.indexOf(c.bestTechnology(techs))+1).toDouble + "\n"))
+    // cells.filter(_.dni.toWattsPerSquareMeter >= 200).map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
+    //    + c.dni.toWattsPerSquareMeter*8.76 + "\n"))
     out_stream.close()
   }
 }
@@ -38,7 +41,7 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
     val country: String, val protected_area: Boolean = false, val slope: SlopeGradients) {
 
   val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
-val onshore = distanceToCoast.value <= 0
+  val onshore = distanceToCoast.value <= 0
   def suitabilityFactor(tech: SolarTechnology) = {
     if (protected_area || excludedCountries.contains(country) || country.contains("Is.") || country.contains("Islands")) 0.0
     else landCover.solarFactor.mean * slope.slope_leq(tech.maximumSlope)
@@ -51,14 +54,14 @@ val onshore = distanceToCoast.value <= 0
   // Actual area occupied by pv panels / heliostat / ...
   def panelArea(tech: SolarTechnology): Area = suitableArea(tech) / tech.occupationRatio
   def potential(tech: SolarTechnology): Power = tech.potential(if (tech.directOnly) dni else ghi, installedCapacity(tech))
-  
-  def potential(techs: List[SolarTechnology]): Power = {
-    val index_max_eroi = techs.zipWithIndex.map(i => (eroi(i._1),i._2)).maxBy(_._1)._2
-    potential(techs(index_max_eroi))
-  }
-  
+
+  // Technology that maximizes the EROI
+  def bestTechnology(techs: List[SolarTechnology]): SolarTechnology = techs(techs.zipWithIndex.map(i => (eroi(i._1), i._2)).maxBy(_._1)._2)
+
+  def potential(techs: List[SolarTechnology]): Power = potential(bestTechnology(techs))
+
   def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
-  
+
   def eroi(techs: List[SolarTechnology]): Double = techs.map(eroi(_)).max
   def eroi(tech: SolarTechnology): Double = {
     if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0

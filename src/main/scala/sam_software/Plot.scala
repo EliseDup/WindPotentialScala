@@ -16,11 +16,11 @@ object Plot {
 
   def main(args: Array[String]): Unit = {
     println("Parabolic no storage")
-    plotSimulations("../sam_data/trough_simulations", 0, CSPParabolic)
+    plotSimulations("../resources/data_solar/sam_data/trough_simulations", 0, CSPParabolic)
      println("Parabolic 12h storage")
-    plotSimulations("../sam_data/trough_simulations", 12, CSPParabolicStorage12h)
+    plotSimulations("../resources/data_solar/sam_data/trough_simulations", 12, CSPParabolicStorage12h)
      println("Tower 12h storage")
-    plotSimulations("../sam_data/tower_simulations", 12, CSPTowerStorage12h)
+    plotSimulations("../resources/data_solar/sam_data/tower_simulations", 12, CSPTowerStorage12h)
     //plotDNIvsEROI("../sam_data/latitude_dni_eff_tower12h_sm2_7",2.7,CSPTowerStorage12h)
     //plotDNIvsEROI("../sam_data/latitude_dni_eff_trough0h_sm1_3",1.3, CSPParabolic)
     //plotDNIvsEROI("../sam_data/latitude_dni_eff_trough0h_sm1_615",1.615, CSPParabolic)
