@@ -12,7 +12,7 @@ import squants.energy.Gigawatts
 import squants.radio.Irradiance
 import squants.time.Hours
 
-object CapacityFactorCalculation {
+object CapacityFactorCalculationTest {
   import utils.Helper._
   def main(args: Array[String]): Unit = {
     val wp = WindPotential()

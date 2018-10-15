@@ -176,6 +176,11 @@ object Helper {
     val sorted = values.sortBy(_._1).reverse
     (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ 0.0)
   }
+  def listCumulatedVSCumulatedBy(values: List[(Double, Double, Double)]): (List[Double], List[Double]) = {
+    val sorted = values.sortBy(_._1).reverse
+    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._3).scanLeft(0.0)(_ + _))
+  }
+  
 def countriesByContinent =  {
   val data_location = "/Users/Elise/Nextcloud/Doctorat/Data/countries/world/"
     val continentsName = getLines(data_location + "Continents", "\t").toList.map(_(0))

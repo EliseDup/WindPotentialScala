@@ -25,17 +25,20 @@ object Test {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-  
-    //val grid = _0_5deg
-    // plotXY(List(listEROI(grid.cells, PVPoly), listEROI(grid.cells, PVMono), listEROI(grid.cells, CSPParabolic), listEROI(grid.cells, CSPParabolicStorage12h), listEROI(grid.cells, CSPTowerStorage12h)),xLabel = "Potential [EJ/year]", yLabel = "EROI", legend = true)
-    //plotXY(List(listEROI(grid.cells, CSPParabolic), listEROI(grid.cells, CSPParabolicStorage12h)),xLabel = "Potential [EJ/year]", yLabel = "EROI", legend = true)
-
-    val dni = (5000 to 30000).map(_*0.1).toList
-    plotXY(List( (dni, dni.map(d => 6.747*math.log(d)-36.72), "Trough 0h, sm = 1.3"), 
+  val g = _0_5deg_total
+  g.write("ghi")
+  println("Write - OK")
+  PlotHelper.cumulativeDensity(List((g.cells.map(_.dni.toWattsPerSquareMeter),"DNI"),( g.cells.map(_.ghi.toWattsPerSquareMeter),"GHI")))
+ 
+  val dni = (500 to 4000).map(_ * 0.1).toList
+    PlotHelper.plotXY(List( (dni, dni.map(d => PVPoly.eroi(WattsPerSquareMeter(d))), "PV Poly"),
+        (dni, dni.map(d => CSPParabolicStorage12h.eroi(WattsPerSquareMeter(d))), "CSP 12h")), legend=true,xLabel = "DNI / GHI", yLabel ="EROI")
+        
+    /*   plotXY(List( (dni, dni.map(d => 6.747*math.log(d)-36.72), "Trough 0h, sm = 1.3"), 
         (dni, dni.map(d => 5.482*math.log(d)-28.34), "Trough 0h, sm = 1.615"), 
         (dni, dni.map(d => 7.49*math.log(d)-42.12), "Trough 12h, sm = 2.7"), 
         (dni, dni.map(d => 5.963*math.log(d)-32.51), "Trough 12h, sm = 3.6"), 
-        (dni, dni.map(d => 4.339*math.log(d)-16.97), "Tower 12h, sm = 2.7")), legend =true)
+        (dni, dni.map(d => 4.339*math.log(d)-16.97), "Tower 12h, sm = 2.7")), legend =true)*/
   }
 
   def pr(s: String) = print(s + "\t")
