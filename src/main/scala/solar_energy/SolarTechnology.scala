@@ -81,7 +81,7 @@ trait CSP extends SolarTechnology {
 }
 
 /**
- * Efficiency with DNI was extrapolated using SAM simulations. For the Solar Multiple usually used, and for th Solar Multiple that maximizes the EROI
+ * Efficiency with DNI was extrapolated using SAM simulations. For the Solar Multiple usually used, and for the Solar Multiple that maximizes the EROI
  * efficiency = a ln DNI + b
  *
  * Trough no storage, sm = 1.3 : 7.349 x - 42.12
@@ -139,9 +139,10 @@ trait SolarTechnology {
   def lifeTimeEfficiency(i: Irradiance) =
     if (degradationRate == 0) efficiency(i) * performanceRatio
     else efficiency(i) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
-  def panelArea(ratedPower: Power): Area = ratedPower / (designPointIrradiance * designEfficiency)
+  def panelArea(ratedPower: Power): Area = ratedPower / (designPointIrradiance * designEfficiency) * solarMultiple
   def potential(solar: Irradiance, ratedPower: Power): Power = panelArea(ratedPower) * solar * lifeTimeEfficiency(solar)
   def yearlyProduction(solar: Irradiance, ratedPower: Power): Energy = potential(solar, ratedPower) * Hours(365 * 24)
+
   def eroi(cf: Double) = ee.eroi(cf)
   def eroi(solar: Irradiance) = {
     val power = Gigawatts(1)

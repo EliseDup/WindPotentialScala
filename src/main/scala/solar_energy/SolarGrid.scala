@@ -65,7 +65,7 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
 
   def potential(techs: List[SolarTechnology]): Power = potential(bestTechnology(techs))
 
-  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance / tech.solarMultiple //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
+  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance // / tech.solarMultiple //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
 
   def eroi(techs: List[SolarTechnology]): Double = techs.map(eroi(_)).max
   

@@ -27,20 +27,12 @@ object SimuationResults {
   def main(args: Array[String]): Unit = {
 
     val grid = _0_5deg
-    grid.cells.map(c => {
-      val density = c.potential(CSPParabolicStorage12h).toWatts/c.suitableArea(CSPParabolicStorage12h).toSquareMeters
-      if(density > 20) {
-        println(c.installedCapacity(CSPParabolicStorage12h).toMegawatts + "\t" + c.suitableArea(CSPParabolicStorage12h).toSquareKilometers)
-        println(c.potential(CSPParabolicStorage12h) + "\t" + CSPParabolicStorage12h.efficiency(c.dni) + "\t" + c.dni)
-        println()
-      }
-    })
     
-    val techs = List(PVPoly, CSPParabolicStorage12h)
+    val techs = List(PVPoly, PVMono, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
+    plotPotentialByTechnology(grid, techs)
     
-    // plotXY(techs.map(t => listEROIVSArea(grid.cells, t)), xLabel = "Cumulated Area [Millions km2]", yLabel = "EROI", legend = true)
-    plotXY(techs.map(t => {
-      
+    plotXY(techs.map(t => listEROIVSArea(grid.cells, t)), xLabel = "Cumulated Area [Millions km2]", yLabel = "EROI", legend = true)
+    plotXY(techs.map(t => {  
       val i = listValueVSCumulated(grid.cells.map(g => (g.potential(t).toWatts/g.suitableArea(t).toSquareMeters, (g.potential(t)*Hours(365*24)).to(Exajoules))))
       (i._1,i._2,t.name)
     }),
