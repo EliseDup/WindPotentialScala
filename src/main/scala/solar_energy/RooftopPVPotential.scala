@@ -35,7 +35,7 @@ object RooftopPVPotential {
     val pvMono = listValueVSCumulated(resources.map(r => (PVMono.eroi(r._3), potential(r._2, r._3, PVMono).to(Exajoules))))
     val pvPoly = listValueVSCumulated(resources.map(r => (PVPoly.eroi(r._3), potential(r._2, r._3, PVPoly).to(Exajoules))))
 
-    plotXY(List((pvMono._1, pvMono._2, PVMono.name), (pvPoly._1, pvPoly._2, PVPoly.name)), xLabel = "Rooftop PV Potential [EJ/year]", yLabel = "EROI")
+    plotXY(List((pvMono._1, pvMono._2, PVMono.name), (pvPoly._1, pvPoly._2, PVPoly.name)), xLabel = "Rooftop PV Potential [EJ/year]", yLabel = "EROI", title = "rooftop_potential")
   }
 
   def potential(area: Area, irradiance: Irradiance, tech: SolarTechnology = PVMono) = {

@@ -10,6 +10,7 @@ import scala.io.Source
 import java.io.PrintStream
 
 object SolarGrid {
+  
   def _0_1deg = apply("../resources/data_solar/0_1deg", Degrees(0.1))
   def _0_5deg = apply("../resources/data_solar/0_5deg", Degrees(0.5))
   def _0_5deg_total = apply("../resources/data_solar/0_5deg_total", Degrees(0.5))
@@ -18,6 +19,7 @@ object SolarGrid {
     val list = Source.fromFile(name).getLines().toList
     new SolarGrid(list.map(SolarCell(_, res)).toList)
   }
+  
 }
 
 class SolarGrid(val cells: List[SolarCell]) {
@@ -27,11 +29,13 @@ class SolarGrid(val cells: List[SolarCell]) {
   def write(logFile: String) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(logFile))
     val techs = List(PVPoly, CSPParabolicStorage12h)
-    
+
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-      + (if(c.suitabilityFactor(techs(0))==0) 0.0 else techs.indexOf(c.bestTechnology(techs))+1).toDouble + "\t" + 
-      c.dni.toWattsPerSquareMeter*8.76 + "\t" + c.ghi.toWattsPerSquareMeter*8.76 + "\t" +
-      (if(c.dni > c.ghi) 1.0 else 0.0) + "\n"))
+      +(if (c.suitabilityFactor(techs(0)) == 0) 0.0 else techs.indexOf(c.bestTechnology(techs)) + 1).toDouble + "\t" +
+      c.dni.toWattsPerSquareMeter * 8.76 + "\t" + c.ghi.toWattsPerSquareMeter * 8.76 + "\t" +
+      (if (c.dni > c.ghi) 1.0 else 0.0) + "\t" + c.eroi(techs) +
+      "\t" + PVPoly.capacityFactor(c.ghi, c.panelArea(PVPoly)) * 100 + "\t" +
+      CSPParabolicStorage12h.capacityFactor(c.ghi, c.panelArea(PVPoly)) * 100 + "\n"))
     // cells.filter(_.dni.toWattsPerSquareMeter >= 200).map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
     //    + c.dni.toWattsPerSquareMeter*8.76 + "\n"))
     out_stream.close()
@@ -46,29 +50,32 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
   val onshore = distanceToCoast.value <= 0
   def suitabilityFactor(tech: SolarTechnology) = {
     if (protected_area || excludedCountries.contains(country) || country.contains("Is.") || country.contains("Islands")) 0.0
-    else if((tech.directOnly && dni.value==0) || ghi.value==0) 0.0
+    else if ((tech.directOnly && dni.value == 0) || ghi.value == 0) 0.0
     else landCover.solarFactor.mean * slope.slope_leq(tech.maximumSlope)
   }
 
   val area = Helper.areaRectangle(center, resolution)
-  def suitableArea(tech: SolarTechnology):Area = suitabilityFactor(tech) * area
+  def suitableArea(tech: SolarTechnology): Area = suitabilityFactor(tech) * area
   def suitableArea(techs: List[SolarTechnology]): Area = suitableArea(techs(techs.indexOf(bestTechnology(techs))))
- 
+
   def area(lcType: LandCoverType): Area = if (lcType.equals(landCover)) area else SquareKilometers(0)
 
   // Actual area occupied by pv panels / heliostat / ...
   def panelArea(tech: SolarTechnology): Area = suitableArea(tech) / tech.occupationRatio
-  def potential(tech: SolarTechnology): Power = tech.potential(if (tech.directOnly) dni else ghi, installedCapacity(tech))
+  def potential(tech: SolarTechnology): Power = tech.potential(if (tech.directOnly) dni else ghi, panelArea(tech))
 
   // Technology that maximizes the EROI
   def bestTechnology(techs: List[SolarTechnology]): SolarTechnology = techs(techs.zipWithIndex.map(i => (eroi(i._1), i._2)).maxBy(_._1)._2)
-
+  def bestCSPTechnology(techs: List[CSP]): (CSP,Boolean) = {
+    val list = techs.map(t => List((t,true),(t,false))).flatten
+    list(list.zipWithIndex.map(i => (i._1._1.eroi(dni,i._1._2), i._2)).maxBy(_._1)._2)
+  }
   def potential(techs: List[SolarTechnology]): Power = potential(bestTechnology(techs))
 
   def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance // / tech.solarMultiple //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
 
   def eroi(techs: List[SolarTechnology]): Double = techs.map(eroi(_)).max
-  
+
   def eroi(tech: SolarTechnology): Double = {
     if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0
     else {
