@@ -26,13 +26,18 @@ object SimuationResults {
 
   def main(args: Array[String]): Unit = {
 
-    val grid = _0_5deg
-   //  plotPotentialByTechnology(grid, List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), "potential_CSP")
-   val t = CSPParabolicStorage12h
-   plotXY(List(listEROI_opt_sm(grid.cells, t,false),
-       listEROI_best_CSP(grid.cells, List(t))),  xLabel = "Potential [EJ/year]", yLabel = "EROI", legend = true)
+   // plotResultsForPaper
     
-    
+    val tech = CSPTowerStorage12h
+    val dni = (50 to 450).map(_.toDouble).toList
+    val eroi = tech.sm.map(i => (dni, dni.map(j => tech.eroi(WattsPerSquareMeter(j), i)), i._1.toString))
+    plotXY(eroi, legend = true, xLabel = "DNI [W/m2]", yLabel = "EROI")
+    val eff = tech.sm.map(i => (dni, dni.map(j => tech.efficiency(WattsPerSquareMeter(j), i) * 100), i._1.toString))
+    plotXY(eff, legend = true, xLabel = "DNI [W/m2]", yLabel = "Efficiency [%]")
+    val sm_eroi = (dni, dni.map(j => tech.optimal_sm(WattsPerSquareMeter(j))), "Max EROI")
+    val sm_eff = (dni, dni.map(j => tech.max_efficiency_sm(WattsPerSquareMeter(j))), "Max efficiency")
+    plotXY(List(sm_eroi, sm_eff), legend = true, xLabel = "DNI [W/m2]", yLabel = "Optimal Solar Mutliple")
+
     print("-End-")
 
   }
@@ -83,18 +88,7 @@ object SimuationResults {
     val res = Helper.listValueVSCumulated(g.filter(g => g.potential(techs).value > 0 && g.eroi(techs) >= 1).map(g => (g.eroi(techs), (g.suitableArea(techs)).to(SquareKilometers) / 1E6)))
     (res._1, res._2, name)
   }
-  
-   def listEROI_opt_sm(g: List[SolarCell], tech: CSP, opt_sm: Boolean) = {
-    val res = Helper.listValueVSCumulated(g.filter(g => tech.yearlyProduction(g.dni, g.panelArea(tech), opt_sm).value > 0 && tech.eroi(g.dni, opt_sm) >= 1).map(g => (tech.eroi(g.dni, opt_sm), (tech.yearlyProduction(g.dni, g.panelArea(tech), opt_sm)).to(Exajoules))))
-    (res._1, res._2, if(opt_sm) "Optimal SM" else "Usual SM")
-  }
- def listEROI_best_CSP(g: List[SolarCell], techs: List[CSP]) = {
-    val res = Helper.listValueVSCumulated(g.filter(g => g.potential(techs).value > 0 && g.eroi(techs) >= 1).map(g => {
-      val bestTech = g.bestCSPTechnology(techs)
-      (bestTech._1.eroi(g.dni,bestTech._2), bestTech._1.yearlyProduction(g.dni, g.panelArea(bestTech._1), bestTech._2).to(Exajoules))
-    }))
-    (res._1, res._2, "Best Tech")
-  }
+
   def plotEROI(g: List[SolarCell], tech: SolarTechnology) = plotXY(List(listEROI(g, tech)), xLabel = "Potential " + tech.name + "[EJ/year]", yLabel = "EROI", title = "potential_" + tech.name)
   def plotEROI(g: List[SolarCell], techs: List[SolarTechnology], title: String) = plotXY(List(listEROI(g, techs)), xLabel = "Solar Potential [EJ/year]", yLabel = "EROI", title = title)
   def plotEROIArea(g: List[SolarCell], tech: SolarTechnology) = plotXY(List(listEROIVSArea(g, tech)), xLabel = "Cumulated Area " + tech.name + "[km2]", yLabel = "EROI", title = "potential_area" + tech.name)
@@ -105,6 +99,5 @@ object SimuationResults {
     (res._1, res._2, tech.name)
   }
   def plotPotentialVSArea(g: List[SolarCell], techs: List[SolarTechnology], title: String) = plotXY(techs.map(tech => listPotentialVSArea(g, tech)), legend = true, xLabel = "Cumulated Area [Millions km2]", yLabel = "Cumulated Potential [EJ/year]", title = title)
-  
-  
+
 }

@@ -31,7 +31,9 @@ class SolarGrid(val cells: List[SolarCell]) {
     val techs = List(PVPoly, CSPParabolicStorage12h)
 
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-      +(if (c.suitabilityFactor(techs(0)) == 0) 0.0 else techs.indexOf(c.bestTechnology(techs)) + 1).toDouble + "\t" +
+        (if(c.suitabilityFactor(CSPParabolic) > 0) CSPParabolicStorage12h.optimal_sm(c.dni) else "0.0") + "\t" +
+        (if(c.suitabilityFactor(CSPParabolic) > 0) CSPParabolic.optimal_sm(c.dni) else "0.0") +"\t" +
+      (if (c.suitabilityFactor(techs(0)) == 0) 0.0 else techs.indexOf(c.bestTechnology(techs)) + 1).toDouble + "\t" +
       c.dni.toWattsPerSquareMeter * 8.76 + "\t" + c.ghi.toWattsPerSquareMeter * 8.76 + "\t" +
       (if (c.dni > c.ghi) 1.0 else 0.0) + "\t" + c.eroi(techs) +
       "\t" + PVPoly.capacityFactor(c.ghi, c.panelArea(PVPoly)) * 100 + "\t" +
@@ -66,10 +68,7 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
 
   // Technology that maximizes the EROI
   def bestTechnology(techs: List[SolarTechnology]): SolarTechnology = techs(techs.zipWithIndex.map(i => (eroi(i._1), i._2)).maxBy(_._1)._2)
-  def bestCSPTechnology(techs: List[CSP]): (CSP,Boolean) = {
-    val list = techs.map(t => List((t,true),(t,false))).flatten
-    list(list.zipWithIndex.map(i => (i._1._1.eroi(dni,i._1._2), i._2)).maxBy(_._1)._2)
-  }
+
   def potential(techs: List[SolarTechnology]): Power = potential(bestTechnology(techs))
 
   def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance // / tech.solarMultiple //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))

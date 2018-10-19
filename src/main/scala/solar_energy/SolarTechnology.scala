@@ -56,33 +56,33 @@ trait CSP extends SolarTechnology {
   val directOnly = true;
   val maximumSlope = 2.0
   val degradationRate = 0.2 / 100
-  
+
+  // List of the (Solar Multiple, a, b) with a and b the parameter of the interpolation for the efficiency: eff = a ln DNI + b
+  val sm: List[(Double, Double, Double)]
+
   // Aperture Area is the area needed to reach the rated power under a given irradiance conditions (dni design point) : Power = Area * DNI * efficiency
   // Then we add a solar multiple (in general 1,3 without storage) to have a security
-  override def eroi(cf: Double) = ee.eroi(cf, panelArea(Gigawatts(1)))
-  override def eroi(solar: Irradiance) = {
-    val power = Gigawatts(1)
-    val yearProd = yearlyProduction(solar, panelArea(power))
-    yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, panelArea(power))
-  }
+  // The solar mutiple that maximises the EROI
+  override def optimal_sm(solar: Irradiance) = optimal_param(solar)._1
+  def optimal_param(solar: Irradiance): (Double, Double, Double) = sm(sm.zipWithIndex.map(i => (eroi(solar, i._1), i._2)).maxBy(_._1)._2)
+  def max_efficiency_sm(solar: Irradiance) = sm(sm.zipWithIndex.map(i => (efficiency(solar, i._1), i._2)).maxBy(_._1)._2)._1
+  def efficiency(dni: Irradiance, sm: (Double, Double, Double)): Double = (sm._2 * math.log(dni.toWattsPerSquareMeter * 8.76) + sm._3) / 100.0
+  def lifeTimeEfficiency(dni: Irradiance, sm: (Double, Double, Double)): Double = efficiency(dni, sm) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
 
-  def eroi(solar: Irradiance, opt_sm : Boolean) = {
+  def eroi(solar: Irradiance, sm: (Double, Double, Double)) = {
     val power = Gigawatts(1)
-    val yearProd = yearlyProduction(solar, panelArea(power, solarMutiple(opt_sm)), opt_sm)
-    yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, panelArea(power, solarMutiple(opt_sm)))
+    val yearProd = yearlyProduction(solar, panelArea(power, sm._1), sm)
+    yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, panelArea(power, sm._1))
   }
-
-  def yearlyProduction(solar : Irradiance, panelArea : Area, opt_sm: Boolean):Energy = {
-     panelArea * solar * lifeTimeEfficiency(solar,opt_sm) * Hours(365*24)
-  }
+  def potential(solar: Irradiance, panelArea: Area, sm: (Double, Double, Double)): Power = panelArea * solar * lifeTimeEfficiency(solar, sm)
+  def yearlyProduction(solar: Irradiance, panelArea: Area, sm: (Double, Double, Double)): Energy = potential(solar, panelArea, sm) * Hours(365 * 24)
+  def panelArea(ratedPower : Power, sm : Double) = ratedPower / (designPointIrradiance * designEfficiency) * sm
   
-  val usual_sm : Double; val optimal_sm : Double; val use_optimal_sm : Boolean = true;
-  override def solarMutiple(opti : Boolean = use_optimal_sm) = if(opti) optimal_sm else usual_sm  
-  val a_opt: Double; val b_opt: Double; val a: Double; val b: Double;
+  override def efficiency(solar: Irradiance): Double = efficiency(solar, optimal_param(solar))
+  override def eroi(solar: Irradiance): Double = eroi(solar, optimal_param(solar))
+  override def potential(solar: Irradiance, panelArea: Area): Power = potential(solar, panelArea, optimal_param(solar))
+  override def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = yearlyProduction(solar, panelArea, optimal_param(solar))
   
-  override def efficiency(dni: Irradiance): Double = efficiency(dni, use_optimal_sm)
-  def efficiency(dni: Irradiance, opt_sm: Boolean): Double = ((if (opt_sm) a_opt else a) * math.log(dni.toWattsPerSquareMeter * 8.76) + (if (opt_sm) b_opt else b)) / 100.0
-  def lifeTimeEfficiency(dni: Irradiance, opt_sm: Boolean): Double = efficiency(dni,opt_sm) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
 }
 
 /**
@@ -95,24 +95,23 @@ trait CSP extends SolarTechnology {
  * Trough 12h storage, sm = 3.6 : 5.483 x - 28.34
  * Tower 12h storage, sm = 2.7 : 4.339 x - 16.97
  * Tower 12h storage, sm = 3.6 : 2.933 x - 7.435
- *
+ * ...
+ * 
  */
+
 object CSPParabolic extends CSP {
   val name = "Trough, no storage"
   val designEfficiency = 0.22
-  val usual_sm = 1.3; val optimal_sm = 1.4
-  val a = 7.349; val b = -42.12
-  val a_opt = 7.524; val b_opt = -42.64
+  val sm = List((1.1,7.877,-46.26),(1.2,7.676,-44.59), (1.3, 7.349, -42.12), (1.4, 6.991, -39.62),(1.5, 6.395,-36.02),(1.6,5.999,-33.79),(1.615,5.963,-32.51),(1.7,5.677,-30.65))
   val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30,
     Gigajoules(1348389), Gigajoules(49617), SquareMeters(697286))
+
 }
 
 object CSPParabolicStorage12h extends CSP {
   val name = "Trough, 12h storage"
   val designEfficiency = 0.22
-  val usual_sm = 2.7; val optimal_sm = 3.6
-  val a = 6.747; val b = -36.72
-  val a_opt = 5.483; val b_opt = -28.34
+  val sm = List((2.7, 6.747, -36.72), (3.0, 6.433, -34.3),(3.1,6.262,-33.12),(3.2,6.109,-32.09),(3.3, 5.945, -30.99),(3.4,5.766,-29.78),(3.5, 5.607,-28.73), (3.6, 5.483, -28.34))
 
   val ee = new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))
@@ -121,9 +120,7 @@ object CSPParabolicStorage12h extends CSP {
 object CSPTowerStorage12h extends CSP {
   val name = "Tower, 12h storage"
   val designEfficiency = 0.21
-  val usual_sm = 2.7; val optimal_sm = 3.6
-  val a = 4.339; val b = -16.97
-  val a_opt = 2.933; val b_opt = -7.435
+  val sm = List((2.7, 4.339, -16.97), (3.6, 2.933, -7.435))
   val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(2116786), Gigajoules(52168), SquareMeters(1443932))
 }
@@ -135,7 +132,7 @@ trait SolarTechnology {
   val performanceRatio: Double;
   val degradationRate: Double
   val occupationRatio: Double;
-  def solarMutiple(opti : Boolean = true): Double = 1.0;
+  def optimal_sm(solar: Irradiance): Double = 1.0;
   val directOnly: Boolean;
   val maximumSlope: Double;
   val designEfficiency: Double;
@@ -148,16 +145,15 @@ trait SolarTechnology {
   def potential(solar: Irradiance, panelArea: Area): Power = panelArea * solar * lifeTimeEfficiency(solar)
   def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = potential(solar, panelArea) * Hours(365 * 24)
   // The size of the power block depending on design conditions, and solar multiple for CSP plants
-  def ratedPower(panelArea: Area) = panelArea * (designPointIrradiance * designEfficiency) / solarMutiple()
-  def panelArea(ratedPower: Power): Area = ratedPower / (designPointIrradiance * designEfficiency) * solarMutiple()
-  def panelArea(ratedPower: Power, sm: Double): Area = ratedPower / (designPointIrradiance * designEfficiency) * sm
+  def ratedPower(panelArea: Area, solar : Irradiance) = panelArea * (designPointIrradiance * designEfficiency) / optimal_sm(solar)
+  def panelArea(ratedPower: Power, solar : Irradiance): Area = ratedPower / (designPointIrradiance * designEfficiency) * optimal_sm(solar)
 
-  def capacityFactor(solar: Irradiance, panelArea: Area): Double = if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea) / ratedPower(panelArea) else 0.0
+  def capacityFactor(solar: Irradiance, panelArea: Area): Double = if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea) / ratedPower(panelArea,solar) else 0.0
 
   def eroi(cf: Double) = ee.eroi(cf)
   def eroi(solar: Irradiance) = {
     val power = Gigawatts(1)
-    val yearProd = yearlyProduction(solar, panelArea(power))
+    val yearProd = yearlyProduction(solar, panelArea(power,solar))
     yearProd * ee.lifeTime / ee.embodiedEnergy(power, yearProd)
   }
 }
