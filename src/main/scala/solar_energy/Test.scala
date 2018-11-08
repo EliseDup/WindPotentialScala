@@ -25,20 +25,14 @@ object Test {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-  val g = _0_5deg_total
-  g.write("ghi")
-  println("Write - OK")
-  PlotHelper.cumulativeDensity(List((g.cells.map(_.dni.toWattsPerSquareMeter),"DNI"),( g.cells.map(_.ghi.toWattsPerSquareMeter),"GHI")))
- 
-  val dni = (500 to 4000).map(_ * 0.1).toList
-    PlotHelper.plotXY(List( (dni, dni.map(d => PVPoly.eroi(WattsPerSquareMeter(d))), "PV Poly"),
-        (dni, dni.map(d => CSPParabolicStorage12h.eroi(WattsPerSquareMeter(d))), "CSP 12h")), legend=true,xLabel = "DNI / GHI", yLabel ="EROI")
-        
-    /*   plotXY(List( (dni, dni.map(d => 6.747*math.log(d)-36.72), "Trough 0h, sm = 1.3"), 
-        (dni, dni.map(d => 5.482*math.log(d)-28.34), "Trough 0h, sm = 1.615"), 
-        (dni, dni.map(d => 7.49*math.log(d)-42.12), "Trough 12h, sm = 2.7"), 
-        (dni, dni.map(d => 5.963*math.log(d)-32.51), "Trough 12h, sm = 3.6"), 
-        (dni, dni.map(d => 4.339*math.log(d)-16.97), "Tower 12h, sm = 2.7")), legend =true)*/
+
+    val annual_output = Gigajoules(688025257) / 30
+    val cf = annual_output / (Gigawatts(1) * Hours(365 * 24))
+    val tech = CSPTowerStorage12h
+    val aa = SquareMeters(18774446)/1.5
+   
+    println(tech.ee.embodiedEnergyArea(Gigawatts(1), annual_output, aa))
+    println(annual_output*30/(tech.ee.embodiedEnergyArea(Gigawatts(1), annual_output, aa)))
   }
 
   def pr(s: String) = print(s + "\t")
@@ -56,7 +50,7 @@ object Test {
     println(c + "\t" + cells.map(_.ghi.toWattsPerSquareMeter).sum / cells.size)
   }
 
-  def printArea(list: List[SolarCell], factor: Double = 1 / 1E6) {
+  def printArea(list: List[SolarCell], factor: Double = 1.0 / 1E6) {
 
     println(list.size)
     println("Total " + "\t" + areaList(list).toSquareKilometers * factor)

@@ -19,8 +19,8 @@ object Plot {
     plotSimulations("../resources/data_solar/sam_data/trough_simulations", 0, CSPParabolic)
      println("Parabolic 12h storage")
     plotSimulations("../resources/data_solar/sam_data/trough_simulations", 12, CSPParabolicStorage12h)
-     println("Tower 12h storage")
-    plotSimulations("../resources/data_solar/sam_data/tower_simulations", 12, CSPTowerStorage12h)
+    // println("Tower 12h storage")
+    //plotSimulations("../resources/data_solar/sam_data/tower_simulations", 12, CSPTowerStorage12h)
     //plotDNIvsEROI("../sam_data/latitude_dni_eff_tower12h_sm2_7",2.7,CSPTowerStorage12h)
     //plotDNIvsEROI("../sam_data/latitude_dni_eff_trough0h_sm1_3",1.3, CSPParabolic)
     //plotDNIvsEROI("../sam_data/latitude_dni_eff_trough0h_sm1_615",1.615, CSPParabolic)
@@ -48,8 +48,8 @@ object Plot {
       val max = i._2.zipWithIndex.maxBy(_._1)._2
       println("Max EROI" + "\t" + i._3 + "\t" + i._1(max) + "\t" + i._2(max))
     }
-    plotXY(list, xLabel = "Solar Multiple", yLabel = "Efficiency [%]", legend = true)
-    plotXY(listEROI, xLabel = "Solar Multiple", yLabel = "EROI", legend = true)
+    plotXY(list, xLabel = "Solar Multiple", yLabel = "Efficiency [%]", legend = false)
+    plotXY(listEROI, xLabel = "Solar Multiple", yLabel = "EROI", legend = false)
   }
   def plotDNIvsEfficiency(data: String) {
     val res = Helper.getLines(data, "\t").map(i => (i(1).toDouble, i(2).toDouble))

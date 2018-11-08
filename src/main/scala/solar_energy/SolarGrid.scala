@@ -10,7 +10,7 @@ import scala.io.Source
 import java.io.PrintStream
 
 object SolarGrid {
-  
+
   def _0_1deg = apply("../resources/data_solar/0_1deg", Degrees(0.1))
   def _0_5deg = apply("../resources/data_solar/0_5deg", Degrees(0.5))
   def _0_5deg_total = apply("../resources/data_solar/0_5deg_total", Degrees(0.5))
@@ -19,7 +19,7 @@ object SolarGrid {
     val list = Source.fromFile(name).getLines().toList
     new SolarGrid(list.map(SolarCell(_, res)).toList)
   }
-  
+
 }
 
 class SolarGrid(val cells: List[SolarCell]) {
@@ -31,8 +31,8 @@ class SolarGrid(val cells: List[SolarCell]) {
     val techs = List(PVPoly, CSPParabolicStorage12h)
 
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-        (if(c.suitabilityFactor(CSPParabolic) > 0) CSPParabolicStorage12h.optimal_sm(c.dni) else "0.0") + "\t" +
-        (if(c.suitabilityFactor(CSPParabolic) > 0) CSPParabolic.optimal_sm(c.dni) else "0.0") +"\t" +
+      (if (c.suitabilityFactor(CSPParabolic) > 0) CSPParabolicStorage12h.optimal_sm(c.dni) else "0.0") + "\t" +
+      (if (c.suitabilityFactor(CSPParabolic) > 0) CSPParabolic.optimal_sm(c.dni) else "0.0") + "\t" +
       (if (c.suitabilityFactor(techs(0)) == 0) 0.0 else techs.indexOf(c.bestTechnology(techs)) + 1).toDouble + "\t" +
       c.dni.toWattsPerSquareMeter * 8.76 + "\t" + c.ghi.toWattsPerSquareMeter * 8.76 + "\t" +
       (if (c.dni > c.ghi) 1.0 else 0.0) + "\t" + c.eroi(techs) +
@@ -41,6 +41,19 @@ class SolarGrid(val cells: List[SolarCell]) {
     // cells.filter(_.dni.toWattsPerSquareMeter >= 200).map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
     //    + c.dni.toWattsPerSquareMeter*8.76 + "\n"))
     out_stream.close()
+  }
+  def writePotential(eroi_min: Double) {
+    val out_stream = new PrintStream(new java.io.FileOutputStream("potential_" + eroi_min))
+    val techs = List(PVPoly, CSPParabolicStorage12h, CSPTowerStorage12h, CSPParabolic)
+    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
+
+      (if (c.potential(techs).value > 0 && c.eroi(techs) > eroi_min) {
+        math.min((techs.indexOf(c.bestTechnology(techs)) + 1).toDouble,2.0)
+      } else {
+        "0.0"
+      }) + "\n"))
+    out_stream.close()
+
   }
 }
 
@@ -65,11 +78,20 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
   // Actual area occupied by pv panels / heliostat / ...
   def panelArea(tech: SolarTechnology): Area = suitableArea(tech) / tech.occupationRatio
   def potential(tech: SolarTechnology): Power = tech.potential(if (tech.directOnly) dni else ghi, panelArea(tech))
-
+  def grossYearlyProduction(tech: SolarTechnology): Energy = potential(tech) * Hours(365 * 24)
+  def netYearlyProduction(tech: SolarTechnology): Energy = {
+    val solar = if (tech.directOnly) dni else ghi
+    val aperture = panelArea(tech)
+    val power = tech.ratedPower(aperture, solar)
+    val gross = grossYearlyProduction(tech)
+    gross - tech.ee.embodiedEnergy(power, gross) / tech.ee.lifeTime
+  }
   // Technology that maximizes the EROI
   def bestTechnology(techs: List[SolarTechnology]): SolarTechnology = techs(techs.zipWithIndex.map(i => (eroi(i._1), i._2)).maxBy(_._1)._2)
 
   def potential(techs: List[SolarTechnology]): Power = potential(bestTechnology(techs))
+  def netYearlyProduction(techs: List[SolarTechnology]): Energy = netYearlyProduction(bestTechnology(techs))
+  def grossYearlyProduction(techs: List[SolarTechnology]): Energy = grossYearlyProduction(bestTechnology(techs))
 
   def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance // / tech.solarMultiple //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
 

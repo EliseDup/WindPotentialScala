@@ -17,14 +17,14 @@ trait PV extends SolarTechnology {
 }
 
 object PVPoly extends PV {
-  val name = "PV Poly 17 %"
-  val ee = new EmbodiedEnergy(Gigajoules(16605974), Gigajoules(143305), Gigajoules(653102), Gigajoules(52911), Gigajoules(0.0097), 25)
+  val name = "poly-Si-PV"
+  val ee = new EmbodiedEnergy(Gigajoules(12211495+4394479), Gigajoules(71652+71652), Gigajoules(653102), Gigajoules(52911.81), Gigajoules(0.0097), 25)
   val designEfficiency = 0.17;
   val degradationRate = 0.5 / 100
 }
 object PVMono extends PV {
-  val name = "PV Mono 24 %"
-  val ee = new EmbodiedEnergy(Gigajoules(14477204), Gigajoules(122559), Gigajoules(469376), Gigajoules(45251), Gigajoules(0.0097), 25)
+  val name = "mono-Si-PV"
+  val ee = new EmbodiedEnergy(Gigajoules(14477204), Gigajoules(122559), Gigajoules(469378), Gigajoules(45251), Gigajoules(0.0097), 25)
   val designEfficiency = 0.24;
   val degradationRate = 0.36 / 100
 }
@@ -100,29 +100,49 @@ trait CSP extends SolarTechnology {
  */
 
 object CSPParabolic extends CSP {
-  val name = "Trough, no storage"
+  val name = "PTPP"
   val designEfficiency = 0.22
-  val sm = List((1.1,7.877,-46.26),(1.2,7.676,-44.59), (1.3, 7.349, -42.12), (1.4, 6.991, -39.62),(1.5, 6.395,-36.02),(1.6,5.999,-33.79),(1.615,5.963,-32.51),(1.7,5.677,-30.65))
+  
+  val sm = List(
+      (1.1,7.877,-46.26),
+      (1.2,7.676,-44.59), 
+      (1.3, 7.349, -42.12), 
+      (1.4, 6.991, -39.62),
+      (1.5, 6.395,-36.02),
+      (1.6,5.999,-33.79),
+      //(1.615,5.963,-32.51),
+      (1.7,5.677,-30.65))
+   
   val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30,
-    Gigajoules(1348389), Gigajoules(49617), SquareMeters(697286))
+    Gigajoules(1348389), Gigajoules(49617), SquareMeters(607286))
 
 }
 
 object CSPParabolicStorage12h extends CSP {
-  val name = "Trough, 12h storage"
+  val name = "PTPP-TES"
   val designEfficiency = 0.22
-  val sm = List((2.7, 6.747, -36.72), (3.0, 6.433, -34.3),(3.1,6.262,-33.12),(3.2,6.109,-32.09),(3.3, 5.945, -30.99),(3.4,5.766,-29.78),(3.5, 5.607,-28.73), (3.6, 5.483, -28.34))
+  val sm = List((2.7, 6.936,-37.83),
+      (2.8,6.776,-36.72),
+      (2.9,6.612,-35.56),
+      (3.0, 6.433, -34.3),
+      (3.1,6.262,-33.12),
+      (3.2,6.109,-32.09),
+      (3.3, 5.945, -30.99),
+      (3.4,5.766,-29.78),
+      (3.5, 5.607,-28.73),
+      (3.6, 5.433, -27.63),
+      (3.7, 5.315, -26.86))
 
   val ee = new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))
 }
 
 object CSPTowerStorage12h extends CSP {
-  val name = "Tower, 12h storage"
+  val name = "STPP-TES"
   val designEfficiency = 0.21
   val sm = List((2.7, 4.339, -16.97), (3.6, 2.933, -7.435))
-  val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
-    Gigajoules(2116786), Gigajoules(52168), SquareMeters(1443932))
+  val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(3723 + 7197 + 183720), Gigajoules(0.05 + 0.023), 30,
+    Gigajoules(1329266), Gigajoules(52168), SquareMeters(1443932))
 }
 
 trait SolarTechnology {
@@ -157,9 +177,6 @@ trait SolarTechnology {
     yearProd * ee.lifeTime / ee.embodiedEnergy(power, yearProd)
   }
 }
-
-//object CSPParabolicStorage extends EmbodiedEnergy(Gigajoules(23097102),Gigajoules(457757),Gigajoules(1372567),Gigajoules(183720),Gigajoules(0.12))
-//object CSPTowerStorage extends EmbodiedEnergy(Gigajoules(30601229),Gigajoules(457757),Gigajoules(1088293),Gigajoules(183720),Gigajoules(0.12))
 
 class EmbodiedEnergy(val raw_materials: Energy,
     val construction_decomissioning: Energy, val transport_materials: Energy, val O_M_fixed: Energy,
