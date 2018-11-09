@@ -25,13 +25,23 @@ object SimuationResults {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-   // plotResultsForPaper
    
+    val dni = (1500 to 3500).map(_.toDouble).toList
+    val sm = List(2.5, 3, 3.5, 4)
+    plotXY(sm.map(s => (dni, dni.map(d => CSPParabolicStorage12h.eroi(WattsPerSquareMeter(d / 8.76), s)), s.toString)), legend = true, xLabel = "DNI [kWh/m2/year]", yLabel = "EROI")
+
+    val sm2 = (100 to 600).map(_ * 0.01).toList
+    val dni2 = List(2000, 2500, 3000)
+
+    plotXY(dni2.map(d => (sm2, sm2.map(s => CSPParabolicStorage12h.eroi(WattsPerSquareMeter(d / 8.76), s)), d.toString)), legend = true, xLabel = "SM", yLabel = "EROI")
+
+    //plotResultsForPaper
+    //plotBestSM(CSPTowerStorage12h)
 
     val grid = _0_5deg_total
-  //  grid.writePotential(0)
+    //  grid.writePotential(0)
     grid.writePotential(1)
- /*     grid.writePotential(3)
+    /*     grid.writePotential(3)
     grid.writePotential(5)
     grid.writePotential(7)
     grid.writePotential(9)
@@ -53,11 +63,11 @@ object SimuationResults {
 
   def plotBestSM(tech: CSP) {
     val dni = (50 to 450).map(_.toDouble).toList
-    val eroi = tech.sm.map(i => (dni, dni.map(j => tech.eroi(WattsPerSquareMeter(j), i)), i._1.toString))
+    val eroi = tech.sm_range.map(i => (dni, dni.map(j => tech.eroi(WattsPerSquareMeter(j), i)), i.toString))
     plotXY(eroi, legend = true, xLabel = "DNI [W/m2]", yLabel = "EROI")
-    val eff = tech.sm.map(i => (dni, dni.map(j => tech.efficiency(WattsPerSquareMeter(j), i) * 100), i._1.toString))
+    val eff = tech.sm_range.map(i => (dni, dni.map(j => tech.efficiency(WattsPerSquareMeter(j), i) * 100), i.toString))
     plotXY(eff, legend = true, xLabel = "DNI [W/m2]", yLabel = "Efficiency [%]")
-    val sm_eroi = (dni, dni.map(j => tech.optimal_sm(WattsPerSquareMeter(j))), "Max EROI")
+    val sm_eroi = (dni, dni.map(j => tech.max_eroi_sm(WattsPerSquareMeter(j))), "Max EROI")
     val sm_eff = (dni, dni.map(j => tech.max_efficiency_sm(WattsPerSquareMeter(j))), "Max efficiency")
     plotXY(List(sm_eroi, sm_eff), legend = true, xLabel = "DNI [W/m2]", yLabel = "Optimal Solar Multiple")
   }
@@ -69,8 +79,8 @@ object SimuationResults {
     plotEROI(grid.cells, techs, "potential")
     plotPotentialByTechnology(grid, List(PVPoly, PVMono), "potential_PV")
     plotPotentialByTechnology(grid, List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), "potential_CSP")
-     plotPotentialByTechnology(grid, techs, "potential_allTech")
-   
+    plotPotentialByTechnology(grid, techs, "potential_allTech")
+
     plotPotentialByContinents(grid, techs, "potential_by_continent")
 
     plotPotentialVSArea(grid.cells, techs, "potential_area")
