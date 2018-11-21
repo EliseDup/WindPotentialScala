@@ -25,51 +25,25 @@ object SimuationResults {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-   
-    val dni = (1500 to 3500).map(_.toDouble).toList
-    val sm = List(2.5, 3, 3.5, 4)
-    plotXY(sm.map(s => (dni, dni.map(d => CSPParabolicStorage12h.eroi(WattsPerSquareMeter(d / 8.76), s)), s.toString)), legend = true, xLabel = "DNI [kWh/m2/year]", yLabel = "EROI")
+printResultsForPaper(1)
+    // plotResultsForPaper
 
-    val sm2 = (100 to 600).map(_ * 0.01).toList
-    val dni2 = List(2000, 2500, 3000)
+    val g = _0_5deg_total
+    g.write("optimal_sm")
 
-    plotXY(dni2.map(d => (sm2, sm2.map(s => CSPParabolicStorage12h.eroi(WattsPerSquareMeter(d / 8.76), s)), d.toString)), legend = true, xLabel = "SM", yLabel = "EROI")
-
-    //plotResultsForPaper
-    //plotBestSM(CSPTowerStorage12h)
-
-    val grid = _0_5deg_total
-    //  grid.writePotential(0)
-    grid.writePotential(1)
-    /*     grid.writePotential(3)
-    grid.writePotential(5)
-    grid.writePotential(7)
-    grid.writePotential(9)
-      val g = grid.cells
-    val techs = List(PVPoly, PVMono, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
-    
-    techs.map(t => println(t.name + "\t" + potential(grid.cells, List(t), 1).to(Exajoules)))
-    
-    val pot = potential(grid.cells, techs, 1)
-    val list = Helper.listValueVSCumulated(g.filter(g => g.netYearlyProduction(techs).value > 0 && g.eroi(techs) >= 1).map(g => (g.eroi(techs), (g.netYearlyProduction(techs)).to(Exajoules))))
-    val x = (1 to 20).map(_*0.05).toList
-    x.map(i => {
-      val quantile = list._1.zipWithIndex.filter(j => j._1 >= i*pot.to(Exajoules)).minBy(_._1)
-      println(i*100 + " % " + quantile._1 + "\t" + list._2(quantile._2))
-    })*/
     print("-End-")
 
   }
 
-  def plotBestSM(tech: CSP) {
-    val dni = (50 to 450).map(_.toDouble).toList
-    val eroi = tech.sm_range.map(i => (dni, dni.map(j => tech.eroi(WattsPerSquareMeter(j), i)), i.toString))
-    plotXY(eroi, legend = true, xLabel = "DNI [W/m2]", yLabel = "EROI")
-    val eff = tech.sm_range.map(i => (dni, dni.map(j => tech.efficiency(WattsPerSquareMeter(j), i) * 100), i.toString))
-    plotXY(eff, legend = true, xLabel = "DNI [W/m2]", yLabel = "Efficiency [%]")
-    val sm_eroi = (dni, dni.map(j => tech.max_eroi_sm(WattsPerSquareMeter(j))), "Max EROI")
-    val sm_eff = (dni, dni.map(j => tech.max_efficiency_sm(WattsPerSquareMeter(j))), "Max efficiency")
-    plotXY(List(sm_eroi, sm_eff), legend = true, xLabel = "DNI [W/m2]", yLabel = "Optimal Solar Multiple")
+  def plotBestSM(tech: CSP, sm: List[Double]) {
+    val dni = (150 to 450).map(_.toDouble).toList
+    val eroi = sm.map(i => (dni, dni.map(j => tech.eroi(WattsPerSquareMeter(j), i)), i.toString))
+    //plotXY(eroi, legend = true, xLabel = "DNI [W/m2]", yLabel = "EROI")
+    val eff = sm.map(i => (dni, dni.map(j => tech.efficiency(WattsPerSquareMeter(j), i) * 100), i.toString))
+    //plotXY(eff, legend = true, xLabel = "DNI [W/m2]", yLabel = "Efficiency [%]")
+    val sm_eroi = (dni.map(_ * 8.76), dni.map(j => tech.max_eroi_sm(WattsPerSquareMeter(j))), "Max EROI")
+    // val sm_eff = (dni, dni.map(j => tech.max_efficiency_sm(WattsPerSquareMeter(j))), "Max efficiency")
+    plotXY(List(sm_eroi), xLabel = "DNI [kWh/m2/year]", yLabel = "Optimal SM " + tech.name)
   }
 
   def plotResultsForPaper {
@@ -77,9 +51,10 @@ object SimuationResults {
     val techs = List(PVPoly, PVMono, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
 
     plotEROI(grid.cells, techs, "potential")
-    plotPotentialByTechnology(grid, List(PVPoly, PVMono), "potential_PV")
-    plotPotentialByTechnology(grid, List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), "potential_CSP")
-    plotPotentialByTechnology(grid, techs, "potential_allTech")
+    plotPotentialByTechnology(grid.cells, List(PVPoly, PVMono), "potential_PV")
+    plotPotentialByTechnology(grid.cells, List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), "potential_CSP")
+    plotPotentialByTechnology(grid.cells, techs, "potential_allTech")
+    plotPotentialByTechnology(grid.eu28, techs, "potential_eu28")
 
     plotPotentialByContinents(grid, techs, "potential_by_continent")
 
@@ -88,6 +63,27 @@ object SimuationResults {
     plotPotentialVSAreaByContinents(grid, List(CSPParabolicStorage12h), "potentialByContinentArea_CSP")
 
     // Plot potential for the usual / optimal solar multiple
+    
+  }
+  def printResultsForPaper(eroi_min : Double) {
+    val grid = _0_5deg
+    val techs = List(PVPoly, PVMono, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
+    val total = potential(grid.cells,techs,eroi_min).to(Exajoules)
+    println("Potential All Tech "+ "\t" +  math.round(total))
+    techs.map(t => println("Potential "+t.name + "\t" + math.round(potential(grid.cells,List(t),eroi_min).to(Exajoules))))
+    
+    
+    // Tables by continent
+    val countries = countriesByContinent
+    println(" & Total & CSP & PV & of Global Potential \\"+ "\\")
+    countries.map(c => println(c._1 + " & " + 
+        math.round(potential(grid.countries(c._2),techs,eroi_min).to(Exajoules)) + " & " + 
+        math.round(potential(grid.countries(c._2),List(PVMono,PVPoly),eroi_min).to(Exajoules)) + " & " + 
+        math.round(potential(grid.countries(c._2),List(CSPParabolic,CSPParabolicStorage12h,CSPTowerStorage12h),eroi_min).to(Exajoules)) + " & " +
+        math.round(potential(grid.countries(c._2),techs,eroi_min).to(Exajoules)/total*100) +
+        " \\" + "\\" ))
+     println("textbf{Total}" + "&" + math.round(total) + " & " + math.round(potential(grid.cells,List(PVMono,PVPoly),eroi_min).to(Exajoules))+ "& " + 
+         math.round(potential(grid.cells,List(CSPParabolic,CSPParabolicStorage12h,CSPTowerStorage12h),eroi_min).to(Exajoules)) + " & " +" \\" + "\\" )
   }
 
   def plotPotentialByContinents(grid: SolarGrid, techs: List[SolarTechnology], title: String) {
@@ -100,8 +96,8 @@ object SimuationResults {
     val continents = countries.map(c => listEROIVSArea(grid.countries(c._2), techs, c._1))
     plotXY(continents, xLabel = "Cumulated Area [Millions km2]", yLabel = "EROI", legend = true, title = title)
   }
-  def plotPotentialByTechnology(grid: SolarGrid, techs: List[SolarTechnology], title: String) {
-    plotXY(techs.map(t => listEROI(grid.cells, t)), xLabel = "Net Potential [EJ/year]", yLabel = "EROI", legend = true, title = title)
+  def plotPotentialByTechnology(grid: List[SolarCell], techs: List[SolarTechnology], title: String) {
+    plotXY(techs.map(t => listEROI(grid, t)), xLabel = "Net Potential [EJ/year]", yLabel = "EROI", legend = true, title = title)
   }
 
   def listEROI(g: List[SolarCell], tech: SolarTechnology) = {

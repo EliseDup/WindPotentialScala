@@ -98,9 +98,9 @@ trait CSP extends SolarTechnology {
 object CSPParabolic extends CSP {
   val name = "PTPP"
   val designEfficiency = 0.22
-  def a(sm : Double) = -3.442*sm + 11.62
-  def b(sm : Double) = 24.52*sm - 73.07
-  val sm_range = (10 to 20).map(_*0.1).toList
+  def a(sm : Double) = -3.38*sm + 11.55
+  def b(sm : Double) = 23.85*sm - 72.26
+  val sm_range = (10 to 50).map(_*0.1).toList
   val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30,
     Gigajoules(1348389), Gigajoules(49617), SquareMeters(607286))
 
@@ -110,7 +110,7 @@ object CSPParabolicStorage12h extends CSP {
   val name = "PTPP-TES"
   val designEfficiency = 0.22
   
-  val sm_range = (20 to 37).map(_*0.1).toList
+  val sm_range = (10 to 100).map(_*0.1).toList
   
   def a(sm : Double) =  -1.578*sm + 11.17
   def b(sm : Double) = 10.65*sm - 66.33
@@ -122,9 +122,9 @@ object CSPParabolicStorage12h extends CSP {
 object CSPTowerStorage12h extends CSP {
   val name = "STPP-TES"
   val designEfficiency = 0.21
-  val sm_range = (20 to 40).map(_*0.1).toList
-  def a(sm : Double) = -1.562*sm + 8.557
-  def b(sm : Double) = 10.59*sm - 45.57
+  val sm_range = (10 to 100).map(_*0.1).toList
+  def a(sm : Double) = -1.62*sm + 8.742
+  def b(sm : Double) = 11.01*sm - 46.86
   
   val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(3723 + 7197 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(1329266), Gigajoules(52168), SquareMeters(1443932))

@@ -7,6 +7,8 @@ import squants.energy._
 import wind_energy.WindPotential
 import wind_energy.CapacityFactorCalculation
 import squants.radio.WattsPerSquareMeter
+import squants.time.Hours
+import squants.motion.MetersPerSecond
 
 // All the information to run results for the wind paper 
 // "Global Wind Potential with Physical and EROI constraints"
@@ -18,13 +20,14 @@ object WindPotential_12_2017 {
   def results_bottom_up = new WorldGrid("runs_history/wind_2017/results_wind_2017_bottom_up", Degrees(0.75), eroi_min, 34, 151, true, false)
   def results_1_5_dissipation = new WorldGrid("runs_history/wind_2017/results_wind_2017_1_5_dissipation", Degrees(0.75), eroi_min, 34, 151, true, false)
   def results_max1we = new WorldGrid("runs_history/wind_2017/results_wind_2017_max1we", Degrees(0.75), eroi_min, 34, 151, true, false)
+  
 
   def main(args: Array[String]): Unit = {
     plotForPaper
     printResultsForPaper
   }
-  
-   def plotForPaper {
+
+  def plotForPaper {
     val g = results.grids.filter(_.EEZ)
     plotEnveloppe(g, eroi_min)
     plotPotential(g, eroi_min, 100.0)
@@ -168,7 +171,7 @@ object WindPotential_12_2017 {
   def round2Dec(e: Energy) = (Math.round(e.to(Exajoules) * 100) / 100.0)
   def round(value: Double) = (Math.round(value * 100) / 100.0) // Math.round(value)
   def round2Dec(value: Double) = (Math.round(value * 100) / 100.0)
-  
+
   def plotEnveloppe(grids: List[GridCell], eroi: List[Double], tick: (Boolean, Double, Double) = (true, 100, 2)) {
     val total = WindPotential().eroiFunction(grids, 1, true, "Net Energy Maximization")
 

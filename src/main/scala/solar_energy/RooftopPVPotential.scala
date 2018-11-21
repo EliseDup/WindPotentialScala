@@ -11,6 +11,8 @@ import squants.time.Hours
 import utils.Exajoules
 import utils._
 import squants.energy.Joules
+import squants.energy.Energy
+import squants.energy.Megawatts
 
 object RooftopPVPotential {
 
@@ -18,28 +20,45 @@ object RooftopPVPotential {
   import Helper._
 
   val grid = SolarGrid._0_5deg
-  val rooftop_area = Helper.getLines("../resources/data_solar/rooftop_area", "\t").map(i => (i(0).toString, SquareKilometers(i(1).toInt))).filter(i => grid.country(i._1).nonEmpty)
+  val rooftop_area = Helper.getLines("../resources/data_solar/rooftop_area", "\t").map(i =>
+    (i(0).toString, SquareKilometers(i(1).toDouble), SquareKilometers(i(2).toDouble), i(3).toDouble, i(4).toDouble)).filter(i => grid.country(i._1).nonEmpty)
 
-  val resources: List[(String, Area, Irradiance)] = rooftop_area.map(c => {
+  val resources: List[(String, Irradiance, Area, Area, Double, Double)] = rooftop_area.map(c => {
     val cells = grid.country(c._1)
-    (c._1, c._2, WattsPerSquareMeter(cells.map(_.ghi.toWattsPerSquareMeter).sum / cells.size))
+    (c._1, WattsPerSquareMeter(cells.map(_.ghi.toWattsPerSquareMeter).sum / cells.size), c._2, c._3, 0.25, 0.65)
   })
 
   def main(args: Array[String]): Unit = {
-    val area = (resources.map(_._2).foldLeft(SquareKilometers(0))(_ + _))
-    val meanGhi = (resources.map(_._3).foldLeft(WattsPerSquareMeter(0))(_ + _) / resources.size)
+    val area = (resources.map(i => i._3 * i._5 + i._4 * i._6).foldLeft(SquareKilometers(0))(_ + _))
+    val meanGhi = (resources.map(_._2).foldLeft(WattsPerSquareMeter(0))(_ + _) / resources.size)
+    resources.map(i => println(i._1 + "\t" + i._2.toWattsPerSquareMeter + "\t" + i._3.toSquareKilometers + "\t" + i._4.toSquareKilometers + "\t" + (netYearlyProductions(i._3*i._5+i._4*i._6, i._2, PVMono)/Hours(365*24)).to(Megawatts)
+        + "\t" +  (potential(i._3*i._5+i._4*i._6, i._2, PVMono)/Hours(365*24)).to(Megawatts)  + "\t" + PVMono.eroi(i._2) + "\t" + PVMono.lifeTimeEfficiency(WattsPerSquareMeter(1000))))
+    val pvMonoRes = listValueVSCumulated(resources.map(i => (PVMono.eroi(i._2), netYearlyProductions(i._3 * i._5, i._2, PVMono).to(Exajoules))))
+    val pvMonoCom = listValueVSCumulated(resources.map(i => (PVMono.eroi(i._2), netYearlyProductions(i._4 * i._6, i._2, PVMono).to(Exajoules))))
+    println(pvMonoRes._1.max)
+    println(pvMonoCom._1.max)
 
-    val pot = (resources.map(i => potential(i._2, i._3)).foldLeft(Joules(0))(_ + _))
-    println(pot.to(Exajoules))
-    resources.map(i => println(i._1 + "\t" + i._2.toSquareKilometers + "\t" + i._3.toWattsPerSquareMeter + "\t" + (potential(i._2, i._3, PVMono) / Hours(365 * 24)).toMegawatts + "\t" + PVMono.eroi(i._3)))
-    val pvMono = listValueVSCumulated(resources.map(r => (PVMono.eroi(r._3), potential(r._2, r._3, PVMono).to(Exajoules))))
-    val pvPoly = listValueVSCumulated(resources.map(r => (PVPoly.eroi(r._3), potential(r._2, r._3, PVPoly).to(Exajoules))))
+    val pvPolyRes = listValueVSCumulated(resources.map(i => (PVPoly.eroi(i._2), netYearlyProductions(i._3 * i._5, i._2, PVPoly).to(Exajoules))))
+    val pvPolyCom = listValueVSCumulated(resources.map(i => (PVPoly.eroi(i._2), netYearlyProductions(i._4 * i._6, i._2, PVPoly).to(Exajoules))))
+    println(pvPolyRes._1.max)
+    println(pvPolyCom._1.max)
 
-    plotXY(List((pvMono._1, pvMono._2, PVMono.name), (pvPoly._1, pvPoly._2, PVPoly.name)), xLabel = "Rooftop PV Potential [EJ/year]", yLabel = "EROI", title = "rooftop_potential")
+    plotXY(List((pvMonoRes._1, pvMonoRes._2, "Residential"), (pvMonoCom._1, pvMonoCom._2, "Commercial")), legend = true, xLabel = "mono-Si-PV, Net Potential [EJ/year]", yLabel = "EROI", title = "rooftop_potential_mono")
+    plotXY(List((pvPolyRes._1, pvPolyRes._2, "Residential"), (pvPolyCom._1, pvPolyCom._2, "Commercial")), legend = true, xLabel = "poly-Si-PV, Net Potential [EJ/year]", yLabel = "EROI", title = "rooftop_potential_poly")
+
   }
 
-  def potential(area: Area, irradiance: Irradiance, tech: SolarTechnology = PVMono) = {
-    tech.lifeTimeEfficiency(irradiance) * area * irradiance / tech.occupationRatio * Hours(365 * 24)
+  def potential(area: Area, irradiance: Irradiance, tech: SolarTechnology): Energy = {
+    tech.lifeTimeEfficiency(irradiance) * area * irradiance * Hours(365 * 24)
   }
+  def capacityFactor(area: Area, irradiance: Irradiance, tech: SolarTechnology): Double = {
+    potential(area, irradiance, tech) / (tech.ratedPower(area, irradiance) * Hours(365 * 24))
+  }
+  def netYearlyProductions(area: Area, irradiance: Irradiance, tech: SolarTechnology): Energy = {
+    val power = tech.ratedPower(area, irradiance)
+    val gross = potential(area, irradiance, tech)
+    gross - tech.ee.embodiedEnergy(power, gross) / tech.ee.lifeTime
+  }
+  
 }
   

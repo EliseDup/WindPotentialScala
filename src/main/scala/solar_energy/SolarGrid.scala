@@ -25,14 +25,18 @@ object SolarGrid {
 class SolarGrid(val cells: List[SolarCell]) {
   def country(c: String) = cells.filter(_.country.equalsIgnoreCase(c))
   def countries(c: List[String]) = cells.filter(x => c.contains(x.country))
+  val eu28countries = Helper.getLines("../model_data/countries/EU28", "\t").map(_(0))
+  def eu28 = cells.filter(g => eu28countries.contains(g.country))
 
   def write(logFile: String) {
     val out_stream = new PrintStream(new java.io.FileOutputStream(logFile))
     val techs = List(PVPoly, CSPParabolicStorage12h)
 
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-      (if (c.suitabilityFactor(CSPParabolic) > 0) CSPParabolicStorage12h.max_eroi_sm(c.dni) else "0.0") + "\t" +
       (if (c.suitabilityFactor(CSPParabolic) > 0) CSPParabolic.max_eroi_sm(c.dni) else "0.0") + "\t" +
+      (if (c.suitabilityFactor(CSPParabolicStorage12h) > 0) CSPParabolicStorage12h.max_eroi_sm(c.dni) else "0.0") + "\t" +
+      (if (c.suitabilityFactor(CSPTowerStorage12h) > 0) CSPTowerStorage12h.max_eroi_sm(c.dni) else "0.0") + "\t" +
+
       (if (c.suitabilityFactor(techs(0)) == 0) 0.0 else techs.indexOf(c.bestTechnology(techs)) + 1).toDouble + "\t" +
       c.dni.toWattsPerSquareMeter * 8.76 + "\t" + c.ghi.toWattsPerSquareMeter * 8.76 + "\t" +
       (if (c.dni > c.ghi) 1.0 else 0.0) + "\t" + c.eroi(techs) +
@@ -48,7 +52,7 @@ class SolarGrid(val cells: List[SolarCell]) {
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
 
       (if (c.potential(techs).value > 0 && c.eroi(techs) > eroi_min) {
-        math.min((techs.indexOf(c.bestTechnology(techs)) + 1).toDouble,2.0)
+        math.min((techs.indexOf(c.bestTechnology(techs)) + 1).toDouble, 2.0)
       } else {
         "0.0"
       }) + "\n"))
