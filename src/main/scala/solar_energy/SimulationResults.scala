@@ -25,11 +25,12 @@ object SimuationResults {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-printResultsForPaper(1)
-    // plotResultsForPaper
+    
+    // printResultsForPaper(5)
+    plotResultsForPaper
 
-    val g = _0_5deg_total
-    g.write("optimal_sm")
+    //val g = _0_5deg_total
+    //g.write("optimal_sm")
 
     print("-End-")
 
@@ -63,27 +64,34 @@ printResultsForPaper(1)
     plotPotentialVSAreaByContinents(grid, List(CSPParabolicStorage12h), "potentialByContinentArea_CSP")
 
     // Plot potential for the usual / optimal solar multiple
-    
+
   }
-  def printResultsForPaper(eroi_min : Double) {
+  def printResultsForPaper(eroi_min: Double) {
     val grid = _0_5deg
     val techs = List(PVPoly, PVMono, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
-    val total = potential(grid.cells,techs,eroi_min).to(Exajoules)
-    println("Potential All Tech "+ "\t" +  math.round(total))
-    techs.map(t => println("Potential "+t.name + "\t" + math.round(potential(grid.cells,List(t),eroi_min).to(Exajoules))))
-    
-    
+    val total = potential(grid.cells, techs, eroi_min).to(Exajoules)
+    println("Potential All Tech " + "\t" + math.round(total))
+    techs.map(t => println("Potential " + t.name + "\t" + math.round(potential(grid.cells, List(t), eroi_min).to(Exajoules))))
+    techs.map(t => println("Max EROI " + t.name + "\t" + grid.cells.filter(_.potential(t).value > 0).map(i => i.eroi(t)).max))
+
     // Tables by continent
     val countries = countriesByContinent
-    println(" & Total & CSP & PV & of Global Potential \\"+ "\\")
-    countries.map(c => println(c._1 + " & " + 
-        math.round(potential(grid.countries(c._2),techs,eroi_min).to(Exajoules)) + " & " + 
-        math.round(potential(grid.countries(c._2),List(PVMono,PVPoly),eroi_min).to(Exajoules)) + " & " + 
-        math.round(potential(grid.countries(c._2),List(CSPParabolic,CSPParabolicStorage12h,CSPTowerStorage12h),eroi_min).to(Exajoules)) + " & " +
-        math.round(potential(grid.countries(c._2),techs,eroi_min).to(Exajoules)/total*100) +
-        " \\" + "\\" ))
-     println("textbf{Total}" + "&" + math.round(total) + " & " + math.round(potential(grid.cells,List(PVMono,PVPoly),eroi_min).to(Exajoules))+ "& " + 
-         math.round(potential(grid.cells,List(CSPParabolic,CSPParabolicStorage12h,CSPTowerStorage12h),eroi_min).to(Exajoules)) + " & " +" \\" + "\\" )
+    println(" & Total & CSP & PV & of Global Potential \\" + "\\")
+    countries.map(c => println(c._1 + " & " +
+      math.round(potential(grid.countries(c._2), techs, eroi_min).to(Exajoules)) + " & " +
+      math.round(potential(grid.countries(c._2), List(PVMono, PVPoly), eroi_min).to(Exajoules)) + " & " +
+      math.round(potential(grid.countries(c._2), List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), eroi_min).to(Exajoules)) + " & " +
+      math.round(potential(grid.countries(c._2), techs, eroi_min).to(Exajoules) / total * 100) +
+      " \\" + "\\"))
+    println("textbf{Total}" + "&" + math.round(total) + " & " + math.round(potential(grid.cells, List(PVMono, PVPoly), eroi_min).to(Exajoules)) + "& " +
+      math.round(potential(grid.cells, List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), eroi_min).to(Exajoules)) + " & " + " \\" + "\\")
+
+    // EU28 potential
+    val eu = grid.eu28
+    techs.map(t => println("Potential EU28 " + t.name + "\t" + math.round(potential(eu, List(t), eroi_min).to(Exajoules))))
+    techs.map(t => println("Max EROI EU28 " + t.name + "\t" + eu.filter(_.potential(t).value > 0).map(i => i.eroi(t)).max))
+
+    techs.map(t => println("Max CF " + t.name + " \t"+ grid.cells.map(i => t.capacityFactor(if(t.directOnly) i.dni else i.ghi, i.panelArea(t))*100).max))
   }
 
   def plotPotentialByContinents(grid: SolarGrid, techs: List[SolarTechnology], title: String) {
