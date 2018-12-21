@@ -25,13 +25,9 @@ object SimuationResults {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-    
-    // printResultsForPaper(5)
-    plotResultsForPaper
-
-    //val g = _0_5deg_total
-    //g.write("optimal_sm")
-
+    printResultsForPaper(1)
+    // plotResultsForPaper
+  
     print("-End-")
 
   }
@@ -76,7 +72,7 @@ object SimuationResults {
 
     // Tables by continent
     val countries = countriesByContinent
-    println(" & Total & CSP & PV & of Global Potential \\" + "\\")
+    println(" & Total & PV & CSP & of Global Potential \\" + "\\")
     countries.map(c => println(c._1 + " & " +
       math.round(potential(grid.countries(c._2), techs, eroi_min).to(Exajoules)) + " & " +
       math.round(potential(grid.countries(c._2), List(PVMono, PVPoly), eroi_min).to(Exajoules)) + " & " +
@@ -91,7 +87,7 @@ object SimuationResults {
     techs.map(t => println("Potential EU28 " + t.name + "\t" + math.round(potential(eu, List(t), eroi_min).to(Exajoules))))
     techs.map(t => println("Max EROI EU28 " + t.name + "\t" + eu.filter(_.potential(t).value > 0).map(i => i.eroi(t)).max))
 
-    techs.map(t => println("Max CF " + t.name + " \t"+ grid.cells.map(i => t.capacityFactor(if(t.directOnly) i.dni else i.ghi, i.panelArea(t))*100).max))
+    techs.map(t => println("Max CF " + t.name + " \t" + grid.cells.map(i => t.capacityFactor(if (t.directOnly) i.dni else i.ghi, i.panelArea(t)) * 100).max))
   }
 
   def plotPotentialByContinents(grid: SolarGrid, techs: List[SolarTechnology], title: String) {
@@ -139,4 +135,28 @@ object SimuationResults {
   }
   def plotPotentialVSArea(g: List[SolarCell], techs: List[SolarTechnology], title: String) = plotXY(techs.map(tech => listPotentialVSArea(g, tech)), legend = true, xLabel = "Cumulated Area [Millions km2]", yLabel = "Cumulated Net Potential [EJ/year]", title = title)
 
+  def printResultsCSP(tech: CSP, sm: Double, power: Power, dni: Irradiance) {
+    print(tech.name + "\t")
+    print(math.round((tech.panelArea(power, sm) * tech.occupationRatio).toSquareKilometers) + "\t")
+    print(math.round(tech.lifeTimeEfficiency(dni, sm) * 100 * 100) / 100.0 + "\t")
+    print(math.round(tech.potential(dni, tech.panelArea(power, sm), sm) / power * 100 * 100) / 100.0 + "\t")
+    print(math.round((tech.potential(dni, tech.panelArea(power, sm), sm) * Hours(365 * 24) * tech.ee.lifeTime).to(Petajoules) * 100) / 100.0 + "\t")
+    print(math.round(tech.ee.embodiedEnergyArea(power, tech.potential(dni, tech.panelArea(power, sm), sm) * Hours(365 * 24), tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
+    print(math.round(tech.ee.embodiedEnergyArea(power, Joules(0), tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
+
+    println(math.round(tech.eroi(dni, sm) * 100) / 100.0)
+
+  }
+  def printResultsPV(tech: SolarTechnology, power: Power, ghi: Irradiance) {
+    print(tech.name + "\t" + tech.max_eroi_sm(ghi) + "\t")
+    print(math.round((tech.panelArea(power, ghi) * tech.occupationRatio).toSquareKilometers) + "\t")
+    print(math.round(tech.lifeTimeEfficiency(ghi) * 100 * 100) / 100.0 + "\t")
+    print(math.round(tech.potential(ghi, tech.panelArea(power, ghi)) / power * 100 * 100) / 100.0 + "\t")
+    print(math.round((tech.potential(ghi, tech.panelArea(power, ghi)) * Hours(365 * 24) * tech.ee.lifeTime).to(Petajoules) * 100) / 100.0 + "\t")
+    print(math.round(tech.ee.embodiedEnergyArea(power, tech.potential(ghi, tech.panelArea(power, ghi)) * Hours(365 * 24), tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
+    print(math.round(tech.ee.embodiedEnergyArea(power, Joules(0), tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
+
+    println(math.round(tech.eroi(ghi) * 100) / 100.0)
+
+  }
 }

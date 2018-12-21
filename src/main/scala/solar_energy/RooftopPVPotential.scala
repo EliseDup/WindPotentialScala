@@ -20,6 +20,7 @@ object RooftopPVPotential {
   import Helper._
 
   val grid = SolarGrid._0_5deg
+
   val rooftop_area = Helper.getLines("../resources/data_solar/rooftop_area", "\t").map(i =>
     (i(0).toString, SquareKilometers(i(1).toDouble), SquareKilometers(i(2).toDouble), i(3).toDouble, i(4).toDouble)).filter(i => grid.country(i._1).nonEmpty)
 
@@ -27,12 +28,13 @@ object RooftopPVPotential {
     val cells = grid.country(c._1)
     (c._1, WattsPerSquareMeter(cells.map(_.ghi.toWattsPerSquareMeter).sum / cells.size), c._2, c._3, 0.25, 0.65)
   })
-
   def main(args: Array[String]): Unit = {
+
+    resources.map(r => println(r._1 + "\t" + r._2.toWattsPerSquareMeter + "\t" + r._3.toSquareKilometers + "\t" + r._4.toSquareKilometers + "\t" + r._5 + "\t" + r._6))
     val area = (resources.map(i => i._3 * i._5 + i._4 * i._6).foldLeft(SquareKilometers(0))(_ + _))
     val meanGhi = (resources.map(_._2).foldLeft(WattsPerSquareMeter(0))(_ + _) / resources.size)
-    resources.map(i => println(i._1 + "\t" + i._2.toWattsPerSquareMeter + "\t" + i._3.toSquareKilometers + "\t" + i._4.toSquareKilometers + "\t" + (netYearlyProductions(i._3*i._5+i._4*i._6, i._2, PVMono)/Hours(365*24)).to(Megawatts)
-        + "\t" +  (potential(i._3*i._5+i._4*i._6, i._2, PVMono)/Hours(365*24)).to(Megawatts)  + "\t" + PVMono.eroi(i._2) + "\t" + PVMono.lifeTimeEfficiency(WattsPerSquareMeter(1000))))
+    resources.map(i => println(i._1 + "\t" + i._2.toWattsPerSquareMeter + "\t" + i._3.toSquareKilometers + "\t" + i._4.toSquareKilometers + "\t" + (netYearlyProductions(i._3 * i._5 + i._4 * i._6, i._2, PVMono) / Hours(365 * 24)).to(Megawatts)
+      + "\t" + (potential(i._3 * i._5 + i._4 * i._6, i._2, PVMono) / Hours(365 * 24)).to(Megawatts) + "\t" + PVMono.eroi(i._2) + "\t" + PVMono.lifeTimeEfficiency(WattsPerSquareMeter(1000))))
     val pvMonoRes = listValueVSCumulated(resources.map(i => (PVMono.eroi(i._2), netYearlyProductions(i._3 * i._5, i._2, PVMono).to(Exajoules))))
     val pvMonoCom = listValueVSCumulated(resources.map(i => (PVMono.eroi(i._2), netYearlyProductions(i._4 * i._6, i._2, PVMono).to(Exajoules))))
     println(pvMonoRes._1.max)
@@ -59,6 +61,6 @@ object RooftopPVPotential {
     val gross = potential(area, irradiance, tech)
     gross - tech.ee.embodiedEnergy(power, gross) / tech.ee.lifeTime
   }
-  
+
 }
   

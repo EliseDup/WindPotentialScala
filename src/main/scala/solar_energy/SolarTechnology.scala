@@ -18,13 +18,13 @@ trait PV extends SolarTechnology {
 
 object PVPoly extends PV {
   val name = "poly-Si-PV"
-  val ee = new EmbodiedEnergy(Gigajoules(12211495+4394479), Gigajoules(71652+71652), Gigajoules(653102), Gigajoules(52911.81), Gigajoules(0.0097), 25)
+  val ee = new EmbodiedEnergy(Gigajoules(12211495 + 4394479), Gigajoules(71652 + 71652), Gigajoules(652934), Gigajoules(52911.81), Gigajoules(0.0097), 25)
   val designEfficiency = 0.17;
   val degradationRate = 0.5 / 100
 }
 object PVMono extends PV {
   val name = "mono-Si-PV"
-  val ee = new EmbodiedEnergy(Gigajoules(14477204), Gigajoules(122559), Gigajoules(469378), Gigajoules(45251), Gigajoules(0.0097), 25)
+  val ee = new EmbodiedEnergy(Gigajoules(8880746+5596459), Gigajoules(61279+61279), Gigajoules(469257), Gigajoules(45252), Gigajoules(0.0097), 25)
   val designEfficiency = 0.24;
   val degradationRate = 0.36 / 100
 }
@@ -56,37 +56,38 @@ trait CSP extends SolarTechnology {
   val directOnly = true;
   val maximumSlope = 2.0
   val degradationRate = 0.2 / 100
-  
+
   val sm_range: List[Double]
-  def a(sm :Double) : Double; def b(sm:Double): Double;  
+  def a(sm: Double): Double; def b(sm: Double): Double;
   // Aperture Area is the area needed to reach the rated power under a given irradiance conditions (dni design point) : Power = Area * DNI * efficiency
   // Then we add a solar multiple (in general 1,3 without storage) to have a security
   // The solar mutiple that maximises the EROI
   override def max_eroi_sm(solar: Irradiance) = {
     val sm = sm_range.zipWithIndex
-    sm(sm.map(s => (s,eroi(solar, s._1))).maxBy(_._2)._1._2)._1
+    sm(sm.map(s => (s, eroi(solar, s._1))).maxBy(_._2)._1._2)._1
   }
   def max_efficiency_sm(solar: Irradiance) = {
     val sm = sm_range.zipWithIndex
-    sm(sm.map(s => (s,efficiency(solar, s._1))).maxBy(_._2)._1._2)._1
+    sm(sm.map(s => (s, efficiency(solar, s._1))).maxBy(_._2)._1._2)._1
   }
   def efficiency(dni: Irradiance, sm: Double): Double = (a(sm) * math.log(dni.toWattsPerSquareMeter * 8.76) + b(sm)) / 100.0
   def lifeTimeEfficiency(dni: Irradiance, sm: Double): Double = efficiency(dni, sm) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
 
-  def eroi(solar: Irradiance, sm: Double):Double = {
+  def eroi(solar: Irradiance, sm: Double): Double = {
     val power = Gigawatts(1)
     val yearProd = yearlyProduction(solar, panelArea(power, sm), sm)
     yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, panelArea(power, sm))
   }
-  def potential(solar: Irradiance, panelArea: Area, sm: Double): Power = panelArea * solar * lifeTimeEfficiency(solar, sm)
+  def potential(solar: Irradiance, panelArea: Area, sm: Double): Power = List(panelArea * solar * lifeTimeEfficiency(solar, sm), ratedPower(panelArea, solar, sm)).minBy(_.value)
   def yearlyProduction(solar: Irradiance, panelArea: Area, sm: Double): Energy = potential(solar, panelArea, sm) * Hours(365 * 24)
-  def panelArea(ratedPower : Power, sm : Double) = ratedPower / (designPointIrradiance * designEfficiency) * sm
+  def panelArea(ratedPower: Power, sm: Double) = ratedPower / (designPointIrradiance * designEfficiency) * sm
+  def ratedPower(panelArea: Area, solar: Irradiance, sm : Double) = panelArea * (designPointIrradiance * designEfficiency) / sm
   
   override def efficiency(solar: Irradiance): Double = efficiency(solar, max_eroi_sm(solar))
   override def eroi(solar: Irradiance): Double = eroi(solar, max_eroi_sm(solar))
   override def potential(solar: Irradiance, panelArea: Area): Power = potential(solar, panelArea, max_eroi_sm(solar))
   override def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = yearlyProduction(solar, panelArea, max_eroi_sm(solar))
-  
+
 }
 
 /**
@@ -98,36 +99,39 @@ trait CSP extends SolarTechnology {
 object CSPParabolic extends CSP {
   val name = "PTPP"
   val designEfficiency = 0.22
-  def a(sm : Double) = -3.38*sm + 11.55
-  def b(sm : Double) = 23.85*sm - 72.26
-  val sm_range = (10 to 50).map(_*0.1).toList
-  val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30,
-    Gigajoules(1348389), Gigajoules(49617), SquareMeters(607286))
-
+  def a(sm: Double) = -3.38 * sm + 11.55
+  def b(sm: Double) = 23.85 * sm - 72.26
+  val sm_range = (10 to 30).map(_ * 0.1).toList
+  val ee = new EmbodiedEnergy(Gigajoules(4742245 + 3178), Gigajoules(114400 + 106001), Gigajoules(732751), Gigajoules(89118), Gigajoules(0.05 + 0.023), 30, Gigajoules(6033371 + 6732247), Gigajoules(479183), SquareMeters(1E9 / (950 * designEfficiency) * 1.3))
+  /*val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30, Gigajoules(1348389), Gigajoules(49617), SquareMeters(607286))
+  */
 }
 
 object CSPParabolicStorage12h extends CSP {
   val name = "PTPP-TES"
   val designEfficiency = 0.22
-  
-  val sm_range = (10 to 100).map(_*0.1).toList
-  
-  def a(sm : Double) =  -1.578*sm + 11.17
-  def b(sm : Double) = 10.65*sm - 66.33
-  
-  val ee = new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
-    Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))
+  val sm_range = (10 to 40).map(_ * 0.1).toList
+  def a(sm: Double) = -1.578 * sm + 11.17
+  def b(sm: Double) = 10.65 * sm - 66.33
+
+  val ee = new EmbodiedEnergy(Gigajoules(5415779+13500041), Gigajoules(220157 + 237600), Gigajoules(756412 + 1080164), Gigajoules(183720), Gigajoules(0.05 + 0.023), 30,
+    Gigajoules(11434969 + 4412439), Gigajoules(930204), SquareMeters(1E9 * 2.7 / (950 * designEfficiency)))
+  /* val ee =   new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
+    Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))*/
 }
 
 object CSPTowerStorage12h extends CSP {
   val name = "STPP-TES"
   val designEfficiency = 0.21
-  val sm_range = (10 to 100).map(_*0.1).toList
-  def a(sm : Double) = -1.62*sm + 8.742
-  def b(sm : Double) = 11.01*sm - 46.86
-  
-  val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(3723 + 7197 + 183720), Gigajoules(0.05 + 0.023), 30,
-    Gigajoules(1329266), Gigajoules(52168), SquareMeters(1443932))
+  val sm_range = (10 to 40).map(_ * 0.1).toList
+  def a(sm: Double) = -1.62 * sm + 8.742
+  def b(sm: Double) = 11.01 * sm - 46.86
+
+  val ee = new EmbodiedEnergy(Gigajoules(8053825+9086794), Gigajoules(220157 + 237600), Gigajoules(1196178 + 727130), Gigajoules(183720), Gigajoules(0.05 + 0.023), 30,
+    Gigajoules(7751182 + 3642818), Gigajoules(457262), SquareMeters(1E9 * 2.7 / (950 *designEfficiency)))
+  // OLD VALUES !!
+  /*val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(3723 + 7197 + 183720), Gigajoules(0.05 + 0.023), 30,
+    Gigajoules(1329266), Gigajoules(52168), SquareMeters(1443932))*/
 }
 
 trait SolarTechnology {
@@ -150,15 +154,22 @@ trait SolarTechnology {
   def potential(solar: Irradiance, panelArea: Area): Power = panelArea * solar * lifeTimeEfficiency(solar)
   def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = potential(solar, panelArea) * Hours(365 * 24)
   // The size of the power block depending on design conditions, and solar multiple for CSP plants
-  def ratedPower(panelArea: Area, solar : Irradiance) = panelArea * (designPointIrradiance * designEfficiency) / max_eroi_sm(solar)
-  def panelArea(ratedPower: Power, solar : Irradiance): Area = ratedPower / (designPointIrradiance * designEfficiency) * max_eroi_sm(solar)
+  def ratedPower(panelArea: Area, solar: Irradiance) = panelArea * (designPointIrradiance * designEfficiency) / max_eroi_sm(solar)
+  def panelArea(ratedPower: Power, solar: Irradiance): Area = ratedPower / (designPointIrradiance * designEfficiency) * max_eroi_sm(solar)
 
-  def capacityFactor(solar: Irradiance, panelArea: Area): Double = if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea) / ratedPower(panelArea,solar) else 0.0
+  def capacityFactor(solar: Irradiance, panelArea: Area): Double = {
+      val res = if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea) / ratedPower(panelArea, solar) else 0.0
+      
+      if(res > 1.0){
+        println(max_eroi_sm(solar) + "\t" +  panelArea + "\t"  + solar + "\t" +lifeTimeEfficiency(solar) + "\t" + potential(solar, panelArea) + "\t" + ratedPower(panelArea, solar)  )
+      }
+    res
+    }
 
   def eroi(cf: Double) = ee.eroi(cf)
   def eroi(solar: Irradiance) = {
     val power = Gigawatts(1)
-    val yearProd = yearlyProduction(solar, panelArea(power,solar))
+    val yearProd = yearlyProduction(solar, panelArea(power, solar))
     yearProd * ee.lifeTime / ee.embodiedEnergy(power, yearProd)
   }
 }
