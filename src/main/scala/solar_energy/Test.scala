@@ -25,7 +25,8 @@ object Test {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-
+val grid = _0_1deg
+printArea(grid.cells)
     val annual_output = Gigajoules(688025257) / 30
     val cf = annual_output / (Gigawatts(1) * Hours(365 * 24))
     val tech = CSPTowerStorage12h

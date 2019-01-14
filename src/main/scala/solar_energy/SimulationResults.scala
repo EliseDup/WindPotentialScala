@@ -25,19 +25,30 @@ object SimuationResults {
   import CSPParabolic._
 
   def main(args: Array[String]): Unit = {
-    printResultsForPaper(1)
-    // plotResultsForPaper
-  
-    print("-End-")
+    println(CSPTowerStorage12h.efficiency(WattsPerSquareMeter(115), 10))
+    println(CSPTowerStorage12h.efficiency(WattsPerSquareMeter(115), 3.6))
+    val sm = (1 to 100).map(_*0.1).toList
+    plotXY(sm , sm.map(i => CSPTowerStorage12h.efficiency(WattsPerSquareMeter(115), i)))
+    
+    val csp = List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
+    csp.map(i => plotBestSM(i,List()))
+    val grid = _0_5deg
+    val res = grid.cells.map(i => (i.dni.toWattsPerSquareMeter, CSPTowerStorage12h.max_eroi_sm(i.dni)))
+    scatterPlot(res)
+   // printResultsForPaper(1)
+   // plotResultsForPaper
+    //(1 to 20).map(i =>
+    //  println(i / 2.0 + "\t" + potential(grid.cells, List(PVMono, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), i / 2.0).to(Exajoules)))
+    //print("-End-")
 
   }
 
   def plotBestSM(tech: CSP, sm: List[Double]) {
-    val dni = (150 to 450).map(_.toDouble).toList
+    val dni = (170 to 450).map(_.toDouble).toList
     val eroi = sm.map(i => (dni, dni.map(j => tech.eroi(WattsPerSquareMeter(j), i)), i.toString))
-    //plotXY(eroi, legend = true, xLabel = "DNI [W/m2]", yLabel = "EROI")
+    //plotXY(eroi, xLabel = "DNI [W/m2]", yLabel = "EROI", legend = true)
     val eff = sm.map(i => (dni, dni.map(j => tech.efficiency(WattsPerSquareMeter(j), i) * 100), i.toString))
-    //plotXY(eff, legend = true, xLabel = "DNI [W/m2]", yLabel = "Efficiency [%]")
+    //  plotXY(eff, xLabel = "DNI [W/m2]", yLabel = "Efficiency [%]", legend = true)
     val sm_eroi = (dni.map(_ * 8.76), dni.map(j => tech.max_eroi_sm(WattsPerSquareMeter(j))), "Max EROI")
     // val sm_eff = (dni, dni.map(j => tech.max_efficiency_sm(WattsPerSquareMeter(j))), "Max efficiency")
     plotXY(List(sm_eroi), xLabel = "DNI [kWh/m2/year]", yLabel = "Optimal SM " + tech.name)
@@ -86,7 +97,6 @@ object SimuationResults {
     val eu = grid.eu28
     techs.map(t => println("Potential EU28 " + t.name + "\t" + math.round(potential(eu, List(t), eroi_min).to(Exajoules))))
     techs.map(t => println("Max EROI EU28 " + t.name + "\t" + eu.filter(_.potential(t).value > 0).map(i => i.eroi(t)).max))
-
     techs.map(t => println("Max CF " + t.name + " \t" + grid.cells.map(i => t.capacityFactor(if (t.directOnly) i.dni else i.ghi, i.panelArea(t)) * 100).max))
   }
 
@@ -95,11 +105,13 @@ object SimuationResults {
     val continents = countries.map(c => listEROI(grid.countries(c._2), techs, c._1))
     plotXY(continents, xLabel = "Net Potential [EJ/year]", yLabel = "EROI", legend = true, title = title)
   }
+
   def plotPotentialVSAreaByContinents(grid: SolarGrid, techs: List[SolarTechnology], title: String) {
     val countries = countriesByContinent
     val continents = countries.map(c => listEROIVSArea(grid.countries(c._2), techs, c._1))
     plotXY(continents, xLabel = "Cumulated Area [Millions km2]", yLabel = "EROI", legend = true, title = title)
   }
+
   def plotPotentialByTechnology(grid: List[SolarCell], techs: List[SolarTechnology], title: String) {
     plotXY(techs.map(t => listEROI(grid, t)), xLabel = "Net Potential [EJ/year]", yLabel = "EROI", legend = true, title = title)
   }
@@ -143,10 +155,9 @@ object SimuationResults {
     print(math.round((tech.potential(dni, tech.panelArea(power, sm), sm) * Hours(365 * 24) * tech.ee.lifeTime).to(Petajoules) * 100) / 100.0 + "\t")
     print(math.round(tech.ee.embodiedEnergyArea(power, tech.potential(dni, tech.panelArea(power, sm), sm) * Hours(365 * 24), tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
     print(math.round(tech.ee.embodiedEnergyArea(power, Joules(0), tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
-
     println(math.round(tech.eroi(dni, sm) * 100) / 100.0)
-
   }
+
   def printResultsPV(tech: SolarTechnology, power: Power, ghi: Irradiance) {
     print(tech.name + "\t" + tech.max_eroi_sm(ghi) + "\t")
     print(math.round((tech.panelArea(power, ghi) * tech.occupationRatio).toSquareKilometers) + "\t")
@@ -155,8 +166,6 @@ object SimuationResults {
     print(math.round((tech.potential(ghi, tech.panelArea(power, ghi)) * Hours(365 * 24) * tech.ee.lifeTime).to(Petajoules) * 100) / 100.0 + "\t")
     print(math.round(tech.ee.embodiedEnergyArea(power, tech.potential(ghi, tech.panelArea(power, ghi)) * Hours(365 * 24), tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
     print(math.round(tech.ee.embodiedEnergyArea(power, Joules(0), tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
-
     println(math.round(tech.eroi(ghi) * 100) / 100.0)
-
   }
 }

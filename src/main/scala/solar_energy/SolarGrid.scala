@@ -47,14 +47,14 @@ class SolarGrid(val cells: List[SolarCell]) {
     out_stream.close()
   }
   def writePotential(eroi_min: Double) {
-    val out_stream = new PrintStream(new java.io.FileOutputStream("potential_" + eroi_min))
+    val out_stream = new PrintStream(new java.io.FileOutputStream("potential_pvpoly_" + eroi_min))
     val techs = List(PVPoly, CSPParabolicStorage12h, CSPTowerStorage12h, CSPParabolic)
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-
-      (if (c.potential(techs).value > 0 && c.eroi(techs) > eroi_min) {
-        math.min((techs.indexOf(c.bestTechnology(techs)) + 1).toDouble, 2.0)
+     
+      (if(c.netYearlyProduction(techs).value > 0 && c.eroi(techs) >= eroi_min) {
+         CSPTowerStorage12h.max_eroi_sm(c.dni) + "\t" + math.min((techs.indexOf(c.bestTechnology(techs)) + 1).toDouble, 2.0)
       } else {
-        "0.0"
+        "0.0" + "\t" + "0.0"
       }) + "\n"))
     out_stream.close()
 
