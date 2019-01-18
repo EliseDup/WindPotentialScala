@@ -46,15 +46,15 @@ class SolarGrid(val cells: List[SolarCell]) {
     //    + c.dni.toWattsPerSquareMeter*8.76 + "\n"))
     out_stream.close()
   }
-  def writePotential(eroi_min: Double) {
-    val out_stream = new PrintStream(new java.io.FileOutputStream("potential_pvpoly_" + eroi_min))
-    val techs = List(PVPoly, CSPParabolicStorage12h, CSPTowerStorage12h, CSPParabolic)
+  def writePotential(eroi_min: Double, poly : Boolean = false) {
+    val name = "potential" + (if(poly) "_pv_poly")
+    val out_stream = new PrintStream(new java.io.FileOutputStream(name + eroi_min)) 
+    val techs = (if(poly) List(PVPoly) else List(PVMono)) ++ List(CSPParabolicStorage12h, CSPTowerStorage12h, CSPParabolic)
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-     
       (if(c.netYearlyProduction(techs).value > 0 && c.eroi(techs) >= eroi_min) {
-         CSPTowerStorage12h.max_eroi_sm(c.dni) + "\t" + math.min((techs.indexOf(c.bestTechnology(techs)) + 1).toDouble, 2.0)
+          math.min((techs.indexOf(c.bestTechnology(techs)) + 1).toDouble, 2.0)
       } else {
-        "0.0" + "\t" + "0.0"
+         "0.0"
       }) + "\n"))
     out_stream.close()
 
@@ -83,12 +83,19 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
   def panelArea(tech: SolarTechnology): Area = suitableArea(tech) / tech.occupationRatio
   def potential(tech: SolarTechnology): Power = tech.potential(if (tech.directOnly) dni else ghi, panelArea(tech))
   def grossYearlyProduction(tech: SolarTechnology): Energy = potential(tech) * Hours(365 * 24)
+  
   def netYearlyProduction(tech: SolarTechnology): Energy = {
     val solar = if (tech.directOnly) dni else ghi
     val aperture = panelArea(tech)
     val power = tech.ratedPower(aperture, solar)
     val gross = grossYearlyProduction(tech)
-    gross - tech.ee.embodiedEnergy(power, gross) / tech.ee.lifeTime
+    gross - tech.ee.embodiedEnergyArea(power, gross, aperture) / tech.ee.lifeTime
+  }
+    def netYearlyProduction(tech: CSP, sm : Double): Energy = {
+    val aperture = panelArea(tech)
+    val power = tech.ratedPower(aperture, dni, sm)
+    val gross = tech.potential(dni, aperture, sm) * Hours(365 * 24) // grossYearlyProduction(tech)
+    gross - tech.ee.embodiedEnergyArea(power, gross, aperture) / tech.ee.lifeTime
   }
   // Technology that maximizes the EROI
   def bestTechnology(techs: List[SolarTechnology]): SolarTechnology = techs(techs.zipWithIndex.map(i => (eroi(i._1), i._2)).maxBy(_._1)._2)

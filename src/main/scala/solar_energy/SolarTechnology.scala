@@ -7,6 +7,7 @@ import squants.space.Area
 import squants.radio.WattsPerSquareMeter
 import squants.space.SquareMeters
 import squants.time.Time
+import squants.space.SquareKilometers
 
 trait PV extends SolarTechnology {
   val designPointIrradiance: Irradiance = WattsPerSquareMeter(1000)
@@ -70,6 +71,7 @@ trait CSP extends SolarTechnology {
     val sm = sm_range.zipWithIndex
     sm(sm.map(s => (s, efficiency(solar, s._1))).maxBy(_._2)._1._2)._1
   }
+
   def efficiency(dni: Irradiance, sm: Double): Double = (a(sm) * math.log(dni.toWattsPerSquareMeter * 8.76) + b(sm)) / 100.0
   def lifeTimeEfficiency(dni: Irradiance, sm: Double): Double = efficiency(dni, sm) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
 
@@ -78,7 +80,10 @@ trait CSP extends SolarTechnology {
     val yearProd = yearlyProduction(solar, panelArea(power, sm), sm)
     yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, panelArea(power, sm))
   }
-  def potential(solar: Irradiance, panelArea: Area, sm: Double): Power = List(panelArea * solar * lifeTimeEfficiency(solar, sm), ratedPower(panelArea, solar, sm)).minBy(_.value)
+  def potential(solar: Irradiance, panelArea: Area, sm: Double): Power = {
+    List(panelArea * solar * lifeTimeEfficiency(solar, sm), ratedPower(panelArea, solar, sm)).minBy(_.value)
+  }
+  
   def yearlyProduction(solar: Irradiance, panelArea: Area, sm: Double): Energy = potential(solar, panelArea, sm) * Hours(365 * 24)
   def panelArea(ratedPower: Power, sm: Double) = ratedPower / (designPointIrradiance * designEfficiency) * sm
   def ratedPower(panelArea: Area, solar: Irradiance, sm: Double) = panelArea * (designPointIrradiance * designEfficiency) / sm
@@ -87,7 +92,8 @@ trait CSP extends SolarTechnology {
   override def eroi(solar: Irradiance): Double = eroi(solar, max_eroi_sm(solar))
   override def potential(solar: Irradiance, panelArea: Area): Power = potential(solar, panelArea, max_eroi_sm(solar))
   override def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = yearlyProduction(solar, panelArea, max_eroi_sm(solar))
-
+  def capacityFactor(solar: Irradiance, panelArea: Area, sm: Double): Double = if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea, sm) / ratedPower(panelArea, solar, sm) else 0.0
+ 
 }
 
 /**
@@ -101,7 +107,7 @@ object CSPParabolic extends CSP {
   val designEfficiency = 0.22
   def a(sm: Double) = -3.38 * sm + 11.55
   def b(sm: Double) = 23.85 * sm - 72.26
-  val sm_range = (5 to 26).map(_ * 0.1).toList
+  val sm_range = (5 to 20).map(_ * 0.1).toList
   val ee = new EmbodiedEnergy(Gigajoules(4742245 + 3178), Gigajoules(114400 + 106001), Gigajoules(732751), Gigajoules(89118), Gigajoules(0.05 + 0.023), 30, Gigajoules(6033371 + 6732247), Gigajoules(479183), SquareMeters(1E9 / (950 * designEfficiency) * 1.3))
   /*val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30, Gigajoules(1348389), Gigajoules(49617), SquareMeters(607286))
   */
@@ -155,15 +161,12 @@ trait SolarTechnology {
   def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = potential(solar, panelArea) * Hours(365 * 24)
   // The size of the power block depending on design conditions, and solar multiple for CSP plants
   def ratedPower(panelArea: Area, solar: Irradiance) = panelArea * (designPointIrradiance * designEfficiency) / max_eroi_sm(solar)
-  def panelArea(ratedPower: Power, solar: Irradiance): Area = ratedPower / (designPointIrradiance * designEfficiency) * max_eroi_sm(solar)
+  def panelArea(ratedPower: Power, solar: Irradiance): Area = {
+      ratedPower / (designPointIrradiance * designEfficiency) * max_eroi_sm(solar)
+    }
 
   def capacityFactor(solar: Irradiance, panelArea: Area): Double = {
-    val res = if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea) / ratedPower(panelArea, solar) else 0.0
-
-    if (res > 1.0) {
-      println(max_eroi_sm(solar) + "\t" + panelArea + "\t" + solar + "\t" + lifeTimeEfficiency(solar) + "\t" + potential(solar, panelArea) + "\t" + ratedPower(panelArea, solar))
-    }
-    res
+    if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea) / ratedPower(panelArea, solar) else 0.0
   }
 
   def eroi(cf: Double) = ee.eroi(cf)

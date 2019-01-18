@@ -35,10 +35,12 @@ object PlotHelper {
 
   def main(args: Array[String]): Unit = {
     val x = (1 to 1000).map(_ * 0.001).toList
-    plotXY(List((x, x.map(Math.pow(_, 2)), "x^2"), (x, x.map(_ * 3), "3x"), (x, x.map(_ * 2), "2x"), (x, x, "x")), legend = true)
+    plotXY(List((x, x.map(Math.pow(_, 3)), "x^3"),(x, x.map(Math.pow(_, 4)), "x^4"),(x, x.map(Math.pow(_, 2)), "x^2"), (x, x.map(_ * 3), "3x"), (x, x.map(_ * 2), "2x"), (x, x, "x")), legend = true)
   }
   val colors = List(Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
-  val dashed = List(stroke(Array(1.0f, 0.0f)), stroke(Array(6.0f, 3.0f)), stroke(Array(1.0f, 3.0f)), stroke(Array(6.0f, 3.0f, 1.0f, 3.0f)))
+  val dashed = List(stroke(Array(1.0f, 0.0f)), stroke(Array(6.0f, 3.0f)),
+    stroke(Array(1.0f, 3.0f)), stroke(Array(6.0f, 3.0f, 1.0f, 3.0f)),
+    stroke(Array(2.0f, 2.0f)), stroke(Array(6.0f, 2.0f, 2.0f)))
 
   // val shapes = List(ShapeUtilities.createDiagonalCross(1.0f, 1.0f),ShapeUtilities.createUpTriangle(2.0f),ShapeUtilities.createDiamond(2.0f))
 
@@ -177,40 +179,14 @@ object PlotHelper {
     createFrame(chart, name = title, save = true, xy = false)
   }
 
-  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, shape: Boolean = false, xy: Boolean = false, bw: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, shape: Boolean = false, xy: Boolean = true, bw: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
-     applyChartTheme(chart, tick)
+    applyChartTheme(chart, tick)
 
     if (xy) {
       val n = chart.getXYPlot().getSeriesCount()
       val r = chart.getXYPlot().getRenderer().asInstanceOf[XYLineAndShapeRenderer]
-       if (n == 7) {
-        for (i <- 0 to 5) {
-          r.setSeriesPaint(i, Color.DARK_GRAY)
-        }
-        for (i <- 1 to 5) {
-          r.setSeriesStroke(i, dots(1.0f))
-        }
-        r.setSeriesStroke(0, line(1.0f))
-        r.setSeriesPaint(6, Color.BLACK)
-        r.setSeriesStroke(6, line(1.5f))
 
-      } else if (n == 2) {
-        r.setSeriesStroke(0, line(1.0f))
-        r.setSeriesPaint(0, Color.BLACK)
-
-        r.setSeriesStroke(1, dots(1.0f))
-        r.setSeriesPaint(1, Color.BLACK)
-
-      } else if (n == 4) {
-        r.setSeriesStroke(0, line(1.0f))
-        r.setSeriesPaint(0, Color.BLACK)
-
-        for (i <- 1 to 4) {
-          r.setSeriesStroke(i, dots(1.0f))
-          r.setSeriesPaint(i, Color.BLACK)
-        }
-      } else 
       if (!bw) {
         for (i <- 0 until Math.min(n, colors.size)) r.setSeriesPaint(i, colors(i))
         chart.getXYPlot().setRenderer(r);
@@ -220,27 +196,14 @@ object PlotHelper {
           r.setSeriesStroke(i, dashed(i))
         }
       }
-
-      /* else if (n == 1) {
-        r.setSeriesPaint(0, Color.BLACK)
-        r.setSeriesStroke(0, line(1.5f))
-      } else if (n <= 6) {
-        r.setSeriesPaint(0, Color.DARK_GRAY)
-        r.setSeriesStroke(1, line(1.0f))
-        for (i <- 1 to n - 1) {
-          r.setSeriesPaint(i, Color.BLACK)
-          r.setSeriesStroke(i, dots(1.5f))
-        }
-      }*/
       r.setBaseShapesVisible(false);
       r.setBaseShapesFilled(true);
       r.setDrawSeriesLineAsPath(true);
       chart.getXYPlot().setRenderer(r);
-
     }
     if (save) {
-      writeAsPDF(chart, new FileOutputStream(("images/"+ (if (name.isEmpty()) i else name)) + ".pdf"),  500, 270)
-      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(("images/"+ (if (name.isEmpty()) i else name)) + ".jpg"), chart, 500, 270, 5, 5)
+      writeAsPDF(chart, new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".pdf"), 500, 270)
+      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".jpg"), chart, 500, 270, 5, 5)
       i = i + 1
     }
     val chartPanel = new ChartPanel(chart)

@@ -180,12 +180,12 @@ object Helper {
     val sorted = values.sortBy(_._1).reverse
     (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._3).scanLeft(0.0)(_ + _))
   }
-  
-def countriesByContinent =  {
-  val data_location = "/Users/Elise/Nextcloud/Doctorat/Data/countries/world/"
+
+  def countriesByContinent = {
+    val data_location = "/Users/Elise/Nextcloud/Doctorat/Data/countries/world/"
     val continentsName = getLines(data_location + "Continents", "\t").toList.map(_(0))
-   continentsName.map(i => (i, getLines(data_location + i, "\t").toList.map(_(0))))
-}
+    continentsName.map(i => (i, getLines(data_location + i, "\t").toList.map(_(0))))
+  }
 }
 case class GeoPoint(val latitude: Angle, val longitude: Angle) {
   override def toString() = "Point of latitude " + latitude + ", longitude :" + longitude
