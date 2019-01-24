@@ -125,7 +125,7 @@ object SolarCell {
     new SolarCell(GeoPoint(Degrees(i(1).toDouble), Degrees(i(0).toDouble)), resolution,
       WattsPerSquareMeter(i(2).toDouble / 24 * 1000), WattsPerSquareMeter(i(3).toDouble / 24 * 1000),
       GlobCoverClasses.landCoverType(i(4).toDouble.toInt), Kilometers(i(5).toDouble), Meters(i(6).toDouble),
-      i(7).toString, i(8).toInt == 1, SlopeGradients(i))
+      i(7).toString, i(8).toInt == 1, SlopeGradients(i,9,16))
   }
   def slope(i: String) = {
     val s = i.toDouble
@@ -184,8 +184,8 @@ object SlopeGradients {
     assert(p <= 100)
     Radians(math.atan(p / 100.0))
   }
-  def apply(line: Array[String]) = {
-    val slopes = (9 to 16).toList.map(line(_).toDouble / 10000.0)
+  def apply(line: Array[String], start : Int, end : Int) = {
+    val slopes = (start to end).toList.map(line(_).toDouble / 10000.0)
     new SlopeGradients((0 to 7).toList.map(i => (classes(i), slopes(i))))
   }
 }
