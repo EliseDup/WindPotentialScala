@@ -4,26 +4,44 @@ import utils._
 import grid._
 import squants.space._
 import squants.radio._
+import squants.energy._
+import squants.motion._
 import solar_energy._
-import squants.motion.Velocity
-import wind_energy.WindProfile
-import squants.motion.MetersPerSecond
+import wind_energy._
 
 object Grid {
   import PlotHelper._
   def main(args: Array[String]): Unit = {
+    var t = System.currentTimeMillis()
     val grid = Grid()
-    plotXY(grid.cells.map(_.dni.toWattsPerSquareMeter), grid.cells.map(_.ghi.toWattsPerSquareMeter)) 
+    println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
+    val cells = grid.cells.filter(_.ghi.value > 0)
+    plotXY(cells.map(_.ghi.toWattsPerSquareMeter), cells.map(i => math.abs(i.center.latitude.toDegrees)))
   }
-  
+
   def apply(name: String) = new Grid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList)
   def apply(): Grid = apply("runs_history/wind_solar/wind_solar_0_75")
 }
+
 class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   val cells: List[Cell] = Helper.getLines(name).map(Cell(_, gridSize, eroi_min))
-  
+
+  def country(c: String) = cells.filter(_.country.equalsIgnoreCase(c))
+  def countries(c: List[String]) = cells.filter(x => c.contains(x.country))
+  val eu28countries = Helper.getLines("../model_data/countries/EU28", "\t").map(_(0))
+  def eu28 = cells.filter(g => eu28countries.contains(g.country))
+
+  def write(logFile: String) {
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(logFile))
+    val techs = List(PVPoly, CSPParabolicStorage12h)
+    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\n"))
+    out_stream.close()
+  }
 }
+
 /**
+ * Cell combines previous SolarCell and GridCell objects :)
+ *
  * class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance, val dni: Irradiance,
  *  val landCover: LandCoverType, val distanceToCoast: Length, val elevation: Length,
  *  val country: String, val protected_area: Boolean = false, val slope: SlopeGradients)
@@ -50,12 +68,37 @@ class Cell(val center: GeoPoint,
     val slope: SlopeGradients,
     val landCovers: DetailedLandCover,
     val protectedArea: Double,
-    val country: Country,
+    val country: String,
     val elevation: Length,
     val distanceToCoast: Length,
     val wind71m: WindProfile,
     val wind125m: WindProfile,
     val optimalCD: Map[Double, (Velocity, Double)]) {
+
+  val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
+  val onshore = distanceToCoast.value <= 0
+  def suitabilityFactor(tech: RenewableTechnology) = {
+    if (excludedCountries.contains(country) || country.contains("Is.") || country.contains("Islands")) 0.0
+    tech.suitabilityFactor(this) * protectedArea
+  }
+  val area = Helper.areaRectangle(center, resolution)
+  /**
+   *  WIND
+   */
+  val wind100m = new WindProfile((wind71m.mean + wind125m.mean) / 2.0, (wind71m.std + wind125m.std) / 2.0, Meters(100))
+  def installedCapacityDensity(vr: Velocity, n: Double, cp: Double = 0.5) = WattsPerSquareMeter(cp * 0.5 * 1.225 * Math.PI / 4 * Math.pow(vr.toMetersPerSecond, 3) / Math.pow(n, 2))
+
+  def getOptimalCD(e: Double): Irradiance =
+    if (!optimalCD.keySet.contains(e)) WattsPerSquareMeter(0)
+    else installedCapacityDensity(optimalCD(e)._1, optimalCD(e)._2)
+  def getOptimalVrN(e: Double): (Velocity, Double) = optimalCD.get(e).getOrElse((MetersPerSecond(0), 15))
+  def optimalRatedSpeed(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15))._1
+  def optimalN(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15.0))._2
+
+  /**
+   * Solar
+   */
+
 }
 /**
  * Text file:
@@ -87,7 +130,7 @@ object Cell {
       SlopeGradients(l, 4, 11),
       lcs(l, 13),
       l(12).toDouble / 100.0,
-      Country(l(38)), //, countryList(l, countryIndex)),
+      l(38).toString,
       Meters(l(36).toDouble), Kilometers(l(37).toDouble),
       new WindProfile(MetersPerSecond(l(39).toDouble), l(40).toDouble, Meters(71)),
       new WindProfile(MetersPerSecond(l(41).toDouble), l(42).toDouble, Meters(125)),

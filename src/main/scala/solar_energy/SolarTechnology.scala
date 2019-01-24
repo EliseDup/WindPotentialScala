@@ -8,6 +8,8 @@ import squants.radio.WattsPerSquareMeter
 import squants.space.SquareMeters
 import squants.time.Time
 import squants.space.SquareKilometers
+import wind_solar.RenewableTechnology
+import wind_solar.Cell
 
 trait PV extends SolarTechnology {
   val designPointIrradiance: Irradiance = WattsPerSquareMeter(1000)
@@ -140,9 +142,7 @@ object CSPTowerStorage12h extends CSP {
     Gigajoules(1329266), Gigajoules(52168), SquareMeters(1443932))*/
 }
 
-trait SolarTechnology {
-  val name: String;
-  val ee: EmbodiedEnergy;
+trait SolarTechnology extends RenewableTechnology {
   val designPointIrradiance: Irradiance;
   val performanceRatio: Double;
   val degradationRate: Double
@@ -151,7 +151,18 @@ trait SolarTechnology {
   val directOnly: Boolean;
   val maximumSlope: Double;
   val designEfficiency: Double;
-
+  
+  // GHI for PV, DNI for CSP
+  def solar(cell: Cell): Irradiance = if(directOnly) cell.dni else cell.ghi;
+  def reflectiveArea(cell : Cell): Area = (cell.area * suitabilityFactor(cell) / occupationRatio)
+  def potential(cell : Cell): Power =  reflectiveArea(cell)* solar(cell) * lifeTimeEfficiency(solar(cell))
+  def ratedPower(cell : Cell): Power = {
+   reflectiveArea(cell)* designPointIrradiance * designEfficiency / max_eroi_sm(solar(cell))
+  }
+  
+  def suitabilityFactor(cell : Cell): Double = cell.landCovers.suitabilityFactorSolar * cell.slope.slope_leq(maximumSlope)
+  def eroi(cell : Cell): Double = eroi(solar(cell))
+  
   def efficiency(i: Irradiance): Double = designEfficiency
   def lifeTimeEfficiency(i: Irradiance) =
     if (degradationRate == 0) efficiency(i) * performanceRatio
