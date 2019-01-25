@@ -117,9 +117,12 @@ trait CSP extends SolarTechnology {
   def lifeTimeEfficiency(dni: Irradiance, sm: Double): Double = efficiency(dni, sm) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
 
   def eroi(solar: Irradiance, sm: Double): Double = {
-    val power = Gigawatts(1)
-    val yearProd = yearlyProduction(solar, panelArea(power, sm), sm)
-    yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, panelArea(power, sm))
+    if(solar.value == 0) 0.0
+    else {
+      val power = Gigawatts(1)
+      val yearProd = yearlyProduction(solar, panelArea(power, sm), sm)
+      yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, yearProd, panelArea(power, sm))
+    }
   }
   def potential(solar: Irradiance, panelArea: Area, sm: Double): Power = {
     List(panelArea * solar * lifeTimeEfficiency(solar, sm), ratedPower(panelArea, solar, sm)).minBy(_.value)
@@ -130,7 +133,10 @@ trait CSP extends SolarTechnology {
   def ratedPower(panelArea: Area, solar: Irradiance, sm: Double) = panelArea * (designPointIrradiance * designEfficiency) / sm
 
   override def efficiency(solar: Irradiance): Double = efficiency(solar, max_eroi_sm(solar))
-  override def eroi(cell: Cell, eroi_min: Double): Double = eroi(cell.dni, max_eroi_sm(cell.dni))
+  override def eroi(cell: Cell, eroi_min: Double): Double = {
+    if(suitabilityFactor(cell) == 0) 0.0
+    else eroi(cell.dni, max_eroi_sm(cell.dni))
+  }
 
   override def eroi(solar: Irradiance): Double = eroi(solar, max_eroi_sm(solar))
   override def potential(solar: Irradiance, panelArea: Area): Power = potential(solar, panelArea, max_eroi_sm(solar))

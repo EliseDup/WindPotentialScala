@@ -10,7 +10,8 @@ import squants.radio._
 import wind_solar.EmbodiedEnergy
 import squants.time.Hours
 
-class OnshoreWindTechnology(val top_down: Boolean = false, val cp_max: Double = 0.5) extends WindTechnology {
+
+object OnshoreWindTechnology extends WindTechnology {
   val name = "Onshore WT"
 
   def constructionInputs(depth: Length) = Gigajoules(13744075)
@@ -20,7 +21,7 @@ class OnshoreWindTechnology(val top_down: Boolean = false, val cp_max: Double = 
 
 }
 
-class OffshoreWindTechnology(val top_down: Boolean = false, val cp_max: Double = 0.5) extends WindTechnology {
+object OffshoreWindTechnology extends WindTechnology {
   val name = "Offshore WT"
 
   val fixedOffshoreFixed = Gigajoules(18185974)
@@ -47,7 +48,7 @@ class OffshoreWindTechnology(val top_down: Boolean = false, val cp_max: Double =
 }
 
 trait WindTechnology extends RenewableTechnology {
-  val top_down: Boolean; val cp_max: Double;
+  val top_down: Boolean = false; val cp_max: Double = 0.5;
   // TODO
   val ee = new EmbodiedEnergy(Joules(0), Joules(0), Joules(0), Joules(0), Joules(0), 25)
   val operation_variable: Energy; val installation_variable: Energy; val OM_variable: Energy;

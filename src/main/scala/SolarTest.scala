@@ -5,37 +5,13 @@ import squants.energy._
 import squants.time._
 import squants.radio._
 import grid._
-import solar_energy.SolarPotential
 import solar_energy.SolarPower._
-import solar_energy.EmbodiedEnergyPV
 import wind_energy.WindPotential
 object SolarTest {
   def main(args: Array[String]): Unit = {
   
     val w = WorldGrid.simple()
-    
-    
-    val potential = SolarPotential.eff_24
-    val lc1 = List(BareAreas,SparseVegetation,Grassland)
-    val desert = w.grids.filter(c => (c.proportion(BareAreas)+c.proportion(SparseVegetation))> 0 )
-    
-    val data = Helper.listValueVSCumulated(desert.map(c => (c.irradiance.mean.toWattsPerSquareMeter*8.76, (c.area(BareAreas)+c.area(SparseVegetation)).toSquareKilometers/1E6)))
-    val tre = Helper.listValueVSCumulated(desert.map(c => (potential.eroi(c,1.0,false), (c.area(BareAreas)+c.area(SparseVegetation)).toSquareKilometers/1E6)))
-    
-    PlotHelper.dualAxisPlot(data._1, data._2, tre._2, xLabel = "Surface Cumulée [Millions km2]", yLabel1 = "Irradiation Annuelle [kWh/m2]", yLabel2="TRE")
-   
-    
-     val urban = w.grids.filter(c => (c.proportion(UrbanAreas))> 0 )
-    
-    val data2 = Helper.listValueVSCumulated(urban.map(c => (c.irradiance.mean.toWattsPerSquareMeter*8.76, (c.area(UrbanAreas)).toSquareKilometers/1E6)))
-    val tre2 = Helper.listValueVSCumulated(urban.map(c => (potential.eroi(c,1.0,false), (c.area(UrbanAreas)).toSquareKilometers/1E6)))
-    
-    PlotHelper.dualAxisPlot(data2._1, data2._2, tre2._2, xLabel = "Surface Cumulée [Millions km2]", yLabel1 = "Irradiation Annuelle [kWh/m2]", yLabel2="TRE")
-   
-    //PlotHelper.plotXY(List(SolarPotential.eff_17.eroiFunction(w.eu28, 0, true, "17 %"),
-    //    SolarPotential.eff_24.eroiFunction(w.eu28, 0, true, "24 %")),
-    //    xLabel = "Centralised PV Potential [EJ/year]", yLabel ="EROI", legend=true, save= true)
-    
+      
   }
 
   def plotByLatitude {

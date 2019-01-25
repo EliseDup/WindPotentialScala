@@ -15,8 +15,9 @@ object Grid {
     var t = System.currentTimeMillis()
     val grid = Grid()
     println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
-    val cells = grid.cells.filter(_.ghi.value > 0)
-    plotXY(cells.map(_.ghi.toWattsPerSquareMeter), cells.map(i => math.abs(i.center.latitude.toDegrees)))
+    
+    grid.plot_eroi_potential(grid.cells, List(CSPTowerStorage12h, OnshoreWindTechnology, OffshoreWindTechnology), 1)
+   
   }
 
   def apply(name: String) = new Grid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList)
@@ -24,6 +25,9 @@ object Grid {
 }
 
 class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
+  import Helper._
+  import PlotHelper._
+  
   val cells: List[Cell] = Helper.getLines(name).map(Cell(_, gridSize, eroi_min))
 
   def country(c: String) = cells.filter(_.country.equalsIgnoreCase(c))
@@ -31,10 +35,21 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   val eu28countries = Helper.getLines("../model_data/countries/EU28", "\t").map(_(0))
   def eu28 = cells.filter(g => eu28countries.contains(g.country))
 
+  def eroi_potential(cells : List[Cell], tech : RenewableTechnology, eroi_min : Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), tech.netYearlyProduction(c, eroi_min).to(Exajoules))))
+  def plot_eroi_potential(cells : List[Cell], techs : List[RenewableTechnology], eroi_min : Double) {
+    val list = techs.map(t => {
+      val res=eroi_potential(cells, t, eroi_min)
+      (res._1,res._2, t.name)
+    })
+    plotXY(list, xLabel = "Cumulated Potential [EJ/year]", yLabel = "EROI", legend= true)
+  }
+  
   def write(logFile: String) {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(logFile))
     val techs = List(PVPoly, CSPParabolicStorage12h)
-    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\n"))
+    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + 
+        "\t" + CSPTowerStorage12h.eroi(c, 1) + "\t" + OnshoreWindTechnology.eroi(c, 1)
+        +"\n"))
     out_stream.close()
   }
 }

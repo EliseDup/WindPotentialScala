@@ -1,4 +1,4 @@
-package utils
+package construction
 
 import squants.energy._
 import squants.mass._

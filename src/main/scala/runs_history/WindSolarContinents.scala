@@ -22,7 +22,6 @@ object WindSolarContinents {
   import solar_energy.SolarUtils._
   import DayMonth._
   import PlotHelper._
-  import solar_energy.SolarPotential._
   import solar_energy.SolarGrid._
   import Helper._
   import wind_energy.WindFarmEnergyInputs._

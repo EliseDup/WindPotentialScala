@@ -5,7 +5,7 @@ import squants.space._
 import squants.energy._
 import squants.time._
 import construction._
-import utils.Transport
+import construction.Transport
 
 object WindPowerTransmission {
 

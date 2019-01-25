@@ -6,7 +6,7 @@ import squants.space._
 import squants.motion._
 import utils._
 import construction._
-import utils.Transport
+import construction.Transport
 import squants.energy.Power.apply
 import squants.mass.Mass.apply
 import squants.motion.Velocity.apply
