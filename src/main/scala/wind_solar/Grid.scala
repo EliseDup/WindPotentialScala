@@ -6,6 +6,7 @@ import squants.space._
 import squants.radio._
 import squants.energy._
 import squants.motion._
+import squants.time._
 import solar_energy._
 import wind_energy._
 
@@ -15,9 +16,7 @@ object Grid {
     var t = System.currentTimeMillis()
     val grid = Grid()
     println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
-    
-    grid.plot_eroi_potential(grid.cells, List(CSPTowerStorage12h, OnshoreWindTechnology, OffshoreWindTechnology), 1)
-   
+    grid.plot_eroi_potential(grid.cells, List(OnshoreWindTechnology, OffshoreWindTechnology,CSPTowerStorage12h, CSPParabolic), 1)
   }
 
   def apply(name: String) = new Grid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList)
@@ -35,10 +34,18 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   val eu28countries = Helper.getLines("../model_data/countries/EU28", "\t").map(_(0))
   def eu28 = cells.filter(g => eu28countries.contains(g.country))
 
-  def eroi_potential(cells : List[Cell], tech : RenewableTechnology, eroi_min : Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), tech.netYearlyProduction(c, eroi_min).to(Exajoules))))
+  def eroi_potential(cells : List[Cell], tech : RenewableTechnology, eroi_min : Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min)*Hours(365*24)).to(Exajoules))))
   def plot_eroi_potential(cells : List[Cell], techs : List[RenewableTechnology], eroi_min : Double) {
     val list = techs.map(t => {
       val res=eroi_potential(cells, t, eroi_min)
+      (res._1,res._2, t.name)
+    })
+    plotXY(list, xLabel = "Cumulated Potential [EJ/year]", yLabel = "EROI", legend= true)
+  }
+  def eroi_netpotential(cells : List[Cell], tech : RenewableTechnology, eroi_min : Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), tech.netYearlyProduction(c, eroi_min).to(Exajoules))))
+  def plot_eroi_netpotential(cells : List[Cell], techs : List[RenewableTechnology], eroi_min : Double) {
+    val list = techs.map(t => {
+      val res=eroi_netpotential(cells, t, eroi_min)
       (res._1,res._2, t.name)
     })
     plotXY(list, xLabel = "Cumulated Potential [EJ/year]", yLabel = "EROI", legend= true)

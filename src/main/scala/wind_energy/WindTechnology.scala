@@ -10,9 +10,9 @@ import squants.radio._
 import wind_solar.EmbodiedEnergy
 import squants.time.Hours
 
-
 object OnshoreWindTechnology extends WindTechnology {
   val name = "Onshore WT"
+  def suitabilityFactor(cell: Cell): Double = if (cell.onshore) cell.landCovers.suitabilityFactorWind else 0.0
 
   def constructionInputs(depth: Length) = Gigajoules(13744075)
   val operation_variable = Gigajoules(0.035)
@@ -23,7 +23,15 @@ object OnshoreWindTechnology extends WindTechnology {
 
 object OffshoreWindTechnology extends WindTechnology {
   val name = "Offshore WT"
-
+  def suitabilityFactor(cell: Cell): Double = {
+    if (!cell.offshoreEEZ || cell.waterDepth.toMeters > 1000) 0.0
+    else {
+      val d = cell.distanceToCoast.toNauticalMiles
+      if (d < 5) 0.1
+      else if (d < 20) 0.33
+      else 0.67
+    } 
+  }
   val fixedOffshoreFixed = Gigajoules(18185974)
   val fixedOffshoreFloating = Gigajoules(26670974)
   def offshoreFixedFoundations(depth: Length) = scalingFactorFixedFoundations(depth) * (Gigajoules(16173 + 361962 + 10326 + 3477293))
@@ -65,7 +73,6 @@ trait WindTechnology extends RenewableTechnology {
   def availabilityFactor(cell: Cell): Double = if (cell.offshore) 0.95 else 0.97
 
   def potential(cell: Cell, eroi_min: Double): Power = power(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min))
-  def suitabilityFactor(cell: Cell): Double = cell.landCovers.suitabilityFactorWind
   def ratedPower(cell: Cell, eroi_min: Double): Power = ratedPower(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min))
 
   def power(cell: Cell, vr: Velocity, n: Double): Power = {

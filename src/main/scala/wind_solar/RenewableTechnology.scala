@@ -16,7 +16,7 @@ trait RenewableTechnology {
 
   def capacityFactor(cell: Cell, eroi_min: Double) = potential(cell, eroi_min: Double) / ratedPower(cell, eroi_min)
   def embodiedEnergy(cell: Cell, eroi_min: Double): Energy = ee.embodiedEnergy(ratedPower(cell, eroi_min), potential(cell, eroi_min) * Hours(365 * 24))
-  def netYearlyProduction(cell: Cell, eroi_min: Double): Energy = potential(cell, eroi_min) * Hours(365 * 24) * ee.lifeTime - embodiedEnergy(cell, eroi_min)
+  def netYearlyProduction(cell: Cell, eroi_min: Double): Energy = potential(cell, eroi_min) * Hours(365 * 24) - embodiedEnergy(cell, eroi_min)/ee.lifeTime 
   
   def eroi(cell: Cell, eroi_min: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
