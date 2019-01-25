@@ -39,9 +39,7 @@ class SolarGrid(val cells: List[SolarCell]) {
 
       (if (c.suitabilityFactor(techs(0)) == 0) 0.0 else techs.indexOf(c.bestTechnology(techs)) + 1).toDouble + "\t" +
       c.dni.toWattsPerSquareMeter * 8.76 + "\t" + c.ghi.toWattsPerSquareMeter * 8.76 + "\t" +
-      (if (c.dni > c.ghi) 1.0 else 0.0) + "\t" + c.eroi(techs) +
-      "\t" + PVPoly.capacityFactor(c.ghi, c.panelArea(PVPoly)) * 100 + "\t" +
-      CSPParabolicStorage12h.capacityFactor(c.dni, c.panelArea(CSPParabolicStorage12h)) * 100 + "\n"))
+      (if (c.dni > c.ghi) 1.0 else 0.0) + "\t" + c.eroi(techs) + "\n"))
     // cells.filter(_.dni.toWattsPerSquareMeter >= 200).map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
     //    + c.dni.toWattsPerSquareMeter*8.76 + "\n"))
     out_stream.close()

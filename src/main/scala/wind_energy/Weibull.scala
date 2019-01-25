@@ -47,10 +47,10 @@ object WeibullParametersExtrapolation {
 object CapacityFactorCalculation {
   // Rated speed vr can be optimized given the Weibull parameter of the wind speed in a location
   val vf = 25.0 
-  def apply(cell: GridCell): Double = cubic(cell)
+  def apply(cell: GridCell): Double = cubic(cell.wind100m)
 
-  def cubic(cell: GridCell, vr : Double = 11.0): Double = {
-   cubic(cell.wind100m.c.toMetersPerSecond, cell.wind100m.k, 3.0, vr)
+  def cubic(wind100m : WindProfile, vr : Double = 11.0): Double = {
+   cubic(wind100m.c.toMetersPerSecond, wind100m.k, 3.0, vr)
   }
   
   // It will always be the lowest right ?!

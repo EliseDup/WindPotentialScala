@@ -73,15 +73,34 @@ class Cell(val center: GeoPoint,
     val distanceToCoast: Length,
     val wind71m: WindProfile,
     val wind125m: WindProfile,
+    val keDissipation : Irradiance,
     val optimalCD: Map[Double, (Velocity, Double)]) {
 
-  val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
+  val s = resolution / 2.0;
+  val area = Helper.areaRectangle(center, resolution)
+  val meanLonDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude - s, center.longitude + s)) +
+    Helper.distance(GeoPoint(center.latitude + s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
+  val meanLatDistance = (Helper.distance(GeoPoint(center.latitude - s, center.longitude - s), GeoPoint(center.latitude + s, center.longitude - s)) +
+    Helper.distance(GeoPoint(center.latitude - s, center.longitude + s), GeoPoint(center.latitude + s, center.longitude + s))) / 2.0
+
   val onshore = distanceToCoast.value <= 0
+  val offshore = !onshore
+  val EEZ = !country.equals("NA")
+  val offshoreEEZ = offshore && EEZ
+  val altitude = if (offshore) Meters(0) else elevation
+  val waterDepth = if (onshore) Meters(0) else -elevation
+
+  val hubAltitude = altitude + Meters(100)
+
+  def proportion(lcType: LandCoverType): Double = landCovers.types.filter(_._2.equals(lcType)).map(_._1).sum
+  def area(lcType: LandCoverType): Area = proportion(lcType) * area
+  val protectedA = area * protectedArea
+
+  val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
   def suitabilityFactor(tech: RenewableTechnology) = {
     if (excludedCountries.contains(country) || country.contains("Is.") || country.contains("Islands")) 0.0
     tech.suitabilityFactor(this) * protectedArea
   }
-  val area = Helper.areaRectangle(center, resolution)
   /**
    *  WIND
    */
@@ -92,8 +111,8 @@ class Cell(val center: GeoPoint,
     if (!optimalCD.keySet.contains(e)) WattsPerSquareMeter(0)
     else installedCapacityDensity(optimalCD(e)._1, optimalCD(e)._2)
   def getOptimalVrN(e: Double): (Velocity, Double) = optimalCD.get(e).getOrElse((MetersPerSecond(0), 15))
-  def optimalRatedSpeed(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15))._1
-  def optimalN(eroi_min: Double) = optimalCD.get(eroi_min).getOrElse((MetersPerSecond(0), 15.0))._2
+  def optimalRatedSpeed(eroi_min: Double) = getOptimalVrN(eroi_min)._1
+  def optimalN(eroi_min: Double) = getOptimalVrN(eroi_min)._2
 
   /**
    * Solar
@@ -109,7 +128,7 @@ class Cell(val center: GeoPoint,
  * 36 : Elevation, 37 : Distance to nearest coast, 38 : Country Name,
  * 39-40 : WindProfile 70m
  * 41-42 : WindProfile 125m
- * 43 ? kinetic energy dissipation ?
+ * 43 : kinetic energy dissipation 
  * 44 -> the end : optimal vr, optimal n, true/false
  *
  */
@@ -134,6 +153,7 @@ object Cell {
       Meters(l(36).toDouble), Kilometers(l(37).toDouble),
       new WindProfile(MetersPerSecond(l(39).toDouble), l(40).toDouble, Meters(71)),
       new WindProfile(MetersPerSecond(l(41).toDouble), l(42).toDouble, Meters(125)),
+      WattsPerSquareMeter(l(43).toDouble),
       if (l.size > 44 + 1 && !l(44).equals("")) (for (e <- (0 until eroi_min.size); if (l(e * 3 + optiIndex + 2).toBoolean)) yield (eroi_min(e), (MetersPerSecond(l(e * 3 + optiIndex).toDouble), l(e * 3 + optiIndex + 1).toDouble))).toMap
       else Map())
   }

@@ -10,6 +10,45 @@ import squants.time.Time
 import squants.space.SquareKilometers
 import wind_solar.RenewableTechnology
 import wind_solar.Cell
+import wind_solar.EmbodiedEnergy
+
+trait SolarTechnology extends RenewableTechnology {
+  val designPointIrradiance: Irradiance;
+  val performanceRatio: Double;
+  val degradationRate: Double
+  val occupationRatio: Double;
+  def max_eroi_sm(solar: Irradiance): Double = 1.0;
+  val directOnly: Boolean;
+  val maximumSlope: Double;
+  val designEfficiency: Double;
+
+  // GHI for PV, DNI for CSP
+  def solar(cell: Cell): Irradiance = if (directOnly) cell.dni else cell.ghi;
+  def reflectiveArea(cell: Cell): Area = (cell.area * suitabilityFactor(cell) / occupationRatio)
+  def potential(cell: Cell, eroi_min: Double): Power = reflectiveArea(cell) * solar(cell) * lifeTimeEfficiency(solar(cell))
+  def ratedPower(cell: Cell, eroi_min: Double): Power = {
+    reflectiveArea(cell) * designPointIrradiance * designEfficiency / max_eroi_sm(solar(cell))
+  }
+  def suitabilityFactor(cell: Cell): Double = cell.landCovers.suitabilityFactorSolar * cell.slope.slope_leq(maximumSlope)
+  override def embodiedEnergy(cell: Cell, eroi_min: Double) = ee.embodiedEnergyArea(ratedPower(cell, eroi_min), potential(cell, eroi_min) * Hours(365 * 24), reflectiveArea(cell))
+  
+  def efficiency(i: Irradiance): Double = designEfficiency
+  def lifeTimeEfficiency(i: Irradiance) =
+    if (degradationRate == 0) efficiency(i) * performanceRatio
+    else efficiency(i) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
+  def eroi(solar: Irradiance) = {
+    val ratedPower = Gigawatts(1)
+    val energyPerYear = yearlyProduction(solar, panelArea(ratedPower, solar))
+    energyPerYear * ee.lifeTime / ee.embodiedEnergyArea(ratedPower, energyPerYear, panelArea(ratedPower, solar))
+  }
+  def potential(solar: Irradiance, panelArea: Area): Power = panelArea * solar * lifeTimeEfficiency(solar)
+  def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = potential(solar, panelArea) * Hours(365 * 24)
+  // The size of the power block depending on design conditions, and solar multiple for CSP plants
+  def ratedPower(panelArea: Area, solar: Irradiance) = panelArea * (designPointIrradiance * designEfficiency) / max_eroi_sm(solar)
+  def panelArea(ratedPower: Power, solar: Irradiance): Area = {
+    ratedPower / (designPointIrradiance * designEfficiency) * max_eroi_sm(solar)
+  }
+}
 
 trait PV extends SolarTechnology {
   val designPointIrradiance: Irradiance = WattsPerSquareMeter(1000)
@@ -85,17 +124,19 @@ trait CSP extends SolarTechnology {
   def potential(solar: Irradiance, panelArea: Area, sm: Double): Power = {
     List(panelArea * solar * lifeTimeEfficiency(solar, sm), ratedPower(panelArea, solar, sm)).minBy(_.value)
   }
-  
+
   def yearlyProduction(solar: Irradiance, panelArea: Area, sm: Double): Energy = potential(solar, panelArea, sm) * Hours(365 * 24)
   def panelArea(ratedPower: Power, sm: Double) = ratedPower / (designPointIrradiance * designEfficiency) * sm
   def ratedPower(panelArea: Area, solar: Irradiance, sm: Double) = panelArea * (designPointIrradiance * designEfficiency) / sm
 
   override def efficiency(solar: Irradiance): Double = efficiency(solar, max_eroi_sm(solar))
+  override def eroi(cell: Cell, eroi_min: Double): Double = eroi(cell.dni, max_eroi_sm(cell.dni))
+
   override def eroi(solar: Irradiance): Double = eroi(solar, max_eroi_sm(solar))
   override def potential(solar: Irradiance, panelArea: Area): Power = potential(solar, panelArea, max_eroi_sm(solar))
   override def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = yearlyProduction(solar, panelArea, max_eroi_sm(solar))
   def capacityFactor(solar: Irradiance, panelArea: Area, sm: Double): Double = if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea, sm) / ratedPower(panelArea, solar, sm) else 0.0
- 
+
 }
 
 /**
@@ -140,87 +181,4 @@ object CSPTowerStorage12h extends CSP {
   // OLD VALUES !!
   /*val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(3723 + 7197 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(1329266), Gigajoules(52168), SquareMeters(1443932))*/
-}
-
-trait SolarTechnology extends RenewableTechnology {
-  val designPointIrradiance: Irradiance;
-  val performanceRatio: Double;
-  val degradationRate: Double
-  val occupationRatio: Double;
-  def max_eroi_sm(solar: Irradiance): Double = 1.0;
-  val directOnly: Boolean;
-  val maximumSlope: Double;
-  val designEfficiency: Double;
-  
-  // GHI for PV, DNI for CSP
-  def solar(cell: Cell): Irradiance = if(directOnly) cell.dni else cell.ghi;
-  def reflectiveArea(cell : Cell): Area = (cell.area * suitabilityFactor(cell) / occupationRatio)
-  def potential(cell : Cell): Power =  reflectiveArea(cell)* solar(cell) * lifeTimeEfficiency(solar(cell))
-  def ratedPower(cell : Cell): Power = {
-   reflectiveArea(cell)* designPointIrradiance * designEfficiency / max_eroi_sm(solar(cell))
-  }
-  
-  def suitabilityFactor(cell : Cell): Double = cell.landCovers.suitabilityFactorSolar * cell.slope.slope_leq(maximumSlope)
-  def eroi(cell : Cell): Double = eroi(solar(cell))
-  
-  def efficiency(i: Irradiance): Double = designEfficiency
-  def lifeTimeEfficiency(i: Irradiance) =
-    if (degradationRate == 0) efficiency(i) * performanceRatio
-    else efficiency(i) * performanceRatio * ((1.0 - math.pow(1.0 - degradationRate, ee.lifeTime)) / degradationRate) / ee.lifeTime
-
-  def potential(solar: Irradiance, panelArea: Area): Power = panelArea * solar * lifeTimeEfficiency(solar)
-  def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = potential(solar, panelArea) * Hours(365 * 24)
-  // The size of the power block depending on design conditions, and solar multiple for CSP plants
-  def ratedPower(panelArea: Area, solar: Irradiance) = panelArea * (designPointIrradiance * designEfficiency) / max_eroi_sm(solar)
-  def panelArea(ratedPower: Power, solar: Irradiance): Area = {
-      ratedPower / (designPointIrradiance * designEfficiency) * max_eroi_sm(solar)
-    }
-
-  def capacityFactor(solar: Irradiance, panelArea: Area): Double = {
-    if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea) / ratedPower(panelArea, solar) else 0.0
-  }
-
-  def eroi(cf: Double) = ee.eroi(cf)
-  def eroi(solar: Irradiance) = {
-    val power = Gigawatts(1)
-    val yearProd = yearlyProduction(solar, panelArea(power, solar))
-    yearProd * ee.lifeTime / ee.embodiedEnergy(power, yearProd)
-  }
-}
-
-class EmbodiedEnergy(val raw_materials: Energy,
-    val construction_decomissioning: Energy, val transport_materials: Energy, val O_M_fixed: Energy,
-    val O_M_output: Energy, val lifeTime: Int, val construction_variable: Energy = Joules(0), val transport_variable: Energy = Joules(0), val default_area: Area = SquareMeters(1)) {
-
-  def eroi(cf: Double) = (lifeTime * Gigawatts(1) * cf * Hours(24 * 365)) / embodiedEnergy1GW(cf)
-  def eroi(cf: Double, area: Area) = {
-    val output_year = Gigawatts(1) * cf * Hours(24 * 365)
-    output_year * lifeTime / embodiedEnergyArea(Gigawatts(1), output_year, area)
-  }
-
-  def embodiedEnergy1GW(output_1GW_year: Energy) =
-    raw_materials + construction_decomissioning + transport_materials +
-      lifeTime * (O_M_fixed + output_1GW_year.toGigajoules * O_M_output)
-
-  def embodiedEnergy1GW(cf: Double): Energy = embodiedEnergy1GW(Gigawatts(1) * cf * Hours(24 * 365))
-
-  def embodiedEnergy(rated_power: Power, output_year: Energy): Energy = {
-    val ratio = rated_power.toGigawatts
-    ratio * embodiedEnergy1GW(output_year / ratio)
-  }
-
-  def embodiedEnergy(rated_power: Power, capacity_factor: Double) = {
-    rated_power.toGigawatts * embodiedEnergy1GW(capacity_factor)
-  }
-  // For CSP, the embodied energy was calculated for a default aperture area !
-  def embodiedEnergyArea(rated_power: Power, output_year: Energy, area: Area): Energy = {
-    val area_ratio = area / default_area
-    embodiedEnergy(rated_power, output_year) + area_ratio * (transport_variable + construction_variable)
-  }
-  // For csp optimzation
-  val fixed1MW = Megawatts(1).toGigawatts * (raw_materials + construction_decomissioning + transport_materials + O_M_fixed * lifeTime)
-  val variable1MW = {
-    val area_ratio = Megawatts(1) / (WattsPerSquareMeter(950) * 0.22) / default_area
-    area_ratio * (transport_variable + construction_variable)
-  }
 }

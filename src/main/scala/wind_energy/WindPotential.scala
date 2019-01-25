@@ -90,7 +90,7 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
      
   def power(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean): Power = {
     val wi = installedCapacity(cell, vr, n, suitable)
-    val res = wi * CapacityFactorCalculation.cubic(cell, vr.toMetersPerSecond) * WakeEffect.arrayEfficiency(wi.toMegawatts / 3.0, Math.PI / (4 * Math.pow(n, 2))) * availabilityFactor(cell)
+    val res = wi * CapacityFactorCalculation.cubic(cell.wind100m, vr.toMetersPerSecond) * WakeEffect.arrayEfficiency(wi.toMegawatts / 3.0, Math.PI / (4 * Math.pow(n, 2))) * availabilityFactor(cell)
     if (top_down && res / cell.suitableArea(suitable) > cell.keDissipation) cell.keDissipation * cell.suitableArea(suitable)
     else res
   }

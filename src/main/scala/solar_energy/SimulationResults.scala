@@ -99,7 +99,7 @@ object SimuationResults {
     val eu = grid.eu28
     techs.map(t => println("Potential EU28 " + t.name + "\t" + math.round(netPotential(eu, List(t), eroi_min).to(Exajoules))))
     techs.map(t => println("Max EROI EU28 " + t.name + "\t" + eu.filter(_.potential(t).value > 0).map(i => i.eroi(t)).max))
-    techs.map(t => println("Max CF " + t.name + " \t" + grid.cells.map(i => t.capacityFactor(if (t.directOnly) i.dni else i.ghi, i.panelArea(t)) * 100).max))
+    // techs.map(t => println("Max CF " + t.name + " \t" + grid.cells.map(i => t.capacityFactor(if (t.directOnly) i.dni else i.ghi, i.panelArea(t)) * 100).max))
   
     val eroi = List(1,5,7.5,9)
     techs.map( {tech =>
