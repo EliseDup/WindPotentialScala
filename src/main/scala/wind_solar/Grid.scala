@@ -14,9 +14,11 @@ object Grid {
   import PlotHelper._
   def main(args: Array[String]): Unit = {
     var t = System.currentTimeMillis()
-    val grid = Grid()
+    val grid = Grid()  
     println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
-    grid.plot_eroi_potential(grid.cells, List(OnshoreWindTechnology, OffshoreWindTechnology,CSPTowerStorage12h, CSPParabolic), 1)
+       
+    grid.plot_eroi_potential(grid.cells, List(OnshoreWindTechnology), 1)
+    grid.plot_eroi_potential(grid.cells, List(OnshoreWindTechnology), 8)
   }
 
   def apply(name: String) = new Grid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList)
@@ -26,7 +28,7 @@ object Grid {
 class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   import Helper._
   import PlotHelper._
-  
+
   val cells: List[Cell] = Helper.getLines(name).map(Cell(_, gridSize, eroi_min))
 
   def country(c: String) = cells.filter(_.country.equalsIgnoreCase(c))
@@ -34,29 +36,29 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   val eu28countries = Helper.getLines("../model_data/countries/EU28", "\t").map(_(0))
   def eu28 = cells.filter(g => eu28countries.contains(g.country))
 
-  def eroi_potential(cells : List[Cell], tech : RenewableTechnology, eroi_min : Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min)*Hours(365*24)).to(Exajoules))))
-  def plot_eroi_potential(cells : List[Cell], techs : List[RenewableTechnology], eroi_min : Double) {
+  def eroi_potential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))))
+  def plot_eroi_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double) {
     val list = techs.map(t => {
-      val res=eroi_potential(cells, t, eroi_min)
-      (res._1,res._2, t.name)
+      val res = eroi_potential(cells, t, eroi_min)
+      (res._1, res._2, t.name)
     })
-    plotXY(list, xLabel = "Cumulated Potential [EJ/year]", yLabel = "EROI", legend= true)
+    plotXY(list, xLabel = "Cumulated Potential [EJ/year]", yLabel = "EROI", legend = true)
   }
-  def eroi_netpotential(cells : List[Cell], tech : RenewableTechnology, eroi_min : Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), tech.netYearlyProduction(c, eroi_min).to(Exajoules))))
-  def plot_eroi_netpotential(cells : List[Cell], techs : List[RenewableTechnology], eroi_min : Double) {
+  def eroi_netpotential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), tech.netYearlyProduction(c, eroi_min).to(Exajoules))))
+  def plot_eroi_netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double) {
     val list = techs.map(t => {
-      val res=eroi_netpotential(cells, t, eroi_min)
-      (res._1,res._2, t.name)
+      val res = eroi_netpotential(cells, t, eroi_min)
+      (res._1, res._2, t.name)
     })
-    plotXY(list, xLabel = "Cumulated Potential [EJ/year]", yLabel = "EROI", legend= true)
+    plotXY(list, xLabel = "Cumulated Potential [EJ/year]", yLabel = "EROI", legend = true)
   }
-  
+
   def write(logFile: String) {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(logFile))
     val techs = List(PVPoly, CSPParabolicStorage12h)
-    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + 
-        "\t" + CSPTowerStorage12h.eroi(c, 1) + "\t" + OnshoreWindTechnology.eroi(c, 1)
-        +"\n"))
+    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees +
+      "\t" + c.area.toSquareKilometers + "\t" + OnshoreWindTechnology.suitabilityFactor(c) + "\t" +OnshoreWindTechnology.potential(c, 1).toGigawatts + "\t" + OnshoreWindTechnology.embodiedEnergy(c, 1).toGigajoules
+      + "\n"))
     out_stream.close()
   }
 }
@@ -95,7 +97,7 @@ class Cell(val center: GeoPoint,
     val distanceToCoast: Length,
     val wind71m: WindProfile,
     val wind125m: WindProfile,
-    val keDissipation : Irradiance,
+    val keDissipation: Irradiance,
     val optimalCD: Map[Double, (Velocity, Double)]) {
 
   val s = resolution / 2.0;
@@ -118,11 +120,6 @@ class Cell(val center: GeoPoint,
   def area(lcType: LandCoverType): Area = proportion(lcType) * area
   val protectedA = area * protectedArea
 
-  val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
-  def suitabilityFactor(tech: RenewableTechnology) = {
-    if (excludedCountries.contains(country) || country.contains("Is.") || country.contains("Islands")) 0.0
-    tech.suitabilityFactor(this) * protectedArea
-  }
   /**
    *  WIND
    */
@@ -150,7 +147,7 @@ class Cell(val center: GeoPoint,
  * 36 : Elevation, 37 : Distance to nearest coast, 38 : Country Name,
  * 39-40 : WindProfile 70m
  * 41-42 : WindProfile 125m
- * 43 : kinetic energy dissipation 
+ * 43 : kinetic energy dissipation
  * 44 -> the end : optimal vr, optimal n, true/false
  *
  */
@@ -165,7 +162,7 @@ object Cell {
   def apply(l: Array[String], resolution: Angle, eroi_min: List[Double]) = {
 
     new Cell(
-      GeoPoint(Degrees(l(1).toDouble), Degrees(l(0).toDouble)),
+      GeoPoint(Degrees(l(0).toDouble), Degrees(l(1).toDouble)),
       resolution,
       WattsPerSquareMeter(l(2).toDouble / 24 * 1000), WattsPerSquareMeter(l(3).toDouble / 24 * 1000),
       SlopeGradients(l, 4, 11),

@@ -13,6 +13,7 @@ import wind_solar.Cell
 import wind_solar.EmbodiedEnergy
 
 trait SolarTechnology extends RenewableTechnology {
+  
   val designPointIrradiance: Irradiance;
   val performanceRatio: Double;
   val degradationRate: Double
@@ -22,6 +23,8 @@ trait SolarTechnology extends RenewableTechnology {
   val maximumSlope: Double;
   val designEfficiency: Double;
 
+  val ee : EmbodiedEnergy;
+  
   // GHI for PV, DNI for CSP
   def solar(cell: Cell): Irradiance = if (directOnly) cell.dni else cell.ghi;
   def reflectiveArea(cell: Cell): Area = (cell.area * suitabilityFactor(cell) / occupationRatio)
@@ -29,8 +32,9 @@ trait SolarTechnology extends RenewableTechnology {
   def ratedPower(cell: Cell, eroi_min: Double): Power = {
     reflectiveArea(cell) * designPointIrradiance * designEfficiency / max_eroi_sm(solar(cell))
   }
-  def suitabilityFactor(cell: Cell): Double = cell.landCovers.suitabilityFactorSolar * cell.slope.slope_leq(maximumSlope)
+  override def suitabilityFactor(cell: Cell): Double = super.suitabilityFactor(cell)*cell.landCovers.suitabilityFactorSolar * cell.slope.slope_leq(maximumSlope)
   override def embodiedEnergy(cell: Cell, eroi_min: Double) = ee.embodiedEnergyArea(ratedPower(cell, eroi_min), potential(cell, eroi_min) * Hours(365 * 24), reflectiveArea(cell))
+  def embodiedEnergy(rated_power : Power, output_year : Energy, area : Area) = ee.embodiedEnergyArea(rated_power, output_year, area)
   
   def efficiency(i: Irradiance): Double = designEfficiency
   def lifeTimeEfficiency(i: Irradiance) =
@@ -56,6 +60,7 @@ trait PV extends SolarTechnology {
   val occupationRatio = 5.0;
   val directOnly = false;
   val maximumSlope = 30.0
+  val lifeTime = 25
 }
 
 object PVPoly extends PV {
@@ -91,7 +96,7 @@ object PVMono extends PV {
 trait CSP extends SolarTechnology {
   def fullLoadHours(dni: Irradiance, sm: Double): Time = fullLoadHours(dni.toWattsPerSquareMeter * 8.76, sm)
   def fullLoadHours(dni_kWh_year: Double, sm: Double): Time = Hours((2.5717 * dni_kWh_year - 694) * (-0.0371 * sm * sm + 0.4171 * sm - 0.0744))
-
+  val lifeTime = 30
   val designPointIrradiance = WattsPerSquareMeter(950)
   val performanceRatio = 1.0;
   val occupationRatio = 7.5

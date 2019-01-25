@@ -57,9 +57,10 @@ object RooftopPVPotential {
     potential(area, irradiance, tech) / (tech.ratedPower(area, irradiance) * Hours(365 * 24))
   }
   def netYearlyProductions(area: Area, irradiance: Irradiance, tech: SolarTechnology): Energy = {
+    
     val power = tech.ratedPower(area, irradiance)
     val gross = potential(area, irradiance, tech)
-    gross - tech.ee.embodiedEnergy(power, gross) / tech.ee.lifeTime
+    gross - tech.embodiedEnergy(power, gross, area) / tech.lifeTime
   }
 
 }

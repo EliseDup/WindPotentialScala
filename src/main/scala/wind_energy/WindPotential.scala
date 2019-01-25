@@ -15,7 +15,7 @@ import utils.Helper
 object WindPotential {
   def apply() = new WindPotential()
   def apply(cp_max: Double) = new WindPotential(cp_max)
-  def apply(cp_max: Double, topDown : Boolean) = new WindPotential(cp_max, topDown)
+  def apply(cp_max: Double, topDown: Boolean) = new WindPotential(cp_max, topDown)
 }
 
 class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) extends EnergyGenerationPotential {
@@ -86,8 +86,8 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
   def spacingParameter(ratedSpeed: Velocity, density: Irradiance, hubAltitude: Length) = Math.sqrt(coeff(hubAltitude) * Math.pow(ratedSpeed.toMetersPerSecond, 3) / density.toWattsPerSquareMeter)
   def installedCapacity(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean): Power = cell.suitableArea(suitable) * capacityDensity(vr, n, cell.hubAltitude)
   def installedCapacity(cell: GridCell, eroi_min: Double, suitable: Boolean): Power = installedCapacity(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min), suitable)
- def installedCapacity(eroi_min: Double, suitable: Boolean = true, grids: List[GridCell]): Power = grids.map(installedCapacity(_, eroi_min, suitable)).foldLeft(Watts(0))(_ + _)
-     
+  def installedCapacity(eroi_min: Double, suitable: Boolean = true, grids: List[GridCell]): Power = grids.map(installedCapacity(_, eroi_min, suitable)).foldLeft(Watts(0))(_ + _)
+
   def power(cell: GridCell, vr: Velocity, n: Double, suitable: Boolean): Power = {
     val wi = installedCapacity(cell, vr, n, suitable)
     val res = wi * CapacityFactorCalculation.cubic(cell.wind100m, vr.toMetersPerSecond) * WakeEffect.arrayEfficiency(wi.toMegawatts / 3.0, Math.PI / (4 * Math.pow(n, 2))) * availabilityFactor(cell)
@@ -133,8 +133,8 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
   // RESULTS
   def potentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true): Energy =
     grids.map(g => (if (eroi(g, density, suitable) >= eroi_min) energyPerYear(g, density, suitable) else Joules(0))).foldLeft(Joules(0))(_ + _)
- 
-    def netPotentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true): Energy =
+
+  def netPotentialFixedDensity(density: Irradiance, eroi_min: Double, grids: List[GridCell], suitable: Boolean = true): Energy =
     grids.map(g => (if (eroi(g, density, suitable) >= eroi_min) netEnergyPerYear(g, density, suitable) else Joules(0))).foldLeft(Joules(0))(_ + _)
 
   def meanCfCountry(world: WorldGrid, country: String, meanSpeed: Velocity) = {
@@ -145,10 +145,10 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
   def meanEfficiency(cells: List[GridCell], eroi_min: Double) = {
     Math.round(Helper.mean(cells.map(g => (g, ((installedCapacity(g, eroi_min, true) * Hours(365 * 24)) / energyPerYear(g, eroi_min, true)) * 1000)))) / 10.0
   }
-  def meanArrayEffect(cells : List[GridCell], eroi_min : Double) = {
-    Helper.mean(cells.map(g => (g,{
-       val wi = installedCapacity(g, eroi_min, true)
-       val n = g.optimalN(eroi_min)
+  def meanArrayEffect(cells: List[GridCell], eroi_min: Double) = {
+    Helper.mean(cells.map(g => (g, {
+      val wi = installedCapacity(g, eroi_min, true)
+      val n = g.optimalN(eroi_min)
       WakeEffect.arrayEfficiency(wi.toMegawatts / 3.0, Math.PI / (4 * Math.pow(n, 2)))
     })))
   }
