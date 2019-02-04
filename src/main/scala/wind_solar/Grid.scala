@@ -13,12 +13,32 @@ import wind_energy._
 object Grid {
   import PlotHelper._
   def main(args: Array[String]): Unit = {
+    
+    val test = List(150,200,250,300,350,400,450)
+    val tech = CSPParabolicStorage12h
+    test.map(t => {
+      val d = WattsPerSquareMeter(t); val a = SquareKilometers(100)
+      val sm = tech.max_net_energy_sm(d, a)
+      val eff = tech.efficiency(d, sm)
+      val power = tech.ratedPower(a/tech.occupationRatio, d, sm)
+      val prod = tech.yearlyProduction(d, a/tech.occupationRatio, sm)
+      val ee = tech.ee.embodiedEnergyArea(power, prod, a/tech.occupationRatio)
+      println(t + "\t" + sm + "\t" + eff + "\t" + power.toMegawatts + "\t" + (power*Hours(365*24)).toMegawattHours + "\t" + prod.toMegawattHours + "\t" + ee.toMegawattHours/tech.lifeTime
+          +"\t" + tech.netPotential(d, a/tech.occupationRatio, sm).toMegawatts*8760 + "\t" + tech.eroi(d, sm))
+      
+    })
+    
+    val dni = (150 to 450).toList.map(WattsPerSquareMeter(_))
+    val sm = dni.map(d => CSPParabolicStorage12h.max_net_energy_sm(d, SquareKilometers(100)))
+    plotXY(List( (dni.map(_.toWattsPerSquareMeter), sm,"Max Net E"), (dni.map(_.toWattsPerSquareMeter), dni.map(d => CSPParabolicStorage12h.max_eroi_sm(d)),"Max EROI")), legend=true)
+  /*  
     var t = System.currentTimeMillis()
     val grid = Grid()  
     println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
-       
-    grid.plot_eroi_potential(grid.cells, List(OnshoreWindTechnology), 1)
-    grid.plot_eroi_potential(grid.cells, List(OnshoreWindTechnology), 8)
+    val techs = List(OnshoreWindTechnology,OffshoreWindTechnology,CSPParabolic,CSPParabolicStorage12h,CSPTowerStorage12h)
+    grid.plot_eroi_potential(grid.eu28, techs, 1)
+    grid.plot_eroi_potential(grid.eu28, techs, 8)
+   */ 
   }
 
   def apply(name: String) = new Grid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList)
@@ -136,7 +156,7 @@ class Cell(val center: GeoPoint,
   /**
    * Solar
    */
-
+   
 }
 /**
  * Text file:

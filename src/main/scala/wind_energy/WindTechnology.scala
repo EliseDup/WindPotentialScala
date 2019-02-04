@@ -50,8 +50,8 @@ trait WindTechnology extends RenewableTechnology {
 
 object OnshoreWindTechnology extends WindTechnology {
   val name = "Onshore WT"
-  override def suitabilityFactor(cell: Cell): Double ={
-    super.suitabilityFactor(cell)* (if (cell.onshore && cell.EEZ) cell.landCovers.suitabilityFactorWind else 0.0)
+  override def suitabilityFactor(cell: Cell): Double = {
+    super.suitabilityFactor(cell) * (if (cell.onshore && cell.EEZ) cell.landCovers.suitabilityFactorWind else 0.0)
   }
 
   def constructionInputs(depth: Length) = Gigajoules(13744075)
@@ -63,14 +63,15 @@ object OnshoreWindTechnology extends WindTechnology {
 
 object OffshoreWindTechnology extends WindTechnology {
   val name = "Offshore WT"
-  override def suitabilityFactor(cell: Cell): Double = {super.suitabilityFactor(cell) *(
-    if (!cell.offshoreEEZ || cell.waterDepth.toMeters > 1000) 0.0
-    else {
-      val d = cell.distanceToCoast.toNauticalMiles
-      if (d < 5) 0.1
-      else if (d < 20) 0.33
-      else 0.67
-    })
+  override def suitabilityFactor(cell: Cell): Double = {
+    super.suitabilityFactor(cell) * (
+      if (!cell.offshoreEEZ || cell.waterDepth.toMeters > 1000) 0.0
+      else {
+        val d = cell.distanceToCoast.toNauticalMiles
+        if (d < 5) 0.1
+        else if (d < 20) 0.33
+        else 0.67
+      })
   }
   val fixedOffshoreFixed = Gigajoules(18185974)
   val fixedOffshoreFloating = Gigajoules(26670974)

@@ -24,14 +24,16 @@ object SimuationResults {
   import SolarPower._
 
   def main(args: Array[String]): Unit = {
-     /*val g = _0_5deg.cells
+  
+    /*val g = _0_5deg.cells
     val eroi = List(1,5,7.5,9)
     List(PVMono,PVPoly,CSPParabolic,CSPParabolicStorage12h,CSPTowerStorage12h).map( {tech =>
       print(tech.name +"\t")
       eroi.map(e => print(math.round(netPotential(g, List(tech) ,e).to(Exajoules))+"\t"))
           println()
     })*/
-    // printResultsForPaper(1)
+    
+    //printResultsForPaper(5)
     plotResultsForPaper
     // (1 to 20).map(i => println(i / 2.0 + "\t" + potential(grid.cells, List(PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), i / 2.0).to(Exajoules)))
     print("-End-")
@@ -39,14 +41,14 @@ object SimuationResults {
   }
 
   def plotBestSM(tech: CSP, sm: List[Double] = List()) {
-    val dni = (230 to 450).map(_.toDouble).toList
+    val dni = (2300 to 4500).map(_.toDouble/10).toList
     // val eroi = sm.map(i => (dni, dni.map(j => tech.eroi(WattsPerSquareMeter(j), i)), i.toString))
     //plotXY(eroi, xLabel = "DNI [W/m2]", yLabel = "EROI", legend = true)
     val eff = sm.map(i => (dni, dni.map(j => tech.efficiency(WattsPerSquareMeter(j), i) * 100), i.toString))
     //  plotXY(eff, xLabel = "DNI [W/m2]", yLabel = "Efficiency [%]", legend = true)
-    val sm_eroi = (dni.map(_ * 8.76), dni.map(j => tech.max_eroi_sm(WattsPerSquareMeter(j))), "Max EROI")
-    // val sm_eff = (dni, dni.map(j => tech.max_efficiency_sm(WattsPerSquareMeter(j))), "Max efficiency")
-    plotXY(List(sm_eroi), xLabel = "DNI [kWh/m2/year]", yLabel = "Optimal SM " + tech.name)
+    val sm_eroi = (dni, dni.map(j => tech.max_eroi_sm(WattsPerSquareMeter(j))), "Max EROI")
+    val sm_net_e =  (dni, dni.map(j => tech.max_net_energy_sm(WattsPerSquareMeter(j),SquareKilometers(100))), "Max Net Energy")
+    plotXY(List(sm_eroi,sm_net_e), xLabel = "DNI [W/m2]", yLabel = "Optimal SM " + tech.name, legend = true)
   }
 
   def plotResultsForPaper {
