@@ -13,7 +13,7 @@ import wind_solar.Cell
 import wind_solar.EmbodiedEnergy
 
 trait SolarTechnology extends RenewableTechnology {
-
+  val wind = false; val solar = true;
   val designPointIrradiance: Irradiance;
   val performanceRatio: Double;
   val degradationRate: Double
@@ -28,12 +28,27 @@ trait SolarTechnology extends RenewableTechnology {
   // GHI for PV, DNI for CSP
   def solar(cell: Cell): Irradiance = if (directOnly) cell.dni else cell.ghi;
   def reflectiveArea(cell: Cell): Area = (cell.area * suitabilityFactor(cell) / occupationRatio)
-  def potential(cell: Cell, eroi_min: Double): Power = reflectiveArea(cell) * solar(cell) * lifeTimeEfficiency(solar(cell))
+  
+  def potential(cell: Cell, eroi_min: Double): Power = 
+    if(eroi(cell,eroi_min) >= eroi_min) reflectiveArea(cell) * solar(cell) * lifeTimeEfficiency(solar(cell)) 
+    else Watts(0)
+  def potential(cell: Cell): Power = reflectiveArea(cell) * solar(cell) * lifeTimeEfficiency(solar(cell)) 
+  
+  override def eroi(cell: Cell, eroi_min: Double): Double = {
+    val wi = ratedPower(cell, eroi_min)
+    if (wi.value == 0) 0.0
+    else {
+      val out_year = potential(cell) * Hours(365 * 24)
+      out_year * lifeTime / embodiedEnergy(cell, eroi_min)
+    }
+  }
+  
   def ratedPower(cell: Cell, eroi_min: Double): Power = {
     reflectiveArea(cell) * designPointIrradiance * designEfficiency / max_eroi_sm(solar(cell))
   }
+  
   override def suitabilityFactor(cell: Cell): Double = super.suitabilityFactor(cell) * cell.landCovers.suitabilityFactorSolar * cell.slope.slope_leq(maximumSlope)
-  override def embodiedEnergy(cell: Cell, eroi_min: Double) = ee.embodiedEnergyArea(ratedPower(cell, eroi_min), potential(cell, eroi_min) * Hours(365 * 24), reflectiveArea(cell))
+  override def embodiedEnergy(cell: Cell, eroi_min: Double) = ee.embodiedEnergyArea(ratedPower(cell,eroi_min), potential(cell) * Hours(365 * 24), reflectiveArea(cell))
   def embodiedEnergy(rated_power: Power, output_year: Energy, area: Area) = ee.embodiedEnergyArea(rated_power, output_year, area)
 
   def efficiency(i: Irradiance): Double = designEfficiency
@@ -162,7 +177,7 @@ trait CSP extends SolarTechnology {
  */
 
 object CSPParabolic extends CSP {
-  val name = "PTPP"
+  val name = "PT-oil"
   val designEfficiency = 0.22
   def a(sm: Double) = -3.38 * sm + 11.55
   def b(sm: Double) = 23.85 * sm - 72.26
@@ -173,7 +188,7 @@ object CSPParabolic extends CSP {
 }
 
 object CSPParabolicStorage12h extends CSP {
-  val name = "PTPP-TES"
+  val name = "PT-salt-TES"
   val designEfficiency = 0.22
   val sm_range = (5 to 40).map(_ * 0.1).toList // (10 to 40).map(_ * 0.1).toList
   def a(sm: Double) = -1.578 * sm + 11.17
@@ -186,7 +201,7 @@ object CSPParabolicStorage12h extends CSP {
 }
 
 object CSPTowerStorage12h extends CSP {
-  val name = "STPP-TES"
+  val name = "ST-salt-TES"
   val designEfficiency = 0.21
   val sm_range = (5 to 40).map(_ * 0.1).toList // (10 to 40).map(_ * 0.1).toList
   def a(sm: Double) = -1.62 * sm + 8.742

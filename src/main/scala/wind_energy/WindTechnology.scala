@@ -11,7 +11,7 @@ import wind_solar.EmbodiedEnergy
 import squants.time.Hours
 
 trait WindTechnology extends RenewableTechnology {
-
+  val wind = true; val solar = false;
   val top_down: Boolean = false; val cp_max: Double = 0.5;
   val lifeTime = 25
   // Energy Inputs
@@ -49,7 +49,7 @@ trait WindTechnology extends RenewableTechnology {
 }
 
 object OnshoreWindTechnology extends WindTechnology {
-  val name = "Onshore WT"
+  val name = "Wind-onshore"
   override def suitabilityFactor(cell: Cell): Double = {
     super.suitabilityFactor(cell) * (if (cell.onshore && cell.EEZ) cell.landCovers.suitabilityFactorWind else 0.0)
   }
@@ -62,7 +62,7 @@ object OnshoreWindTechnology extends WindTechnology {
 }
 
 object OffshoreWindTechnology extends WindTechnology {
-  val name = "Offshore WT"
+  val name = "Wind-offshore"
   override def suitabilityFactor(cell: Cell): Double = {
     super.suitabilityFactor(cell) * (
       if (!cell.offshoreEEZ || cell.waterDepth.toMeters > 1000) 0.0

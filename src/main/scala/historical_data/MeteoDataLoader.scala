@@ -37,9 +37,9 @@ object MeteoDataLoader {
    */
   val stations = new MeteoStations()
   val cities = stations.stations.filter(_.countryID.equals("BX")).filter(_.stationID.nonEmpty).filter(c => !c.city.equals("Genk") && !c.city.equals("Ghent") && !c.city.equals("Brasschaat"))
- 
+
   def main(args: Array[String]) = {
-    for (year <- (2012 to 2015)) {
+    for (year <- (2017 to 2018)) {
       val prefix = year.toString
       val start = new DateTime(year, 1, 1, 0, 0)
       val end = new DateTime(year, 12, 31, 0, 0)

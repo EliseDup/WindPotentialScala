@@ -151,6 +151,7 @@ class SlopeGradients(val gradients: List[((Double, Double), Double)]) {
   // Count the percentage of area with slope less that a given threshold
   // If include, the interval contains the given percentage, if not it is strictly less
   val total = gradients.map(_._2).sum
+  val meanSlope = gradients.map(i => (i._1._1+i._1._2)/100.0/2.0 * i._2).sum
   def slope_leq(percent: Double, include: Boolean = true) = {
     assert(percent <= 100)
     val lastIndex =

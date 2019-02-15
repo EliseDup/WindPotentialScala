@@ -85,12 +85,13 @@ class MeteoData(val station: MeteoStation, val start: DateTime, val end: DateTim
   def createMeteoDay(i: Int): List[MeteoEntry] = {
     @transient val dayFormat = DateTimeFormat.forPattern("yyyy/MM/dd")
     val day = start.plusDays(i).toString(dayFormat)
-    if (start.plusDays(i).dayOfMonth() == 1) println("Load meteo for " + day)
+    //if (start.plusDays(i).dayOfMonth() == 1) 
+    println("Load meteo for " + day)
     val urlString = "https://www.wunderground.com/history/airport/" +
       station.stationID + "/" +
       day +
       "/DailyHistory.html?req_city=Bruxelles&req_state=&req_statename=Belgium&reqdb.zip=00000&reqdb.magic=1&reqdb.wmo=06451&format=1"
-    val csv =
+      val csv =
       try {
         fromInputStream(new URL(urlString).openStream).getLines
       } catch {

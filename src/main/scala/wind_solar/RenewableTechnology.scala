@@ -10,7 +10,7 @@ trait RenewableTechnology {
   val name: String;
   // val ee: EmbodiedEnergy;
   val lifeTime: Int;
-
+  val wind : Boolean; val solar : Boolean
   def potential(cell: Cell, eroi_min: Double): Power;
   val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
   
@@ -22,8 +22,10 @@ trait RenewableTechnology {
   def embodiedEnergy(cell: Cell, eroi_min: Double): Energy;
 
   def capacityFactor(cell: Cell, eroi_min: Double) = potential(cell, eroi_min: Double) / ratedPower(cell, eroi_min)
-  def netYearlyProduction(cell: Cell, eroi_min: Double): Energy = potential(cell, eroi_min) * Hours(365 * 24) - embodiedEnergy(cell, eroi_min) / lifeTime
-
+  def netYearlyProduction(cell: Cell, eroi_min: Double): Energy = 
+    if(eroi(cell,eroi_min) >= eroi_min) potential(cell, eroi_min) * Hours(365 * 24) - embodiedEnergy(cell, eroi_min) / lifeTime
+    else Joules(0)
+    
   def eroi(cell: Cell, eroi_min: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0

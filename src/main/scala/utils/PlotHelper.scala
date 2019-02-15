@@ -93,8 +93,9 @@ object PlotHelper {
     val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
-    //plot.getRangeAxis().setRange(10,20)
-    //plot.getDomainAxis().setRange(0,800)
+    val max = xys.map(_._2).flatten.max
+    plot.getRangeAxis().setRange(1,max)
+    // plot.getDomainAxis().setRange(0,800)
     createFrame(chart, name = title, save = save, tick = tick)
   }
 
@@ -179,7 +180,7 @@ object PlotHelper {
     createFrame(chart, name = title, save = true, xy = false)
   }
 
-  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, shape: Boolean = false, xy: Boolean = true, bw: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
     applyChartTheme(chart, tick)
 
