@@ -94,7 +94,7 @@ object PlotHelper {
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
     val max = xys.map(_._2).flatten.max
-    plot.getRangeAxis().setRange(1,max)
+    //plot.getRangeAxis().setRange(1,max)
     // plot.getDomainAxis().setRange(0,800)
     createFrame(chart, name = title, save = save, tick = tick)
   }
