@@ -9,24 +9,29 @@ import squants.space.Length
 import squants.radio._
 import wind_solar.EmbodiedEnergy
 import squants.time.Hours
+import squants.motion.MetersPerSecond
+import squants.space.Meters
 
 trait WindTechnology extends RenewableTechnology {
   val wind = true; val solar = false;
   val top_down: Boolean = false; val cp_max: Double = 0.5;
   val lifeTime = 25
   // Energy Inputs
-  val operation_variable: Energy; val installation_variable: Energy; val OM_variable: Energy;
+  val installation_variable: Energy; val OM_variable: Energy;
   def constructionInputs(depth: Length): Energy;
   def operation(output: Energy): Energy = output.toGigajoules * operation_variable
   def installation(distanceToCoast: Length): Energy = Math.abs(distanceToCoast.toKilometers) * installation_variable
   def OM(distanceToCoast: Length): Energy = Math.abs(distanceToCoast.toKilometers) * OM_variable
 
-  def embodiedEnergy(cell: Cell, eroi_min: Double): Energy = {
-    (ratedPower(cell, eroi_min) / Gigawatts(1)) *
-      (constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) + OM(cell.distanceToCoast)) +
-      operation(potential(cell, eroi_min) * Hours(365 * 24) * lifeTime)
+  def embodiedEnergy(cell: Cell, eroi_min: Double): Energy = embodiedEnergy(cell, ratedPower(cell, eroi_min), potential(cell, eroi_min) * Hours(365 * 24))
+  
+  def embodiedEnergy(cell : Cell, installedPower: Power, annual_output: Energy): Energy = {
+    (installedPower / Gigawatts(1)) *
+      (fixed_energy_inputs_1GW(cell)) +
+      operation(annual_output * lifeTime)
   }
-
+  def fixed_energy_inputs_1GW(cell : Cell) = constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) + OM(cell.distanceToCoast) 
+    
   def availabilityFactor(cell: Cell): Double = if (cell.offshore) 0.95 else 0.97
 
   def potential(cell: Cell, eroi_min: Double): Power = power(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min))
@@ -46,6 +51,12 @@ trait WindTechnology extends RenewableTechnology {
   // => v_rated = (Power_rated / (1/2 * Cp_max * rho * PI / 4 * D^2) )^(1/3)
   // => D = (Power_rated / (1/2 * Cp_max * rho * PI / 4 * v^3) )^(1/2)
   def coeff(elevation: Length) = 0.5 * cp_max * WindPower.airDensity(elevation).toKilogramsPerCubicMeter * Math.PI / 4
+  val defaultVr = MetersPerSecond(11)
+
+  def ratedPower(rotorDiameter: Length, hubAltitude: Length, ratedSpeed: Velocity = defaultVr) = Watts(coeff(hubAltitude) * Math.pow(rotorDiameter.toMeters, 2) * Math.pow(ratedSpeed.toMetersPerSecond, 3))
+  def rotorDiameter(ratedPower: Power, hubAltitude: Length, ratedSpeed: Velocity = defaultVr) = Meters(Math.sqrt(ratedPower.toWatts / (coeff(hubAltitude) * Math.pow(ratedSpeed.toMetersPerSecond, 3))))
+  def ratedSpeed(ratedPower: Power, rotorDiameter: Length, hubAltitude: Length) = MetersPerSecond(Math.pow(ratedPower.toWatts / (coeff(hubAltitude) * Math.pow(rotorDiameter.toMeters, 2)), 1.0 / 3))
+
 }
 
 object OnshoreWindTechnology extends WindTechnology {
@@ -56,9 +67,10 @@ object OnshoreWindTechnology extends WindTechnology {
 
   def constructionInputs(depth: Length) = Gigajoules(13744075)
   val operation_variable = Gigajoules(0.035)
+  
   val installation_variable = Gigajoules(605.74)
   val OM_variable = Gigajoules(21.3)
-
+  
 }
 
 object OffshoreWindTechnology extends WindTechnology {

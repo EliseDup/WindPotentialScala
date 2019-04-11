@@ -16,6 +16,7 @@ object Gemba {
   def sum_over_sources(array: Array[Array[Energy]], year: Int) = (0 until array.size).map(s => array(s)(year)).foldLeft(Exajoules(0))(_ + _)
   def sum(array: Array[Energy]): Energy = sum(array.toList)
   def sum(list: List[Energy]): Energy = list.foldLeft(Joules(0))(_ + _)
+
   val demand_exo = Helper.getLines("Demand_Exo", "\t").map(i => (i(0).toInt, Exajoules(i(1).toDouble)))
   def get_demand_exo(year: Int): Option[(Int, Energy)] = {
     if (year <= 1964) {
@@ -32,8 +33,11 @@ object Gemba {
     val years = (1799 to 2200).toList;
     val years_double = years.map(_.toDouble)
     val ignore = List("UNCONVENTIONAL", "BIOMASS", "OTEC", "WAVE", "TIDAL", "GEOTHERMAL")
-    val take = List("COAL", "OIL, CONVENTIONAL", "GAS, CONVENTIONAL", "BIOMASS", "WIND", "SOLAR","WAVE","OTEC","TIDAL")
-    val sources = resources //.filter(s => take.contains(s.name))
+    // All but NUCLEAR FISSION and OIL, UNCONVENTIONAL
+    val take = List("COAL", "OIL, CONVENTIONAL","GAS, CONVENTIONAL") //, "BIOMASS") // List("COAL", "OIL, CONVENTIONAL", "GAS, CONVENTIONAL", "BIOMASS", "WIND", "SOLAR","WAVE","OTEC","TIDAL","GEOTHERMAL","HYDRO","GAS, UNCONVENTIONAL")
+    val sources = resources.filter(s => take.contains(s.name))
+    println(resources.size + "\t" + sources.size)
+
     // sources.map(_.plot)
     val res = simulate(sources, years)
 
@@ -47,7 +51,8 @@ object Gemba {
     plotXY(List((years_double, res.renewable_production.map(_.to(Exajoules)), "Renewable Production"),
       (years_double, res.non_renewable_production.map(_.to(Exajoules)), "Non-Renewable Production"),
       (years_double, res.production_total.toList.map(_.to(Exajoules)), "Total Production")), legend = true, xLabel = "Year", yLabel = "EJ/year")
-
+    val nr = sources.zipWithIndex.filter(s => !s._1.renewable)
+    plotXY(nr.map(n => (years_double, res.cumulated_production(n._2).toList.map(_.to(Exajoules)), n._1.name + "("+n._1.technical_potential.to(Exajoules)+" EJ)")), legend = true, xLabel = "Year", yLabel = "Cumulated Production [EJ]")
   }
 
   def simulate(sources: List[EnergySource], years: List[Int]): GembaResults = {
@@ -65,7 +70,7 @@ object Gemba {
         if (y == source.incept_date) {
           res.capital_stock(s)(year) = Exajoules(1)
           res.eroi(s)(year - 1) = math.max(source.EROI(res.rho(s)(year)), 0.0001)
-          println(y + "\t" + source.name)
+          println("Incept Date" + "\t" + y + "\t" + source.name)
         }
         // Simulate production, depending on the available capital stock in i-1 = capital stock / capital factor * EROI / lifetime = Energy Outputs / year
         // We cannot produce more than the technical potential / URR
@@ -89,18 +94,19 @@ object Gemba {
 
       // Simulate demand, based on industrial capital stock
       res.demand_total(year + 1) = energy_requirement * capital_effectiveness * res.industrial_capital_stock(year)
-      val demand_excedent = max(Joules(0), res.demand_total(year + 1) - res.production_total(year))
+      val demand_excedent = res.demand_total(year + 1) - res.production_total(year)
+
       // Allocate only demand excedent (i.e. what is not already produced by existing capital stock) !! Otherwise capital stock remains unused !!
-      var den = (sources_util.map(_._2)).map(s => res.eroi(s)(year)).sum
+      var den = (sources_util.map(_._2)).map(s => res.rho(s)(year) * res.eroi(s)(year)).sum
       if (den == 0) den = 1
       for (util <- sources_util) {
         val source = util._1
         val s = util._2
-        res.demand(s)(year + 1) = res.production(s)(year) + demand_excedent * res.eroi(s)(year) / den
+        res.demand(s)(year + 1) = max(Joules(0), res.production(s)(year) + demand_excedent * res.rho(s)(year) * res.eroi(s)(year) / den) //res.demand_total(year + 1) * res.rho(s)(year) * res.eroi(s)(year) / den //
         // Capital stock required to produce the demand
         val required_capital_stock = res.demand(s)(year + 1) * source.capital_factor * source.life_time / res.eroi(s)(year)
-        // Difference between what exist and what is needed for year y
-        res.capital_inputs_energy_sector(s)(year + 1) = max(Joules(0), required_capital_stock - res.capital_stock(s)(year))
+        // Difference between what exist and what is needed for year y+1 
+        res.capital_inputs_energy_sector(s)(year + 1) = max(Joules(0), required_capital_stock + res.capital_stock(s)(year) / source.life_time - res.capital_stock(s)(year))
         res.capital_stock(s)(year + 1) = res.capital_stock(s)(year) + res.capital_inputs_energy_sector(s)(year + 1) - res.capital_stock(s)(year) / source.life_time
       }
       val net_energy = sum_over_sources(res.net_production, year)
@@ -112,8 +118,7 @@ object Gemba {
       res.industrial_capital_stock(year + 1) = res.industrial_capital_stock(year) + res.industrial_output(year) - res.industrial_capital_stock(year) / res.lifetime_industrial_capital_stock
 
       println(y + "\t" + res.capital_stock(0)(year).to(Exajoules) + "\t" + res.production_total(year).to(Exajoules) + "\t" + res.demand_total(year).to(Exajoules) + "\t"
-        + res.industrial_capital_stock(year).to(Exajoules))
-
+        + res.industrial_capital_stock(year).to(Exajoules) + "\t" + res.capital_inputs_energy_sector(0)(year + 1).to(Exajoules))
     }
     res
   }

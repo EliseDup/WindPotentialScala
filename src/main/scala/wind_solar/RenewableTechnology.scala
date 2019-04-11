@@ -8,12 +8,17 @@ import squants.mass.Mass
 
 trait RenewableTechnology {
   val name: String;
-  // val ee: EmbodiedEnergy;
   val lifeTime: Int;
   val wind : Boolean; val solar : Boolean
-  def potential(cell: Cell, eroi_min: Double): Power;
-  val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
   
+  // GJ / GJ
+  def operation_variable : Energy 
+  // GJ / GW
+  def fixed_energy_inputs_1GW(cell : Cell) : Energy
+  
+  def potential(cell: Cell, eroi_min: Double): Power;
+  
+  val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
   def suitabilityFactor(cell: Cell): Double = {
     if (excludedCountries.contains(cell.country) || cell.country.contains("Is.") || cell.country.contains("Islands")) 0.0
     else (1 - cell.protectedArea)

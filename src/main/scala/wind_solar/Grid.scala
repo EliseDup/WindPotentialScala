@@ -9,11 +9,17 @@ import squants.motion._
 import squants.time._
 import solar_energy._
 import wind_energy._
+import wind_energy.WindTechnology
 
 object Grid {
   def apply(name: String) = new Grid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList)
-  def apply(): Grid = apply("runs_history/wind_solar/wind_solar_0_75")
-  def eu(): Grid = apply("runs_history/wind_solar/eu28_wind_solar_0_75")
+  def apply(): Grid = apply("runs_history/wind_solar_2019/wind_solar_0_75")
+  def eu(): Grid = apply("runs_history/wind_solar_2019/eu28_wind_solar_0_75")
+  
+  def main(args: Array[String]): Unit = {
+    val grid = Grid()
+    grid.write("sites")
+  }
 }
 
 class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
@@ -53,11 +59,18 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   def write(logFile: String, inclusion: List[Cell] = List()) {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(logFile))
     val techs = List(PVPoly, CSPParabolicStorage12h)
-    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees +
+    cells.filter(c => (OnshoreWindTechnology.suitabilityFactor(c)  >0 ||
+          OffshoreWindTechnology.suitabilityFactor(c) >0 ||
+          PVMono.suitabilityFactor(c) >0 ||
+          CSPParabolic.suitabilityFactor(c) > 0)).map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees +
       "\t" +
-      (if (inclusion.isEmpty || inclusion.contains(c)) eu28countries.map(i => c.proportion(i)).sum * 100 + "\t" + (PVMono.suitabilityFactor(c) * 100) + "\t" + CSPParabolic.suitabilityFactor(c) * 100 + "\t" + OffshoreWindTechnology.suitabilityFactor(c) * 100 + "\t" + OnshoreWindTechnology.suitabilityFactor(c) * 100
-        + "\t" + c.slope.meanSlope * 100
-      else "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0")
+      (if (inclusion.isEmpty || inclusion.contains(c)) c.area.toSquareKilometers + "\t" + 
+          OnshoreWindTechnology.suitabilityFactor(c) + "\t" + 
+          OffshoreWindTechnology.suitabilityFactor(c) + "\t" + 
+          PVMono.suitabilityFactor(c) + "\t" +
+          CSPParabolic.suitabilityFactor(c) + "\t" +
+          c.wind100m.c.toMetersPerSecond + "\t" + c.wind100m.k + "\t" + c.ghi.toWattsPerSquareMeter + "\t" + c.dni.toWattsPerSquareMeter
+      else "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0" + "\t" + "0.0")
       + "\n"))
     out_stream.close()
   }

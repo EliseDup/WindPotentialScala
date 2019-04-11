@@ -23,8 +23,9 @@ trait SolarTechnology extends RenewableTechnology {
   val maximumSlope: Double;
   val designEfficiency: Double;
 
-  val ee: EmbodiedEnergy;
-
+  val ee: EmbodiedEnergy; 
+  def operation_variable = ee.O_M_output
+  
   // GHI for PV, DNI for CSP
   def solar(cell: Cell): Irradiance = if (directOnly) cell.dni else cell.ghi;
   def reflectiveArea(cell: Cell): Area = (cell.area * suitabilityFactor(cell) / occupationRatio)
@@ -67,6 +68,9 @@ trait SolarTechnology extends RenewableTechnology {
   def panelArea(ratedPower: Power, solar: Irradiance): Area = {
     ratedPower / (designPointIrradiance * designEfficiency) * max_eroi_sm(solar)
   }
+  
+  def fixed_energy_inputs_1GW(cell : Cell) = ee.embodiedEnergyArea(Gigawatts(1), Joules(0), ee.default_area)
+
 }
 
 trait PV extends SolarTechnology {
@@ -76,6 +80,7 @@ trait PV extends SolarTechnology {
   val directOnly = false;
   val maximumSlope = 30.0
   val lifeTime = 25
+  
 }
 
 object PVPoly extends PV {
@@ -204,7 +209,7 @@ object CSPTowerStorage12h extends CSP {
   val name = "ST-salt-TES"
   val designEfficiency = 0.21
   val sm_range = (5 to 40).map(_ * 0.1).toList // (10 to 40).map(_ * 0.1).toList
-  def a(sm: Double) = -1.62 * sm + 8.742
+  def a(sm: Double) = -1.62*sm + 8.742
   def b(sm: Double) = 11.01 * sm - 46.86
 
   val ee = new EmbodiedEnergy(Gigajoules(8053825 + 9086794), Gigajoules(220157 + 237600), Gigajoules(1196178 + 727130), Gigajoules(183720), Gigajoules(0.05 + 0.023), 30,

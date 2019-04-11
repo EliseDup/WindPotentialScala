@@ -12,7 +12,7 @@ import scala.io.Source
 import java.io.PrintStream
 import wind_energy.WindPotential
 
-object SimuationResults {
+object SolarPotential_03_2019 {
 
   import SolarUtils._
   import DayMonth._
@@ -24,42 +24,12 @@ object SimuationResults {
   import SolarPower._
 
   def main(args: Array[String]): Unit = {
-    logEROICurves(List(List(PVMono, PVPoly), List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), "pv_csp_eroi")
     printResultsForPaper(5)
-
     plotResultsForPaper
     //val grid = _0_5deg
     //(1 to 20).map(i => println(i / 2.0 + "\t" + potential(grid.cells, List(PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), i / 2.0).to(Exajoules)))
     print("-End-")
 
-  }
-
-  def logEROICurves(techs: List[List[SolarTechnology]], fileName: String) {
-    val grid = _0_5deg.cells.filter(_.potential(techs.flatten).value > 0)
-    val log = new java.io.PrintStream(new java.io.FileOutputStream(fileName))
-
-    grid.map(c => {
-      techs.map(t => {
-        val tech = c.bestTechnology(t)
-        val output = c.potential(tech) * Hours(365 * 24)
-        val installed = c.installedCapacity(tech)
-        val inputs = tech.embodiedEnergy(installed, Joules(0), SquareKilometers(1))
-        val oe = tech.ee.O_M_output.toGigajoules * output.to(Gigajoules) * tech.lifeTime
-        log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe / 1E6 + "\t" + c.suitableArea(tech).toSquareKilometers +
-          "\t" + !tech.directOnly + "\t")
-      })
-      // MAX
-      val tech = c.bestTechnology(techs.flatten)
-      val output = c.potential(tech) * Hours(365 * 24)
-      val installed = c.installedCapacity(tech)
-      val inputs = tech.embodiedEnergy(installed, Joules(0), SquareKilometers(1))
-      val oe = tech.ee.O_M_output.toGigajoules * output.to(Gigajoules) * tech.lifeTime
-      log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe / 1E6 + "\t" + c.suitableArea(tech).toSquareKilometers +
-        "\t" + !tech.directOnly + "\t")
-
-      log.print("\n")
-
-    })
   }
 
   def plotBestSM(tech: CSP, sm: List[Double] = List()) {
@@ -209,4 +179,33 @@ object SimuationResults {
     print(math.round(tech.ee.embodiedEnergyArea(power, Joules(0), tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
     println(math.round(tech.eroi(ghi) * 100) / 100.0)
   }
+
+  def logEROICurves(techs: List[List[SolarTechnology]], fileName: String) {
+    val grid = _0_5deg.cells.filter(_.potential(techs.flatten).value > 0)
+    val log = new java.io.PrintStream(new java.io.FileOutputStream(fileName))
+
+    grid.map(c => {
+      techs.map(t => {
+        val tech = c.bestTechnology(t)
+        val output = c.potential(tech) * Hours(365 * 24)
+        val installed = c.installedCapacity(tech)
+        val inputs = tech.embodiedEnergy(installed, Joules(0), SquareKilometers(1))
+        val oe = tech.ee.O_M_output.toGigajoules * output.to(Gigajoules) * tech.lifeTime
+        log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe / 1E6 + "\t" + c.suitableArea(tech).toSquareKilometers +
+          "\t" + !tech.directOnly + "\t")
+      })
+      // MAX
+      val tech = c.bestTechnology(techs.flatten)
+      val output = c.potential(tech) * Hours(365 * 24)
+      val installed = c.installedCapacity(tech)
+      val inputs = tech.embodiedEnergy(installed, Joules(0), SquareKilometers(1))
+      val oe = tech.ee.O_M_output.toGigajoules * output.to(Gigajoules) * tech.lifeTime
+      log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe / 1E6 + "\t" + c.suitableArea(tech).toSquareKilometers +
+        "\t" + !tech.directOnly + "\t")
+
+      log.print("\n")
+
+    })
+  }
+
 }

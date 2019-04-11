@@ -9,6 +9,7 @@ import wind_energy.CapacityFactorCalculation
 import squants.radio.WattsPerSquareMeter
 import squants.time.Hours
 import squants.motion.MetersPerSecond
+import wind_energy.WindFarmEnergyInputs
 
 // All the information to run results for the wind paper 
 // "Global Wind Potential with Physical and EROI constraints"
@@ -16,14 +17,17 @@ import squants.motion.MetersPerSecond
 object WindPotential_12_2017 {
   val eroi_min = (2 until 40).map(_ * 0.5).toList
 
-  val results = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 151, true, false)   
+  val results = new WorldGrid("runs_history/wind_2017/results_wind_2017", Degrees(0.75), eroi_min, 34, 151, true, false)
   def results_bottom_up = new WorldGrid("runs_history/wind_2017/results_wind_2017_bottom_up", Degrees(0.75), eroi_min, 34, 151, true, false)
   def results_1_5_dissipation = new WorldGrid("runs_history/wind_2017/results_wind_2017_1_5_dissipation", Degrees(0.75), eroi_min, 34, 151, true, false)
   def results_max1we = new WorldGrid("runs_history/wind_2017/results_wind_2017_max1we", Degrees(0.75), eroi_min, 34, 151, true, false)
-  
+
   def main(args: Array[String]): Unit = {
-    plotForPaper
-    printResultsForPaper
+    println(TerawattHours(2571) / TonOilEquivalent(13647 * 1E6))
+   
+    logEROICurve
+    // plotForPaper
+    // printResultsForPaper
   }
 
   def plotForPaper {
@@ -33,7 +37,19 @@ object WindPotential_12_2017 {
     plotPotentialEEAReport(results.eu28, eroi_min, 5.0)
     plotPotentialTDBU
   }
-
+  def logEROICurve {
+    val p = WindPotential(0.5, true)
+    val g = results.grids.filter(_.EEZ).filter(c => p.power(c, 1, true).value > 0)
+    val log = new java.io.PrintStream(new java.io.FileOutputStream("wind_eroi"))
+    g.map(c => {
+      val output = p.power(c,1,true)*Hours(365*24)
+      val wi = p.installedCapacity(c,1,true)
+      val ee = p.energyInputs(wi, Joules(0), c)
+      val oe = p.operationalEnergy(output*p.lifeTimeYears, c)
+      log.print(p.eroi(c,1,true)  + "\t" + output.to(Petajoules) + "\t"+ wi.toMegawatts + "\t" + ee.to(Petajoules) + "\t" + oe.to(Petajoules) + 
+          "\t" + p.suitableArea(c).toSquareKilometers + "\t"  + c.onshore+ "\n")
+    })
+  }
   def printArea(c: String) {
     println(c + "\t" + results.grids.filter(_.onshore).map(_.area(c).toSquareKilometers).sum)
   }

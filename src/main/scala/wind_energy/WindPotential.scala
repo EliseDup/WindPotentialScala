@@ -11,6 +11,7 @@ import squants.time.Hours
 import squants.motion.Velocity
 import squants.motion.MetersPerSecond
 import utils.Helper
+import utils.Petajoules
 
 object WindPotential {
   def apply() = new WindPotential()
@@ -60,6 +61,9 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
   }
   def offshoreEnergyInputs(installedCapacity: Power, energyOutput: Energy, distanceToCoast: Length, waterDepth: Length) = {
     WindFarmEnergyInputs.offshoreEnergyInputs(installedCapacity, energyOutput, waterDepth, distanceToCoast)
+  }
+  def operationalEnergy(output: Energy, cell: GridCell): Energy = {
+    if(cell.onshore) WindFarmEnergyInputs.onshoreOperation(output) else WindFarmEnergyInputs.offshoreOperation(output)
   }
   def onshoreEnergyInputs(installedCapacity: Power, energyOutput: Energy, distanceToCoast: Length) = {
     WindFarmEnergyInputs.onshoreEnergyInputs(installedCapacity, energyOutput, distanceToCoast)
