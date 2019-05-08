@@ -33,7 +33,9 @@ class SolarGrid(val cells: List[SolarCell]) {
     val techs = List(PVPoly, CSPParabolicStorage12h)
 
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-      (if (c.suitabilityFactor(CSPParabolic) > 0) CSPParabolic.max_eroi_sm(c.dni) else "0.0") + "\t" +
+      c.eroi(PVMono) + "\t"+
+      c.eroi(CSPTowerStorage12h) + "\t"+
+        (if (c.suitabilityFactor(CSPParabolic) > 0) CSPParabolic.max_eroi_sm(c.dni) else "0.0") + "\t" +
       (if (c.suitabilityFactor(CSPParabolicStorage12h) > 0) CSPParabolicStorage12h.max_eroi_sm(c.dni) else "0.0") + "\t" +
       (if (c.suitabilityFactor(CSPTowerStorage12h) > 0) CSPTowerStorage12h.max_eroi_sm(c.dni) else "0.0") + "\t" +
 

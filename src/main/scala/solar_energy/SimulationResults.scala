@@ -24,9 +24,9 @@ object SimuationResults {
   import SolarPower._
 
   def main(args: Array[String]): Unit = {
-    logEROICurves(List(List(PVMono, PVPoly), List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), "pv_csp_eroi")
+    val grid = _0_5deg
+    //logEROICurves(List(List(PVMono, PVPoly), List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), "pv_csp_eroi")
     printResultsForPaper(5)
-
     plotResultsForPaper
     //val grid = _0_5deg
     //(1 to 20).map(i => println(i / 2.0 + "\t" + potential(grid.cells, List(PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), i / 2.0).to(Exajoules)))

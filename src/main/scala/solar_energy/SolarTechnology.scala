@@ -16,8 +16,7 @@ trait SolarTechnology extends RenewableTechnology {
   val wind = false; val solar = true;
   val designPointIrradiance: Irradiance;
   val performanceRatio: Double;
-  val degradationRate: Double
-  val occupationRatio: Double;
+  val degradationRate: Double;
   def max_eroi_sm(solar: Irradiance): Double = 1.0;
   val directOnly: Boolean;
   val maximumSlope: Double;

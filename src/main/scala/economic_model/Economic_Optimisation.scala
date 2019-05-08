@@ -17,17 +17,65 @@ import squants.energy._
 import utils.Exajoules
 import solar_energy._
 import utils.PlotHelper
+import wind_solar.RenewableTechnology
 
-object Input_Output {
-   
+object Economic_Optimisation {
+
+  import Helper._
+  import PlotHelper._
+
   val all_sites = Grid().cells // Grid.eu().cells.filter(i => OnshoreWindTechnology.suitabilityFactor(i) > 0 || OffshoreWindTechnology.suitabilityFactor(i) > 0)
   val sites = all_sites
 
   def main(args: Array[String]): Unit = {
+    writePythonInputsSimpleModel("simple")
+  }
+
+  /**
+   *  Write the inputs needed for the optimization for the simple model with default design parameters (n and vr for wind farm, SM for CSP tower 12h)
+   *  The inputs for each cell are written in a single line in a txt file:
+   *  Col 0: Lat
+   *  Col 1: Lon
+   *  Col 2 to 4: suitable area (wind, pv, csp) * ground cover ratio (-> only panel/mirrors effective area for solar power plants !)
+   *  Col 5 to 7: conversion efficiency (= life time efficiency for pv, csp and Capacity factor * array efficiency * availability factor for wind)
+   *  Col 8 to 10: renewable resources [W/m^2] such as to have energy produced = area * efficiency * resources. For wind because efficiency = capacity factor, renewable resources = installed capacity density !), for pv = GHI, for CSP = DNI
+   *  Col 11 to 13: Installed capacity density (= installed capacity : wind = 1/2 Cp,max rho pi/4 vr^3 / n^2, pv = 240 Wp/m^2, csp = 950 W/m^2 * 22% / SM)
+   *  Col 14 to 16: Fixed energy inputs [kWh/MW]
+   *  Col 17 to 19: Operational energy inputs [kWh/kWh_produced]
+   */
+  def writePythonInputsSimpleModel(logFile: String, n: Double = 8, vr: Double = 11, SM: Double = 2.7) {
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(logFile))
+    sites.map(c => {
+      val windTech = if (c.onshore) OnshoreWindTechnology else OffshoreWindTechnology
+      val tech = List(windTech, PVMono, CSPTowerStorage12h)
+      if (tech.map(_.suitabilityFactor(c)).sum > 0) {
+        out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t")
+        tech.map(t => out_stream.print(t.suitabilityFactor(c) * c.area.toSquareKilometers / t.occupationRatio + "\t"))
+        // Efficiency 
+        out_stream.print(CapacityFactorCalculation.cubic(c.wind100m, 11) * windTech.availabilityFactor(c) * WakeEffect.arrayEfficiency(500, math.Pi / (4 * n * n)) + "\t")
+        out_stream.print(PVMono.lifeTimeEfficiency(c.ghi) + "\t")
+        out_stream.print(if (c.dni.value > 0) CSPTowerStorage12h.lifeTimeEfficiency(c.dni, 2.7) else 0.0 + "\t")
+        // Ressources (the energy produced must be equal to area * efficiency * ressources, so there is a trick for wind)
+        
+        // Installed capacity density
+        out_stream.print(0.5 * 0.5 * 1.225 * Math.PI / 4 * Math.pow(vr, 3) / Math.pow(n, 2) + "\t")
+        out_stream.print(240.0 + "\t")
+        out_stream.print(950 * 0.22 / SM + "\t")
+
+        tech.map(t => out_stream.print(t.fixed_energy_inputs_1GW(c).toKilowattHours/1000 + "\t"))
+        tech.map(t => out_stream.print(t.operation_variable.toGigajoules + "\t"))
+
+        out_stream.print("\n")
+      }
+    })
+    out_stream.close()
+  }
+
+  def maximiseNetEnergy {
     println("I-O model with " + "\t" + sites.size + " sites")
     writePythonInputsWind("opti_inputs_wind")
     writePythonInputsSolar("opti_inputs_solar")
-    
+
     // The optimal # of wind turbines in each cell
     val x_0 = DenseVector.ones[Double](sites.size)
 
@@ -56,7 +104,7 @@ object Input_Output {
         c.wind100m.c.toMetersPerSecond + "\t" + c.wind100m.k + "\t" +
         c.area.toSquareKilometers + "\t" +
         tech.suitabilityFactor(c) * c.area.toSquareKilometers + "\t" +
-        tech.fixed_energy_inputs_1GW(c).toMegawattHours/1000.0 + "\t" +
+        tech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 + "\t" +
         tech.operation_variable.toGigajoules + "\t" +
         tech.availabilityFactor(c) + "\n")
     })
@@ -70,13 +118,13 @@ object Input_Output {
     println("Suitable " + "\t" + suitable.size)
     sites.map(c => {
       out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
-        c.ghi.toWattsPerSquareMeter + "\t" + c.dni.toWattsPerSquareMeter+ "\t"+
+        c.ghi.toWattsPerSquareMeter + "\t" + c.dni.toWattsPerSquareMeter + "\t" +
         c.area.toSquareKilometers + "\t" +
-        PVMono.suitabilityFactor(c)+ "\t" + CSPTowerStorage12h.suitabilityFactor(c) + "\t" +
-        PVMono.fixed_energy_inputs_1GW(c).toMegawattHours/1000.0 + "\t" +
+        PVMono.suitabilityFactor(c) + "\t" + CSPTowerStorage12h.suitabilityFactor(c) + "\t" +
+        PVMono.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 + "\t" +
         PVMono.operation_variable.toGigajoules + "\t" +
-        CSPTowerStorage12h.fixed_energy_inputs_1GW(c).toMegawattHours/1000.0 + "\t" +
-        (CSPTowerStorage12h.ee.transport_variable + CSPTowerStorage12h.ee.construction_variable).toMegawattHours/1000.0 + "\t" + CSPTowerStorage12h.ee.default_area.toSquareKilometers/1000.0 + "\t"+
+        CSPTowerStorage12h.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 + "\t" +
+        (CSPTowerStorage12h.ee.transport_variable + CSPTowerStorage12h.ee.construction_variable).toMegawattHours / 1000.0 + "\t" + CSPTowerStorage12h.ee.default_area.toSquareKilometers / 1000.0 + "\t" +
         CSPTowerStorage12h.operation_variable.toGigajoules +
         "\n")
     })
@@ -106,6 +154,18 @@ object Input_Output {
   x(1)(0) = capital_factor * life_time / EROI
   x(1)(1) = capital_effectiveness
 
+  def energyProductionFunction(tech: RenewableTechnology, cells: List[Cell] = all_sites) {
+    val suitable = cells.filter(c => tech.suitabilityFactor(c) > 0)
+    println(cells.size + "\t" + suitable.size)
+    val res = suitable.map(c => {
+      val energy = (tech.potential(c, 1.0) * Hours(365 * 24)).to(Exajoules) * (1 - tech.operation_variable.to(Gigajoules))
+      val EE = (tech.fixed_energy_inputs_1GW(c) * tech.ratedPower(c, 1).toGigawatts).to(Exajoules) / tech.lifeTime
+      (energy, EE, energy)
+    })
+    val cum = listCumulatedVSCumulatedBy(res)
+    plotXY(List((cum._1, cum._2, "")), yLabel = tech.name + " Energy Produced [EJ/year]", xLabel = "Embodied Energy in Capital [EJ]")
+
+  }
 }
 
 class Site(val center: GeoPoint, val area: Area, val sf: (Double, Double, Double, Double), val c: Velocity, val k: Double, val ghi: Irradiance, val dni: Irradiance) {

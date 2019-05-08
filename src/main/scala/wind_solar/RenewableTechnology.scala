@@ -11,6 +11,7 @@ trait RenewableTechnology {
   val lifeTime: Int;
   val wind : Boolean; val solar : Boolean
   
+  val occupationRatio: Double
   // GJ / GJ
   def operation_variable : Energy 
   // GJ / GW

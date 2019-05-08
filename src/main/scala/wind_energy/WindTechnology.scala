@@ -16,6 +16,7 @@ trait WindTechnology extends RenewableTechnology {
   val wind = true; val solar = false;
   val top_down: Boolean = false; val cp_max: Double = 0.5;
   val lifeTime = 25
+  val occupationRatio = 1.0
   // Energy Inputs
   val installation_variable: Energy; val OM_variable: Energy;
   def constructionInputs(depth: Length): Energy;
