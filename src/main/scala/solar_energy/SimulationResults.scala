@@ -11,6 +11,8 @@ import grid._
 import scala.io.Source
 import java.io.PrintStream
 import wind_energy.WindPotential
+import wind_energy.OnshoreWindTechnology
+import wind_energy.OffshoreWindTechnology
 
 object SimuationResults {
 
@@ -25,6 +27,7 @@ object SimuationResults {
 
   def main(args: Array[String]): Unit = {
     val grid = _0_5deg
+    
     //logEROICurves(List(List(PVMono, PVPoly), List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), "pv_csp_eroi")
     printResultsForPaper(5)
     plotResultsForPaper

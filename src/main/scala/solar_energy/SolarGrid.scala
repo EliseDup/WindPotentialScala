@@ -104,7 +104,7 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
   def netYearlyProduction(techs: List[SolarTechnology]): Energy = netYearlyProduction(bestTechnology(techs))
   def grossYearlyProduction(techs: List[SolarTechnology]): Energy = grossYearlyProduction(bestTechnology(techs))
 
-  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance // / tech.solarMultiple //* (if (tech.directOnly) dni else WattsPerSquareMeter(1000))
+  def installedCapacity(tech: SolarTechnology) = panelArea(tech) * tech.designEfficiency * tech.designPointIrradiance / tech.max_eroi_sm(if (tech.directOnly) dni else ghi)
 
   def eroi(techs: List[SolarTechnology]): Double = techs.map(eroi(_)).max
 

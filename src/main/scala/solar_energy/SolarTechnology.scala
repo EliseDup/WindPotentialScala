@@ -11,6 +11,7 @@ import squants.space.SquareKilometers
 import wind_solar.RenewableTechnology
 import wind_solar.Cell
 import wind_solar.EmbodiedEnergy
+import utils.Petajoules
 
 trait SolarTechnology extends RenewableTechnology {
   val wind = false; val solar = true;

@@ -23,9 +23,13 @@ object WindPotential_12_2017 {
   def results_max1we = new WorldGrid("runs_history/wind_2017/results_wind_2017_max1we", Degrees(0.75), eroi_min, 34, 151, true, false)
 
   def main(args: Array[String]): Unit = {
-    println(TerawattHours(2571) / TonOilEquivalent(13647 * 1E6))
-   
-    logEROICurve
+    val p = WindPotential(0.5, true)
+    val g = results.grids
+    val log = new java.io.PrintStream(new java.io.FileOutputStream("wind_eroi"))
+    g.map(c => {
+      log.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +p.eroi(c, 1, true) + "\n")
+    })
+    // logEROICurve
     // plotForPaper
     // printResultsForPaper
   }
@@ -42,12 +46,12 @@ object WindPotential_12_2017 {
     val g = results.grids.filter(_.EEZ).filter(c => p.power(c, 1, true).value > 0)
     val log = new java.io.PrintStream(new java.io.FileOutputStream("wind_eroi"))
     g.map(c => {
-      val output = p.power(c,1,true)*Hours(365*24)
-      val wi = p.installedCapacity(c,1,true)
+      val output = p.power(c, 1, true) * Hours(365 * 24)
+      val wi = p.installedCapacity(c, 1, true)
       val ee = p.energyInputs(wi, Joules(0), c)
-      val oe = p.operationalEnergy(output*p.lifeTimeYears, c)
-      log.print(p.eroi(c,1,true)  + "\t" + output.to(Petajoules) + "\t"+ wi.toMegawatts + "\t" + ee.to(Petajoules) + "\t" + oe.to(Petajoules) + 
-          "\t" + p.suitableArea(c).toSquareKilometers + "\t"  + c.onshore+ "\n")
+      val oe = p.operationalEnergy(output * p.lifeTimeYears, c)
+      log.print(p.eroi(c, 1, true) + "\t" + output.to(Petajoules) + "\t" + wi.toMegawatts + "\t" + ee.to(Petajoules) + "\t" + oe.to(Petajoules) +
+        "\t" + p.suitableArea(c).toSquareKilometers + "\t" + c.onshore + "\n")
     })
   }
   def printArea(c: String) {
