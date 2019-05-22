@@ -19,8 +19,6 @@ object Grid {
   def main(args: Array[String]): Unit = {
     val grid = Grid()
     // grid.write("sites")
-    
-    
   }
 }
 
