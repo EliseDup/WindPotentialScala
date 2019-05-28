@@ -93,7 +93,7 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
   }
     def netYearlyProduction(tech: CSP, sm : Double): Energy = {
     val aperture = panelArea(tech)
-    val power = tech.ratedPower(aperture, dni, sm)
+    val power = tech.ratedPower(aperture, sm)
     val gross = tech.potential(dni, aperture, sm) * Hours(365 * 24) // grossYearlyProduction(tech)
     gross - tech.ee.embodiedEnergyArea(power, gross, aperture) / tech.ee.lifeTime
   }

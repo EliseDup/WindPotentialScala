@@ -23,6 +23,7 @@ import squants.motion.Velocity
 import grid._
 import wind_energy.WindPotential
 import squants.radio.Irradiance
+import squants.energy._
 
 object Helper {
   val ressourcesPy = "/Users/Elise/Documents/workspace/resources/"
@@ -180,7 +181,7 @@ object Helper {
     val sorted = values.sortBy(_._1).reverse
     (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._3).scanLeft(0.0)(_ + _))
   }
-
+  
   def countriesByContinent = {
     val data_location = "/Users/Elise/Nextcloud/Doctorat/Data/countries/world/"
     val continentsName = getLines(data_location + "Continents", "\t").toList.map(_(0))

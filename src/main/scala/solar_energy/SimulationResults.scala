@@ -19,7 +19,6 @@ object SimuationResults {
   import SolarUtils._
   import DayMonth._
   import PlotHelper._
-  import SolarPotential._
   import SolarGrid._
   import Helper._
   import wind_energy.WindFarmEnergyInputs._

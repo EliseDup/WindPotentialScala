@@ -9,7 +9,7 @@ import squants.mass.Mass
 trait RenewableTechnology {
   val name: String;
   val lifeTime: Int;
-  val wind : Boolean; val solar : Boolean
+  val wind : Boolean; val solar : Boolean; val csp : Boolean; val pv: Boolean;
   
   val occupationRatio: Double
   // GJ / GJ

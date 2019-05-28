@@ -13,7 +13,7 @@ import squants.motion.MetersPerSecond
 import squants.space.Meters
 
 trait WindTechnology extends RenewableTechnology {
-  val wind = true; val solar = false;
+  val wind = true; val solar = false; val csp = false; val pv = false;
   val top_down: Boolean = false; val cp_max: Double = 0.5;
   val lifeTime = 25
   val occupationRatio = 1.0
@@ -46,7 +46,7 @@ trait WindTechnology extends RenewableTechnology {
   }
   def ratedPower(cell: Cell, vr: Velocity, n: Double): Power = cell.area * suitabilityFactor(cell) * capacityDensity(vr, n, cell.hubAltitude)
   def capacityDensity(ratedSpeed: Velocity, n: Double, hubAltitude: Length): Irradiance = WattsPerSquareMeter(coeff(hubAltitude) * Math.pow(ratedSpeed.toMetersPerSecond, 3) / (n * n))
-
+ 
   // Relationship between rated power, rotor diameter and rated wind speed
   // Power_rated = 1/2 * Cp_max * rho * PI / 4 * D^2 * v_rated^3
   // => v_rated = (Power_rated / (1/2 * Cp_max * rho * PI / 4 * D^2) )^(1/3)

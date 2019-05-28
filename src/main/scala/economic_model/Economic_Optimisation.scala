@@ -26,14 +26,12 @@ object Economic_Optimisation {
 
   val all_sites = Grid().cells // Grid.eu().cells.filter(i => OnshoreWindTechnology.suitabilityFactor(i) > 0 || OffshoreWindTechnology.suitabilityFactor(i) > 0)
   val sites = all_sites
-
+  def KEden = all_sites.map(s => math.pow(s.wind100m.mean.toMetersPerSecond, 2) * s.area.toSquareKilometers).sum
   def main(args: Array[String]): Unit = {
-    printFixedInputs()
-    val KEden = all_sites.map(s => math.pow(s.wind100m.mean.toMetersPerSecond, 2) * s.area.toSquareKilometers).sum
-    println("KE Total" + "\t" +KEden)
-    writePythonInputsSimpleModel("inputs_simple_sf", KEden)
+    // writePythonInputsSimpleModel("inputs_simple_sf", KEden)
     // writePythonInputsSimpleModelParams("inputs_params_sf", KEden)
   }
+  
   /**
    * Inputs for Python optimization that do not vary from cell to cell
    */
@@ -111,6 +109,7 @@ object Economic_Optimisation {
     })
     out_stream.close()
   }
+  
   def maximiseNetEnergy {
     println("I-O model with " + "\t" + sites.size + " sites")
     writePythonInputsWind("opti_inputs_wind")
