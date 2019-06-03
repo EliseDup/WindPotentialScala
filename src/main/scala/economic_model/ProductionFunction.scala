@@ -18,7 +18,7 @@ object ProductionFunction {
   val all_sites = Grid().cells
 
   def main(args: Array[String]): Unit = {
-    val techs = List(OffshoreWindTechnology,OnshoreWindTechnology,PVMono,CSPTowerStorage12h)
+    val techs = List(OffshoreWindTechnology, OnshoreWindTechnology, PVMono, CSPTowerStorage12h)
     techs.map(t => new ProductionFunction(all_sites, List(t), t.name).plot)
   }
 }
@@ -43,7 +43,7 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
 
   def plot {
     val xy_cum_double = energyToDouble(xy_cum)
-    plotXY(List((xy_cum_double._1, xy_cum_double._2, "")), yLabel = "Energy Produced " + name + "[EJ/year]", xLabel = "Embodied Energy [EJ]")
+    plotXY(List((xy_cum_double._1, xy_cum_double._2, "")), yLabel = name + "[EJ/year]", xLabel = "Embodied Energy [EJ/Life Time]")
   }
 
   def potential_ee(site: Cell, tech: RenewableTechnology): (Energy, Energy) = {
