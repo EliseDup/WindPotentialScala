@@ -28,10 +28,13 @@ object Economic_Optimisation {
   val sites = all_sites
   def KEden = all_sites.map(s => math.pow(s.wind100m.mean.toMetersPerSecond, 2) * s.area.toSquareKilometers).sum
   def main(args: Array[String]): Unit = {
-    // writePythonInputsSimpleModel("inputs_simple_sf", KEden)
-    // writePythonInputsSimpleModelParams("inputs_params_sf", KEden)
+    writePythonInputsSimpleModel("../WindPotentialPython/Economic_Optimisation/inputs/inputs_simple_total", KEden, true)
+    writePythonInputsSimpleModelParams("../WindPotentialPython/Economic_Optimisation/inputs/inputs_params_total", KEden, true)
+    writePythonInputsSimpleModel("../WindPotentialPython/Economic_Optimisation/inputs/inputs_simple_sf", KEden, false)
+    writePythonInputsSimpleModelParams("../WindPotentialPython/Economic_Optimisation/inputs/inputs_params_sf", KEden, false)
+
   }
-  
+
   /**
    * Inputs for Python optimization that do not vary from cell to cell
    */
@@ -56,32 +59,32 @@ object Economic_Optimisation {
    *  Col 14 to 16: Fixed energy inputs [kWh/MW/year]
    *  Col 17 to 19: Operational energy inputs [kWh/kWh_produced]
    */
-  def writePythonInputsSimpleModel(logFile: String, KEden: Double, n: Double = 8, vr: Double = 11, SM: Double = 2.7) {
+  def writePythonInputsSimpleModel(logFile: String, KEden: Double, total: Boolean, n: Double = 8, vr: Double = 11, SM: Double = 2.7) {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(logFile))
     sites.map(c => {
       val windTech = if (c.onshore) OnshoreWindTechnology else OffshoreWindTechnology
       val tech = List(windTech, PVMono, CSPTowerStorage12h)
-      if (tech.map(_.suitabilityFactor(c)).sum > 0) {
-      out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t")
-      tech.map(t => out_stream.print(t.suitabilityFactor(c) * c.area.toSquareKilometers / t.occupationRatio + "\t"))
-      // Efficiency 
-      out_stream.print(CapacityFactorCalculation.cubic(c.wind100m, 11) * windTech.availabilityFactor(c) * WakeEffect.arrayEfficiency(500, math.Pi / (4 * n * n)) + "\t")
-      out_stream.print(PVMono.lifeTimeEfficiency(c.ghi) + "\t")
-      out_stream.print((if (c.dni.value > 0) CSPTowerStorage12h.lifeTimeEfficiency(c.dni, 2.7) else 0.0) + "\t")
-      // Ressources (the energy produced must be equal to area * efficiency * ressources, so there is a trick for wind)
-      val cd_wind = 0.5 * 0.5 * 1.225 * Math.PI / 4 * Math.pow(vr, 3) / Math.pow(n, 2)
-      out_stream.print(cd_wind + "\t" + c.ghi.toWattsPerSquareMeter + "\t" + c.dni.toWattsPerSquareMeter + "\t")
-      // Installed capacity density
-      out_stream.print(cd_wind + "\t")
-      out_stream.print(240.0 + "\t")
-      out_stream.print(950 * 0.22 / SM + "\t")
-      tech.map(t => out_stream.print((t.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / t.lifeTime) + "\t"))
-      tech.map(t => out_stream.print(t.operation_variable.toGigajoules + "\t"))
-      // out_stream.print(windTech.availabilityFactor(c) + "\t")
-      out_stream.print(math.pow(c.wind100m.mean.toMetersPerSecond, 2) * c.area.toSquareKilometers / KEden * 292 * 1E6 + "\t")
-      out_stream.print(c.wind100m.mean.toMetersPerSecond +"\t" + c.area.toSquareKilometers)
-      
-      out_stream.print("\n")
+      if (total || tech.map(_.suitabilityFactor(c)).sum > 0) {
+        out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" + c.area.toSquareKilometers + "\t")
+        tech.map(t => out_stream.print(t.suitabilityFactor(c) * c.area.toSquareKilometers / t.occupationRatio + "\t"))
+        // Efficiency 
+        out_stream.print(CapacityFactorCalculation.cubic(c.wind100m, 11) * windTech.availabilityFactor(c) * WakeEffect.arrayEfficiency(500, math.Pi / (4 * n * n)) + "\t")
+        out_stream.print(PVMono.lifeTimeEfficiency(c.ghi) + "\t")
+        out_stream.print((if (c.dni.value > 0) CSPTowerStorage12h.lifeTimeEfficiency(c.dni, 2.7) else 0.0) + "\t")
+        // Ressources (the energy produced must be equal to area * efficiency * ressources, so there is a trick for wind)
+        val cd_wind = 0.5 * 0.5 * 1.225 * Math.PI / 4 * Math.pow(vr, 3) / Math.pow(n, 2)
+        out_stream.print(cd_wind + "\t" + c.ghi.toWattsPerSquareMeter + "\t" + c.dni.toWattsPerSquareMeter + "\t")
+        // Installed capacity density
+        out_stream.print(cd_wind + "\t")
+        out_stream.print(240.0 + "\t")
+        out_stream.print(950 * 0.22 / SM + "\t")
+        tech.map(t => out_stream.print((t.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / t.lifeTime) + "\t"))
+        tech.map(t => out_stream.print(t.operation_variable.toGigajoules + "\t"))
+        // out_stream.print(windTech.availabilityFactor(c) + "\t")
+        out_stream.print(math.pow(c.wind100m.mean.toMetersPerSecond, 2) * c.area.toSquareKilometers / KEden * 292 * 1E6 + "\t")
+        out_stream.print(c.wind100m.mean.toMetersPerSecond + "\t" + c.area.toSquareKilometers)
+
+        out_stream.print("\n")
       }
     })
     out_stream.close()
@@ -92,13 +95,13 @@ object Economic_Optimisation {
    * embodiedE1y_wind = data[:, 10]
    * availWind = data[:,11]
    */
-  def writePythonInputsSimpleModelParams(logFile: String, keDen : Double) {
+  def writePythonInputsSimpleModelParams(logFile: String, keDen: Double, total: Boolean) {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(logFile))
     sites.map(c => {
       val windTech = if (c.onshore) OnshoreWindTechnology else OffshoreWindTechnology
       val tech = List(windTech, PVMono, CSPTowerStorage12h)
-      if (tech.map(_.suitabilityFactor(c)).sum > 0) {
-        out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t")
+      if (total || tech.map(_.suitabilityFactor(c)).sum > 0) {
+        out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" + c.area.toSquareKilometers + "\t")
         tech.map(t => out_stream.print(t.suitabilityFactor(c) * c.area.toSquareKilometers / t.occupationRatio + "\t"))
         out_stream.print(c.wind100m.c.toMetersPerSecond + "\t" + c.wind100m.k + "\t" + c.ghi.toWattsPerSquareMeter + "\t" + c.dni.toWattsPerSquareMeter + "\t")
         out_stream.print(windTech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / windTech.lifeTime + "\t" + windTech.operation_variable.toGigajoules + "\t" + windTech.availabilityFactor(c))
@@ -109,7 +112,7 @@ object Economic_Optimisation {
     })
     out_stream.close()
   }
-  
+
   def maximiseNetEnergy {
     println("I-O model with " + "\t" + sites.size + " sites")
     writePythonInputsWind("opti_inputs_wind")

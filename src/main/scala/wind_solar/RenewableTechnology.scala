@@ -20,7 +20,7 @@ trait RenewableTechnology {
   def potential(cell: Cell, eroi_min: Double): Power;
   
   val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
-  def suitabilityFactor(cell: Cell): Double = {
+  def suitabilityFactor(cell: Cell): Double ={
     if (excludedCountries.contains(cell.country) || cell.country.contains("Is.") || cell.country.contains("Islands")) 0.0
     else (1 - cell.protectedArea)
   }
