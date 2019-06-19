@@ -35,7 +35,7 @@ object PlotHelper {
 
   def main(args: Array[String]): Unit = {
     val x = (1 to 1000).map(_ * 0.001).toList
-    plotXY(List((x, x.map(Math.pow(_, 3)), "x^3"),(x, x.map(Math.pow(_, 4)), "x^4"),(x, x.map(Math.pow(_, 2)), "x^2"), (x, x.map(_ * 3), "3x"), (x, x.map(_ * 2), "2x"), (x, x, "x")), legend = true)
+    plotXY(List((x, x.map(Math.pow(_, 3)), "x^3"), (x, x.map(Math.pow(_, 4)), "x^4"), (x, x.map(Math.pow(_, 2)), "x^2"), (x, x.map(_ * 3), "3x"), (x, x.map(_ * 2), "2x"), (x, x, "x")), legend = true)
   }
   val colors = List(Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
   val dashed = List(stroke(Array(1.0f, 0.0f)), stroke(Array(6.0f, 3.0f)),
@@ -93,6 +93,7 @@ object PlotHelper {
     val yAxis = plot.getRangeAxis().asInstanceOf[NumberAxis];
     if (logX) plot.setDomainAxis(new LogarithmicAxis(""))
     if (logY) plot.setRangeAxis(new LogarithmicAxis(""))
+
     val max = xys.map(_._2).flatten.max
     //plot.getRangeAxis().setRange(1,max)
     // plot.getDomainAxis().setRange(0,800)

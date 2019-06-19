@@ -81,9 +81,9 @@ object Economic_Optimisation {
         tech.map(t => out_stream.print((t.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / t.lifeTime) + "\t"))
         tech.map(t => out_stream.print(t.operation_variable.toGigajoules + "\t"))
         // out_stream.print(windTech.availabilityFactor(c) + "\t")
-        out_stream.print(math.pow(c.wind100m.mean.toMetersPerSecond, 2) * c.area.toSquareKilometers / KEden * 292 * 1E6 + "\t")
+        out_stream.print(c.keDissipation.toWattsPerSquareMeter +"\t") // math.pow(c.wind100m.mean.toMetersPerSecond, 2) / KEden * 292 * 1E6 + "\t")
         out_stream.print(c.wind100m.mean.toMetersPerSecond + "\t" + c.area.toSquareKilometers)
-
+   
         out_stream.print("\n")
       }
     })
@@ -105,7 +105,7 @@ object Economic_Optimisation {
         tech.map(t => out_stream.print(t.suitabilityFactor(c) * c.area.toSquareKilometers / t.occupationRatio + "\t"))
         out_stream.print(c.wind100m.c.toMetersPerSecond + "\t" + c.wind100m.k + "\t" + c.ghi.toWattsPerSquareMeter + "\t" + c.dni.toWattsPerSquareMeter + "\t")
         out_stream.print(windTech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / windTech.lifeTime + "\t" + windTech.operation_variable.toGigajoules + "\t" + windTech.availabilityFactor(c))
-        out_stream.print("\t" + math.pow(c.wind100m.mean.toMetersPerSecond, 2) * c.area.toSquareKilometers / keDen * 292 * 1E6)
+        out_stream.print("\t" + c.keDissipation.toWattsPerSquareMeter) // math.pow(c.wind100m.mean.toMetersPerSecond, 2) / keDen * 292 * 1E6)
 
         out_stream.print("\n")
       }
