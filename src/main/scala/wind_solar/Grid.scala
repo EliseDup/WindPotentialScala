@@ -268,9 +268,7 @@ class Cell(val center: GeoPoint,
   def optimalRatedSpeed(eroi_min: Double) = getOptimalVrN(eroi_min)._1
   def optimalN(eroi_min: Double) = getOptimalVrN(eroi_min)._2
 
-  /**
-   * Solar
-   */
+  
 
 }
 /**

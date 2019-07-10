@@ -181,7 +181,7 @@ object PlotHelper {
     createFrame(chart, name = title, save = true, xy = false)
   }
 
-  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf : Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
     applyChartTheme(chart, tick)
 
@@ -204,7 +204,7 @@ object PlotHelper {
       chart.getXYPlot().setRenderer(r);
     }
     if (save) {
-      writeAsPDF(chart, new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".pdf"), 500, 270)
+      if(pdf) writeAsPDF(chart, new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".pdf"), 500, 270)
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".jpg"), chart, 500, 270, 5, 5)
       i = i + 1
     }

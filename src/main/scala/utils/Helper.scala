@@ -173,12 +173,16 @@ object Helper {
   }
   def listValueVSArea(gr: List[(Double, Area)]) = listValueVSCumulated(gr.map(g => (g._1, g._2.to(SquareKilometers) / (1E6))))
 
-  def listValueVSCumulated(values: List[(Double, Double)]): (List[Double], List[Double]) = {
-    val sorted = values.sortBy(_._1).reverse
-    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ 0.0)
+  def listValueVSCumulated(values: List[(Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
+    val sorted = if(increasing) values.sortBy(_._1).reverse else values.sortBy(_._1) 
+    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ sorted.map(_._1).max) // Why 0 ?!
   }
-  def listCumulatedVSCumulatedBy(values: List[(Double, Double, Double)]): (List[Double], List[Double]) = {
-    val sorted = values.sortBy(_._1).reverse
+    def listValueVSCumulatedBy(values: List[(Double, Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
+    val sorted = if(increasing) values.sortBy(_._1).reverse else values.sortBy(_._1) 
+    (sorted.map(_._3).scanLeft(0.0)(_ + _), sorted.map(_._2) :+ sorted.map(_._2).max)
+  }
+  def listCumulatedVSCumulatedBy(values: List[(Double, Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
+    val sorted = if(increasing) values.sortBy(_._1).reverse else values.sortBy(_._1)
     (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._3).scanLeft(0.0)(_ + _))
   }
   
