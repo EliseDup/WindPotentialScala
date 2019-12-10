@@ -29,7 +29,7 @@ object Economic_Optimisation {
   def KEden = all_sites.map(s => math.pow(s.wind100m.mean.toMetersPerSecond, 2) * s.area.toSquareKilometers).sum
   def main(args: Array[String]): Unit = {
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, CSPTowerStorage12h)
-    techs.map(t => println(t.name + "\t" + t.operation_variable.toGigajoules))
+    techs.map(t => println(t.name + "\t" + t.operation_variable))
     techs.map(t => println(t.name + "\t" + t.lifeTime))
     
     /**
@@ -52,11 +52,11 @@ object Economic_Optimisation {
    */
   def printFixedInputs(pv: PV = PVMono, csp: CSP = CSPTowerStorage12h) {
     println("efficiency_PV = " + pv.lifeTimeEfficiency(WattsPerSquareMeter(0)))
-    println("operationE_PV = " + pv.operation_variable.toGigajoules)
-    println("operationE_CSP = " + csp.operation_variable.toGigajoules)
+    println("operationE_PV = " + pv.operation_variable)
+    println("operationE_CSP = " + csp.operation_variable)
     println("embodiedE1y_PV = " + pv.fixed_energy_inputs_1GW(all_sites(0)).toMegawattHours / 1000.0 / pv.lifeTime)
-    println("embodiedE1y_CSP_fixed = " + csp.ee.embodiedEnergyArea(Gigawatts(1), Joules(0), SquareKilometers(0)).toMegawattHours / 1000.0 / csp.lifeTime)
-    println("embodiedE1y_CSP_area = " + csp.ee.embodiedEnergyArea(Gigawatts(0), Joules(0), csp.ee.default_area).toMegawattHours / 1000.0 / csp.lifeTime)
+    println("embodiedE1y_CSP_fixed = " + csp.ee.embodiedEnergyArea(Gigawatts(1), SquareKilometers(0)).toMegawattHours / 1000.0 / csp.lifeTime)
+    println("embodiedE1y_CSP_area = " + csp.ee.embodiedEnergyArea(Gigawatts(0), csp.ee.default_area).toMegawattHours / 1000.0 / csp.lifeTime)
     println("defaultCSP_area = " + csp.ee.default_area.toSquareKilometers)
   }
   /**
@@ -91,7 +91,7 @@ object Economic_Optimisation {
         out_stream.print(240.0 + "\t")
         out_stream.print(950 * 0.22 / SM + "\t")
         tech.map(t => out_stream.print((t.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / t.lifeTime) + "\t"))
-        tech.map(t => out_stream.print(t.operation_variable.toGigajoules + "\t"))
+        tech.map(t => out_stream.print(t.operation_variable + "\t"))
         // out_stream.print(windTech.availabilityFactor(c) + "\t")
         out_stream.print(c.keDissipation.toWattsPerSquareMeter + "\t") // math.pow(c.wind100m.mean.toMetersPerSecond, 2) / KEden * 292 * 1E6 + "\t")
         out_stream.print(c.wind100m.mean.toMetersPerSecond + "\t" + c.area.toSquareKilometers)
@@ -126,7 +126,7 @@ object Economic_Optimisation {
           out_stream.print(950 * 0.22 / SM + "\t")
         }
         out_stream.print((tech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / tech.lifeTime) + "\t")
-        out_stream.print(tech.operation_variable.toGigajoules + "\t")
+        out_stream.print(tech.operation_variable + "\t")
         out_stream.print(c.keDissipation.toWattsPerSquareMeter + "\t") // math.pow(c.wind100m.mean.toMetersPerSecond, 2) / KEden * 292 * 1E6 + "\t")
         out_stream.print(c.wind100m.mean.toMetersPerSecond + "\t" + c.area.toSquareKilometers)
 
@@ -150,7 +150,7 @@ object Economic_Optimisation {
         out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" + c.area.toSquareKilometers + "\t")
         tech.map(t => out_stream.print(t.suitabilityFactor(c) * c.area.toSquareKilometers / t.occupationRatio + "\t"))
         out_stream.print(c.wind100m.c.toMetersPerSecond + "\t" + c.wind100m.k + "\t" + c.ghi.toWattsPerSquareMeter + "\t" + c.dni.toWattsPerSquareMeter + "\t")
-        out_stream.print(windTech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / windTech.lifeTime + "\t" + windTech.operation_variable.toGigajoules + "\t" + windTech.availabilityFactor(c))
+        out_stream.print(windTech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / windTech.lifeTime + "\t" + windTech.operation_variable + "\t" + windTech.availabilityFactor(c))
         out_stream.print("\t" + c.keDissipation.toWattsPerSquareMeter) // math.pow(c.wind100m.mean.toMetersPerSecond, 2) / keDen * 292 * 1E6)
 
         out_stream.print("\n")
@@ -165,7 +165,7 @@ object Economic_Optimisation {
       if (total || tech.suitabilityFactor(c) > 0) {
         out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" + c.area.toSquareKilometers + "\t" +
           tech.suitabilityFactor(c) * c.area.toSquareKilometers / tech.occupationRatio + "\t" + c.wind100m.c.toMetersPerSecond + "\t" + c.wind100m.k + "\t" +
-          tech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / tech.lifeTime + "\t" + tech.operation_variable.toGigajoules + "\t" + tech.availabilityFactor(c)
+          tech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 / tech.lifeTime + "\t" + tech.operation_variable + "\t" + tech.availabilityFactor(c)
           + "\t" + c.keDissipation.toWattsPerSquareMeter) // math.pow(c.wind100m.mean.toMetersPerSecond, 2) / keDen * 292 * 1E6)
 
         out_stream.print("\n")
@@ -231,7 +231,7 @@ object Economic_Optimisation {
         c.area.toSquareKilometers + "\t" +
         tech.suitabilityFactor(c) * c.area.toSquareKilometers + "\t" +
         tech.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 + "\t" +
-        tech.operation_variable.toGigajoules + "\t" +
+        tech.operation_variable + "\t" +
         tech.availabilityFactor(c) + "\n")
     })
     out_stream.close()
@@ -248,22 +248,22 @@ object Economic_Optimisation {
         c.area.toSquareKilometers + "\t" +
         PVMono.suitabilityFactor(c) + "\t" + CSPTowerStorage12h.suitabilityFactor(c) + "\t" +
         PVMono.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 + "\t" +
-        PVMono.operation_variable.toGigajoules + "\t" +
+        PVMono.operation_variable + "\t" +
         CSPTowerStorage12h.fixed_energy_inputs_1GW(c).toMegawattHours / 1000.0 + "\t" +
         (CSPTowerStorage12h.ee.transport_variable + CSPTowerStorage12h.ee.construction_variable).toMegawattHours / 1000.0 + "\t" + CSPTowerStorage12h.ee.default_area.toSquareKilometers / 1000.0 + "\t" +
-        CSPTowerStorage12h.operation_variable.toGigajoules +
+        CSPTowerStorage12h.operation_variable +
         "\n")
     })
     out_stream.close()
   }
 
-  def netEnergy(cell: Cell, tech: WindTechnology, installedPower: Power): Energy = {
+ def netEnergy(cell: Cell, tech: WindTechnology, installedPower: Power): Energy = {
     val area = cell.area * tech.suitabilityFactor(cell); val rD = tech.rotorDiameter(Megawatts(1), cell.elevation + Meters(100))
     // Spacing factor calculation for a given suitable area and installed capacity density
     val nD = Math.sqrt(area.toSquareMeters / installedPower.toMegawatts) / rD.toMeters
-    val potential = tech.power(cell, MetersPerSecond(11), nD) * Hours(365 * 24)
+    val potential = tech.potential(cell, 1) * Hours(365 * 24)
     // println(area.toSquareKilometers + "\t" + installedPower.toMegawatts + "\t" + nD + "\t" + potential)
-    potential - tech.embodiedEnergy(cell, installedPower, potential)
+    potential - tech.embodiedEnergy(cell, installedPower)
   }
   // Energy Sector caracteristics
   val capital_factor = 0.1; val EROI = 10; val life_time = 30;
@@ -284,7 +284,7 @@ object Economic_Optimisation {
     val suitable = cells.filter(c => tech.suitabilityFactor(c) > 0)
     println(cells.size + "\t" + suitable.size)
     val res = suitable.map(c => {
-      val energy = (tech.potential(c, 1.0) * Hours(365 * 24)).to(Exajoules) * (1 - tech.operation_variable.to(Gigajoules))
+      val energy = (tech.potential(c, 1.0) * Hours(365 * 24)).to(Exajoules) * (1 - tech.operation_variable)
       val EE = (tech.fixed_energy_inputs_1GW(c) * tech.ratedPower(c, 1).toGigawatts).to(Exajoules) / tech.lifeTime
       (energy, EE, energy)
     })

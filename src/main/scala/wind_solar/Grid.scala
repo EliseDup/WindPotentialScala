@@ -41,7 +41,7 @@ object Grid {
   }
   def production_selfcons_ee(c: Cell, techs: List[RenewableTechnology]): (Energy, Energy, Energy) = {
     val prod = techs.map(t => t.potential(c, 1) * Hours(365 * 24)).foldLeft(WattHours(0))(_ + _)
-    val self_cons = techs.map(t => t.operation_variable.toGigajoules * t.potential(c, 1) * Hours(365 * 24)).foldLeft(WattHours(0))(_ + _)
+    val self_cons = techs.map(t => t.operation_variable * t.potential(c, 1) * Hours(365 * 24)).foldLeft(WattHours(0))(_ + _)
     val ee = techs.map(t => t.embodiedEnergy(c, 1) / t.lifeTime).foldLeft(WattHours(0))(_ + _)
     (prod, self_cons, ee)
   }

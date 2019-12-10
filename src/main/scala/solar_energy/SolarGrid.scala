@@ -89,13 +89,13 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
     val aperture = panelArea(tech)
     val power = tech.ratedPower(aperture, solar)
     val gross = grossYearlyProduction(tech)
-    gross - tech.ee.embodiedEnergyArea(power, gross, aperture) / tech.ee.lifeTime
+    gross - tech.ee.embodiedEnergyArea(power, aperture) / tech.ee.lifeTime
   }
     def netYearlyProduction(tech: CSP, sm : Double): Energy = {
     val aperture = panelArea(tech)
     val power = tech.ratedPower(aperture, sm)
     val gross = tech.potential(dni, aperture, sm) * Hours(365 * 24) // grossYearlyProduction(tech)
-    gross - tech.ee.embodiedEnergyArea(power, gross, aperture) / tech.ee.lifeTime
+    gross - tech.ee.embodiedEnergyArea(power, aperture) / tech.ee.lifeTime
   }
   // Technology that maximizes the EROI
   def bestTechnology(techs: List[SolarTechnology]): SolarTechnology = techs(techs.zipWithIndex.map(i => (eroi(i._1), i._2)).maxBy(_._1)._2)

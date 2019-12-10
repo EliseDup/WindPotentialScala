@@ -26,7 +26,7 @@ object SimuationResults {
 
   def main(args: Array[String]): Unit = {
     val grid = _0_5deg
-    
+
     //logEROICurves(List(List(PVMono, PVPoly), List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), "pv_csp_eroi")
     printResultsForPaper(5)
     plotResultsForPaper
@@ -45,18 +45,16 @@ object SimuationResults {
         val tech = c.bestTechnology(t)
         val output = c.potential(tech) * Hours(365 * 24)
         val installed = c.installedCapacity(tech)
-        val inputs = tech.embodiedEnergy(installed, Joules(0), SquareKilometers(1))
-        val oe = tech.ee.O_M_output.toGigajoules * output.to(Gigajoules) * tech.lifeTime
-        log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe / 1E6 + "\t" + c.suitableArea(tech).toSquareKilometers +
+        val inputs = tech.embodiedEnergy(installed, SquareKilometers(1))
+        log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + c.suitableArea(tech).toSquareKilometers +
           "\t" + !tech.directOnly + "\t")
       })
       // MAX
       val tech = c.bestTechnology(techs.flatten)
       val output = c.potential(tech) * Hours(365 * 24)
       val installed = c.installedCapacity(tech)
-      val inputs = tech.embodiedEnergy(installed, Joules(0), SquareKilometers(1))
-      val oe = tech.ee.O_M_output.toGigajoules * output.to(Gigajoules) * tech.lifeTime
-      log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe / 1E6 + "\t" + c.suitableArea(tech).toSquareKilometers +
+      val inputs = tech.embodiedEnergy(installed, SquareKilometers(1))
+      log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + c.suitableArea(tech).toSquareKilometers +
         "\t" + !tech.directOnly + "\t")
 
       log.print("\n")
@@ -196,8 +194,7 @@ object SimuationResults {
     print(math.round(tech.lifeTimeEfficiency(dni, sm) * 100 * 100) / 100.0 + "\t")
     print(math.round(tech.potential(dni, tech.panelArea(power, sm), sm) / power * 100 * 100) / 100.0 + "\t")
     print(math.round((tech.potential(dni, tech.panelArea(power, sm), sm) * Hours(365 * 24) * tech.ee.lifeTime).to(Petajoules) * 100) / 100.0 + "\t")
-    print(math.round(tech.ee.embodiedEnergyArea(power, tech.potential(dni, tech.panelArea(power, sm), sm) * Hours(365 * 24), tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
-    print(math.round(tech.ee.embodiedEnergyArea(power, Joules(0), tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
+    print(math.round(tech.ee.embodiedEnergyArea(power, tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
     println(math.round(tech.eroi(dni, sm) * 100) / 100.0)
   }
 
@@ -207,8 +204,7 @@ object SimuationResults {
     print(math.round(tech.lifeTimeEfficiency(ghi) * 100 * 100) / 100.0 + "\t")
     print(math.round(tech.potential(ghi, tech.panelArea(power, ghi)) / power * 100 * 100) / 100.0 + "\t")
     print(math.round((tech.potential(ghi, tech.panelArea(power, ghi)) * Hours(365 * 24) * tech.ee.lifeTime).to(Petajoules) * 100) / 100.0 + "\t")
-    print(math.round(tech.ee.embodiedEnergyArea(power, tech.potential(ghi, tech.panelArea(power, ghi)) * Hours(365 * 24), tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
-    print(math.round(tech.ee.embodiedEnergyArea(power, Joules(0), tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
+    print(math.round(tech.ee.embodiedEnergyArea(power, tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
     println(math.round(tech.eroi(ghi) * 100) / 100.0)
   }
 }

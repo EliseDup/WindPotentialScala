@@ -76,7 +76,7 @@ object RooftopPVPotential {
     
     val power = tech.ratedPower(area, irradiance)
     val gross = potential(area, irradiance, tech)
-    gross - tech.embodiedEnergy(power, gross, area) / tech.lifeTime
+    gross - tech.embodiedEnergy(power, area) / tech.lifeTime
   }
 
 }
