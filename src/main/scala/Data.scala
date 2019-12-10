@@ -32,11 +32,13 @@ import wind_energy.WindFarmEnergyInputs
 import utils.PetawattHours
 import wind_energy.NormalizedPowerCurve
 import squants.space.Kilometers
+import wind_energy.Weibull
 
 object Data {
 
   import WindPotential._
-
+  import Helper._
+  import PlotHelper._
   def main(args: Array[String]): Unit = {
 
     println("Start")
@@ -46,26 +48,19 @@ object Data {
     val world = WorldGrid()
 
     println("Load Grid in " + (System.currentTimeMillis() - t0) / 1000.0 + " seconds")
+    val eu = world.eu28.filter(_.offshoreEEZ).filter(WindPotential().suitabilityFactor(_) > 0)
+    val test = eu.map(i => (WindPotential().efficiency(i, 1),
+      WindPotential().power(i, 1, true).to(Terawatts), i.area.toSquareKilometers,
+      i.suitableArea(WindPotential()).toSquareKilometers, WindPotential().installedCapacity(i, 1, true).to(Megawatts)))
 
-    val c = world.grids.filter(_.EEZ)
-  //  plotPotential(c, eroi, 100)
-    for (country <- List("Belgium")) { //world.eu28countries) {
-      val g = c.filter(_.country.map.map(_._1).contains(country))
-      println(country + "\t"
-        + WindPotential().potential(1.0, true, g.filter(_.onshore)).to(TerawattHours) + "\t" +
-        + WindPotential().potential(1.0, true, g.filter(_.offshore)).to(TerawattHours) + "\n" +
-g.filter(_.onshore).map(c => c.proportion(country)*WindPotential().installedCapacity(c, 5.0, true).to(Megawatts)).sum +"\t"+
-g.filter(_.onshore).map(c => c.proportion(country)*WindPotential().installedCapacity(c, 12.0, true).to(Megawatts)).sum +"\n"+
-g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().installedCapacity(c, 5.0, true).to(Megawatts)).sum +"\t"+
-g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().installedCapacity(c, 12.0, true).to(Megawatts)).sum +"\n"+
-
-g.filter(_.onshore).map(c => c.proportion(country)*WindPotential().energyPerYear(c, 5.0, true).to(TerawattHours)).sum +"\t"+
-g.filter(_.onshore).map(c => c.proportion(country)*WindPotential().energyPerYear(c, 12.0, true).to(TerawattHours)).sum +"\n"+
-g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().energyPerYear(c, 5.0, true).to(TerawattHours)).sum +"\t"+
-g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().energyPerYear(c, 12.0, true).to(TerawattHours)).sum
-      )
-    }
-
+    val log = new PrintStream(new java.io.FileOutputStream("wind-offshore-eu28"))
+    log.print("Efficiency" + "\t" + "TWe" + "\t" + "Total Area [km2]" + "\t" + "Suitable Area [km2]" + "\t" + "Installed Capacity [MWi]" + "\n")
+    test.sortBy(_._1).reverse.map(i => {
+      log.print(i._1 + "\t" + i._2 + "\t" + i._3 + "\t" + i._4 + "\t" + i._5 + "\n")
+    })
+    val list = listValueVSCumulated(test.map(i => (i._1, i._2)), true)
+    plotXY(List((list._1, list._2.map(_ * 100), "")), xLabel = "Potential Wind Offshore EU-28 [TWe]", yLabel = "Total Cf [%]", title = "wind-offshore-eu28")
+    print("END")
   }
 
   def oneCellTest(cf: Double) {
@@ -129,13 +124,13 @@ g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().energyPerYea
       WindPotential().eroiFunction(grids, 12, true, "EROImin = 12")), "paper/eroiFunction_5_8_12_bw",
       xLabel = "Cumulated  Production [EJ/year]", yLabel = "EROI", tick = tick)
   }
-  
+
   def plotPotential(world: List[GridCell], eroi: List[Double], tick: Double) {
-    
+
     val offshore = world.filter(_.offshoreEEZ).filter(_.waterDepth.toMeters <= 1000); val onshore = world.filter(_.onshore); val grids = offshore ++ onshore
-    
+
     val total = WindPotential().potential_eroi(eroi, true, grids, "Total")
-       PlotHelper.plotXY(List(
+    PlotHelper.plotXY(List(
       total), title = "RegardsEco_Figure4",
       xLabel = "Energie Brute Produite [EJ/an]", yLabel = "TRE", tick = (true, 100.0, 2.0))
 
@@ -146,7 +141,7 @@ g.filter(_.offshore).map(c => c.proportion(country)*WindPotential().energyPerYea
       xLabel = "Maximum Global Potential [EJ/year]", yLabel = "EROImin", tick = (true, 100.0, 2.0))
 
     val fixed = List(2, 4, 9)
-    val listFixed = fixed.map(cd => (eroi.map(e => WindPotential(0.5,true).potentialFixedDensity(WattsPerSquareMeter(cd), e, grids, true).to(Exajoules)), eroi, cd.toString + "MW/km2"))
+    val listFixed = fixed.map(cd => (eroi.map(e => WindPotential(0.5, true).potentialFixedDensity(WattsPerSquareMeter(cd), e, grids, true).to(Exajoules)), eroi, cd.toString + "MW/km2"))
     PlotHelper.plotXY(total +: listFixed, title = "paper/potential_fixed_bw", xLabel = "Maximum Global Potential [EJ/year]", yLabel = "EROImin", tick = (true, 100.0, 2.0), legend = true)
 
     PlotHelper.plotXY(List(

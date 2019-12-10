@@ -175,7 +175,7 @@ object Helper {
 
   def listValueVSCumulated(values: List[(Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
     val sorted = if(increasing) values.sortBy(_._1).reverse else values.sortBy(_._1) 
-    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ sorted.map(_._1).max) // Why 0 ?!
+    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ (if(increasing) 0 else sorted.map(_._1).max)) // Why 0 ?!
   }
     def listValueVSCumulatedBy(values: List[(Double, Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
     val sorted = if(increasing) values.sortBy(_._1).reverse else values.sortBy(_._1) 

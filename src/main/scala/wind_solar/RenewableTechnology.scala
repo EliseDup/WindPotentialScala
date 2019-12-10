@@ -16,7 +16,7 @@ trait RenewableTechnology {
   def operation_variable : Energy 
   // GJ / GW
   def fixed_energy_inputs_1GW(cell : Cell) : Energy
-  
+  // Operational electricity should be directly removed from potential as it never gets out of the facility ..
   def potential(cell: Cell, eroi_min: Double): Power;
   
   val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")

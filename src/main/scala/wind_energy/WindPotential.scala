@@ -99,6 +99,9 @@ class WindPotential(val cp_max: Double = 0.5, val top_down: Boolean = true) exte
     else res
   }
 
+  def efficiency(cell: GridCell, vr: Velocity, n: Double): Double = CapacityFactorCalculation.cubic(cell.wind100m, vr.toMetersPerSecond) * WakeEffect.arrayEfficiency(500, Math.PI / (4 * Math.pow(n, 2))) * availabilityFactor(cell)
+  def efficiency(cell: GridCell, eroi_min: Double): Double = CapacityFactorCalculation.cubic(cell.wind100m, cell.optimalRatedSpeed(eroi_min).toMetersPerSecond) * WakeEffect.arrayEfficiency(500, Math.PI / (4 * Math.pow(cell.optimalN(eroi_min), 2))) * availabilityFactor(cell)
+    
   def power(cell: GridCell, eroi_min: Double, suitable: Boolean): Power = power(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min), suitable)
 
   def powerDensity(cell: GridCell, eroi_min: Double, suitable: Boolean): Irradiance = {
