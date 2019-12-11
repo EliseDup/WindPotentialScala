@@ -16,6 +16,7 @@ trait RenewableTechnology {
   def operation_variable: Double
   // GJ / GW
   def fixed_energy_inputs_1GW(cell: Cell): Energy
+
   // Operational electricity should be directly removed from potential as it never gets out of the facility ..
   def potential(cell: Cell, eroi_min: Double): Power;
 
@@ -32,12 +33,13 @@ trait RenewableTechnology {
     if (eroi(cell, eroi_min) >= eroi_min) potential(cell, eroi_min) * Hours(365 * 24) - embodiedEnergy(cell, eroi_min) / lifeTime
     else Joules(0)
 
+  // In EROI calculation we take into account operation variable in the numerator and denominator !
   def eroi(cell: Cell, eroi_min: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0
     else {
       val out_year = potential(cell, eroi_min) * Hours(365 * 24)
-      out_year * lifeTime / embodiedEnergy(cell, eroi_min)
+      out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
     }
   }
 }

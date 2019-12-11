@@ -19,7 +19,7 @@ object ECOS2019 {
     // ECOSPaperResults
     val grid = Grid.eu()
     val cells = grid.cells
-    
+    plotResults(grid)
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("../WindPotentialPython/test_ecos"))
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees +
       "\t" +

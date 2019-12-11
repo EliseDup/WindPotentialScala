@@ -41,7 +41,7 @@ trait SolarTechnology extends RenewableTechnology {
     if (wi.value == 0) 0.0
     else {
       val out_year = potential(cell) * Hours(365 * 24)
-      out_year * lifeTime / embodiedEnergy(cell, eroi_min)
+      out_year/(1-operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + operation_variable*out_year/(1-operation_variable) * lifeTime)
     }
   }
 
@@ -60,7 +60,7 @@ trait SolarTechnology extends RenewableTechnology {
   def eroi(solar: Irradiance) = {
     val ratedPower = Gigawatts(1)
     val energyPerYear = yearlyProduction(solar, panelArea(ratedPower, solar))
-    energyPerYear * ee.lifeTime / ee.embodiedEnergyArea(ratedPower, panelArea(ratedPower, solar))
+    energyPerYear/(1-operation_variable) * ee.lifeTime / (ee.embodiedEnergyArea(ratedPower, panelArea(ratedPower, solar))+energyPerYear/(1-operation_variable)*operation_variable* ee.lifeTime)
   }
   def potential(solar: Irradiance, panelArea: Area): Power = panelArea * solar * lifeTimeEfficiency(solar)
   def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = potential(solar, panelArea) * Hours(365 * 24)
@@ -152,7 +152,7 @@ trait CSP extends SolarTechnology {
     else {
       val power = Gigawatts(1)
       val yearProd = yearlyProduction(solar, panelArea(power, sm), sm)
-      yearProd * ee.lifeTime / ee.embodiedEnergyArea(power, panelArea(power, sm))
+      yearProd * (1-operation_variable) * ee.lifeTime / (ee.embodiedEnergyArea(power, panelArea(power, sm)) + yearProd * (1-operation_variable) * ee.lifeTime * operation_variable)
     }
   }
   def potential(solar: Irradiance, panelArea: Area, sm: Double): Power = {

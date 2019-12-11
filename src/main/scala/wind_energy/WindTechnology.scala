@@ -35,6 +35,8 @@ trait WindTechnology extends RenewableTechnology {
   def availabilityFactor(cell: Cell): Double = if (cell.offshore) 0.95 else 0.97
 
   def potential(cell: Cell, eroi_min: Double): Power = power(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min))*(1-operation_variable)
+  def potential(cell: Cell, vr: Velocity, n: Double): Power = power(cell,vr,n)*(1-operation_variable)
+  
   def ratedPower(cell: Cell, eroi_min: Double): Power = ratedPower(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min))
 
   private def power(cell: Cell, vr: Velocity, n: Double): Power = {

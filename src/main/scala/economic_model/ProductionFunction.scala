@@ -50,16 +50,15 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
   println("# Suitable sites for " + name + " = " + sites_sf.size + " / " + sites.size)
 
   // Build the list of Gross Energy Produced, Net Energy Produced, Embodied Energy, Operational Energy) for all the sites
-  val e_ne_ee_oe: List[(Double, Energy, Energy, Energy, Energy)] = sites_sf.map(s => {
+  val e_ne_ee: List[(Double, Energy, Energy, Energy)] = sites_sf.map(s => {
     val e_ee = techs.map(potential_ee(s, _))
     val e = e_ee.map(_._1).foldLeft(Joules(0))(_ + _)
-    val ne = e_ee.map(i => i._2).foldLeft(Joules(0))(_ + _)
+    val ne = e_ee.map(_._2).foldLeft(Joules(0))(_ + _)
     val ee = e_ee.map(_._3).foldLeft(Joules(0))(_ + _)
-    val oe = e_ee.map(_._4).foldLeft(Joules(0))(_ + _)
-    (e / ee, e, ne, ee, oe)
+    (e / ee, e, ne, ee)
   })
   // (Embodied Energy, Energy delivered) cumulated, by decreasing ratio of e/ee
-  val ee_ed_cum = doubleToEnergy(Helper.listCumulatedVSCumulatedBy(e_ne_ee_oe.map(i => (i._1, i._4.toGigajoules, i._2.toGigajoules - i._5.toGigajoules))))
+  val ee_ed_cum = doubleToEnergy(Helper.listCumulatedVSCumulatedBy(e_ne_ee.map(i => (i._1, i._4.toGigajoules, i._2.toGigajoules))))
 
   def plot(interpolation: Option[(Double, Double, Double)] = None) {
     val ee_ed_cum_double = energyToDouble(ee_ed_cum)
@@ -80,12 +79,13 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
     plotXY(list, yLabel = name + " [EJ/year]", xLabel = "Embodied Energy [EJ/year]", title = name, legend = list.size > 1)
   }
 
-  def plotCapitalIntensity(name: String = "") {
-    val k_nete = e_ne_ee_oe.map(i => (i._1, i._4 / (i._4 + i._5), i._2.to(Exajoules)))
+  // WRONG !!
+  /*def plotCapitalIntensity(name: String = "") {
+    val k_nete = e_ne_ee.map(i => (i._1, i._4 / (i._4 + i._5), i._2.to(Exajoules)))
     val k_nete_cum = Helper.listValueVSCumulatedBy(k_nete, true)
     plotXY(List((k_nete_cum._1, k_nete_cum._2, "")), xLabel = name + ", gross [EJ/year]", yLabel = "Capital Intensity", title = name)
 
-  }
+  }*/
   // Write Energy / Net Energy / Embodied Energy
   def write(output: String) {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(output))
@@ -96,38 +96,35 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
     out_stream.close()
   }
 
-  def potential_ee(site: Cell, tech: RenewableTechnology): (Energy, Energy, Energy, Energy) = {
+  def potential_ee(site: Cell, tech: RenewableTechnology): (Energy, Energy, Energy) = {
     if (tech.wind) {
       val windTech = tech.asInstanceOf[WindTechnology]
-      val grossE = windTech.power(site, defaultVR, defaultN) * Hours(365 * 24)
-      val EE = windTech.embodiedEnergy(site, windTech.ratedPower(site, defaultVR, defaultN), Joules(0)) / windTech.lifeTime
-      val OE = grossE * windTech.operation_variable.toGigajoules
-      val netE = grossE * (1 - windTech.operation_variable.toGigajoules) - EE
-      (grossE, netE, EE, OE)
+      val grossE = windTech.potential(site, defaultVR, defaultN) * Hours(365 * 24)
+      val EE = windTech.embodiedEnergy(site, windTech.ratedPower(site, defaultVR, defaultN)) / windTech.lifeTime
+      val netE = grossE - EE
+      (grossE, netE, EE)
 
     } else if (tech.csp) {
       val cspTech = tech.asInstanceOf[CSP]
-      if (site.dni.value == 0) (Joules(0), Joules(0), Joules(0), Joules(0))
+      if (site.dni.value == 0) (Joules(0), Joules(0), Joules(0))
       else {
         val panelArea = cspTech.reflectiveArea(site)
         val ratedPower = cspTech.ratedPower(panelArea, defaultSM)
         val grossE = cspTech.potential(site.dni, panelArea, defaultSM) * Hours(365 * 24)
-        val EE = cspTech.embodiedEnergy(ratedPower, Joules(0), panelArea) / cspTech.lifeTime
-        val OE = grossE * cspTech.operation_variable.toGigajoules
-        val netE = grossE * (1 - cspTech.operation_variable.toGigajoules) - EE
-        (grossE, netE, EE, OE)
+        val EE = cspTech.embodiedEnergy(ratedPower, panelArea) / cspTech.lifeTime
+        val netE = grossE - EE
+        (grossE, netE, EE)
       }
     } else {
-      if (site.ghi.value == 0) (Joules(0), Joules(0), Joules(0), Joules(0))
+      if (site.ghi.value == 0) (Joules(0), Joules(0), Joules(0))
       else {
         val pvTech = tech.asInstanceOf[PV]
         val panelArea = pvTech.reflectiveArea(site)
         val ratedPower = pvTech.ratedPower(site, 1.0)
         val grossE = pvTech.potential(site) * Hours(365 * 24)
-        val OE = grossE * pvTech.operation_variable.toGigajoules
-        val EE = pvTech.embodiedEnergy(ratedPower, Joules(0), panelArea) / pvTech.lifeTime
-        val netE = grossE * (1 - pvTech.operation_variable.toGigajoules) - EE
-        (grossE, netE, EE, OE)
+        val EE = pvTech.embodiedEnergy(ratedPower, panelArea) / pvTech.lifeTime
+        val netE = grossE - EE
+        (grossE, netE, EE)
 
       }
     }

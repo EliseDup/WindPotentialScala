@@ -67,7 +67,7 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
 
   def netpotential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): Double = netpotential(cells, List(tech), eroi_min)
   // List eroi vs cumulated net potential for the technology maximising the EROI
-  def netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), t.netYearlyProduction(c, eroi_min).to(Petajoules))).maxBy(_._1)._2).sum
+  def netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), t.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1)._2).sum
   // List eroi vs cumulated net potential for the sum of the technologies (for technologies that can be combined, i.e. solar and wind)
   def sum_netpotential(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double): Double =
     cells.map(c => techs.map(tech => tech.map(t => (t.eroi(c, eroi_min), t.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1)._2).sum).sum
