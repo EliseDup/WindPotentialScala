@@ -31,7 +31,9 @@ trait WindTechnology extends RenewableTechnology {
       (fixed_energy_inputs_1GW(cell)) // + operation(annual_output * lifeTime)
   }
   def fixed_energy_inputs_1GW(cell : Cell) = constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) + OM(cell.distanceToCoast) 
-    
+  
+  def energyInputsInstallation(cell: Cell,eroi_min: Double) = constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) 
+  
   def availabilityFactor(cell: Cell): Double = if (cell.offshore) 0.95 else 0.97
 
   def potential(cell: Cell, eroi_min: Double): Power = power(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min))*(1-operation_variable)

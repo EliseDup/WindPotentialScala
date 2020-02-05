@@ -18,19 +18,20 @@ object ProductionFunction {
   val all_sites = Grid().cells
 
   val ed_params = Map(
-    (OnshoreWindTechnology, ( -0.0637018610663 , 11.2840180061 , 7.87916132725 )),
-    (OffshoreWindTechnology, ( -0.0806316861928 , 9.28538696435 , 0.831048129606 )),
-    (PVMono, ( -0.0172059611559 , 11.0685240846 , -15.6644974786 )),
-    (CSPTowerStorage12h, ( -0.175549090097 , 16.5633370464 , 3.19917790027 )))
-   val ed_params_total =( -0.0105137914601 , 10.2371376248 , 2.35772267845 )
+    (OnshoreWindTechnology, (-0.0637018610663, 11.2840180061, 7.87916132725)),
+    (OffshoreWindTechnology, (-0.0806316861928, 9.28538696435, 0.831048129606)),
+    (PVMono, (-0.0172059611559, 11.0685240846, -15.6644974786)),
+    (CSPTowerStorage12h, (-0.175549090097, 16.5633370464, 3.19917790027)))
+  val ed_params_total = (-0.0105137914601, 10.2371376248, 2.35772267845)
+
   def main(args: Array[String]): Unit = {
-    
+
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, CSPTowerStorage12h)
     techs.map(t => {
       val f = new ProductionFunction(all_sites, List(t), t.name)
-    //  f.plotCapitalIntensity(t.name)
+      //  f.plotCapitalIntensity(t.name)
       f.plot(Some(ed_params(t)))
-    //  f.write(f.name)
+      //  f.write(f.name)
     })
 
     val total = new ProductionFunction(all_sites, List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono), "Wind and Solar")
@@ -68,9 +69,9 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
 
     interpolation match {
       case Some(params) => {
-        val max_x = (-params._2/(2*params._1)).toInt
+        val max_x = (-params._2 / (2 * params._1)).toInt
         println(max_x + "\t" + ee_ed_cum_double._1.max)
-        val x = (0 to max_x+10).map(_.toDouble).toList //ee_ed_cum_double._1.max.toInt).map(_.toDouble).toList
+        val x = (0 to max_x + 10).map(_.toDouble).toList //ee_ed_cum_double._1.max.toInt).map(_.toDouble).toList
         val inter = List((x, x.map(i => params._1 * i * i + params._2 * i + params._3), "Interpolation"))
         list = list ++ inter
       }
@@ -79,13 +80,6 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
     plotXY(list, yLabel = name + " [EJ/year]", xLabel = "Embodied Energy [EJ/year]", title = name, legend = list.size > 1)
   }
 
-  // WRONG !!
-  /*def plotCapitalIntensity(name: String = "") {
-    val k_nete = e_ne_ee.map(i => (i._1, i._4 / (i._4 + i._5), i._2.to(Exajoules)))
-    val k_nete_cum = Helper.listValueVSCumulatedBy(k_nete, true)
-    plotXY(List((k_nete_cum._1, k_nete_cum._2, "")), xLabel = name + ", gross [EJ/year]", yLabel = "Capital Intensity", title = name)
-
-  }*/
   // Write Energy / Net Energy / Embodied Energy
   def write(output: String) {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(output))
@@ -133,4 +127,28 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
   def energyToDouble(list: (List[Energy], List[Energy])) = (list._1.map(_.to(Exajoules)), list._2.map(_.to(Exajoules)))
   def doubleToEnergy(list: (List[Double], List[Double])) = (list._1.map(Gigajoules(_)), list._2.map(Gigajoules(_)))
 
+  def simulateTransition(rate: Double, cap_init: Power, year_init: Int, year_end: Int, annual_growth: Double, tech: RenewableTechnology) {
+    val ke = scala.collection.mutable.ArrayBuffer.empty[Double]
+    val tilde_ke = scala.collection.mutable.ArrayBuffer.empty[Energy]
+    val ie = scala.collection.mutable.ArrayBuffer.empty[Double]
+    val ey = scala.collection.mutable.ArrayBuffer.empty[Energy]
+    val installed_cap = scala.collection.mutable.ArrayBuffer.empty[Power]
+    val year = scala.collection.mutable.ArrayBuffer.empty[Int]
+
+    val sites_sorted = sites_sf.sortBy(tech.eroi(_, 1.0)).toIterator
+
+    year += (year_init)
+    installed_cap += (cap_init)
+    for (y <- year_init until year_end) {
+      year += y
+      val target = installed_cap.last * (1 + annual_growth)
+      var newCap = Watts(0)
+      while (newCap.value <= target.value){
+        val next_site = sites_sorted.next()
+        newCap += tech.ratedPower(next_site, 1.0)
+        
+      }
+    }
+
+  }
 }

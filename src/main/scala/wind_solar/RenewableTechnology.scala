@@ -42,6 +42,9 @@ trait RenewableTechnology {
       out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
     }
   }
+  
+  def energyInputsInstallation(cell: Cell, eroi_min:Double): Energy
+
 }
 
 class EmbodiedEnergy(val raw_materials: Energy,

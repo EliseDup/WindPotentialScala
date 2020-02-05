@@ -14,18 +14,25 @@ object GrowthModel {
   val delta = delta_(T, 0.1)
 
   val alpha = 0.08 // part de l'énergie dans le PIB
-  val gpt = 0.000355 // Taux de progrès technique
+  val gpt = 0.1 / 100 // Taux de progrès technique
 
   def m(alpha: Double) = alpha / (1 - alpha) // 
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
 
   def main(args: Array[String]): Unit = {
-    calibration
+
+    val (k, qy, vy, qe, ve) = calibration(Some(0.5))
+    val (pib, eroi) = resolution(k, qy, vy, qe, ve)
+    println(pib + "\t" + eroi)
+    //plotXY(List(calibration(None), calibration(Some(0.5)), calibration(Some(0.8))), yLabel = "EROI", legend = true)
+
   }
 
-  def calibration {
+  def calibration(new_s: Option[Double] = None, plot: Boolean = false): (Double, Double, Double, Double, Double) = {
+
     val data = getLines("data_calibration", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), i(5).toDouble / 100))
-    val ind = (0 until data.size).toList
+    val n = data.size
+    val ind = (0 until n).toList
 
     val year = data.map(_._1)
     val year_double = year.map(_.toDouble)
@@ -35,32 +42,63 @@ object GrowthModel {
     val qe = ind.map(i => a(i) / u(i))
     val ey = ind.map(i => e(i) - ce(i))
     val gamma = ind.map(i => ey(i) / e(i))
-
     val g = List((pib(1) - pib(0)) / pib(0)) ++ (0 until pib.size - 1).map(i => (pib(i + 1) - pib(i)) / pib(i)) // On met pour les 2 premières années le même taux de croissance pour ne pas avoir de pb de dimensions
     val gk = ind.map(i => g(i) - gpt) // Taux de croissance du capital
 
-    val v = ind.map(i => s(i) / (gk(i) + delta)) // Intensité en capital de l'économie
+    val v = ind.map(i => new_s.getOrElse(s(i)) / (gk(i) + delta)) // Intensité en capital de l'économie
     val p = ind.map(i => alpha * pib(i) / e(i).toKilowattHours) // Prix réel de l'énergie
     val qy = ind.map(i => e(i).toKilowattHours / pib(i) * gamma(i) / (1 - alpha + alpha * gamma(i))) // Intensité énergétique de l'économie
     val vy = ind.map(i => v(i) * (1 - alpha) / rho(alpha, gamma(i))) // Intensité capitalistique de l'économie
     val ve = ind.map(i => alpha * gamma(i) / (1 - alpha + alpha * gamma(i)) * (1 - qe(i)) / qy(i) * v(i)) // Intensité capitalistique du secteur énergétique
-
     val eroi = ind.map(i => 1 / (qe(i) + delta * ve(i) * qy(i)))
+    // Y = PIB - pCe
+    val y = ind.map(i => pib(i) - p(i) * ce(i).toKilowattHours)
+    val ky = ind.map(i => y(i) * vy(i))
+    val ke = ind.map(i => u(i).toKilowattHours * ve(i))
+    val k = ind.map(i => ke(i) + ky(i))
 
-    plotXY(List((year_double, e.map(_.to(MegaTonOilEquivalent)), "E"), (year_double, a.map(_.to(MegaTonOilEquivalent)), "A"), (year_double, u.map(_.to(MegaTonOilEquivalent)), "U"), (year_double, ce.map(_.to(MegaTonOilEquivalent)), "Ce"), (year_double, ey.map(_.to(MegaTonOilEquivalent)), "Ey")), legend = true, yLabel = "[Mtoe]")
-    plotXY(List((year_double, eroi, "")), yLabel = "EROI")
+    if (plot) {
+      plotXY(List((year_double, e.map(_.to(MegaTonOilEquivalent)), "E"), (year_double, a.map(_.to(MegaTonOilEquivalent)), "A"), (year_double, u.map(_.to(MegaTonOilEquivalent)), "U"), (year_double, ce.map(_.to(MegaTonOilEquivalent)), "Ce"), (year_double, ey.map(_.to(MegaTonOilEquivalent)), "Ey")), legend = true, yLabel = "[Mtoe]")
+      plotXY(List((year_double, eroi, "")), yLabel = "EROI")
+      plotXY(List((year_double, ke, "Ke"), (year_double, ky, "Ky"), (year_double, k, "K")), legend = true)
+    }
 
+    println("EROI 2017 " + " \t" + eroi(n - 1))
+    //for(i <- ind)
+    //  println(v(i) + "\t" + ve(i) + "\t" +vy(i) + "\t" + p(i) + "\t" + qy(i) + "\t"+ qe(i) + "\t" + delta + "\t" + eroi(i))
+    (k(n - 1), qy(n - 1), vy(n - 1), qe(n - 1), ve(n - 1))
   }
- 
-  def simulation(K: Double, qy: Double, vy: Double, qe: Double, ve: Double) {
-    // Constantes ?
-    val s = .25; val n = 0.1
-    // Calcul des prix
-    val r = 1/(vy + qy*ve/(1-qe))
-    val p = 1/qy*(1-r*vy)
-    val pib = r*K
-    val i = s*pib
-    val y = (1+s*n)/(1+n)*pib
+
+  // For a given set of parameters (K, qy, vy, qe, ve) and fixed parameters s (saving rate) and n (consumption "structure" of house holds = pCe / Cy), solves the model
+  def resolution(K: Double, qy: Double, vy: Double, qe: Double, ve: Double): (Double, Double) = {
+    
+    val s = .5; val n = 0.1;
+    
+    // Prices calculation
+    // r = rental price of capital
+    val r = 1 / (vy + qy * ve / (1 - qe))
+    // p = purchase price of energy
+    val p = 1 / qy * (1 - r * vy)
+
+    val pib = r * K
+    val i = s * pib
+    val y = (1 + s * n) / (1 + n) * pib
+    
+    // Variables macro
+    val cy = y - i
+    val ce = n * cy / p
+    val ky = vy * y
+    val ey = qy * y
+    val e = ey + ce
+    val u = e / (1 - qe)
+    val ke = ve * u
+    // Variables de résultat
+    val gamma = ey / e
+    val m = ke / ky
+    val v = 1 / r
+
+    val eroi = 1 / (qe + delta * ve * qy)
+    (pib, eroi)
   }
 
   /**
