@@ -187,7 +187,7 @@ object SolarPotential_03_2019 {
         val output = c.potential(tech) * Hours(365 * 24)
         val installed = c.installedCapacity(tech)
         val inputs = tech.embodiedEnergy(installed, SquareKilometers(1))
-        val oe = tech.ee.O_M_output * output * tech.lifeTime
+        val oe = tech.ee.om_output * output * tech.lifeTime
         log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe.to(Petajoules)  + "\t" + c.suitableArea(tech).toSquareKilometers +
           "\t" + !tech.directOnly + "\t")
       })
@@ -196,7 +196,7 @@ object SolarPotential_03_2019 {
       val output = c.potential(tech) * Hours(365 * 24)
       val installed = c.installedCapacity(tech)
       val inputs = tech.embodiedEnergy(installed, SquareKilometers(1))
-      val oe = tech.ee.O_M_output * output * tech.lifeTime
+      val oe = tech.ee.om_output * output * tech.lifeTime
       log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe.to(Petajoules)  + "\t" + c.suitableArea(tech).toSquareKilometers +
         "\t" + !tech.directOnly + "\t")
 

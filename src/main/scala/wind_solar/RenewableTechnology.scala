@@ -14,8 +14,7 @@ trait RenewableTechnology {
   val ee : EmbodiedEnergy
   
   val occupationRatio: Double
-  // %
-  
+
   def fixed_energy_inputs_1GW(cell: Cell): Energy
 
   // Operational electricity should be directly removed from potential as it never gets out of the facility ..
@@ -40,41 +39,45 @@ trait RenewableTechnology {
     if (wi.value == 0) 0.0
     else {
       val out_year = potential(cell, eroi_min) * Hours(365 * 24)
-      out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
+      out_year / (1 - ee.om_output) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year / (1 - ee.om_output) * ee.om_output * lifeTime)
     }
   }
   
   def energyInputsInstallation(cell: Cell, eroi_min:Double): Energy
   def OMYearlyEnergyInputs(cell: Cell, eroi_min:Double): Energy
-  def operation_variable: Double = ee.O_M_output
+  def operation_variable: Double = ee.om_output
  
 }
 
 class EmbodiedEnergy(val power : Power,
     val raw_materials: Energy, val manufacturing: Energy,
     val installation: Energy, val decommissioning:Energy,
-    val transport: Energy, val O_M_fixed: Energy,
-    val O_M_output: Double, val lifeTime: Int, 
-    
-    val construction_variable: Energy = Joules(0), val transport_variable: Energy = Joules(0), val default_area: Area = SquareMeters(1)) {
+    val transport: Energy, val om_fixed: Energy,
+    val om_output: Double, val lifeTime: Int, 
+    val construction_variable: Energy = Joules(0), val transport_variable: Energy = Joules(0), val om_variable: Energy = Joules(0),
+    val default_area: Area = SquareMeters(1)) {
 
   //def truckTransport(weight: Mass, distance: Length) = Megajoules(1.25) * weight.toTonnes * Math.abs(distance.toKilometers)
   //def shipTransport(weight: Mass, distance: Length) = Megajoules(0.29) * weight.toTonnes * Math.abs(distance.toKilometers)
 
   private def embodiedEnergy(rated_power: Power): Energy = {
     val ratio = rated_power/power
-    (raw_materials +  manufacturing + installation + decommissioning + transport + lifeTime * O_M_fixed) * ratio
+    (raw_materials +  manufacturing + installation + decommissioning + transport + lifeTime * om_fixed) * ratio
   }
   // For CSP, the embodied energy was calculated for a default aperture area ! 
   def embodiedEnergyArea(rated_power: Power, area: Area): Energy = {
     val area_ratio = area / default_area
     embodiedEnergy(rated_power) + area_ratio * (transport_variable + construction_variable)
   }
-  //TODO remove the decommisioning part here !!
+  // For Wind energy, transport varies with distance to shore
+  def embodiedEnergyDistance(rated_power: Power, distanceToShore : Length): Energy = {
+    distanceToShore.toKilometers*(construction_variable + om_variable)
+  }
+  
   def installationEnergyInputs(rated_power: Power, area: Area): Energy = {
     val area_ratio = area / default_area
     val ratio = rated_power/power
     (raw_materials + manufacturing + installation + transport) * ratio + area_ratio * (transport_variable + construction_variable)
   }
-  def OMYearlyEnergyInputs(rated_power: Power) : Energy = rated_power/power*O_M_fixed
+  def omYearlyEnergyInputs(rated_power: Power) : Energy = rated_power/power*om_fixed
 }
