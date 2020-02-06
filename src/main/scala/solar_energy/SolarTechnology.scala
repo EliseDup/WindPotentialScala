@@ -52,7 +52,9 @@ trait SolarTechnology extends RenewableTechnology {
   override def suitabilityFactor(cell: Cell): Double = super.suitabilityFactor(cell) * (if (solar(cell).value > 0) 1.0 else 0.0) * cell.landCovers.suitabilityFactorSolar * cell.slope.slope_leq(maximumSlope)
   override def embodiedEnergy(cell: Cell, eroi_min: Double) = ee.embodiedEnergyArea(ratedPower(cell, eroi_min), reflectiveArea(cell))
   def embodiedEnergy(rated_power: Power, area: Area) = ee.embodiedEnergyArea(rated_power, area)
-  def energyInputsInstallation(cell: Cell,eroi_min: Double) = ee.constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) 
+  
+  def energyInputsInstallation(cell: Cell,eroi_min: Double) = ee.installationEnergyInputs(ratedPower(cell, eroi_min), reflectiveArea(cell))
+  def OMYearlyEnergyInputs(cell: Cell,eroi_min: Double) = ee.OMYearlyEnergyInputs(ratedPower(cell, eroi_min))
   
   def efficiency(i: Irradiance): Double = designEfficiency
   def lifeTimeEfficiency(i: Irradiance) =

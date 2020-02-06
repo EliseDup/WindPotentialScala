@@ -74,13 +74,17 @@ object PlotHelper {
     val list = for (i <- series) yield (i._1.map(_.time), i._1.map(_.value), i._2)
     plotTime(list)
   }
-  def plotXY(xy: (List[Double], List[Double])) { plotXY(List((xy._1, xy._2, ""))) }
-  def plotXY(x: List[Double], y: List[Double]) { plotXY(List((x, y, ""))) }
-  def plotXY(xy: (List[Double], List[Double], String)) { plotXY(List(xy)) }
-  def plotXY(xy: List[((List[Double], List[Double]), String)], xLabel: String, yLabel: String) { plotXY(xy.map(i => (i._1._1, i._1._2, i._2)), xLabel = xLabel, yLabel = yLabel) }
+
+  def plotXY(xy: (List[Double], List[Double])): XYPlot = { plotXY(List((xy._1, xy._2, ""))) }
+  def plotXY(x: List[Double], y: List[Double]): XYPlot = { plotXY(List((x, y, ""))) }
+  def plotXY(xy: (List[Double], List[Double], String)): XYPlot = { plotXY(List(xy)) }
+
+  def getPlotXY(x: List[Double], y: List[Double], yLabel: String): XYPlot = { plotXY(List((x, y, "")), yLabel = yLabel, drawPlot = false) }
+
+  def plotXY(xy: List[((List[Double], List[Double]), String)], xLabel: String, yLabel: String): XYPlot = { plotXY(xy.map(i => (i._1._1, i._1._2, i._2)), xLabel = xLabel, yLabel = yLabel) }
 
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
-    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1), drawPlot: Boolean = true): XYPlot = {
 
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
@@ -97,7 +101,9 @@ object PlotHelper {
     val max = xys.map(_._2).flatten.max
     //plot.getRangeAxis().setRange(1,max)
     // plot.getDomainAxis().setRange(0,800)
-    createFrame(chart, name = title, save = save, tick = tick)
+    if (drawPlot)
+      createFrame(chart, name = title, save = save, tick = tick)
+    return plot
   }
 
   def dualAxisPlot(x: List[Double], y1: List[Double], y2: List[Double], xLabel: String, yLabel1: String, yLabel2: String) {
@@ -181,7 +187,20 @@ object PlotHelper {
     createFrame(chart, name = title, save = true, xy = false)
   }
 
-  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf : Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+  def combinedPlots(x: List[Double], y: List[(List[Double], String)]) {
+    val list = y.map(i => getPlotXY(x, i._1, i._2))
+    val plots = new CombinedDomainXYPlot()
+    list.map(p => plots.add(p))
+    plots.getDomainAxis().setRange(x.min, x.max)
+    val chart = new JFreeChart("", plots);
+    val chartPanel = new ChartPanel(chart)
+    chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
+    val frame = new ApplicationFrame("")
+    frame.setContentPane(chartPanel)
+    frame.pack()
+    frame.setVisible(true)
+  }
+  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf: Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
     applyChartTheme(chart, tick)
 
@@ -204,7 +223,7 @@ object PlotHelper {
       chart.getXYPlot().setRenderer(r);
     }
     if (save) {
-      if(pdf) writeAsPDF(chart, new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".pdf"), 500, 270)
+      if (pdf) writeAsPDF(chart, new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".pdf"), 500, 270)
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".jpg"), chart, 500, 270, 5, 5)
       i = i + 1
     }

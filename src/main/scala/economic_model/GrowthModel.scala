@@ -18,7 +18,9 @@ object GrowthModel {
 
   def m(alpha: Double) = alpha / (1 - alpha) // 
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
-
+  
+  val (k, qy, vy, qe, ve) = calibration(Some(0.5))
+  
   def main(args: Array[String]): Unit = {
 
     val (k, qy, vy, qe, ve) = calibration(Some(0.5))
@@ -103,7 +105,7 @@ object GrowthModel {
 
   /**
    * OLD CALIBRATION MODEL
-   */
+   
   // Données observées
   val pib2017 = 8.02501E+13; val pib2016 = 7.77968E+13; val pib2015 = 7.58342E+13; // US $ 2010
   val U = MegaTonOilEquivalent(10537); val E = MegaTonOilEquivalent(9717);
@@ -133,5 +135,5 @@ object GrowthModel {
   def delta_v(e0: Double, et: Double, qe0: Double, qet: Double, qy0: Double, qyt: Double) = v(et, qet, qyt) - v(e0, qe0, qy0)
   def gk(e: Double, qe: Double): Double = s0 / v(e, qe) - delta
   def g(e0: Double, et: Double, qe0: Double, qet: Double, qyt: Double = qy0) = (s0 - delta_v(e0, et, qe0, qet, qy0, qyt)) / (vy + ve(et, qet, qyt) * qyt / (1 - qet)) - delta
-
+*/
 }

@@ -25,20 +25,21 @@ trait WindTechnology extends RenewableTechnology {
   def OM(distanceToCoast: Length): Energy = Math.abs(distanceToCoast.toKilometers) * OM_variable
 
   def embodiedEnergy(cell: Cell, eroi_min: Double): Energy = embodiedEnergy(cell, ratedPower(cell, eroi_min)) // , potential(cell, eroi_min) * Hours(365 * 24))
-  
-  def embodiedEnergy(cell : Cell, installedPower: Power): Energy = {
+
+  def embodiedEnergy(cell: Cell, installedPower: Power): Energy = {
     (installedPower / Gigawatts(1)) *
       (fixed_energy_inputs_1GW(cell)) // + operation(annual_output * lifeTime)
   }
-  def fixed_energy_inputs_1GW(cell : Cell) = constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) + OM(cell.distanceToCoast) 
-  
-  def energyInputsInstallation(cell: Cell,eroi_min: Double) = constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) 
-  
+  def fixed_energy_inputs_1GW(cell: Cell) = constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) + OM(cell.distanceToCoast)
+
+  def energyInputsInstallation(cell: Cell, eroi_min: Double) = (ratedPower(cell, eroi_min) / Gigawatts(1)) * (constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast))
+  def OMYearlyEnergyInputs(cell: Cell, eroi_min: Double) = (ratedPower(cell, eroi_min) / Gigawatts(1)) * OM(cell.distanceToCoast)
+
   def availabilityFactor(cell: Cell): Double = if (cell.offshore) 0.95 else 0.97
 
-  def potential(cell: Cell, eroi_min: Double): Power = power(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min))*(1-operation_variable)
-  def potential(cell: Cell, vr: Velocity, n: Double): Power = power(cell,vr,n)*(1-operation_variable)
-  
+  def potential(cell: Cell, eroi_min: Double): Power = power(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min)) * (1 - operation_variable)
+  def potential(cell: Cell, vr: Velocity, n: Double): Power = power(cell, vr, n) * (1 - operation_variable)
+
   def ratedPower(cell: Cell, eroi_min: Double): Power = ratedPower(cell, cell.optimalRatedSpeed(eroi_min), cell.optimalN(eroi_min))
 
   private def power(cell: Cell, vr: Velocity, n: Double): Power = {
@@ -51,13 +52,12 @@ trait WindTechnology extends RenewableTechnology {
   def ratedPower(cell: Cell, vr: Velocity, n: Double): Power = {
     val res = cell.area * suitabilityFactor(cell) * capacityDensity(vr, n, cell.hubAltitude)
     val efficiency = CapacityFactorCalculation.cubic(cell.wind100m, vr.toMetersPerSecond) * WakeEffect.arrayEfficiency(res.toMegawatts / 3.0, Math.PI / (4 * Math.pow(n, 2))) * availabilityFactor(cell)
-    if(top_down && res *  efficiency / (suitabilityFactor(cell) * cell.area) > cell.keDissipation){
+    if (top_down && res * efficiency / (suitabilityFactor(cell) * cell.area) > cell.keDissipation) {
       cell.keDissipation * cell.area * suitabilityFactor(cell) / efficiency
-    }
-    else res
+    } else res
   }
   def capacityDensity(ratedSpeed: Velocity, n: Double, hubAltitude: Length): Irradiance = WattsPerSquareMeter(coeff(hubAltitude) * Math.pow(ratedSpeed.toMetersPerSecond, 3) / (n * n))
- 
+
   // Relationship between rated power, rotor diameter and rated wind speed
   // Power_rated = 1/2 * Cp_max * rho * PI / 4 * D^2 * v_rated^3
   // => v_rated = (Power_rated / (1/2 * Cp_max * rho * PI / 4 * D^2) )^(1/3)
@@ -82,7 +82,7 @@ object OnshoreWindTechnology extends WindTechnology {
   val operation_variable = 0.035
   val installation_variable = Gigajoules(605.74)
   val OM_variable = Gigajoules(21.3)
-  
+
 }
 
 object OffshoreWindTechnology extends WindTechnology {
