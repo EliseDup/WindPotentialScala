@@ -76,13 +76,15 @@ object OnshoreWindTechnology extends WindTechnology {
   override def suitabilityFactor(cell: Cell): Double = {
     super.suitabilityFactor(cell) * (if (cell.onshore && cell.EEZ) cell.landCovers.suitabilityFactorWind else 0.0)
   }
-
+  
   def constructionInputs(depth: Length) = Gigajoules(13744075)
   // 3.5 % of electricity directly consumed
-  val operation_variable = 0.035
+  // val operation_variable = 0.035
   val installation_variable = Gigajoules(605.74)
   val OM_variable = Gigajoules(21.3)
-
+  
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4377757+366858), Gigajoules(7869000+68760), Gigajoules(153422), Gigajoules(6450),
+      Gigajoules(38285+473322+348921),Gigajoules(41400)/25, 0.035, 25)
 }
 
 object OffshoreWindTechnology extends WindTechnology {
@@ -115,8 +117,10 @@ object OffshoreWindTechnology extends WindTechnology {
     else fixedOffshoreFixed + offshoreFixedFoundations(depth)
   }
   // 0.7 % of electricity directly consumed
-  val operation_variable = 0.007
+  // val operation_variable = 0.007
   val installation_variable = Gigajoules(16904) + Gigajoules(4681 + 105)
   val OM_variable = Gigajoules(6615)
-
+  
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(3442580+241686),Gigajoules(8523000+82662),Gigajoules(1779159),Gigajoules(1283000),
+      Gigajoules(64150+938343+192719), Gigajoules(1639675)/25, 0.007, 25)
 }

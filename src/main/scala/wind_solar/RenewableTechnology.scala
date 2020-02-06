@@ -10,10 +10,11 @@ trait RenewableTechnology {
   val name: String;
   val lifeTime: Int;
   val wind: Boolean; val solar: Boolean; val csp: Boolean; val pv: Boolean;
-
+   
+  val ee : EmbodiedEnergy
+  
   val occupationRatio: Double
   // %
-  def operation_variable: Double
   
   def fixed_energy_inputs_1GW(cell: Cell): Energy
 
@@ -45,19 +46,24 @@ trait RenewableTechnology {
   
   def energyInputsInstallation(cell: Cell, eroi_min:Double): Energy
   def OMYearlyEnergyInputs(cell: Cell, eroi_min:Double): Energy
+  def operation_variable: Double = ee.O_M_output
+ 
 }
 
-class EmbodiedEnergy(val raw_materials: Energy,
-    val construction_decomissioning: Energy, val transport_materials: Energy, val O_M_fixed: Energy,
-    val O_M_output: Double, val lifeTime: Int, val construction_variable: Energy = Joules(0), val transport_variable: Energy = Joules(0), 
-    val default_area: Area = SquareMeters(1)) {
+class EmbodiedEnergy(val power : Power,
+    val raw_materials: Energy, val manufacturing: Energy,
+    val installation: Energy, val decommissioning:Energy,
+    val transport: Energy, val O_M_fixed: Energy,
+    val O_M_output: Double, val lifeTime: Int, 
+    
+    val construction_variable: Energy = Joules(0), val transport_variable: Energy = Joules(0), val default_area: Area = SquareMeters(1)) {
 
   //def truckTransport(weight: Mass, distance: Length) = Megajoules(1.25) * weight.toTonnes * Math.abs(distance.toKilometers)
   //def shipTransport(weight: Mass, distance: Length) = Megajoules(0.29) * weight.toTonnes * Math.abs(distance.toKilometers)
 
   private def embodiedEnergy(rated_power: Power): Energy = {
-    val ratio = rated_power.toGigawatts
-    (raw_materials + construction_decomissioning + transport_materials + lifeTime * O_M_fixed) * ratio
+    val ratio = rated_power/power
+    (raw_materials +  manufacturing + installation + decommissioning + transport + lifeTime * O_M_fixed) * ratio
   }
   // For CSP, the embodied energy was calculated for a default aperture area ! 
   def embodiedEnergyArea(rated_power: Power, area: Area): Energy = {
@@ -67,8 +73,8 @@ class EmbodiedEnergy(val raw_materials: Energy,
   //TODO remove the decommisioning part here !!
   def installationEnergyInputs(rated_power: Power, area: Area): Energy = {
     val area_ratio = area / default_area
-    val ratio = rated_power.toGigawatts
-    (raw_materials + construction_decomissioning + transport_materials) * ratio + area_ratio * (transport_variable + construction_variable)
+    val ratio = rated_power/power
+    (raw_materials + manufacturing + installation + transport) * ratio + area_ratio * (transport_variable + construction_variable)
   }
-  def OMYearlyEnergyInputs(rated_power: Power) : Energy = rated_power.toGigawatts*O_M_fixed
+  def OMYearlyEnergyInputs(rated_power: Power) : Energy = rated_power/power*O_M_fixed
 }

@@ -12,8 +12,10 @@ import wind_solar.RenewableTechnology
 import wind_solar.Cell
 import wind_solar.EmbodiedEnergy
 import utils.Petajoules
+import wind_solar.EmbodiedEnergy
 
 trait SolarTechnology extends RenewableTechnology {
+
   val wind = false; val solar = true;
   val designPointIrradiance: Irradiance;
   val performanceRatio: Double;
@@ -22,9 +24,6 @@ trait SolarTechnology extends RenewableTechnology {
   val directOnly: Boolean;
   val maximumSlope: Double;
   val designEfficiency: Double;
-
-  val ee: EmbodiedEnergy;
-  def operation_variable = ee.O_M_output
 
   // GHI for PV, DNI for CSP
   def solar(cell: Cell): Irradiance = if (directOnly) cell.dni else cell.ghi;
@@ -90,13 +89,13 @@ trait PV extends SolarTechnology {
 
 object PVPoly extends PV {
   val name = "poly-Si-PV"
-  val ee = new EmbodiedEnergy(Gigajoules(12211495 + 4394479), Gigajoules(71652 + 71652), Gigajoules(652934), Gigajoules(52911.81), 0.0097, 25)
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(12211495), Gigajoules(4394479), Gigajoules(71652), Gigajoules(71652), Gigajoules(652934), Gigajoules(52911.81), 0.0097, 25)
   val designEfficiency = 0.17;
   val degradationRate = 0.5 / 100
 }
 object PVMono extends PV {
   val name = "mono-Si-PV"
-  val ee = new EmbodiedEnergy(Gigajoules(8880746 + 5596459), Gigajoules(61279 + 61279), Gigajoules(469257), Gigajoules(45252), 0.0097, 25)
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(8880746), Gigajoules(5596459), Gigajoules(61279), Gigajoules(61279), Gigajoules(469257), Gigajoules(45252), 0.0097, 25)
   val designEfficiency = 0.24;
   val degradationRate = 0.36 / 100
 }
@@ -193,7 +192,7 @@ object CSPParabolic extends CSP {
   def a(sm: Double) = -3.38 * sm + 11.55
   def b(sm: Double) = 23.85 * sm - 72.26
   val sm_range = (5 to 25).map(_ * 0.1).toList
-  val ee = new EmbodiedEnergy(Gigajoules(4742245 + 3178), Gigajoules(114400 + 106001), Gigajoules(732751), Gigajoules(89118), 0.05 + 0.023, 30, Gigajoules(6033371 + 6732247), Gigajoules(479183), SquareMeters(1E9 / (950 * designEfficiency) * 1.3))
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4742245),Gigajoules(3178), Gigajoules(114400), Gigajoules(106001), Gigajoules(732751), Gigajoules(89118), 0.05 + 0.023, 30, Gigajoules(6033371 + 6732247), Gigajoules(479183), SquareMeters(1E9 / (950 * designEfficiency) * 1.3))
   /*val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30, Gigajoules(1348389), Gigajoules(49617), SquareMeters(607286))
   */
 }
@@ -205,7 +204,7 @@ object CSPParabolicStorage12h extends CSP {
   def a(sm: Double) = -1.578 * sm + 11.17
   def b(sm: Double) = 10.65 * sm - 66.33
 
-  val ee = new EmbodiedEnergy(Gigajoules(5415779 + 13500041), Gigajoules(220157 + 237600), Gigajoules(756412 + 1080164), Gigajoules(183720), 0.05 + 0.023, 30,
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(5415779), Gigajoules(13500041), Gigajoules(220157), Gigajoules(237600), Gigajoules(756412 + 1080164), Gigajoules(183720), 0.05 + 0.023, 30,
     Gigajoules(11434969 + 4412439), Gigajoules(930204), SquareMeters(1E9 * 2.7 / (950 * designEfficiency)))
   /* val ee =   new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
     Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))*/
@@ -218,7 +217,7 @@ object CSPTowerStorage12h extends CSP {
   def a(sm: Double) = -1.62 * sm + 8.742
   def b(sm: Double) = 11.01 * sm - 46.86
 
-  val ee = new EmbodiedEnergy(Gigajoules(8053825 + 9086794), Gigajoules(220157 + 237600), Gigajoules(1196178 + 727130), Gigajoules(183720), 0.05 + 0.023, 30,
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(8053825), Gigajoules(9086794), Gigajoules(220157), Gigajoules(237600), Gigajoules(1196178 + 727130), Gigajoules(183720), 0.05 + 0.023, 30,
     Gigajoules(7751182 + 3642818), Gigajoules(457262), SquareMeters(1E9 * 2.7 / (950 * designEfficiency)))
   // OLD VALUES !!
   /*val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(3723 + 7197 + 183720), Gigajoules(0.05 + 0.023), 30,
