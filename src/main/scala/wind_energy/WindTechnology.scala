@@ -19,21 +19,12 @@ trait WindTechnology extends RenewableTechnology {
   val occupationRatio = 1.0
   // Energy Inputs
   val installation_variable: Energy; val OM_variable: Energy;
-  def constructionInputs(depth: Length): Energy;
-  // def operation(output: Energy): Energy = output * operation_variable
-  def installation(distanceToCoast: Length): Energy = Math.abs(distanceToCoast.toKilometers) * installation_variable
-  def OM(distanceToCoast: Length): Energy = Math.abs(distanceToCoast.toKilometers) * OM_variable
+  def construction_depth(depth: Length): Energy;
 
-  def embodiedEnergy(cell: Cell, eroi_min: Double): Energy = embodiedEnergy(cell, ratedPower(cell, eroi_min)) // , potential(cell, eroi_min) * Hours(365 * 24))
-
-  def embodiedEnergy(cell: Cell, installedPower: Power): Energy = {
-    (installedPower / Gigawatts(1)) *
-      (fixed_energy_inputs_1GW(cell)) // + operation(annual_output * lifeTime)
-  }
-  def fixed_energy_inputs_1GW(cell: Cell) = constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast) + OM(cell.distanceToCoast)
-
-  def energyInputsInstallation(cell: Cell, eroi_min: Double) = (ratedPower(cell, eroi_min) / Gigawatts(1)) * (constructionInputs(cell.waterDepth) + installation(cell.distanceToCoast))
-  def OMYearlyEnergyInputs(cell: Cell, eroi_min: Double) = (ratedPower(cell, eroi_min) / Gigawatts(1)) * OM(cell.distanceToCoast)
+  override def energyInputsInstallation(cell: Cell, eroi_min: Double): Energy =
+    super.energyInputsInstallation(cell, eroi_min) + ratioPower(cell, eroi_min) * (Math.abs(cell.distanceToCoast.toKilometers) * installation_variable + construction_depth(cell.waterDepth))
+  override def energyInputsOMYearly(cell: Cell, eroi_min: Double): Energy =
+    super.energyInputsOMYearly(cell, eroi_min) + ratioPower(cell, eroi_min) * Math.abs(cell.distanceToCoast.toKilometers) * OM_variable
 
   def availabilityFactor(cell: Cell): Double = if (cell.offshore) 0.95 else 0.97
 
@@ -76,15 +67,15 @@ object OnshoreWindTechnology extends WindTechnology {
   override def suitabilityFactor(cell: Cell): Double = {
     super.suitabilityFactor(cell) * (if (cell.onshore && cell.EEZ) cell.landCovers.suitabilityFactorWind else 0.0)
   }
-  
-  def constructionInputs(depth: Length) = Gigajoules(13744075)
+
+  def construction_depth(depth: Length) = Gigajoules(13744075)
   // 3.5 % of electricity directly consumed
   // val operation_variable = 0.035
   val installation_variable = Gigajoules(605.74)
   val OM_variable = Gigajoules(21.3)
-  
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4377757+366858), Gigajoules(7869000+68760), Gigajoules(153422), Gigajoules(6450),
-      Gigajoules(38285+473322+348921),Gigajoules(41400)/25, 0.035, 25)
+
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4377757 + 366858), Gigajoules(7869000 + 68760), Gigajoules(153422), Gigajoules(6450),
+    Gigajoules(38285 + 473322 + 348921), Gigajoules(41400) / 25, 0.035, 25)
 }
 
 object OffshoreWindTechnology extends WindTechnology {
@@ -112,7 +103,7 @@ object OffshoreWindTechnology extends WindTechnology {
     else if (d <= 35) 1.95
     else 2.19
   }
-  override def constructionInputs(depth: Length): Energy = {
+  def construction_depth(depth: Length): Energy = {
     if (depth.toMeters > 40) fixedOffshoreFloating
     else fixedOffshoreFixed + offshoreFixedFoundations(depth)
   }
@@ -120,7 +111,7 @@ object OffshoreWindTechnology extends WindTechnology {
   // val operation_variable = 0.007
   val installation_variable = Gigajoules(16904) + Gigajoules(4681 + 105)
   val OM_variable = Gigajoules(6615)
-  
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(3442580+241686),Gigajoules(8523000+82662),Gigajoules(1779159),Gigajoules(1283000),
-      Gigajoules(64150+938343+192719), Gigajoules(1639675)/25, 0.007, 25)
+
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(3442580 + 241686), Gigajoules(8523000 + 82662), Gigajoules(1779159), Gigajoules(1283000),
+    Gigajoules(64150 + 938343 + 192719), Gigajoules(1639675) / 25, 0.007, 25)
 }

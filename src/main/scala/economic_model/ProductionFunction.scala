@@ -77,7 +77,7 @@ object ProductionFunction {
             val next_site = sites_sorted.next()
             val prod = tech.potential(next_site, 1.0) * Hours(365 * 24)
             newProd += prod
-            newOperationE += prod * tech.operation_variable + tech.OMYearlyEnergyInputs(next_site, 1.0)
+            newOperationE += prod * tech.operation_variable + tech.energyInputsOMYearly(next_site, 1.0)
             newKe += tech.energyInputsInstallation(next_site, 1.0) 
             newCap += tech.ratedPower(next_site, 1.0)
           } else {
@@ -127,11 +127,12 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
 
   // Build the list of Gross Energy Produced, Net Energy Produced, Embodied Energy, Operational Energy) for all the sites
   val e_ne_ee: List[(Double, Energy, Energy, Energy)] = sites_sf.map(s => {
-    val e_ee = techs.map(potential_ee(s, _))
+    /*val e_ee = techs.map(potential_ee(s, _))
     val e = e_ee.map(_._1).foldLeft(Joules(0))(_ + _)
     val ne = e_ee.map(_._2).foldLeft(Joules(0))(_ + _)
     val ee = e_ee.map(_._3).foldLeft(Joules(0))(_ + _)
-    (e / ee, e, ne, ee)
+    (e / ee, e, ne, ee)*/
+    (0.0,Joules(0),Joules(0),Joules(0))
   })
   // (Embodied Energy, Energy delivered) cumulated, by decreasing ratio of e/ee
   val ee_ed_cum = doubleToEnergy(Helper.listCumulatedVSCumulatedBy(e_ne_ee.map(i => (i._1, i._4.toGigajoules, i._2.toGigajoules))))
@@ -165,7 +166,7 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
     out_stream.close()
   }
 
-  def potential_ee(site: Cell, tech: RenewableTechnology): (Energy, Energy, Energy) = {
+  /*def potential_ee(site: Cell, tech: RenewableTechnology): (Energy, Energy, Energy) = {
     if (tech.wind) {
       val windTech = tech.asInstanceOf[WindTechnology]
       val grossE = windTech.potential(site, defaultVR, defaultN) * Hours(365 * 24)
@@ -197,7 +198,7 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
 
       }
     }
-  }
+  }*/
 
   def energyToDouble(list: (List[Energy], List[Energy])) = (list._1.map(_.to(Exajoules)), list._2.map(_.to(Exajoules)))
   def doubleToEnergy(list: (List[Double], List[Double])) = (list._1.map(Gigajoules(_)), list._2.map(Gigajoules(_)))
