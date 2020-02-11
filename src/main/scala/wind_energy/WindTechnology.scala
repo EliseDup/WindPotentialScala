@@ -17,14 +17,15 @@ trait WindTechnology extends RenewableTechnology {
   val top_down: Boolean = true; val cp_max: Double = 0.5;
   val lifeTime = 25
   val occupationRatio = 1.0
-  // Energy Inputs
+
+  // Energy Inputs specific to wind power
   val installation_variable: Energy; val OM_variable: Energy;
   def construction_depth(depth: Length): Energy;
 
   override def energyInputsInstallation(cell: Cell, eroi_min: Double): Energy =
-    super.energyInputsInstallation(cell, eroi_min) + ratioPower(cell, eroi_min) * (Math.abs(cell.distanceToCoast.toKilometers) * installation_variable + construction_depth(cell.waterDepth))
+    super.energyInputsInstallation(cell, eroi_min) + ee.ratioPower(ratedPower(cell, eroi_min)) * (Math.abs(cell.distanceToCoast.toKilometers) * installation_variable + construction_depth(cell.waterDepth))
   override def energyInputsOMYearly(cell: Cell, eroi_min: Double): Energy =
-    super.energyInputsOMYearly(cell, eroi_min) + ratioPower(cell, eroi_min) * Math.abs(cell.distanceToCoast.toKilometers) * OM_variable
+    super.energyInputsOMYearly(cell, eroi_min) + ee.ratioPower(ratedPower(cell, eroi_min)) * Math.abs(cell.distanceToCoast.toKilometers) * OM_variable
 
   def availabilityFactor(cell: Cell): Double = if (cell.offshore) 0.95 else 0.97
 
@@ -69,13 +70,11 @@ object OnshoreWindTechnology extends WindTechnology {
   }
 
   def construction_depth(depth: Length) = Gigajoules(13744075)
-  // 3.5 % of electricity directly consumed
-  // val operation_variable = 0.035
   val installation_variable = Gigajoules(605.74)
   val OM_variable = Gigajoules(21.3)
 
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4377757 + 366858), Gigajoules(7869000 + 68760), Gigajoules(153422), Gigajoules(6450),
-    Gigajoules(38285 + 473322 + 348921), Gigajoules(41400) / 25, 0.035, 25)
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4377757 + 366858), Gigajoules(7869000 + 68760), Gigajoules(153422), Gigajoules(6450 + 348921),
+    Gigajoules(38285 + 473322), Gigajoules(41400) / 25, 0.035, 25)
 }
 
 object OffshoreWindTechnology extends WindTechnology {
@@ -90,8 +89,9 @@ object OffshoreWindTechnology extends WindTechnology {
         else 0.67
       })
   }
-  val fixedOffshoreFixed = Gigajoules(18185974)
-  val fixedOffshoreFloating = Gigajoules(26670974)
+
+  // val fixedOffshoreFixed = Gigajoules(18185974) // 
+  // val fixedOffshoreFloating = Gigajoules(26670974) // 
   def offshoreFixedFoundations(depth: Length) = scalingFactorFixedFoundations(depth) * (Gigajoules(16173 + 361962 + 10326 + 3477293))
   // For water depth up to 40 m
   def scalingFactorFixedFoundations(depth: Length) = {
@@ -103,15 +103,18 @@ object OffshoreWindTechnology extends WindTechnology {
     else if (d <= 35) 1.95
     else 2.19
   }
+
   def construction_depth(depth: Length): Energy = {
-    if (depth.toMeters > 40) fixedOffshoreFloating
-    else fixedOffshoreFixed + offshoreFixedFoundations(depth)
+    //if (depth.toMeters > 40) fixedOffshoreFloating
+    //else fixedOffshoreFixed + offshoreFixedFoundations(depth)
+    if (depth.toMeters > 40) Joules(0)
+    else offshoreFixedFoundations(depth)
   }
   // 0.7 % of electricity directly consumed
   // val operation_variable = 0.007
-  val installation_variable = Gigajoules(16904) + Gigajoules(4681 + 105)
+  val installation_variable = Gigajoules(16904) + Gigajoules(4681 + 105) // Was not added decommisioning transport effect !! + Gigajoules(12674)
   val OM_variable = Gigajoules(6615)
 
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(3442580 + 241686), Gigajoules(8523000 + 82662), Gigajoules(1779159), Gigajoules(1283000),
-    Gigajoules(64150 + 938343 + 192719), Gigajoules(1639675) / 25, 0.007, 25)
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(3442580 + 241686), Gigajoules(8523000 + 82662), Gigajoules(1779159), Gigajoules(1283000 + 192719),
+    Gigajoules(64150 + 938343), Gigajoules(1639675) / 25, 0.007, 25)
 }

@@ -64,7 +64,7 @@ object Plot {
     val ratedPower = Megawatts(1)
     val area = ratedPower / (technology.designEfficiency * technology.designPointIrradiance) * sm
     val annualOutput = KilowattHours(dni * efficiency / 100 * area.toSquareMeters)
-    30 * annualOutput / (technology.ee.embodiedEnergyArea(ratedPower, area))
+    30 * annualOutput / (technology.embodiedEnergyArea(ratedPower, area))
   }
 
 }

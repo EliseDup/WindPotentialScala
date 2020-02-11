@@ -45,7 +45,7 @@ object SimuationResults {
         val tech = c.bestTechnology(t)
         val output = c.potential(tech) * Hours(365 * 24)
         val installed = c.installedCapacity(tech)
-        val inputs = tech.embodiedEnergy(installed, SquareKilometers(1))
+        val inputs = tech.embodiedEnergyArea(installed, SquareKilometers(1))
         log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + c.suitableArea(tech).toSquareKilometers +
           "\t" + !tech.directOnly + "\t")
       })
@@ -53,7 +53,7 @@ object SimuationResults {
       val tech = c.bestTechnology(techs.flatten)
       val output = c.potential(tech) * Hours(365 * 24)
       val installed = c.installedCapacity(tech)
-      val inputs = tech.embodiedEnergy(installed, SquareKilometers(1))
+      val inputs = tech.embodiedEnergyArea(installed, SquareKilometers(1))
       log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + c.suitableArea(tech).toSquareKilometers +
         "\t" + !tech.directOnly + "\t")
 
@@ -194,7 +194,7 @@ object SimuationResults {
     print(math.round(tech.lifeTimeEfficiency(dni, sm) * 100 * 100) / 100.0 + "\t")
     print(math.round(tech.potential(dni, tech.panelArea(power, sm), sm) / power * 100 * 100) / 100.0 + "\t")
     print(math.round((tech.potential(dni, tech.panelArea(power, sm), sm) * Hours(365 * 24) * tech.ee.lifeTime).to(Petajoules) * 100) / 100.0 + "\t")
-    print(math.round(tech.ee.embodiedEnergyArea(power, tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
+    print(math.round(tech.embodiedEnergyArea(power, tech.panelArea(power, sm)).to(Petajoules) * 100) / 100.0 + "\t")
     println(math.round(tech.eroi(dni, sm) * 100) / 100.0)
   }
 
@@ -204,7 +204,7 @@ object SimuationResults {
     print(math.round(tech.lifeTimeEfficiency(ghi) * 100 * 100) / 100.0 + "\t")
     print(math.round(tech.potential(ghi, tech.panelArea(power, ghi)) / power * 100 * 100) / 100.0 + "\t")
     print(math.round((tech.potential(ghi, tech.panelArea(power, ghi)) * Hours(365 * 24) * tech.ee.lifeTime).to(Petajoules) * 100) / 100.0 + "\t")
-    print(math.round(tech.ee.embodiedEnergyArea(power, tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
+    print(math.round(tech.embodiedEnergyArea(power, tech.panelArea(power, ghi)).to(Petajoules) * 100) / 100.0 + "\t")
     println(math.round(tech.eroi(ghi) * 100) / 100.0)
   }
 }
