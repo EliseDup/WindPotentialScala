@@ -34,13 +34,6 @@ object ProductionFunction {
 
   val all_sites = Grid().cells
 
-  val ed_params = Map(
-    (OnshoreWindTechnology, (-0.0637018610663, 11.2840180061, 7.87916132725)),
-    (OffshoreWindTechnology, (-0.0806316861928, 9.28538696435, 0.831048129606)),
-    (PVMono, (-0.0172059611559, 11.0685240846, -15.6644974786)),
-    (CSPTowerStorage12h, (-0.175549090097, 16.5633370464, 3.19917790027)))
-  val ed_params_total = (-0.0105137914601, 10.2371376248, 2.35772267845)
-
   def main(args: Array[String]): Unit = {
 
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, CSPTowerStorage12h)
@@ -48,7 +41,7 @@ object ProductionFunction {
     val delta = GrowthModel.delta
     val tech = OnshoreWindTechnology
 
-    simulateTransition(0.15, Gigawatts(546), 2018, 2050, tech, GrowthModel.qy, GrowthModel.vy)
+    simulateTransition(0.25, initialValues(tech)._1, 2018, 2050, tech, GrowthModel.qy, GrowthModel.vy)
     println("Simulation -- END")
 
     def simulateTransition(annual_growth_rate: Double, cap_init: Power, year_init: Int, year_end: Int, tech: RenewableTechnology, qy: Double, vy: Double) {
@@ -78,7 +71,7 @@ object ProductionFunction {
             val prod = tech.potential(next_site, 1.0) * Hours(365 * 24)
             newProd += prod
             newOperationE += prod * tech.operation_variable + tech.energyInputsOMYearly(next_site, 1.0)
-            newKe += tech.energyInputsInstallation(next_site, 1.0) 
+            newKe += tech.energyInputsInstallation(next_site, 1.0) + tech.energyInputsDecomissioning(next_site, 1.0)
             newCap += tech.ratedPower(next_site, 1.0)
           } else {
             ended = true
@@ -113,7 +106,6 @@ object ProductionFunction {
       combinedPlots(year_double, ys)
 
     }
-
   }
 }
 
@@ -155,50 +147,13 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
     }
     plotXY(list, yLabel = name + " [EJ/year]", xLabel = "Embodied Energy [EJ/year]", title = name, legend = list.size > 1)
   }
-
-  // Write Energy / Net Energy / Embodied Energy
-  def write(output: String) {
-    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(output))
-    val ee_ed_cum_double = energyToDouble(ee_ed_cum)
-    for (i <- 0 until ee_ed_cum_double._1.size) {
-      out_stream.print(ee_ed_cum_double._2(i) + "\t" + ee_ed_cum_double._1(i) + "\n")
-    }
-    out_stream.close()
-  }
-
-  /*def potential_ee(site: Cell, tech: RenewableTechnology): (Energy, Energy, Energy) = {
-    if (tech.wind) {
-      val windTech = tech.asInstanceOf[WindTechnology]
-      val grossE = windTech.potential(site, defaultVR, defaultN) * Hours(365 * 24)
-      val EE = windTech.embodiedEnergy(site, windTech.ratedPower(site, defaultVR, defaultN)) / windTech.lifeTime
-      val netE = grossE - EE
-      (grossE, netE, EE)
-
-    } else if (tech.csp) {
-      val cspTech = tech.asInstanceOf[CSP]
-      if (site.dni.value == 0) (Joules(0), Joules(0), Joules(0))
-      else {
-        val panelArea = cspTech.reflectiveArea(site)
-        val ratedPower = cspTech.ratedPower(panelArea, defaultSM)
-        val grossE = cspTech.potential(site.dni, panelArea, defaultSM) * Hours(365 * 24)
-        val EE = cspTech.embodiedEnergy(ratedPower, panelArea) / cspTech.lifeTime
-        val netE = grossE - EE
-        (grossE, netE, EE)
-      }
-    } else {
-      if (site.ghi.value == 0) (Joules(0), Joules(0), Joules(0))
-      else {
-        val pvTech = tech.asInstanceOf[PV]
-        val panelArea = pvTech.reflectiveArea(site)
-        val ratedPower = pvTech.ratedPower(site, 1.0)
-        val grossE = pvTech.potential(site) * Hours(365 * 24)
-        val EE = pvTech.embodiedEnergy(ratedPower, panelArea) / pvTech.lifeTime
-        val netE = grossE - EE
-        (grossE, netE, EE)
-
-      }
-    }
-  }*/
+ 
+  val ed_params = Map(
+    (OnshoreWindTechnology, (-0.0637018610663, 11.2840180061, 7.87916132725)),
+    (OffshoreWindTechnology, (-0.0806316861928, 9.28538696435, 0.831048129606)),
+    (PVMono, (-0.0172059611559, 11.0685240846, -15.6644974786)),
+    (CSPTowerStorage12h, (-0.175549090097, 16.5633370464, 3.19917790027)))
+  val ed_params_total = (-0.0105137914601, 10.2371376248, 2.35772267845)
 
   def energyToDouble(list: (List[Energy], List[Energy])) = (list._1.map(_.to(Exajoules)), list._2.map(_.to(Exajoules)))
   def doubleToEnergy(list: (List[Double], List[Double])) = (list._1.map(Gigajoules(_)), list._2.map(Gigajoules(_)))

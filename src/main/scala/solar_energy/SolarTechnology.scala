@@ -204,9 +204,7 @@ object CSPParabolic extends CSP {
   val transport_variable = Gigajoules(479183)
   val construction_variable = Gigajoules(6033371 + 6732247)
   
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4742245), Gigajoules(3178), Gigajoules(114400), Gigajoules(106001), Gigajoules(732751), Gigajoules(89118), 0.05 + 0.023, 30) //, Gigajoules(6033371 + 6732247), Gigajoules(479183), Joules(0), SquareMeters(1E9 / (950 * designEfficiency) * 1.3))
-  /*val ee = new EmbodiedEnergy(Gigajoules(7032927), Gigajoules(220400), Gigajoules(356270), Gigajoules(2619 + 5215 + 89118), Gigajoules(0.05 + 0.05), 30, Gigajoules(1348389), Gigajoules(49617), SquareMeters(607286))
-  */
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4742245), Gigajoules(3178), Gigajoules(114400), Gigajoules(106001), Gigajoules(732751), Gigajoules(89118), 0.05 + 0.023, 30)
 }
 
 object CSPParabolicStorage12h extends CSP {
@@ -220,11 +218,8 @@ object CSPParabolicStorage12h extends CSP {
   val transport_variable =Gigajoules(930204)
   val construction_variable = Gigajoules(11434969 + 4412439)
   
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(5415779), Gigajoules(13500041), Gigajoules(220157), Gigajoules(237600), Gigajoules(756412 + 1080164), Gigajoules(183720), 0.05 + 0.023, 30) 
-  //,Gigajoules(11434969 + 4412439), Gigajoules(930204), Joules(0), SquareMeters(1E9 * 2.7 / (950 * designEfficiency)))
-  /* val ee =   new EmbodiedEnergy(Gigajoules(12756143), Gigajoules(457757), Gigajoules(738320), Gigajoules(1985 + 3838 + 183720), Gigajoules(0.05 + 0.023), 30,
-    Gigajoules(1067143), Gigajoules(65463), SquareMeters(1261286))*/
-}
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(5415779), Gigajoules(13500041), Gigajoules(220157), Gigajoules(237600), Gigajoules(756412 + 1080164), Gigajoules(183720), 0.05 + 0.023, 30)
+  }
 
 object CSPTowerStorage12h extends CSP {
   val name = "ST-salt-TES"
@@ -238,8 +233,4 @@ object CSPTowerStorage12h extends CSP {
   val construction_variable = Gigajoules(7751182 + 3642818)
   
   val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(8053825), Gigajoules(9086794), Gigajoules(220157), Gigajoules(237600), Gigajoules(1196178 + 727130), Gigajoules(183720), 0.05 + 0.023, 30)
-   //   , Gigajoules(7751182 + 3642818), Gigajoules(457262), Joules(0), SquareMeters(1E9 * 2.7 / (950 * designEfficiency)))
-  // OLD VALUES !!
-  /*val ee = new EmbodiedEnergy(Gigajoules(18379658), Gigajoules(457757), Gigajoules(1425920), Gigajoules(3723 + 7197 + 183720), Gigajoules(0.05 + 0.023), 30,
-    Gigajoules(1329266), Gigajoules(52168), SquareMeters(1443932))*/
-}
+  }

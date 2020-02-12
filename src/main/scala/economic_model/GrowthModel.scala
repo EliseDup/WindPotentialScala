@@ -13,7 +13,7 @@ object GrowthModel {
   def delta_(t: Int, ratio_left: Double = 0.1) = 1.0 - math.pow(ratio_left, 1.0 / t)
   val delta = delta_(T, 0.1)
 
-  val alpha = 0.08 // part de l'énergie dans le PIB
+  val alpha = 0.04 // Energy-related industry value added as a percentage of GDP
   val gpt = 0.1 / 100 // Taux de progrès technique
 
   def m(alpha: Double) = alpha / (1 - alpha) // 
@@ -21,15 +21,6 @@ object GrowthModel {
   
   val (k, qy, vy, qe, ve) = calibration(Some(0.5))
   
-  def main(args: Array[String]): Unit = {
-
-    val (k, qy, vy, qe, ve) = calibration(Some(0.5))
-    val (pib, eroi) = resolution(k, qy, vy, qe, ve)
-    println(pib + "\t" + eroi)
-    //plotXY(List(calibration(None), calibration(Some(0.5)), calibration(Some(0.8))), yLabel = "EROI", legend = true)
-
-  }
-
   def calibration(new_s: Option[Double] = None, plot: Boolean = false): (Double, Double, Double, Double, Double) = {
 
     val data = getLines("data_calibration", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), i(5).toDouble / 100))
@@ -60,17 +51,29 @@ object GrowthModel {
     val k = ind.map(i => ke(i) + ky(i))
 
     if (plot) {
+      plotXY(List((year_double,pib,"PIB"),(year_double,y,"Y")), "[US $ 2010]",legend = true)
       plotXY(List((year_double, e.map(_.to(MegaTonOilEquivalent)), "E"), (year_double, a.map(_.to(MegaTonOilEquivalent)), "A"), (year_double, u.map(_.to(MegaTonOilEquivalent)), "U"), (year_double, ce.map(_.to(MegaTonOilEquivalent)), "Ce"), (year_double, ey.map(_.to(MegaTonOilEquivalent)), "Ey")), legend = true, yLabel = "[Mtoe]")
       plotXY(List((year_double, eroi, "")), yLabel = "EROI")
       plotXY(List((year_double, ke, "Ke"), (year_double, ky, "Ky"), (year_double, k, "K")), legend = true)
+     
+      combinedPlots(year_double, List((qe,"qe"),(qy,"qy"),(ve,"ve"),(vy,"vy"),(v,"v")))
+       
     }
 
     println("EROI 2017 " + " \t" + eroi(n - 1))
-    //for(i <- ind)
-    //  println(v(i) + "\t" + ve(i) + "\t" +vy(i) + "\t" + p(i) + "\t" + qy(i) + "\t"+ qe(i) + "\t" + delta + "\t" + eroi(i))
     (k(n - 1), qy(n - 1), vy(n - 1), qe(n - 1), ve(n - 1))
   }
 
+    def main(args: Array[String]): Unit = {
+
+    val (k, qy, vy, qe, ve) = calibration(None, plot=true)
+    println(k, qy, vy, qe, ve)
+    println(qe + "\t" + delta*qy*ve)
+    val (pib, eroi) = resolution(k, qy, vy, qe, ve)
+    println(pib + "\t" + eroi)
+    //plotXY(List(calibration(None), calibration(Some(0.5)), calibration(Some(0.8))), yLabel = "EROI", legend = true)
+    
+  }
   // For a given set of parameters (K, qy, vy, qe, ve) and fixed parameters s (saving rate) and n (consumption "structure" of house holds = pCe / Cy), solves the model
   def resolution(K: Double, qy: Double, vy: Double, qe: Double, ve: Double): (Double, Double) = {
     
