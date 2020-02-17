@@ -187,12 +187,18 @@ object PlotHelper {
     createFrame(chart, name = title, save = true, xy = false)
   }
 
-  def combinedPlots(x: List[Double], y: List[(List[Double], String)]) {
+  def combinedPlots(x: List[Double], y: List[(List[Double], String)], name: String = "", save: Boolean = true) {
+    
     val list = y.map(i => getPlotXY(x, i._1, i._2))
     val plots = new CombinedDomainXYPlot()
     list.map(p => plots.add(p))
     plots.getDomainAxis().setRange(x.min, x.max)
     val chart = new JFreeChart("", plots);
+    applyChartTheme(chart, (false,1,1))
+    if (save) {
+      ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(("images/" + (if (name.isEmpty()) i else name)) + ".jpg"), chart, 500, 270, 5, 5)
+      i = i + 1
+    }
     val chartPanel = new ChartPanel(chart)
     chartPanel.setPreferredSize(new java.awt.Dimension(500, 270))
     val frame = new ApplicationFrame("")
