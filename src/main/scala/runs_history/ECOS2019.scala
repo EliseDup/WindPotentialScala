@@ -14,41 +14,44 @@ import solar_energy._
 
 object ECOS2019 {
   import PlotHelper._
-  
+
   def main(args: Array[String]): Unit = {
     // ECOSPaperResults
     val grid = Grid.eu()
-    val cells = grid.cells
+    val t = OffshoreWindTechnology
+    val cells = grid.cells.filter(t.suitabilityFactor(_) > 0)
+    val cell = cells(800)
+    println(t.eroi(cell, 1) + "\t" + t.embodiedEnergy(cell,1))
     // plotResults(grid)
-printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
+    //printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
   }
-  
+
   // Results for the paper of ECOS 2019 conference - 15/02/19
-  def ECOSPaperResults{
+  def ECOSPaperResults {
     var t = System.currentTimeMillis()
     val grid = Grid.eu()
     val cells = Grid.eu().eu28
     println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
-    
+
     plotResults(grid)
-    printResultsPerCountry(grid, 1) 
+    printResultsPerCountry(grid, 1)
     printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
     List(4, 6, 9, 12).map(e => grid.writeWindPotential(e, grid.eu28))
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     techs.map(t => grid.writePotential(t, 1, grid.eu28))
     techs.map(t => grid.writePotential(t, List(4, 6, 9, 12).map(_.toDouble), grid.eu28))
-    
+
     grid.writeTechnology(List(4, 6, 9, 12).map(_.toDouble), grid.eu28)
-    
+
     println("-- End :) --")
   }
-  
-   def solarPotential(techs: List[SolarTechnology], grid: Grid, name: String) = {
+
+  def solarPotential(techs: List[SolarTechnology], grid: Grid, name: String) = {
     val res = grid.eroi_netpotential(grid.eu28, techs, 1)
     (res._1, res._2, name)
   }
-   
-  def printPotentialTable(grid : Grid, eroi: List[Double]) {
+
+  def printPotentialTable(grid: Grid, eroi: List[Double]) {
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     val solartechs = List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     val techs_sum = List(List(OnshoreWindTechnology), List(OffshoreWindTechnology), List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h))
@@ -61,8 +64,8 @@ printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
       print("\t" + grid.netpotential(grid.eu28, solartechs, e) + "\t" + grid.sum_netpotential(grid.eu28, techs_sum, e) + "\n")
     })
   }
-  
-  def printResultsPerCountry(grid : Grid, eroi: Double) {
+
+  def printResultsPerCountry(grid: Grid, eroi: Double) {
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     print("Country " + "\t")
     techs.map(t => print(t.name + "\t" + "" + "\t"))
@@ -77,8 +80,8 @@ printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
       println()
     }
   }
-  def plotResults(grid : Grid) {
-   
+  def plotResults(grid: Grid) {
+
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     val eroi_min = (2 until 40).map(_ * 0.5).toList
     val onshorepotential = (eroi_min.map(e => grid.netpotential(grid.eu28, OnshoreWindTechnology, e)), eroi_min, OnshoreWindTechnology.name)

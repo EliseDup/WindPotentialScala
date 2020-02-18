@@ -104,7 +104,7 @@ object OffshoreWindTechnology extends WindTechnology {
   }
 
   def construction_depth(depth: Length): Energy = {
-    if (depth.toMeters > 40) Joules(0)
+    if (depth.toMeters > 40) Gigajoules(540000+660000+1125000+6160000)
     else offshoreFixedFoundations(depth)
   }
   // 0.7 % of electricity directly consumed
