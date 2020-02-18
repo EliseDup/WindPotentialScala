@@ -27,7 +27,7 @@ trait RenewableTechnology {
 
   def capacityFactor(cell: Cell, eroi_min: Double) = potential(cell, eroi_min: Double) / ratedPower(cell, eroi_min)
   def netYearlyProduction(cell: Cell, eroi_min: Double): Energy =
-    if (eroi(cell, eroi_min) >= eroi_min) potential(cell, eroi_min) * Hours(365 * 24) - embodiedEnergy(cell, eroi_min) / lifeTime
+    if (eroi(cell, eroi_min) >= eroi_min-0.001) potential(cell, eroi_min) * Hours(365 * 24) - embodiedEnergy(cell, eroi_min) / lifeTime
     else Joules(0)
 
   // In EROI calculation we take into account operation variable in the numerator and denominator !
