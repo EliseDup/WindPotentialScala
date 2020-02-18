@@ -33,10 +33,10 @@ object Grid {
       prod_total += res._1; self_cons_total += res._2; energy_inputs_total += res._3;
       (prod_total, prod_total / energy_inputs_total, self_cons_total / prod_total)
     })
-    
-    plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(_._2), "") ), xLabel = "Total Production [EJ/year]", yLabel = "EROI")
-    plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(_._3*100), "")), xLabel = "Total Production [EJ/year]", yLabel = "Self Consumption [%]")
-    plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(e => ve(e._2,e._3)), "")), xLabel = "Total Production [EJ/year]", yLabel = "ve")
+
+    plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(_._2), "")), xLabel = "Total Production [EJ/year]", yLabel = "EROI")
+    plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(_._3 * 100), "")), xLabel = "Total Production [EJ/year]", yLabel = "Self Consumption [%]")
+    plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(e => ve(e._2, e._3)), "")), xLabel = "Total Production [EJ/year]", yLabel = "ve")
 
   }
   def production_selfcons_ee(c: Cell, techs: List[RenewableTechnology]): (Energy, Energy, Energy) = {
@@ -68,6 +68,14 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   def netpotential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): Double = netpotential(cells, List(tech), eroi_min)
   // List eroi vs cumulated net potential for the technology maximising the EROI
   def netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), t.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1)._2).sum
+
+    def potential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): Double = potential(cells, List(tech), eroi_min)
+  // List eroi vs cumulated net potential for the technology maximising the EROI
+  def potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), (t.potential(c, eroi_min)*Hours(365*24)).to(Exajoules))).maxBy(_._1)._2).sum
+
+  def installedCapacity(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): Double = installedCapacity(cells, List(tech), eroi_min)
+  def installedCapacity(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), t.ratedPower(c, eroi_min).to(Gigawatts))).maxBy(_._1)._2).sum
+
   // List eroi vs cumulated net potential for the sum of the technologies (for technologies that can be combined, i.e. solar and wind)
   def sum_netpotential(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double): Double =
     cells.map(c => techs.map(tech => tech.map(t => (t.eroi(c, eroi_min), t.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1)._2).sum).sum
