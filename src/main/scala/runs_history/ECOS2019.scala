@@ -18,15 +18,19 @@ object ECOS2019 {
   def main(args: Array[String]): Unit = {
     // ECOSPaperResults
     val grid = Grid.eu()
-    val t = OffshoreWindTechnology
-    val cells = grid.cells.filter(t.suitabilityFactor(_) > 0)
-    for(i <- 1 until 9){
-      val cell = cells(i*100)
-      println(t.eroi(cell, 10) + "\t" + t.ratedPower(cell, 10) + "\t" + t.potential(cell, 10) + "\t" + t.embodiedEnergy(cell, 10))
-    }
+    val cells = grid.cells
+    plotResults(grid)
     
-    // plotResults(grid)
-    printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("../WindPotentialPython/test_ecos"))
+    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees +
+      "\t" +
+      100 * (OffshoreWindTechnology.suitabilityFactor(c) + OnshoreWindTechnology.suitabilityFactor(c)) + "\t" +
+      (if (c.waterDepth.toMeters > 1000) "1.0" else "0.0") + "\t" +
+      (if (c.offshoreEEZ && grid.eu28countries.contains(c.country)) 1.0 else 0.0) + "\t" +
+      c.dni.toWattsPerSquareMeter + "\t" + c.ghi.toWattsPerSquareMeter + "\t" + (if (c.dni.value > c.ghi.value) "1.0" else "0.0")
+      + "\n"))
+    out_stream.close()
+
   }
 
   // Results for the paper of ECOS 2019 conference - 15/02/19

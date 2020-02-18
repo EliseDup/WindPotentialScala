@@ -35,7 +35,15 @@ trait RenewableTechnology {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0
     else {
-      val out_year = potential(cell, eroi_min) * Hours(365 * 24)
+    
+         val out_year = potential(cell, eroi_min) * Hours(365 * 24)
+     
+          val num = out_year / (1 - operation_variable) * lifeTime
+    val den = (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
+    
+    println(embodiedEnergy(cell, eroi_min).toGigawattHours + "\t" + num.toGigawattHours + "\t" + den.toGigawattHours + "\t" + num/den)
+	
+ 
       out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
     }
   }
