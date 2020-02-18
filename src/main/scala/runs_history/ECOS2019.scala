@@ -18,14 +18,9 @@ object ECOS2019 {
   def main(args: Array[String]): Unit = {
     // ECOSPaperResults
     val grid = Grid.eu()
-    val t = OffshoreWindTechnology
-    val cells = grid.cells.filter(t.suitabilityFactor(_) > 0)
-    for(i <- 1 until 9){
-    val cell = cells(i*100)
-    println(t.eroi(cell, 1) + "\t" + t.embodiedEnergy(cell,1).toGigajoules + "\t" + t.ratedPower(cell, 1).toGigawatts + "\t" + t.potential(cell, 1).toGigawatts + "\t" + cell.center)
-    }
-    // plotResults(grid)
-    //printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
+    val cells = grid.cells
+    plotResults(grid)
+    printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
   }
 
   // Results for the paper of ECOS 2019 conference - 15/02/19
