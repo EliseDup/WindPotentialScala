@@ -18,7 +18,12 @@ object ECOS2019 {
   def main(args: Array[String]): Unit = {
     // ECOSPaperResults
     val grid = Grid.eu()
-    val cells = grid.cells
+   val t = OffshoreWindTechnology
+       val cells = grid.cells.filter(t.suitabilityFactor(_) > 0)
+       val cell = cells(500)
+       println(t.eroi(cell,10)  + "\t" + t.embodiedEnergy(cell) + "\t" + t.embodiedEnergy(cell, 10))
+ 
+    
     plotResults(grid)
     
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("../WindPotentialPython/test_ecos"))

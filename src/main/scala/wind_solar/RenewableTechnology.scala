@@ -35,15 +35,7 @@ trait RenewableTechnology {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0
     else {
-    
-         val out_year = potential(cell, eroi_min) * Hours(365 * 24)
-     
-          val num = out_year / (1 - operation_variable) * lifeTime
-    val den = (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
-    
-    println(embodiedEnergy(cell, eroi_min).toGigawattHours + "\t" + num.toGigawattHours + "\t" + den.toGigawattHours + "\t" + num/den)
-	
- 
+      val out_year = potential(cell, eroi_min) * Hours(365 * 24)
       out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
     }
   }
@@ -60,7 +52,7 @@ trait RenewableTechnology {
   def energyInputsOMYearly(cell: Cell): Energy = energyInputsOMYearly(cell, 1.0)
 
   def operation_variable: Double = ee.om_output
-  
+
   def embodiedEnergy(cell: Cell, eroi_min: Double): Energy = energyInputsInstallation(cell, eroi_min) + energyInputsDecomissioning(cell, eroi_min) + energyInputsOMYearly(cell, eroi_min) * lifeTime
   def embodiedEnergy(cell: Cell): Energy = embodiedEnergy(cell, 1.0)
 
@@ -87,10 +79,10 @@ class EmbodiedEnergy(val power: Power,
     val installation: Energy, val decommissioning: Energy,
     val transport: Energy, val om_fixed: Energy,
     val om_output: Double, val lifeTime: Int) {
-  
-  def ratioPower(rated_power: Power): Double = rated_power/power
-  
-  def embodiedEnergy(rated_power: Power): Energy = energyInputsInstallation(rated_power) + energyInputsDecomissioning(rated_power) + lifeTime*energyInputsOMYearly(rated_power)
+
+  def ratioPower(rated_power: Power): Double = rated_power / power
+
+  def embodiedEnergy(rated_power: Power): Energy = energyInputsInstallation(rated_power) + energyInputsDecomissioning(rated_power) + lifeTime * energyInputsOMYearly(rated_power)
 
   def energyInputsInstallation(rated_power: Power): Energy = ratioPower(rated_power) * (raw_materials + manufacturing + installation + transport)
   def energyInputsDecomissioning(rated_power: Power): Energy = ratioPower(rated_power) * decommissioning
