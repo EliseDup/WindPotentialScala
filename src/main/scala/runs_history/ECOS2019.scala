@@ -22,11 +22,11 @@ object ECOS2019 {
     val cells = grid.cells.filter(t.suitabilityFactor(_) > 0)
     for(i <- 1 until 9){
       val cell = cells(i*100)
-      println(t.eroi(cell, 10) + "\t" + t.ratedPower(cell, 10) + "\t" + t.potential(cell, 10))
+      println(t.eroi(cell, 10) + "\t" + t.ratedPower(cell, 10) + "\t" + t.potential(cell, 10) + "\t" + t.embodiedEnergy(cell, 10))
     }
     
     // plotResults(grid)
-    // printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
+    printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
   }
 
   // Results for the paper of ECOS 2019 conference - 15/02/19

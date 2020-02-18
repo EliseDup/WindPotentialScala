@@ -83,30 +83,11 @@ class EmbodiedEnergy(val power: Power,
   def ratioPower(rated_power: Power): Double = rated_power/power
   
   def embodiedEnergy(rated_power: Power): Energy = energyInputsInstallation(rated_power) + energyInputsDecomissioning(rated_power) + lifeTime*energyInputsOMYearly(rated_power)
-  //def embodiedEnergy(rated_power: Power, output: Energy): Energy = embodiedEnergy(rated_power) + output * om_output
-  
+
   def energyInputsInstallation(rated_power: Power): Energy = ratioPower(rated_power) * (raw_materials + manufacturing + installation + transport)
   def energyInputsDecomissioning(rated_power: Power): Energy = ratioPower(rated_power) * decommissioning
   def energyInputsOMYearly(rated_power: Power): Energy = ratioPower(rated_power) * om_fixed
 
   def truckTransport(weight: Mass, distance: Length) = Megajoules(1.25) * weight.toTonnes * Math.abs(distance.toKilometers)
   def shipTransport(weight: Mass, distance: Length) = Megajoules(0.29) * weight.toTonnes * Math.abs(distance.toKilometers)
-
-  // For CSP, the embodied energy was calculated for a default aperture area ! 
-  /*  def embodiedEnergyArea(rated_power: Power, area: Area): Energy = {
-    val area_ratio = area / default_area
-    embodiedEnergy(rated_power) + area_ratio * (transport_variable + construction_variable)
-  }
-
-  // For Wind energy, transport varies with distance to shore
-  def embodiedEnergyDistance(rated_power: Power, distanceToShore: Length): Energy = {
-    distanceToShore.toKilometers * (construction_variable + om_variable)
-  }
-
-  def installationEnergyInputs(rated_power: Power, area: Area): Energy = {
-    val area_ratio = area / default_area
-    val ratio = rated_power / power
-    (raw_materials + manufacturing + installation + transport) * ratio + area_ratio * (transport_variable + construction_variable)
-  }*/
-  // def omYearlyEnergyInputs(rated_power: Power): Energy = rated_power / power * om_fixed
 }

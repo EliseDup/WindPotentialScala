@@ -111,7 +111,7 @@ object OffshoreWindTechnology extends WindTechnology {
   // val operation_variable = 0.007
   val installation_variable = Gigajoules(16904) + Gigajoules(4681 + 105)
   val OM_variable = Gigajoules(6615)/lifeTime // !! Yearly
-  val decommissioning_variable = Gigajoules(12674)
+  val decommissioning_variable = Joules(0) // Gigajoules(12674)
   
   val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(3442580 + 241686), Gigajoules(8523000 + 82662), Gigajoules(1779159), Gigajoules(1283000 + 192719),
     Gigajoules(64150 + 938343), Gigajoules(1639675) / 25, 0.007, 25)
