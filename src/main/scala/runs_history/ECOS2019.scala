@@ -20,8 +20,10 @@ object ECOS2019 {
     val grid = Grid.eu()
     val t = OffshoreWindTechnology
     val cells = grid.cells.filter(t.suitabilityFactor(_) > 0)
-    val cell = cells(800)
-    println(t.eroi(cell, 1) + "\t" + t.embodiedEnergy(cell,1))
+    for(i <- 1 until 9){
+    val cell = cells(i*100)
+    println(t.eroi(cell, 1) + "\t" + t.embodiedEnergy(cell,1).toGigajoules + "\t" + t.ratedPower(cell, 1).toGigawatts + "\t" + t.potential(cell, 1).toGigawatts + "\t" + cell.center)
+    }
     // plotResults(grid)
     //printPotentialTable(grid, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
   }
