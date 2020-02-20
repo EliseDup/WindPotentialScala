@@ -39,8 +39,9 @@ object ProductionFunction {
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, CSPTowerStorage12h)
     val sites_sf = all_sites.filter(s => techs.map(_.suitabilityFactor(s)).sum > 0)
     val delta = GrowthModel.delta
+    val (k, qy, vy, qe, ve, v) = GrowthModel.calibration(smoothing = (true,5))
     techs.map(tech =>
-    simulateTransition(0.25, initialValues(tech)._1, 2018, 2050, tech, GrowthModel.qy, GrowthModel.vy)
+    simulateTransition(0.25, initialValues(tech)._1, 2018, 2050, tech, qy, vy)
  )
     println("Simulation -- END")
 
