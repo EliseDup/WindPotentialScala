@@ -18,34 +18,34 @@ import org.jfree.chart.JFreeChart
 object ProductionFunction {
   import PlotHelper._
   import Helper._
-/**
- * Sources :
- * - Installed Capacity : IRENA_RE_Capacity_Statistics_2019
- * - Production: IEA
- */
+  
+  /**
+   * Sources :
+   * - Installed Capacity : IRENA_RE_Capacity_Statistics_2019
+   * - Production: IEA
+   */
+  
   val initialValues =
-    Map((OnshoreWindTechnology, (Gigawatts(540.37), GigawattHours(1127319*540.37/(540.37+23.356)))),
-      (OffshoreWindTechnology, (Gigawatts(23.356), GigawattHours(1127319*23.356/(540.37+23.356)))),
+    Map((OnshoreWindTechnology, (Gigawatts(540.37), GigawattHours(1127319 * 540.37 / (540.37 + 23.356)))),
+      (OffshoreWindTechnology, (Gigawatts(23.356), GigawattHours(1127319 * 23.356 / (540.37 + 23.356)))),
       (PVMono, (Gigawatts(480.357), GigawattHours(443554))),
       (PVPoly, (Gigawatts(480.357), GigawattHours(443554))),
-      (CSPParabolic, (Gigawatts(5.469), GigawattHours(10848)+Terajoules(1815))),
-      (CSPParabolicStorage12h, (Gigawatts(5.469), GigawattHours(10848)+Terajoules(1815))),
-      (CSPTowerStorage12h, (Gigawatts(5.469), GigawattHours(10848)+Terajoules(1815))))
+      (CSPParabolic, (Gigawatts(5.469), GigawattHours(10848) + Terajoules(1815))),
+      (CSPParabolicStorage12h, (Gigawatts(5.469), GigawattHours(10848) + Terajoules(1815))),
+      (CSPTowerStorage12h, (Gigawatts(5.469), GigawattHours(10848) + Terajoules(1815))))
 
   val all_sites = Grid().cells
 
   def main(args: Array[String]): Unit = {
-
-    val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, CSPTowerStorage12h)
+    
+    val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono) //, CSPTowerStorage12h)
     val sites_sf = all_sites.filter(s => techs.map(_.suitabilityFactor(s)).sum > 0)
-    val delta = GrowthModel.delta
-    val (k, qy, vy, qe, ve, v) = GrowthModel.calibration(smoothing = (true,5))
-    techs.map(tech =>
-    simulateTransition(0.25, initialValues(tech)._1, 2018, 2050, tech, qy, vy)
- )
+    val delta = Calibration.delta_(25)
+    val (e, qy, vy, ve, v) = Calibration.calibration_results(2017, delta, 0.05, 0.1/100, Some(0.5))
+    techs.map(tech => simulateGrowth(0.25, initialValues(tech)._1, 2018, 2050, tech, qy, vy, 5))
     println("Simulation -- END")
 
-    def simulateTransition(annual_growth_rate: Double, cap_init: Power, year_init: Int, year_end: Int, tech: RenewableTechnology, qy: Double, vy: Double) {
+    def simulateGrowth(annual_growth_rate: Double, cap_init: Power, year_init: Int, year_end: Int, tech: RenewableTechnology, qy: Double, vy: Double, eroi_min : Double) {
 
       val tilde_ke = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ke += Joules(0)
       val tilde_ie = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ie += Joules(0)
@@ -57,13 +57,16 @@ object ProductionFunction {
       val ve = scala.collection.mutable.ArrayBuffer.empty[Double]
       val ke = scala.collection.mutable.ArrayBuffer.empty[Double]
       val qe = scala.collection.mutable.ArrayBuffer.empty[Double]
+      val eroi = scala.collection.mutable.ArrayBuffer.empty[Double]
 
       val sites_sorted = sites_sf.sortBy(tech.eroi(_, 1.0)).reverse.toIterator
 
       var ended = false
       for (y <- year_init until year_end) {
         year += y
-
+        if(eroi.nonEmpty && eroi.last <= eroi_min) {
+          ended = true
+        }
         var target = annual_growth_rate * installed_cap.last
         var newCap = Watts(0); var newProd = Joules(0); var newKe = Joules(0); var newOperationE = Joules(0)
         while (newCap <= target && !ended) {
@@ -71,8 +74,8 @@ object ProductionFunction {
             val next_site = sites_sorted.next()
             val prod = tech.potential(next_site, 1.0) * Hours(365 * 24)
             newProd += prod
-            newOperationE += prod * tech.operation_variable + tech.energyInputsOMYearly(next_site, 1.0)
-            newKe += tech.energyInputsInstallation(next_site, 1.0) + tech.energyInputsDecomissioning(next_site, 1.0)
+            newOperationE += tech.energyInputsOMYearly(next_site, 1.0) // + prod * tech.operation_variable 
+            newKe += tech.energyInputsInstallation(next_site, 1.0) // + tech.energyInputsDecomissioning(next_site, 1.0)
             newCap += tech.ratedPower(next_site, 1.0)
           } else {
             ended = true
@@ -90,8 +93,9 @@ object ProductionFunction {
 
         a += a.last + newOperationE
         ke += tilde_ke.last.toKilowattHours / qy
-        ve += u.last.toKilowattHours / ke.last
+        ve += ke.last / u.last.toKilowattHours
         qe += a.last / u.last
+        eroi += 1/(qe.last + delta*qy*ve.last)
       }
       val year_double = year.toList.map(_.toDouble)
 
@@ -99,12 +103,12 @@ object ProductionFunction {
         //(installed_cap.toList.map(_.to(Gigawatts)), "Cap [GW]"),
         (ve.toList, "ve"),
         (qe.toList, "qe"),
-        (ke.toList, "K_e [US $]"),
+        //(ke.toList, "K_e [US $]"),
         (u.toList.map(_.to(Exajoules)), "U [EJ/year]"),
-        (a.toList.map(_.to(Exajoules)), "A [EJ/year]")
-        //(tilde_ie.toList.map(_.to(Exajoules)), "I_e [EJ/year]")
+        //(a.toList.map(_.to(Exajoules)), "A [EJ/year]"),
+        (eroi.toList, "EROI")//(tilde_ie.toList.map(_.to(Exajoules)), "I_e [EJ/year]")
         )
-      combinedPlots(year_double, ys)
+      combinedPlots(year_double, ys, xLabel = tech.name + "(" + cap_init.toGigawatts.toInt + "GW in 2017, annual growth rate "+annual_growth_rate*100.toInt + " %)", title = tech.name)
 
     }
   }
@@ -125,7 +129,7 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
     val ne = e_ee.map(_._2).foldLeft(Joules(0))(_ + _)
     val ee = e_ee.map(_._3).foldLeft(Joules(0))(_ + _)
     (e / ee, e, ne, ee)*/
-    (0.0,Joules(0),Joules(0),Joules(0))
+    (0.0, Joules(0), Joules(0), Joules(0))
   })
   // (Embodied Energy, Energy delivered) cumulated, by decreasing ratio of e/ee
   val ee_ed_cum = doubleToEnergy(Helper.listCumulatedVSCumulatedBy(e_ne_ee.map(i => (i._1, i._4.toGigajoules, i._2.toGigajoules))))
@@ -148,7 +152,7 @@ class ProductionFunction(val sites: List[Cell], val techs: List[RenewableTechnol
     }
     plotXY(list, yLabel = name + " [EJ/year]", xLabel = "Embodied Energy [EJ/year]", title = name, legend = list.size > 1)
   }
- 
+
   val ed_params = Map(
     (OnshoreWindTechnology, (-0.0637018610663, 11.2840180061, 7.87916132725)),
     (OffshoreWindTechnology, (-0.0806316861928, 9.28538696435, 0.831048129606)),

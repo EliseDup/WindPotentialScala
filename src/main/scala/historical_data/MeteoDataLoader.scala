@@ -39,6 +39,10 @@ object MeteoDataLoader {
   val cities = stations.stations.filter(_.countryID.equals("BX")).filter(_.stationID.nonEmpty).filter(c => !c.city.equals("Genk") && !c.city.equals("Ghent") && !c.city.equals("Brasschaat"))
 
   def main(args: Array[String]) = {
+    
+  }
+
+  def loadMeteoCities(cities: List[MeteoStation]) {
     for (year <- (2017 to 2018)) {
       val prefix = year.toString
       val start = new DateTime(year, 1, 1, 0, 0)
@@ -55,6 +59,22 @@ object MeteoDataLoader {
 
       })
       println("Finished")
+    }
+  }
+  def loadMeteo(stationID: String) {
+    for (year <- (2017 to 2018)) {
+      val prefix = year.toString
+      val start = new DateTime(year, 1, 1, 0, 0)
+      val end = new DateTime(year, 1, 31, 0, 0)
+      println("Load Meteo for :" + stationID)
+      val res = new MeteoData(new MeteoStation("","",stationID,0.0,0.0,0.0), start, end)
+      res.writeToTxt("results/meteo/" + stationID)
+      val obs = new MeteoDataLoaded("results/meteo/" + stationID+ prefix)
+      val out_stream = new PrintStream(new java.io.FileOutputStream("results/hourly/" + stationID + prefix))
+      obs.hourlyAverages.map(i => out_stream.print(i.toTxt() + "\n"))
+      out_stream.close()
+      println(stationID + " printed")
+
     }
   }
 }

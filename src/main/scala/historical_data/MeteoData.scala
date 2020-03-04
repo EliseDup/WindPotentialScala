@@ -97,6 +97,7 @@ class MeteoData(val station: MeteoStation, val start: DateTime, val end: DateTim
       } catch {
         case e: Exception => List()
       }
+      println(csv)
     (for (line <- csv; if !line.contains("Time") && line.nonEmpty && line.split(",").size > 1) yield MeteoEntry(station, day, line.split(","))).toList
   }
 
