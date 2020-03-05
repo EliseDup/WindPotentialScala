@@ -30,47 +30,60 @@ object GrowthModel {
     val techs_it = techs.map(tech => new TechnologyIterator(tech, all_sites, delta, qy))
     val ind = Calibration.index_year(start_year)
 
+    val res = new GrowthModelResults(delta, qy); val res_re = new GrowthModelResults(delta, qy); val res_nre = new GrowthModelResults(delta, qy);
+    res.updateProduction(start_year, Calibration.data.u(ind), Calibration.data.e(ind), Calibration.data.a(ind), calib._6)
+    res_nre.updateProduction(start_year, Calibration.data.u(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.a(ind), calib._6)
+    res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0)
+    /* 
     val u = scala.collection.mutable.ArrayBuffer.empty[Energy]; u += Calibration.data.u(ind)
     val u_nre = scala.collection.mutable.ArrayBuffer.empty[Energy]; u_nre += Calibration.data.u(ind) - MegaTonOilEquivalent(45)
     val u_re = scala.collection.mutable.ArrayBuffer.empty[Energy]; u_re += MegaTonOilEquivalent(45)
-
     val a = scala.collection.mutable.ArrayBuffer.empty[Energy]; a += Calibration.data.a(ind)
     val a_nre = scala.collection.mutable.ArrayBuffer.empty[Energy]; a += Calibration.data.a(ind)
     val a_re = scala.collection.mutable.ArrayBuffer.empty[Energy]; a += Joules(0);
-
     // Wind and Solar production in 2017
     val e_re = scala.collection.mutable.ArrayBuffer.empty[Energy]; e_re += MegaTonOilEquivalent(45)
     val e_nre = scala.collection.mutable.ArrayBuffer.empty[Energy]; e_nre += Calibration.data.e(ind) - MegaTonOilEquivalent(45)
     val e = scala.collection.mutable.ArrayBuffer.empty[Energy]; e += e_re.last + e_nre.last
-
     val year = scala.collection.mutable.ArrayBuffer.empty[Int]; year += start_year
 
     val ve = scala.collection.mutable.ArrayBuffer.empty[Double]; ve += calib._4
     val ke = scala.collection.mutable.ArrayBuffer.empty[Double]; ke += calib._6
-    val ke_nre = scala.collection.mutable.ArrayBuffer.empty[Double]; ke += calib._6
-    val ke_re = scala.collection.mutable.ArrayBuffer.empty[Double]; ke += 0
+    val ke_nre = scala.collection.mutable.ArrayBuffer.empty[Double]; ke_nre += calib._6
+    val ke_re = scala.collection.mutable.ArrayBuffer.empty[Double]; ke_re += 0
 
     val qe = scala.collection.mutable.ArrayBuffer.empty[Double]; qe += Calibration.data.qe(ind)
     val eroi = scala.collection.mutable.ArrayBuffer.empty[Double]; eroi += calib._1
 
+*/
     // We want to reach 100% renewables by end_year: 
-    val n_year = end_year - start_year; val e_0 = e_re.last;
-    val qe_0 = qe.last; val ve_0 = ve.last; val ke_0 = ke.last;
-    val growth_rate = math.pow(Calibration.data.e(ind) / e_0, 1.0 / n_year)
+    val n_year = end_year - start_year; val e_re0 = res_re.e.last;
+    val qe_0 = Calibration.data.qe(ind); val ve_0 = calib._4; val ke_0 = calib._6
+    val growth_rate = math.pow(Calibration.data.e(ind) / e_re0, 1.0 / n_year)
     println("Simulation " + n_year + ", exponential growth rate " + growth_rate)
 
     // If we consider an exponential growth (i.e. a constant growth rate): 
     // Ere,n = Enre,2017 & Ere,n = Ere,2017 * g^n => g = (Enre,2017/Ere,2017)^1/n
     for (y <- 1 to n_year) {
-      year += start_year + y
+      // year += start_year + y
       // The desired total production from RE sources by the end of the year.
-      val target_total_re = e_0 * math.pow(growth_rate, y)
-      val target_new_re = List(target_total_re - e_re.last, Joules(0)).maxBy(_.to(MegaTonOilEquivalent))
-      println("Simulate year " + year.last + " with target " + target_new_re)
+      val target_total_re = e_re0 * math.pow(growth_rate, y)
+      val target_new_re = List(target_total_re - res_re.e.last, Joules(0)).maxBy(_.to(MegaTonOilEquivalent))
+      println("Simulate year " + res.year.last + " with target " + target_new_re)
 
       techs_it.map(it => it.simulate_year(y, target_new_re / techs.size))
       // Update params from RE sector
-      e_re += techs_it.map(_.results.e.last).foldLeft(Joules(0))(_ + _)
+      res_re.updateProduction(start_year + y, techs_it.map(_.results.u.last).foldLeft(Joules(0))(_ + _),
+        techs_it.map(_.results.e.last).foldLeft(Joules(0))(_ + _),
+        techs_it.map(_.results.a.last).foldLeft(Joules(0))(_ + _),
+        techs_it.map(_.results.ke.last).sum)
+      val e_nre = List(res_nre.e.last - res_re.e.last, Joules(0)).maxBy(_.to(MegaTonOilEquivalent))
+      val u_nre = e_nre * (1 + qe_0)
+      res_nre.updateProduction(start_year + y, u_nre, e_nre, u_nre * qe_0, u_nre.to(KilowattHours) * ve_0)
+      res.sumResults(start_year + y, List(res_re,res_nre))
+      // res.updateProduction(start_year + y, res_re.u.last+res_nre.u.last, res_re.e.last+res_nre.e.last, res_re.a.last+res_nre.a.last, res_re.ke.last+res_nre.ke.last)
+      
+      /*e_re += techs_it.map(_.results.e.last).foldLeft(Joules(0))(_ + _)
       a_re += techs_it.map(_.results.a.last).foldLeft(Joules(0))(_ + _)
       u_re += techs_it.map(_.results.u.last).foldLeft(Joules(0))(_ + _)
       ke_re += techs_it.map(_.results.ke.last).sum
@@ -85,15 +98,15 @@ object GrowthModel {
       a += a_re.last + a_nre.last; e += e_re.last + e_nre.last; u += u_re.last + u_nre.last; ke += ke_re.last + ke_nre.last;
       ve += ke.last / u.last.toKilowattHours
       qe += a.last / u.last
-      eroi += 1 / (qe.last + delta * qy * ve.last)
+      eroi += 1 / (qe.last + delta * qy * ve.last)*/
     }
 
-    val year_double = year.toList.map(_.toDouble)
-    val ys = List((ve.toList, "ve"), (qe.toList, "qe"), (u.toList.map(_.to(Exajoules)), "U [EJ/year]"), (e.toList.map(_.to(Exajoules)), "E [EJ/year]"),
-      (eroi.toList, "EROI"))
+    val year_double = res.year.toList.map(_.toDouble)
+    val ys = List((res.ve.toList, "ve"), (res.qe.toList, "qe"), (res.u.toList.map(_.to(Exajoules)), "U [EJ/year]"), (res.e.toList.map(_.to(Exajoules)), "E [EJ/year]"),
+      (res.eroi.toList, "EROI"))
     combinedPlots(year_double, ys)
-    plotXY(List((year_double, e.toList.map(_.to(Exajoules)), "E"), (year_double, e_re.toList.map(_.to(Exajoules)), "E_RE"), (year_double, e_nre.toList.map(_.to(Exajoules)), "E_NRE")), legend = true)
-    plotXY(List((year_double, u.toList.map(_.to(Exajoules)), "U"), (year_double, u_re.toList.map(_.to(Exajoules)), "U_RE"), (year_double, u_nre.toList.map(_.to(Exajoules)), "U_NRE")), legend = true)
+    plotXY(List((year_double, res.e.toList.map(_.to(Exajoules)), "E"), (year_double, res_re.e.toList.map(_.to(Exajoules)), "E_RE"), (year_double, res_nre.e.toList.map(_.to(Exajoules)), "E_NRE")), legend = true)
+    plotXY(List((year_double, res.u.toList.map(_.to(Exajoules)), "U"), (year_double, res_re.u.toList.map(_.to(Exajoules)), "U_RE"), (year_double, res_nre.u.toList.map(_.to(Exajoules)), "U_NRE")), legend = true)
 
   }
 
@@ -179,5 +192,13 @@ class GrowthModelResults(delta: Double, qy: Double) {
     ve += ke.last / u.last.toKilowattHours
     qe += a.last / u.last
     eroi += 1 / (qe.last + delta * qy * ve.last)
+  }
+  def sumResults(y : Int, res : List[GrowthModelResults]){
+    year += y
+    u += res.map(_.u.last).foldLeft(Joules(0))(_ + _)
+    e += res.map(_.e.last).foldLeft(Joules(0))(_ + _)
+    a += res.map(_.a.last).foldLeft(Joules(0))(_ + _)
+    ke += res.map(_.ke.last).sum
+    updateParams
   }
 }
