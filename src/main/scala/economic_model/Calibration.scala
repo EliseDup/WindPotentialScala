@@ -8,7 +8,7 @@ object Calibration {
   val year_double = data.year.map(_.toDouble)
   val ind = data.ind
   def delta_(t: Int, ratio_left: Double = 0.1) = 1.0 - math.pow(ratio_left, 1.0 / t)
- 
+
   def index_year(year: Int) = data.year.zipWithIndex.find(i => i._1 == year).get._2
 
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
@@ -36,16 +36,16 @@ object Calibration {
     val vy = ky / y // Intensité capitalistique de l'économie
     val ve = ke / data.u(i).toKilowattHours // Intensité capitalistique du secteur énergétique
 
-    (1 / (data.qe(i) + delta * ve * qy), qy, vy, ve, v)
+    (1 / (data.qe(i) + delta * ve * qy), qy, vy, ve, v, ke)
   }
 
   def round(x: Double) = {
     math.round(100 * x) / 100.0
   }
-  
-  def printTableCalibration(year : Int = 2017, ss: List[Double], deltas: List[Double], alphas: List[Double], gpts: List[Double]) {
+
+  def printTableCalibration(year: Int = 2017, ss: List[Double], deltas: List[Double], alphas: List[Double], gpts: List[Double]) {
     val cals = ss.map(s => deltas.map(delta => alphas.map(alpha => gpts.map(gpt => ((s, delta, alpha, gpt), calibration_results(year, delta, alpha, gpt, Some(s))))).flatten).flatten).flatten
-    val ref = calibration_results(2017,delta_(25, 0.1), 0.05, 0.1 / 100, Some(0.5) )
+    val ref = calibration_results(2017, delta_(25, 0.1), 0.05, 0.1 / 100, Some(0.5))
     print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
 
     print("$s$ [%]&"); print("textbf{"); print("50 "); print("}"); cals.map(cal => print(" & " + cal._1._1 * 100)); println(" \\" + "\\")
@@ -65,10 +65,10 @@ object Calibration {
 
   }
 
-  def printTableCalibration_new(year : Int = 2017, ts: List[Int], alphas: List[Double], ms: List[Double], gpts: List[Double]) {
+  def printTableCalibration_new(year: Int = 2017, ts: List[Int], alphas: List[Double], ms: List[Double], gpts: List[Double]) {
 
-    val cals = ts.map(t => alphas.map(alpha => ms.map(m => gpts.map(gpt => ((t, delta_(t), alpha, m, gpt), calibration_results_work(year,delta_(t),alpha,m,gpt)))).flatten).flatten).flatten
-    val ref = calibration_results_work(year,delta_(15),0.05,0.05,0.1/100)
+    val cals = ts.map(t => alphas.map(alpha => ms.map(m => gpts.map(gpt => ((t, delta_(t), alpha, m, gpt), calibration_results_work(year, delta_(t), alpha, m, gpt)))).flatten).flatten).flatten
+    val ref = calibration_results_work(year, delta_(15), 0.05, 0.05, 0.1 / 100)
 
     print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
 
