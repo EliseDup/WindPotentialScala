@@ -12,10 +12,40 @@ object GrowthModel {
   import Helper._
   import PlotHelper._
 
+  def round(x: Double) = {
+    math.round(100 * x) / 100.0
+  }
   def main(args: Array[String]): Unit = {
-    //Calibration.printTableCalibration(1990, List(0.25, 0.8), List(Calibration.delta_(15), Calibration.delta_(40)), List(0.05, 0.08), List(0.1 / 100))
-    //Calibration.printTableCalibration_new(1990, List(10, 25), List(0.03, 0.07), List(0.03, 0.1), List(0.1 / 100))
-    simulateTransition(0.25, Calibration.delta_(25), 0.05, 2017, 2050)
+    println(Calibration.calibration_results_work(2017, Calibration.delta_(15), 0.05, 0.05, 0.1/100))
+    val ts = List(10, 15, 25, 40)
+    val techs = List(
+        List((OnshoreWindTechnology,1.0/4),(OffshoreWindTechnology,1.0/4),(PVMono,1.0/2)))
+        //List((OnshoreWindTechnology,1.0)),List((OffshoreWindTechnology,1.0)), List((PVMono,1.0))) //, CSPTowerStorage12h)
+    val res = ts.map(t => techs.map(tech => (t, tech, calculate(Exajoules(400), t, tech))))
+    res.map(re => re.map(r => 
+      println(r._1 + "\t" + r._2(0)._1.name + "\t" +
+      round(r._3(1)._1) + "\t" + round(r._3(1)._2*100) + "\t" + round(r._3(1)._3))))
+  }
+
+  // For a given target (= final energy demand), and renewable energy share, gives a estimate of the technical parameters and EROI of the energy system
+  def calculate(target:Energy, T:Int, techs: List[(RenewableTechnology,Double)]) = {
+    
+    val delta = Calibration.delta_(T)
+    println("Calculate new EROI, T : " + "\t" + T + ", delta [%]:" + math.round(delta * 100))
+
+    val all_sites = Grid().cells
+    val calib = Calibration.calibration_results_work(2017, delta, 0.05, 0.05, 0.1 / 100); val qy = calib._2
+    val techs_it = techs.map(tech => new TechnologyIterator(tech._1, all_sites, delta, qy))
+    techs_it.map(t => println(t.tech.name + "\t" + t.results.eroi.last))
+    techs_it.map(t => t.simulate_year(2050, target * techs.find(_._1.equals(t.tech)).get._2))
+
+    // Initialise 
+    val start_year = 2017; val ind = Calibration.index_year(start_year)
+    val res = new GrowthModelResults(delta, qy); val res_re = new GrowthModelResults(delta, qy); val res_nre = new GrowthModelResults(delta, qy);
+    res.updateProduction(start_year, Calibration.data.u(ind), Calibration.data.e(ind), Calibration.data.a(ind), calib._6)
+    res.sumResults(2050, techs_it.map(_.results))
+
+    List((res.eroi(0), res.qe(0), res.ve(0)), (res.eroi(1), res.qe(1), res.ve(1)))
   }
 
   def simulateTransition(s: Double, delta: Double, alpha: Double, start_year: Int, end_year: Int) {
@@ -69,18 +99,21 @@ object GrowthModel {
 
   }
 
-  class TechnologyIterator(tech: RenewableTechnology, sites: List[Cell], delta: Double, qy: Double, log: Boolean = false) {
+  class TechnologyIterator(val tech: RenewableTechnology, sites: List[Cell], delta: Double, qy: Double, log: Boolean = false) {
+    // Initialize with current installed capacity and energy produced
+    val (cap0, e0) = ProductionFunction.initialValues(tech)
+    val ke0 = tech.ee.energyInputsInstallation(cap0).toKilowattHours / qy;
+    val oe0 = tech.ee.energyInputsOMYearly(cap0);
+    val results = new GrowthModelResults(delta, qy)
+    results.updateProduction(2017, e0 + oe0, e0, oe0, ke0)
+
+    assert(math.abs(results.eroi.last - (e0 + oe0) / (oe0 + delta * tech.ee.energyInputsInstallation(cap0))) < 0.1)
+
+    val tilde_ke = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ke += tech.ee.energyInputsInstallation(cap0)
+    val tilde_ie = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ie += tilde_ke.last * delta
+    val installed_cap = scala.collection.mutable.ArrayBuffer.empty[Power]; installed_cap += cap0
 
     val sites_sorted = sites.filter(s => tech.suitabilityFactor(s) > 0).sortBy(tech.eroi(_, 1.0)).reverse.toIterator
-    val init = ProductionFunction.initialValues(tech)
-
-    val results = new GrowthModelResults(delta, qy)
-    results.updateProduction(2017, init._2, init._2, Joules(0), 0)
-
-    val tilde_ke = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ke += Joules(0)
-    val tilde_ie = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ie += Joules(0)
-    val installed_cap = scala.collection.mutable.ArrayBuffer.empty[Power]; installed_cap += init._1
-
     def simulate_year(y: Int, target: Energy) {
       // year += y
       var ended = false
