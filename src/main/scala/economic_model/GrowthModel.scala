@@ -16,36 +16,93 @@ object GrowthModel {
     math.round(100 * x) / 100.0
   }
   def main(args: Array[String]): Unit = {
-    println(Calibration.calibration_results_work(2017, Calibration.delta_(15), 0.05, 0.05, 0.1/100))
-    val ts = List(10, 15, 25, 40)
-    val techs = List(
-        List((OnshoreWindTechnology,1.0/4),(OffshoreWindTechnology,1.0/4),(PVMono,1.0/2)))
-        //List((OnshoreWindTechnology,1.0)),List((OffshoreWindTechnology,1.0)), List((PVMono,1.0))) //, CSPTowerStorage12h)
-    val res = ts.map(t => techs.map(tech => (t, tech, calculate(Exajoules(400), t, tech))))
-    res.map(re => re.map(r => 
-      println(r._1 + "\t" + r._2(0)._1.name + "\t" +
-      round(r._3(1)._1) + "\t" + round(r._3(1)._2*100) + "\t" + round(r._3(1)._3))))
+    Calibration.printTableCalibration_new(2017, List(10,15), List(0.04,0.08), List(0.03,0.1), List(0.1/100))
+    
+   val cals = (1990 to 2017).map( y => (y,Calibration.calibration_results_work(y, Calibration.delta_(25) , 0.05, 0.065, 0.1/100)))
+    
+    val share = (1 to 10).map(_ * 0.1).toList
+
+    val techs = List((OnshoreWindTechnology, 1.0 / 4), (OffshoreWindTechnology, 1.0 / 4), (PVMono, 1.0 / 2))
+    val res = share.map(s => (s, calculate(Exajoules(400), 25, techs, s)))
+
+    res.map(r =>
+      println(r._1 * 100 + " & " + round(r._2(1)._1) + " & " + round(r._2(1)._2 * 100) + " & " + round(r._2(1)._3)) + "\\" + "\\")
+
+    plotXY(List((share, res.map(_._2(1)._1), "")), xLabel = "RE Share", yLabel = "EROI")
+    plotXY(List((share, res.map(_._2(1)._2 * 100), "")), xLabel = "RE Share", yLabel = "qe [%]")
+    plotXY(List((share, res.map(_._2(1)._3), "")), xLabel = "RE Share", yLabel = "ve")
+
+    combinedPlots(share.map(_ * 100), List((res.map(_._2(1)._1), "EROI"), (res.map(_._2(1)._2 * 100), "qe [%]"), (res.map(_._2(1)._3), "ve")), xLabel = "RE Share [%]")
   }
 
   // For a given target (= final energy demand), and renewable energy share, gives a estimate of the technical parameters and EROI of the energy system
-  def calculate(target:Energy, T:Int, techs: List[(RenewableTechnology,Double)]) = {
-    
+  def calculate(target: Energy, T: Int, techs: List[(RenewableTechnology, Double)], share_re: Double = 1.0) = {
+
     val delta = Calibration.delta_(T)
-    println("Calculate new EROI, T : " + "\t" + T + ", delta [%]:" + math.round(delta * 100))
+    // println("Calculate new EROI, T : " + "\t" + T + ", delta [%]:" + math.round(delta * 100))
 
     val all_sites = Grid().cells
     val calib = Calibration.calibration_results_work(2017, delta, 0.05, 0.05, 0.1 / 100); val qy = calib._2
-    val techs_it = techs.map(tech => new TechnologyIterator(tech._1, all_sites, delta, qy))
-    techs_it.map(t => println(t.tech.name + "\t" + t.results.eroi.last))
-    techs_it.map(t => t.simulate_year(2050, target * techs.find(_._1.equals(t.tech)).get._2))
 
     // Initialise 
     val start_year = 2017; val ind = Calibration.index_year(start_year)
     val res = new GrowthModelResults(delta, qy); val res_re = new GrowthModelResults(delta, qy); val res_nre = new GrowthModelResults(delta, qy);
     res.updateProduction(start_year, Calibration.data.u(ind), Calibration.data.e(ind), Calibration.data.a(ind), calib._6)
-    res.sumResults(2050, techs_it.map(_.results))
+    res_nre.updateProduction(start_year, Calibration.data.u(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.a(ind), calib._6)
+    res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0)
+
+    // Iterate on each technology to produce at optimal eroi
+    val techs_it = techs.map(tech => new TechnologyIterator(tech._1, all_sites, delta, qy))
+    techs_it.map(t => t.simulate_year(2050, (target * share_re) * techs.find(_._1.equals(t.tech)).get._2))
+
+    // End values
+    res_re.sumResults(2050, techs_it.map(_.results))
+    val tilde_ke = techs_it.map(t => t.tilde_ke.last.to(MegaTonOilEquivalent)).sum
+    val u = res_re.u.last.to(MegaTonOilEquivalent)
+    val a = res_re.a.last.to(MegaTonOilEquivalent)
+
+    val qe_0 = Calibration.data.qe(ind); val ve_0 = calib._4; val ke_0 = calib._6
+    val e_nre = target * (1.0 - share_re); val u_nre = e_nre / (1 - qe_0)
+    res_nre.updateProduction(2050, u_nre, e_nre, u_nre * qe_0, u_nre.to(KilowattHours) * ve_0)
+
+    res.sumResults(start_year, List(res_re, res_nre))
+    // println("Growth rate " + "\t" + (0.25 / delta - (res.ve(1) - res.ve(0)) / res.ve(0)))
+    println(delta + "\t" + share_re + "\t" + u + "\t" + a + "\t" + tilde_ke + "\t" + u / (a + tilde_ke * delta) + "\t" + res_re.eroi.last + "\t" + res_nre.eroi.last + "\t" + res.eroi.last)
 
     List((res.eroi(0), res.qe(0), res.ve(0)), (res.eroi(1), res.qe(1), res.ve(1)))
+  }
+
+  // For a given target (= final energy demand), and renewable energy share, gives a estimate of the technical parameters and EROI of the energy system
+  def simulate(calib: Calibration2017, target: Energy, T: Int, techs: List[(RenewableTechnology, Double)], share_re: Double = 1.0) = {
+
+    val delta = calib.delta
+
+    val all_sites = Grid().cells
+
+    // Initialise 
+    val start_year = 2017; val ind = Calibration.index_year(start_year)
+    val res = new GrowthModelResults(delta, calib.qf); val res_re = new GrowthModelResults(delta, calib.qf); val res_nre = new GrowthModelResults(delta, calib.qf);
+    res.updateProduction(start_year, calib.Ye, calib.E, calib.Ee, calib.Ke)
+    res_nre.updateProduction(start_year, calib.Ye - MegaTonOilEquivalent(45), calib.E - MegaTonOilEquivalent(45), calib.Ee, calib.Ke)
+    res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0)
+
+    // Iterate on each technology to produce at optimal eroi
+    val techs_it = techs.map(tech => new TechnologyIterator(tech._1, all_sites, delta, calib.qf))
+    techs_it.map(t => t.simulate_year(2050, (target * share_re) * techs.find(_._1.equals(t.tech)).get._2))
+
+    // End values
+    res_re.sumResults(2050, techs_it.map(_.results))
+    val tilde_ke = techs_it.map(t => t.tilde_ke.last.to(MegaTonOilEquivalent)).sum
+    val u = res_re.u.last.to(MegaTonOilEquivalent)
+    val a = res_re.a.last.to(MegaTonOilEquivalent)
+
+    val qe_0 = Calibration.data.qe(ind); val ve_0 = calib.ve; val ke_0 = calib.Ke
+    val e_nre = target * (1.0 - share_re); val u_nre = e_nre / (1 - qe_0)
+    res_nre.updateProduction(2050, u_nre, e_nre, u_nre * qe_0, u_nre.to(KilowattHours) * ve_0)
+
+    res.sumResults(start_year, List(res_re, res_nre))
+
+    (res.eroi(1), res.qe(1), res.ve(1))
   }
 
   def simulateTransition(s: Double, delta: Double, alpha: Double, start_year: Int, end_year: Int) {

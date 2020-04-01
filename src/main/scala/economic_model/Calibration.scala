@@ -13,6 +13,26 @@ object Calibration {
 
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
 
+  def calibration_results_work(year: Int, delta: Double, alpha: Double = 6 / 100, m: Double = 6.5 / 100, gpt: Double = 0.1 / 100) = {
+    val energy_units = KilowattHours; val pib_units = 1 // 1E9
+    val i = index_year(year)
+    val gk = data.g(i) - gpt
+    val v = data.s(i) / (gk + delta)
+    val k = v * data.pib(i) / pib_units; val ke = m / (1 + m) * k; val ky = 1 / (1 + m) * k
+    val p = alpha * data.pib(i) / pib_units / data.e(i).to(energy_units) // Prix réel de l'énergie
+    val y = data.pib(i) / pib_units - p * data.ce(i).to(energy_units)
+    val qy = data.ey(i).to(energy_units) / y // Intensité énergétique de l'économie
+    val vy = ky / y // Intensité capitalistique de l'économie
+    val ve = ke / data.u(i).to(energy_units) // Intensité capitalistique du secteur énergétique
+    
+    val cy = y-data.s(i)*data.pib(i)
+    val n = p*data.ce(i).to(energy_units)/cy
+    
+    println(year + "\t" + (1 / (data.qe(i) + delta * ve * qy)) + "\t" + qy + "\t" + vy + "\t" + data.qe(i) + "\t" + ve + "\t" + v + "\t" + k / data.u(i).to(energy_units))
+
+    (1 / (data.qe(i) + delta * ve * qy), qy, vy, ve, v, n)
+
+  }
   def calibration_results(year: Int, delta: Double, alpha: Double, gpt: Double, new_s: Option[Double]) = {
     val i = index_year(year)
     val s = new_s.getOrElse(data.s(i))
@@ -24,19 +44,6 @@ object Calibration {
     val ve = alpha * data.gamma(i) / (1 - alpha + alpha * data.gamma(i)) * (1 - data.qe(i)) / qy * v // Intensité capitalistique du secteur énergétique
 
     (1 / (data.qe(i) + delta * ve * qy), qy, vy, ve, v)
-  }
-  def calibration_results_work(year: Int, delta: Double, alpha: Double, m: Double, gpt: Double) = {
-    val i = index_year(year)
-    val gk = data.g(i) - gpt
-    val v = data.s(i) / (gk + delta)
-    val k = v * data.pib(i); val ke = m / (1 + m) * k; val ky = 1 / (1 + m) * k
-    val p = alpha * data.pib(i) / data.e(i).toKilowattHours // Prix réel de l'énergie
-    val y = data.pib(i) - p * data.ce(i).toKilowattHours
-    val qy = data.ey(i).toKilowattHours / y // Intensité énergétique de l'économie
-    val vy = ky / y // Intensité capitalistique de l'économie
-    val ve = ke / data.u(i).toKilowattHours // Intensité capitalistique du secteur énergétique
-
-    (1 / (data.qe(i) + delta * ve * qy), qy, vy, ve, v, ke)
   }
 
   def round(x: Double) = {
@@ -68,27 +75,30 @@ object Calibration {
   def printTableCalibration_new(year: Int = 2017, ts: List[Int], alphas: List[Double], ms: List[Double], gpts: List[Double]) {
 
     val cals = ts.map(t => alphas.map(alpha => ms.map(m => gpts.map(gpt => ((t, delta_(t), alpha, m, gpt), calibration_results_work(year, delta_(t), alpha, m, gpt)))).flatten).flatten).flatten
-    val ref = calibration_results_work(year, delta_(15), 0.05, 0.05, 0.1 / 100)
+    val ref = calibration_results_work(year, delta_(25), 0.06, 0.065, 0.1 / 100)
 
     print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
 
-    print("$T$ [years]&"); print("textbf{"); print("15"); print("}"); cals.map(cal => print(" & " + cal._1._1)); println(" \\" + "\\")
+    print("$T$ [years]&"); print("textbf{"); print("25"); print("}"); cals.map(cal => print(" & " + cal._1._1)); println(" \\" + "\\")
 
     // print("$delta$ [%]&"); print("textbf{"); print(round(delta_(25, 0.1) * 100)); print("}"); cals.map(cal => print(" & " + round(cal._1._2 * 100))); println(" \\" + "\\")
-    print("$alpha$ [%]&"); print("textbf{"); print("5"); print("}"); cals.map(cal => print(" & " + cal._1._3 * 100)); println(" \\" + "\\")
-    print("$m$ [%]&"); print("textbf{"); print("5"); print("}"); cals.map(cal => print(" & " + cal._1._4 * 100)); println(" \\" + "\\")
+    print("$alpha$ [%]&"); print("textbf{"); print("6"); print("}"); cals.map(cal => print(" & " + cal._1._3 * 100)); println(" \\" + "\\")
+    print("$m$ [%]&"); print("textbf{"); print("6.5"); print("}"); cals.map(cal => print(" & " + cal._1._4 * 100)); println(" \\" + "\\")
     print("$g_{pt}$ [%]&"); print("textbf{"); print("0.1"); print("}"); cals.map(cal => print(" & " + cal._1._5 * 100)); println(" \\" + "\\")
 
     print("$v$ & "); print("textbf{"); print(round(ref._5)); print("}"); cals.map(cal => print(" & " + round(cal._2._5))); println(" \\" + "\\")
     print("$q_y$ & "); print("textbf{"); print(round(ref._2)); print("}"); cals.map(cal => print(" & " + round(cal._2._2))); println(" \\" + "\\")
     print("$v_y$ & "); print("textbf{"); print(round(ref._3)); print("}"); cals.map(cal => print(" & " + round(cal._2._3))); println(" \\" + "\\")
     print("$v_e$ & "); print("textbf{"); print(round(ref._4)); print("}"); cals.map(cal => print(" & " + round(cal._2._4))); println(" \\" + "\\")
+    
+     print("n [%]& "); print("textbf{"); print(round(ref._6* 100)); print("}"); cals.map(cal => print(" & " + round(cal._2._6* 100))); println(" \\" + "\\")
+   
     print("$epsilon$ & "); print("textbf{"); print(round(ref._1)); print("}"); cals.map(cal => print(" & " + round(cal._2._1))); println(" \\" + "\\")
 
     println
     print("textbf{"); print(round(100 * (delta_(15, 0.1) * ref._2 * ref._4))); print("}");
     cals.map(cal => print(" & " + round(round(100 * (cal._1._2 * cal._2._4 * cal._2._2))))); println(" \\" + "\\")
-
+    
   }
 }
 
