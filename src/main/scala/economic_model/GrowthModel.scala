@@ -16,10 +16,12 @@ object GrowthModel {
     math.round(100 * x) / 100.0
   }
   def main(args: Array[String]): Unit = {
-    Calibration.printTableCalibration_new(2017, List(10,15), List(0.04,0.08), List(0.03,0.1), List(0.1/100))
-    
-   val cals = (1990 to 2017).map( y => (y,Calibration.calibration_results_work(y, Calibration.delta_(25) , 0.05, 0.065, 0.1/100)))
-    
+
+    val cal = Calibration2017.units(MegaTonOilEquivalent,1E9,1E6)
+    println(cal.k + "\t" + cal.ki + "\t" + cal.ks)
+    println(cal.gki + "\t" + cal.gks)
+    println(cal.gi + "\t" + cal.gs)
+
     val share = (1 to 10).map(_ * 0.1).toList
 
     val techs = List((OnshoreWindTechnology, 1.0 / 4), (OffshoreWindTechnology, 1.0 / 4), (PVMono, 1.0 / 2))
@@ -47,8 +49,8 @@ object GrowthModel {
     // Initialise 
     val start_year = 2017; val ind = Calibration.index_year(start_year)
     val res = new GrowthModelResults(delta, qy); val res_re = new GrowthModelResults(delta, qy); val res_nre = new GrowthModelResults(delta, qy);
-    res.updateProduction(start_year, Calibration.data.u(ind), Calibration.data.e(ind), Calibration.data.a(ind), calib._6)
-    res_nre.updateProduction(start_year, Calibration.data.u(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.a(ind), calib._6)
+    res.updateProduction(start_year, Calibration.data.ye(ind), Calibration.data.e(ind), Calibration.data.ee(ind), calib._6)
+    res_nre.updateProduction(start_year, Calibration.data.ye(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.ee(ind), calib._6)
     res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0)
 
     // Iterate on each technology to produce at optimal eroi
@@ -82,8 +84,8 @@ object GrowthModel {
     // Initialise 
     val start_year = 2017; val ind = Calibration.index_year(start_year)
     val res = new GrowthModelResults(delta, calib.qf); val res_re = new GrowthModelResults(delta, calib.qf); val res_nre = new GrowthModelResults(delta, calib.qf);
-    res.updateProduction(start_year, calib.Ye, calib.E, calib.Ee, calib.Ke)
-    res_nre.updateProduction(start_year, calib.Ye - MegaTonOilEquivalent(45), calib.E - MegaTonOilEquivalent(45), calib.Ee, calib.Ke)
+    res.updateProduction(start_year, calib.energyUnits(calib.Ye), calib.energyUnits(calib.E), calib.energyUnits(calib.Ee), calib.Ke)
+    res_nre.updateProduction(start_year, calib.energyUnits(calib.Ye) - MegaTonOilEquivalent(45), calib.energyUnits(calib.E) - MegaTonOilEquivalent(45), calib.energyUnits(calib.Ee), calib.Ke)
     res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0)
 
     // Iterate on each technology to produce at optimal eroi
@@ -118,8 +120,8 @@ object GrowthModel {
     val ind = Calibration.index_year(start_year)
 
     val res = new GrowthModelResults(delta, qy); val res_re = new GrowthModelResults(delta, qy); val res_nre = new GrowthModelResults(delta, qy);
-    res.updateProduction(start_year, Calibration.data.u(ind), Calibration.data.e(ind), Calibration.data.a(ind), calib._6)
-    res_nre.updateProduction(start_year, Calibration.data.u(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.a(ind), calib._6)
+    res.updateProduction(start_year, Calibration.data.ye(ind), Calibration.data.e(ind), Calibration.data.ee(ind), calib._6)
+    res_nre.updateProduction(start_year, Calibration.data.ye(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.ee(ind), calib._6)
     res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0)
 
     // We want to reach 100% renewables by end_year: 

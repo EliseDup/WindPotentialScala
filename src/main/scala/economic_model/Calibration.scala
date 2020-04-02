@@ -12,25 +12,40 @@ object Calibration {
   def index_year(year: Int) = data.year.zipWithIndex.find(i => i._1 == year).get._2
 
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
-
-  def calibration_results_work(year: Int, delta: Double, alpha: Double = 6 / 100, m: Double = 6.5 / 100, gpt: Double = 0.1 / 100) = {
-    val energy_units = KilowattHours; val pib_units = 1 // 1E9
+  // gpt = -gv
+  def calibration_results_work(year: Int, delta: Double, alpha: Double = 6 / 100, m: Double = 6.5 / 100, gpt: Double = 0.1 / 100, theta: Double = 0.4) = {
+    val energy_units = MegaTonOilEquivalent; val pib_units = 1E9
+    val gv = -gpt
     val i = index_year(year)
-    val gk = data.g(i) - gpt
+    val gk = data.g(i) + gv
     val v = data.s(i) / (gk + delta)
-    val k = v * data.pib(i) / pib_units; val ke = m / (1 + m) * k; val ky = 1 / (1 + m) * k
+    val k = v * data.pib(i) / pib_units; val ke = m / (1 + m) * k; val kf = 1 / (1 + m) * k
     val p = alpha * data.pib(i) / pib_units / data.e(i).to(energy_units) // Prix réel de l'énergie
-    val y = data.pib(i) / pib_units - p * data.ce(i).to(energy_units)
-    val qy = data.ey(i).to(energy_units) / y // Intensité énergétique de l'économie
-    val vy = ky / y // Intensité capitalistique de l'économie
-    val ve = ke / data.u(i).to(energy_units) // Intensité capitalistique du secteur énergétique
-    
-    val cy = y-data.s(i)*data.pib(i)
-    val n = p*data.ce(i).to(energy_units)/cy
-    
-    println(year + "\t" + (1 / (data.qe(i) + delta * ve * qy)) + "\t" + qy + "\t" + vy + "\t" + data.qe(i) + "\t" + ve + "\t" + v + "\t" + k / data.u(i).to(energy_units))
+    val yf = data.pib(i) / pib_units - p * data.ce(i).to(energy_units)
+    val qf = data.ef(i).to(energy_units) / yf // Intensité énergétique de l'économie
+    val vf = kf / yf // Intensité capitalistique de l'économie
+    val ve = ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
 
-    (1 / (data.qe(i) + delta * ve * qy), qy, vy, ve, v, n)
+    val cf = yf - data.s(i) * data.pib(i)
+    val n = p * data.ce(i).to(energy_units) / cf
+
+    val eroi = 1 / (data.qe(i) + delta * ve * qf)
+    println(year + "\t" + eroi + "\t" + qf + "\t" + vf + "\t" + data.qe(i) + "\t" + ve + "\t" + v + "\t" + k / data.ye(i).to(energy_units))
+    // val L=3422; % Pop active (10^6 personnes) 
+    val L = 2871.0 // * 1E6; // Pop employee (10^6 personnes)
+
+    val r = theta / v;
+    val w = (1 - theta) * data.pib(i) / pib_units / L;
+    val lf = (1 - p * qf - r * vf) / w;
+    val le = ((1 - data.qe(i)) * p - r * ve) / w;
+    val Lf = lf * yf;
+    val Le = le * data.ye(i).to(energy_units);
+    println(L + "\t" + Le + "\t" + Lf)
+    println(k + "\t" + ke + "\t" + kf)
+    println(ke/Le + "\t" + kf/Lf + "\t" + (kf/Lf>ke/Le) + "\t" + (le*vf-lf*ve))
+    val rho = yf / (data.pib(i)/pib_units)
+
+    (eroi, qf, vf, ve, v, n)
 
   }
   def calibration_results(year: Int, delta: Double, alpha: Double, gpt: Double, new_s: Option[Double]) = {
@@ -90,15 +105,15 @@ object Calibration {
     print("$q_y$ & "); print("textbf{"); print(round(ref._2)); print("}"); cals.map(cal => print(" & " + round(cal._2._2))); println(" \\" + "\\")
     print("$v_y$ & "); print("textbf{"); print(round(ref._3)); print("}"); cals.map(cal => print(" & " + round(cal._2._3))); println(" \\" + "\\")
     print("$v_e$ & "); print("textbf{"); print(round(ref._4)); print("}"); cals.map(cal => print(" & " + round(cal._2._4))); println(" \\" + "\\")
-    
-     print("n [%]& "); print("textbf{"); print(round(ref._6* 100)); print("}"); cals.map(cal => print(" & " + round(cal._2._6* 100))); println(" \\" + "\\")
-   
+
+    print("n [%]& "); print("textbf{"); print(round(ref._6 * 100)); print("}"); cals.map(cal => print(" & " + round(cal._2._6 * 100))); println(" \\" + "\\")
+
     print("$epsilon$ & "); print("textbf{"); print(round(ref._1)); print("}"); cals.map(cal => print(" & " + round(cal._2._1))); println(" \\" + "\\")
 
     println
     print("textbf{"); print(round(100 * (delta_(15, 0.1) * ref._2 * ref._4))); print("}");
     cals.map(cal => print(" & " + round(round(100 * (cal._1._2 * cal._2._4 * cal._2._2))))); println(" \\" + "\\")
-    
+
   }
 }
 
@@ -114,15 +129,15 @@ object CalibrationData {
   val n = data.size
   val ind = (0 until n).toList
 
-  val year = data.map(_._1); val pib = data.map(_._2); val a = data.map(_._3); val e = data.map(_._4); val ce = data.map(_._5)
+  val year = data.map(_._1); val pib = data.map(_._2); val ee = data.map(_._3); val e = data.map(_._4); val ce = data.map(_._5)
 
   val s = smooth_double(data.map(_._6), smoothing); val gpt = smooth_double(data.map(_._7), smoothing);
 
   // Calculs directs
-  val u = ind.map(i => a(i) + e(i))
-  val qe = smooth_double(ind.map(i => a(i) / u(i)), smoothing)
-  val ey = ind.map(i => e(i) - ce(i))
-  val gamma = smooth_double(ind.map(i => ey(i) / e(i)), smoothing)
+  val ye = ind.map(i => ee(i) + e(i))
+  val qe = smooth_double(ind.map(i => ee(i) / ye(i)), smoothing)
+  val ef = ind.map(i => e(i) - ce(i))
+  val gamma = smooth_double(ind.map(i => ef(i) / e(i)), smoothing)
   val g = smooth_double(List((pib(1) - pib(0)) / pib(0)) ++ (0 until pib.size - 1).map(i => (pib(i + 1) - pib(i)) / pib(i)), smoothing) // On met pour les 2 premières années le même taux de croissance pour ne pas avoir de pb de dimensions
   // (n, ind, year, pib, a, e, ce, s, u, qe, ey, gamma, g, gpt)
 
