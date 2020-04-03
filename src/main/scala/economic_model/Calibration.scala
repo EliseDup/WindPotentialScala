@@ -40,9 +40,6 @@ object Calibration {
     val le = ((1 - data.qe(i)) * p - r * ve) / w;
     val Lf = lf * yf;
     val Le = le * data.ye(i).to(energy_units);
-    println(L + "\t" + Le + "\t" + Lf)
-    println(k + "\t" + ke + "\t" + kf)
-    println(ke/Le + "\t" + kf/Lf + "\t" + (kf/Lf>ke/Le) + "\t" + (le*vf-lf*ve))
     val rho = yf / (data.pib(i)/pib_units)
 
     (eroi, qf, vf, ve, v, n)

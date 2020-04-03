@@ -14,8 +14,8 @@ object Calibration2017 {
   def m(m: Double): Calibration2017 = new Calibration2017(m = m)
 }
 
-class Calibration2017(val T: Int = 15, val alpha: Double = 6 / 100.0, val m: Double = 5 / 100.0, val gpt: Double = 0.1 / 100, val theta: Double = 0.4, 
-    val energyUnits: EnergyUnit = KilowattHours,val pibUnits: Double = 1,val popUnits: Double = 1) {
+class Calibration2017(val T: Int = 25, val alpha: Double = 6 / 100.0, val m: Double = 6.5 / 100.0, val gpt: Double = 0.1 / 100, val theta: Double = 0.4, 
+    val energyUnits: EnergyUnit = KilowattHours,val pibUnits: Double = 1.0,val popUnits: Double = 1.0) {
   
   def convertEnergy(energy: Energy) = energy.to(energyUnits)
   def convertPIB(pib : Double) = pib/pibUnits
@@ -67,7 +67,7 @@ class Calibration2017(val T: Int = 15, val alpha: Double = 6 / 100.0, val m: Dou
   val Cy = Yf - I;
 
   val n = p * Ce / Cy; // coefficient de partage du budget de C
-  val sy = s * (1 + n) / (1 + s * n); // I/Y
+  // val sy = s * (1 + n) / (1 + s * n); // I/Y
   val e = E / PIB;
   val c = Ce / Cy;
   val k = K / Ye;
@@ -88,6 +88,7 @@ class Calibration2017(val T: Int = 15, val alpha: Double = 6 / 100.0, val m: Dou
   // Conditions d'existence: intervalle admissible pour le taux de croissance du capital gk
   def interval_gk(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
     val (ki, ks) = interval_k(s, n, ve, vf, qe, qf, le, lf)
+    val sy = s * (1 + n) / (1 + s * n); // I/Y
     val gki = sy * (1 - ve / ki) / vf - delta;
     val gks = sy * (1 - ve / ks) / vf - delta;
     (gki, gks)

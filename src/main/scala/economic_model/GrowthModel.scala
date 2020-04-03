@@ -17,18 +17,19 @@ object GrowthModel {
   }
   def main(args: Array[String]): Unit = {
 
-    val cal = Calibration2017.units(MegaTonOilEquivalent,1E9,1E6)
+    val cal = Calibration2017() // .units(MegaTonOilEquivalent,1E9,1E6)
     println(cal.k + "\t" + cal.ki + "\t" + cal.ks)
     println(cal.gki + "\t" + cal.gks)
     println(cal.gi + "\t" + cal.gs)
 
-    val share = (1 to 10).map(_ * 0.1).toList
+    val share = (1 to 2).map(_ * 0.1).toList
 
     val techs = List((OnshoreWindTechnology, 1.0 / 4), (OffshoreWindTechnology, 1.0 / 4), (PVMono, 1.0 / 2))
     val res = share.map(s => (s, calculate(Exajoules(400), 25, techs, s)))
-
+    
     res.map(r =>
-      println(r._1 * 100 + " & " + round(r._2(1)._1) + " & " + round(r._2(1)._2 * 100) + " & " + round(r._2(1)._3)) + "\\" + "\\")
+      println(r._1 * 100 + " & " + round(r._2(1)._1) + " & " + round(r._2(1)._2 * 100) + " & " + round(r._2(1)._3) +  "& " + 
+      cal.interval_gk(cal.s, cal.n, r._2(1)._1, cal.vf, r._2(1)._2, cal.qf, cal.le, cal.lf) + "\\" + "\\"))
 
     plotXY(List((share, res.map(_._2(1)._1), "")), xLabel = "RE Share", yLabel = "EROI")
     plotXY(List((share, res.map(_._2(1)._2 * 100), "")), xLabel = "RE Share", yLabel = "qe [%]")
@@ -44,17 +45,18 @@ object GrowthModel {
     // println("Calculate new EROI, T : " + "\t" + T + ", delta [%]:" + math.round(delta * 100))
 
     val all_sites = Grid().cells
-    val calib = Calibration.calibration_results_work(2017, delta, 0.05, 0.05, 0.1 / 100); val qy = calib._2
+    val calib = Calibration2017() // Calibration.calibration_results_work(2017, delta, 0.05, 0.05, 0.1 / 100); 
+    val qf = calib.qf
 
     // Initialise 
     val start_year = 2017; val ind = Calibration.index_year(start_year)
-    val res = new GrowthModelResults(delta, qy); val res_re = new GrowthModelResults(delta, qy); val res_nre = new GrowthModelResults(delta, qy);
-    res.updateProduction(start_year, Calibration.data.ye(ind), Calibration.data.e(ind), Calibration.data.ee(ind), calib._6)
-    res_nre.updateProduction(start_year, Calibration.data.ye(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.ee(ind), calib._6)
+    val res = new GrowthModelResults(delta, qf); val res_re = new GrowthModelResults(delta, qf); val res_nre = new GrowthModelResults(delta, qf);
+    res.updateProduction(start_year, calib.energyUnits(calib.Ye), calib.energyUnits(calib.E), calib.energyUnits(calib.Ee), calib.Ke*calib.pibUnits)
+    res_nre.updateProduction(start_year, calib.energyUnits(calib.Ye) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45),calib.energyUnits(calib.Ee), calib.Ke*calib.pibUnits)
     res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0)
 
     // Iterate on each technology to produce at optimal eroi
-    val techs_it = techs.map(tech => new TechnologyIterator(tech._1, all_sites, delta, qy))
+    val techs_it = techs.map(tech => new TechnologyIterator(tech._1, all_sites, delta, qf))
     techs_it.map(t => t.simulate_year(2050, (target * share_re) * techs.find(_._1.equals(t.tech)).get._2))
 
     // End values
@@ -63,13 +65,13 @@ object GrowthModel {
     val u = res_re.u.last.to(MegaTonOilEquivalent)
     val a = res_re.a.last.to(MegaTonOilEquivalent)
 
-    val qe_0 = Calibration.data.qe(ind); val ve_0 = calib._4; val ke_0 = calib._6
+    val qe_0 = Calibration.data.qe(ind); val ve_0 = calib.ve; val ke_0 = calib.Ke*calib.pibUnits
     val e_nre = target * (1.0 - share_re); val u_nre = e_nre / (1 - qe_0)
     res_nre.updateProduction(2050, u_nre, e_nre, u_nre * qe_0, u_nre.to(KilowattHours) * ve_0)
 
     res.sumResults(start_year, List(res_re, res_nre))
     // println("Growth rate " + "\t" + (0.25 / delta - (res.ve(1) - res.ve(0)) / res.ve(0)))
-    println(delta + "\t" + share_re + "\t" + u + "\t" + a + "\t" + tilde_ke + "\t" + u / (a + tilde_ke * delta) + "\t" + res_re.eroi.last + "\t" + res_nre.eroi.last + "\t" + res.eroi.last)
+    // println(delta + "\t" + share_re + "\t" + u + "\t" + a + "\t" + tilde_ke + "\t" + u / (a + tilde_ke * delta) + "\t" + res_re.eroi.last + "\t" + res_nre.eroi.last + "\t" + res.eroi.last)
 
     List((res.eroi(0), res.qe(0), res.ve(0)), (res.eroi(1), res.qe(1), res.ve(1)))
   }
