@@ -14,33 +14,35 @@ object Calibration {
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
   // gpt = -gv
   def calibration_results_work(year: Int, delta: Double, alpha: Double = 6 / 100, m: Double = 6.5 / 100, gpt: Double = 0.1 / 100, theta: Double = 0.4) = {
-    val energy_units = MegaTonOilEquivalent; val pib_units = 1E9
+    val energy_units = KilowattHours; val pib_units = 1;
+     val i = index_year(year)
+   
+    val pib = data.pib(i) / pib_units;
     val gv = -gpt
-    val i = index_year(year)
     val gk = data.g(i) + gv
     val v = data.s(i) / (gk + delta)
-    val k = v * data.pib(i) / pib_units; val ke = m / (1 + m) * k; val kf = 1 / (1 + m) * k
-    val p = alpha * data.pib(i) / pib_units / data.e(i).to(energy_units) // Prix réel de l'énergie
-    val yf = data.pib(i) / pib_units - p * data.ce(i).to(energy_units)
+    val k = v * pib; val ke = m / (1 + m) * k; val kf = 1 / (1 + m) * k
+    val p = alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
+    val yf = pib - p * data.ce(i).to(energy_units)
     val qf = data.ef(i).to(energy_units) / yf // Intensité énergétique de l'économie
     val vf = kf / yf // Intensité capitalistique de l'économie
     val ve = ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
 
-    val cf = yf - data.s(i) * data.pib(i)
+    val cf = yf - data.s(i) * pib
     val n = p * data.ce(i).to(energy_units) / cf
 
     val eroi = 1 / (data.qe(i) + delta * ve * qf)
     println(year + "\t" + eroi + "\t" + qf + "\t" + vf + "\t" + data.qe(i) + "\t" + ve + "\t" + v + "\t" + k / data.ye(i).to(energy_units))
     // val L=3422; % Pop active (10^6 personnes) 
-    val L = 2871.0 // * 1E6; // Pop employee (10^6 personnes)
+    val L = 2871.0 * 1E6; // Pop employee (10^6 personnes)
 
     val r = theta / v;
-    val w = (1 - theta) * data.pib(i) / pib_units / L;
+    val w = (1 - theta) * pib / L;
     val lf = (1 - p * qf - r * vf) / w;
     val le = ((1 - data.qe(i)) * p - r * ve) / w;
     val Lf = lf * yf;
     val Le = le * data.ye(i).to(energy_units);
-    val rho = yf / (data.pib(i)/pib_units)
+    val rho = yf / pib
 
     (eroi, qf, vf, ve, v, n)
 

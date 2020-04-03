@@ -7,20 +7,20 @@ object Calibration2017 {
 
   def apply() = new Calibration2017()
   def apply(T: Int, alpha: Double, m: Double) = new Calibration2017(T, alpha, m)
-  def units(energy: EnergyUnit, pib: Double, pop:Double) = new Calibration2017(energyUnits=energy, pibUnits=pib, popUnits=pop)
-  
+  def units(energy: EnergyUnit, pib: Double, pop: Double) = new Calibration2017(energyUnits = energy, pibUnits = pib, popUnits = pop)
+
   def T(T: Int): Calibration2017 = new Calibration2017(T = T)
   def alpha(alpha: Double): Calibration2017 = new Calibration2017(alpha = alpha)
   def m(m: Double): Calibration2017 = new Calibration2017(m = m)
 }
 
-class Calibration2017(val T: Int = 25, val alpha: Double = 6 / 100.0, val m: Double = 6.5 / 100.0, val gpt: Double = 0.1 / 100, val theta: Double = 0.4, 
-    val energyUnits: EnergyUnit = KilowattHours,val pibUnits: Double = 1.0,val popUnits: Double = 1.0) {
-  
+class Calibration2017(val T: Int = 15, val alpha: Double = 6 / 100.0, val m: Double = 6.5 / 100.0, val gpt: Double = 0.1 / 100, val theta: Double = 0.4,
+    val energyUnits: EnergyUnit = KilowattHours, val pibUnits: Double = 1.0, val popUnits: Double = 1.0) {
+
   def convertEnergy(energy: Energy) = energy.to(energyUnits)
-  def convertPIB(pib : Double) = pib/pibUnits
-  def convertPop(pop : Double) = pop/popUnits
-  
+  def convertPIB(pib: Double) = pib /pibUnits
+  def convertPop(pop: Double) = pop /popUnits
+
   // Données observées
   // IEA
   val E = convertEnergy(MegaTonOilEquivalent(9717.295))
@@ -34,7 +34,7 @@ class Calibration2017(val T: Int = 25, val alpha: Double = 6 / 100.0, val m: Dou
   val g = (PIB - PIB_prev) / PIB_prev
   val s = 25.0 / 100
   // L=3422; % Pop active (10^6 personnes) % donnee non retenue
-  val L = convertPop(2871 * 1E6); //* 1E6; // Pop employee (10^6 personnes) % donnee retenue
+  val L = convertPop(2871.0 * 1E6); //* 1E6; // Pop employee (10^6 personnes) % donnee retenue
 
   // Données calculées
   val qe = Ee / Ye; val gamma = Ef / E;
@@ -74,8 +74,8 @@ class Calibration2017(val T: Int = 25, val alpha: Double = 6 / 100.0, val m: Dou
 
   val (ki, ks) = interval_k(s, n, ve, vf, qe, qf, le, lf)
   val (gki, gks) = interval_gk(s, n, ve, vf, qe, qf, le, lf)
-  val (gi, gs) = (gki+gpt, gks+gpt)
-  
+  val (gi, gs) = (gki + gpt, gks + gpt)
+
   // Conditions d'existence: intervalle admissible pour k = K/U
   def interval_k(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
     // n'
