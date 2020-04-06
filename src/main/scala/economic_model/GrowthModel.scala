@@ -16,39 +16,46 @@ object GrowthModel {
     math.round(100 * x) / 100.0
   }
   def main(args: Array[String]): Unit = {
+
+    val years = (1990 to 2017).toList
     
     val cal = Calibration2017() // .units(MegaTonOilEquivalent,1E9,1E6)
-    println(cal.k)
-    println(cal.ki + "\t" + cal.ks)
-    val cal2 = Calibration2017.units(MegaTonOilEquivalent, 1E9, 1E6)
-    println(cal2.k)
-     println(cal2.ki + "\t" + cal2.ks)
-    /*    val share = (1 to 2).map(_ * 0.1).toList
-
+    println(cal.ki + "\t" + cal.k + "\t" + cal.ks)
+    println(cal.gi + "\t" + cal.g + "\t" + cal.gs)
+    
+    val cal2 = new calibration_results_work()
+    println(cal2.ki + "\t" + cal2.k + "\t" + cal2.ks)
+    println(cal2.gi + "\t" + cal2.g + "\t" + cal2.gs)
+    
+    println(cal.p + "\t" +cal2.p)
+    println(cal.qf + "\t" + cal2.qf)
+    
+    /*
+    val share = (1 to 10).map(_ * 0.1).toList
     val techs = List((OnshoreWindTechnology, 1.0 / 4), (OffshoreWindTechnology, 1.0 / 4), (PVMono, 1.0 / 2))
     val res = share.map(s => (s, calculate(Exajoules(400), 25, techs, s)))
+    println("RE Share [%]" + "\t" + "EROI" + "\t" + " qe [%] " + "\t" + " ve " +  "\t" + " gi " +"\t" + "gs")
     
-    res.map(r =>
-      println(r._1 * 100 + " & " + round(r._2(1)._1) + " & " + round(r._2(1)._2 * 100) + " & " + round(r._2(1)._3) +  "& " + 
-      cal.interval_gk(cal.s, cal.n, r._2(1)._1, cal.vf, r._2(1)._2, cal.qf, cal.le, cal.lf) + "\\" + "\\"))
+    res.map(r => {
+      val intg = cal.interval_gk(cal.s, cal.n, r._2(1)._3, cal.vf, r._2(1)._2, cal.qf, cal.le, cal.lf)
+      println(r._1 * 100 + " & " + round(r._2(1)._1) + " & " + round(r._2(1)._2 * 100) + " & " + round(r._2(1)._3) + "& " +
+        intg._1 + "\t" + intg._2 + "\\" + "\\")})
 
     plotXY(List((share, res.map(_._2(1)._1), "")), xLabel = "RE Share", yLabel = "EROI")
     plotXY(List((share, res.map(_._2(1)._2 * 100), "")), xLabel = "RE Share", yLabel = "qe [%]")
     plotXY(List((share, res.map(_._2(1)._3), "")), xLabel = "RE Share", yLabel = "ve")
 
     combinedPlots(share.map(_ * 100), List((res.map(_._2(1)._1), "EROI"), (res.map(_._2(1)._2 * 100), "qe [%]"), (res.map(_._2(1)._3), "ve")), xLabel = "RE Share [%]")
-*/
+    */
   }
 
   // For a given target (= final energy demand), and renewable energy share, gives a estimate of the technical parameters and EROI of the energy system
   def calculate(target: Energy, T: Int, techs: List[(RenewableTechnology, Double)], share_re: Double = 1.0) = {
 
-    val delta = Calibration.delta_(T)
-    // println("Calculate new EROI, T : " + "\t" + T + ", delta [%]:" + math.round(delta * 100))
-
     val all_sites = Grid().cells
-    val calib = Calibration2017() // Calibration.calibration_results_work(2017, delta, 0.05, 0.05, 0.1 / 100); 
+    val calib = Calibration2017.T(T)
     val qf = calib.qf
+    val delta = calib.delta
 
     // Initialise 
     val start_year = 2017; val ind = Calibration.index_year(start_year)
@@ -63,17 +70,18 @@ object GrowthModel {
 
     // End values
     res_re.sumResults(2050, techs_it.map(_.results))
-    val tilde_ke = techs_it.map(t => t.tilde_ke.last.to(MegaTonOilEquivalent)).sum
-    val u = res_re.u.last.to(MegaTonOilEquivalent)
-    val a = res_re.a.last.to(MegaTonOilEquivalent)
+    val tilde_ke = techs_it.map(t => t.tilde_ke.last.to(calib.energyUnits)).sum
+    val u = res_re.u.last.to(calib.energyUnits)
+    val a = res_re.a.last.to(calib.energyUnits)
 
     val qe_0 = Calibration.data.qe(ind); val ve_0 = calib.ve; val ke_0 = calib.Ke * calib.pibUnits
     val e_nre = target * (1.0 - share_re); val u_nre = e_nre / (1 - qe_0)
-    res_nre.updateProduction(2050, u_nre, e_nre, u_nre * qe_0, u_nre.to(KilowattHours) * ve_0)
+    res_nre.updateProduction(2050, u_nre, e_nre, u_nre * qe_0, u_nre.to(calib.energyUnits) * ve_0)
 
     res.sumResults(start_year, List(res_re, res_nre))
-    // println("Growth rate " + "\t" + (0.25 / delta - (res.ve(1) - res.ve(0)) / res.ve(0)))
+
     // println(delta + "\t" + share_re + "\t" + u + "\t" + a + "\t" + tilde_ke + "\t" + u / (a + tilde_ke * delta) + "\t" + res_re.eroi.last + "\t" + res_nre.eroi.last + "\t" + res.eroi.last)
+    // g = s*PIB/K - delta
 
     List((res.eroi(0), res.qe(0), res.ve(0)), (res.eroi(1), res.qe(1), res.ve(1)))
   }
@@ -115,22 +123,22 @@ object GrowthModel {
 
     val all_sites = Grid().cells
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono) //, CSPTowerStorage12h)
-    val delta = Calibration.delta_(15)
+    val delta = 1 / 20.0
 
     // (eroi, qy, vy, ve, v)
-    val calib = Calibration.calibration_results_work(2017, delta, 0.05, 0.05, 0.1 / 100)
-    val qy = calib._2
+    val calib = new calibration_results_work(2017, delta, 0.05, 0.05, 0.1 / 100)
+    val qy = calib.qf
     val techs_it = techs.map(tech => new TechnologyIterator(tech, all_sites, delta, qy))
     val ind = Calibration.index_year(start_year)
 
     val res = new GrowthModelResults(delta, qy); val res_re = new GrowthModelResults(delta, qy); val res_nre = new GrowthModelResults(delta, qy);
-    res.updateProduction(start_year, Calibration.data.ye(ind), Calibration.data.e(ind), Calibration.data.ee(ind), calib._6)
-    res_nre.updateProduction(start_year, Calibration.data.ye(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.ee(ind), calib._6)
+    res.updateProduction(start_year, Calibration.data.ye(ind), Calibration.data.e(ind), Calibration.data.ee(ind), calib.Ke)
+    res_nre.updateProduction(start_year, Calibration.data.ye(ind) - MegaTonOilEquivalent(45), Calibration.data.e(ind) - MegaTonOilEquivalent(45), Calibration.data.ee(ind), calib.Ke)
     res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0)
 
     // We want to reach 100% renewables by end_year: 
     val n_year = end_year - start_year;
-    val qe_0 = Calibration.data.qe(ind); val ve_0 = calib._4; val ke_0 = calib._6
+    val qe_0 = Calibration.data.qe(ind); val ve_0 = calib.ve; val ke_0 = calib.Ke
     val e_re0 = res_re.e.last; val e_0 = Calibration.data.e(ind)
     // If we consider an exponential growth (i.e. a constant growth rate): 
     // Ere,n = E,2017 & Ere,n = Ere,2017 * g^n => g = (E,2017/Ere,2017)^1/n

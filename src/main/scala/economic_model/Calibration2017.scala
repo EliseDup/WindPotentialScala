@@ -14,7 +14,7 @@ object Calibration2017 {
   def m(m: Double): Calibration2017 = new Calibration2017(m = m)
 }
 
-class Calibration2017(val T: Int = 15, val alpha: Double = 6 / 100.0, val m: Double = 6.5 / 100.0, val gpt: Double = 0.1 / 100, val theta: Double = 0.4,
+class Calibration2017(val T: Int = 20, val alpha: Double = 6 / 100.0, val m: Double = 6.5 / 100.0, val gpt: Double = 0.1 / 100, val theta: Double = 0.4,
     val energyUnits: EnergyUnit = KilowattHours, val pibUnits: Double = 1.0, val popUnits: Double = 1.0) {
 
   def convertEnergy(energy: Energy) = energy.to(energyUnits)
@@ -39,7 +39,7 @@ class Calibration2017(val T: Int = 15, val alpha: Double = 6 / 100.0, val m: Dou
   // Données calculées
   val qe = Ee / Ye; val gamma = Ef / E;
   val gk = g - gpt
-  val delta = Calibration.delta_(T, 0.1)
+  val delta = 1.0/T 
   // Données calibrées
   val v = s / (gk + delta)
   // v = K/PIB

@@ -40,9 +40,9 @@ object ProductionFunction {
 
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono) //, CSPTowerStorage12h)
     val sites_sf = all_sites.filter(s => techs.map(_.suitabilityFactor(s)).sum > 0)
-    val delta = Calibration.delta_(25)         
-    val (e, qy, vy, ve, v) = Calibration.calibration_results(2017, delta, 0.05, 0.1 / 100, Some(0.5))
-    techs.map(tech => simulateGrowth(0.25, initialValues(tech)._1, 2018, 2050, tech, qy, vy, 5))
+    val delta = 1.0/20.0
+    val cal = new calibration_results_work(2017, delta, 0.05, 0.1 / 100) //, Some(0.5))
+    techs.map(tech => simulateGrowth(0.25, initialValues(tech)._1, 2018, 2050, tech, cal.qf, cal.vf, 5))
     println("Simulation -- END")
 
     def simulateGrowth(annual_growth_rate: Double, cap_init: Power, year_init: Int, year_end: Int, tech: RenewableTechnology, qy: Double, vy: Double, eroi_min: Double) {
