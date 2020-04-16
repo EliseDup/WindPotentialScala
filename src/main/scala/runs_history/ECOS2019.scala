@@ -14,12 +14,11 @@ import solar_energy._
 
 object ECOS2019 {
   import PlotHelper._
-
+  import Helper._
   def main(args: Array[String]): Unit = {
-    // ECOSPaperResults
-    val grid = Grid.eu()
-    printResultsPerCountry(grid, 1)
+    ECOSPaperResults
   }
+  
 
   // Results for the paper of ECOS 2019 conference - 15/02/19
   def ECOSPaperResults {
@@ -62,11 +61,11 @@ object ECOS2019 {
 
   def printResultsPerCountry(grid: Grid, eroi: Double) {
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
-     print(" " + "\t" + " " +"\t" + " " + "\t" + " " + "\t")
-     techs.map(t => print(t.name + "\t" + " " +"\t" + " " +"\t" + " " + "\t" + " " + "\t"))
-         println()
-    print("Country" + "\t" + "Onshore_area" + "\t" + "Offshore_area" + "\t" )
-    techs.map(t => print("Suitable_area"+ "\t" + "Potential[EJ/year]" + "\t" + "Installed_Capacity[GW]" + "\t"))
+    print(" " + "\t" + " " + "\t" + " " + "\t" + " " + "\t")
+    techs.map(t => print(t.name + "\t" + " " + "\t" + " " + "\t" + " " + "\t" + " " + "\t"))
+    println()
+    print("Country" + "\t" + "Onshore_area" + "\t" + "Offshore_area" + "\t")
+    techs.map(t => print("Suitable_area" + "\t" + "Potential[EJ/year]" + "\t" + "Installed_Capacity[GW]" + "\t"))
     println()
     for (c <- grid.eu28countries) {
       val cells = grid.country(c)

@@ -91,6 +91,7 @@ object PVPoly extends PV {
 object PVMono extends PV {
   val name = "mono-Si-PV"
   val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(8880746), Gigajoules(5596459), Gigajoules(61279), Gigajoules(61279), Gigajoules(469257), Gigajoules(45252), 0.0097, 25)
+  // Gigajoules(63885) / GW / Year of maintenance in 2018 paper on 15 energy generation technology ..
   val designEfficiency = 0.24;
   val degradationRate = 0.36 / 100
 }

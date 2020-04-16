@@ -26,6 +26,9 @@ import squants.radio.Irradiance
 import squants.energy._
 
 object Helper {
+
+  def round(x: Double, n: Int = 2) = math.round(math.pow(10, n) * x) / math.pow(10, n)
+
   val ressourcesPy = "/Users/Elise/Documents/workspace/resources/"
   val resultsPy = "/Users/Elise/Documents/workspace/WindPotentialPy/results/"
   val ressources = "/Users/Elise/Documents/workspace/WindPotential/resources/"
@@ -174,18 +177,18 @@ object Helper {
   def listValueVSArea(gr: List[(Double, Area)]) = listValueVSCumulated(gr.map(g => (g._1, g._2.to(SquareKilometers) / (1E6))))
 
   def listValueVSCumulated(values: List[(Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
-    val sorted = if(increasing) values.sortBy(_._1).reverse else values.sortBy(_._1) 
-    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ (if(increasing) 0 else sorted.map(_._1).max)) // Why 0 ?!
+    val sorted = if (increasing) values.sortBy(_._1).reverse else values.sortBy(_._1)
+    (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._1) :+ (if (increasing) 0 else sorted.map(_._1).max)) // Why 0 ?!
   }
-    def listValueVSCumulatedBy(values: List[(Double, Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
-    val sorted = if(increasing) values.sortBy(_._1).reverse else values.sortBy(_._1) 
+  def listValueVSCumulatedBy(values: List[(Double, Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
+    val sorted = if (increasing) values.sortBy(_._1).reverse else values.sortBy(_._1)
     (sorted.map(_._3).scanLeft(0.0)(_ + _), sorted.map(_._2) :+ sorted.map(_._2).max)
   }
   def listCumulatedVSCumulatedBy(values: List[(Double, Double, Double)], increasing: Boolean = true): (List[Double], List[Double]) = {
-    val sorted = if(increasing) values.sortBy(_._1).reverse else values.sortBy(_._1)
+    val sorted = if (increasing) values.sortBy(_._1).reverse else values.sortBy(_._1)
     (sorted.map(_._2).scanLeft(0.0)(_ + _), sorted.map(_._3).scanLeft(0.0)(_ + _))
   }
-  
+
   def countriesByContinent = {
     val data_location = "/Users/Elise/Nextcloud/Doctorat/Data/countries/world/"
     val continentsName = getLines(data_location + "Continents", "\t").toList.map(_(0))

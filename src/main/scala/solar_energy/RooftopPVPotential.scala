@@ -24,7 +24,7 @@ object RooftopPVPotential {
   val rooftop_area = Helper.getLines("../resources/data_solar/rooftop_area", "\t").map(i =>
     (i(0).toString, SquareKilometers(i(1).toDouble), SquareKilometers(i(2).toDouble), i(3).toDouble, i(4).toDouble)).filter(i => grid.country(i._1).nonEmpty)
 
-  val eu28countries = Helper.getLines("../model_data/countries/EU28", "\t").map(_(0))
+  val eu28countries = Helper.getLines("../model_data/countries/EU28", "\t").map(_(0)) ++ List("Norway","Switzerland")
   val eu28 = rooftop_area.filter(i => eu28countries.contains(i._1))
 
   /*val resources: List[(String, Irradiance, Area, Area, Double, Double)] = rooftop_area.map(c => {

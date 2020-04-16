@@ -2,9 +2,8 @@ package economic_model
 
 import utils.MegaTonOilEquivalent
 import squants.energy._
-
 object Calibration2017 {
-
+/*
   def apply() = new Calibration2017()
   def apply(T: Int, alpha: Double, m: Double) = new Calibration2017(T, alpha, m)
   def units(energy: EnergyUnit, pib: Double, pop: Double) = new Calibration2017(energyUnits = energy, pibUnits = pib, popUnits = pop)
@@ -12,11 +11,13 @@ object Calibration2017 {
   def T(T: Int): Calibration2017 = new Calibration2017(T = T)
   def alpha(alpha: Double): Calibration2017 = new Calibration2017(alpha = alpha)
   def m(m: Double): Calibration2017 = new Calibration2017(m = m)
+  
+  */
 }
 
 class Calibration2017(val T: Int = 20, val alpha: Double = 6 / 100.0, val m: Double = 6.5 / 100.0, val gpt: Double = 0.1 / 100, val theta: Double = 0.4,
     val energyUnits: EnergyUnit = KilowattHours, val pibUnits: Double = 1.0, val popUnits: Double = 1.0) {
-
+/*
   def convertEnergy(energy: Energy) = energy.to(energyUnits)
   def convertPIB(pib: Double) = pib /pibUnits
   def convertPop(pop: Double) = pop /popUnits
@@ -93,4 +94,6 @@ class Calibration2017(val T: Int = 20, val alpha: Double = 6 / 100.0, val m: Dou
     val gks = sy * (1 - ve / ks) / vf - delta;
     (gki, gks)
   }
+  * */
+  */
 }
