@@ -13,19 +13,18 @@ object ResultsPaper {
   def main(args: Array[String]): Unit = {
     printCalibrationResults()
     printCalibrationResults(new calibration_results_work(energy_units = MegaTonOilEquivalent, pib_units = 1E9.toInt))
-    // Calibration.printTableCalibration_new(2017, List(15, 25), List(0.04, 0.08), List(0.03, 0.1), List(0.0))
+    
+    Calibration.printTableCalibration_new(2017, List(15, 25), List(0.04, 0.08), List(0.04, 0.1), List(0.0))
   }
 
   def printCalibrationResults(c: calibration_results_work = new calibration_results_work()) {
     println("alpha : " + c.alpha * 100 + ", m :" + c.m * 100 + " , gpt : " + c.gpt * 100)
     println("EROI : " + c.eroi)
     println(c.pib_units + "US $ " + "/ " + c.energy_units.toString)
-    println("(ki, k, ks)" + "\t" + round(c.ki, 3) + "\t" + round(c.k, 3) + "\t" + round(c.ks, 3))
-    // println("(gki,gk,gks)" + "\t" + round(c.gki * 100,3) + "\t" + round(c.gk * 100,3) + "\t" + round(c.gks * 100,3))
+    println("(mi, m, ms)" + "\t" + round(c.mi*100, 2) + "\t" + round(c.m*100, 2) + "\t" + round(c.ms*100, 2))
     println("(gi,g,gs)" + "\t" + round(c.gi * 100, 3) + "\t" + round(c.g * 100, 3) + "\t" + round(c.gs * 100, 3))
-    println("(delta_i,delta,delta_s)" + "\t" + round(c.interval_delta(c.ki, c.ks, c.ve)._1 * 100, 3) + "\t" + round(c.delta * 100, 3) + "\t" + round(c.interval_delta(c.ki, c.ks, c.ve)._2 * 100, 3))
-    println("(m_i,m,m_s)" + "\t" + round(c.interval_m(c.ki, c.ks, c.ve)._1 * 100, 3) + "\t" + round(100 * c.m, 3) + "\t" + round(c.interval_m(c.ki, c.ks, c.ve)._2 * 100, 3))
-
+    println("(delta_i,delta,delta_s)" + "\t" + round(c.interval_delta_m(c.mi, c.ms)._1 * 100, 3) + "\t" + round(c.delta * 100, 3) + "\t" + round(c.interval_delta_m(c.mi, c.ms)._2 * 100, 3))
+   
     println("Det > 0 ?" + "\t" + ((c.le * c.vf - c.lf * c.ve) > 0))
   }
 

@@ -22,8 +22,8 @@ trait WindTechnology extends RenewableTechnology {
   val installation_variable: Energy; val OM_variable: Energy; val decommissioning_variable: Energy;
   def construction_depth(depth: Length): Energy;
 
-  override def energyInputsInstallation(cell: Cell, eroi_min: Double): Energy =
-    super.energyInputsInstallation(cell, eroi_min) + ee.ratioPower(ratedPower(cell, eroi_min)) * (Math.abs(cell.distanceToCoast.toKilometers) * installation_variable + construction_depth(cell.waterDepth))
+  override def indirectEnergyInputsInstallation(cell: Cell, eroi_min: Double): Energy =
+    super.indirectEnergyInputsInstallation(cell, eroi_min) + ee.ratioPower(ratedPower(cell, eroi_min)) * (Math.abs(cell.distanceToCoast.toKilometers) * installation_variable + construction_depth(cell.waterDepth))
   override def energyInputsOMYearly(cell: Cell, eroi_min: Double): Energy =
     super.energyInputsOMYearly(cell, eroi_min) + ee.ratioPower(ratedPower(cell, eroi_min)) * Math.abs(cell.distanceToCoast.toKilometers) * OM_variable
   override def energyInputsDecomissioning(cell: Cell, eroi_min: Double) = super.energyInputsDecomissioning(cell, eroi_min) + ee.ratioPower(ratedPower(cell, eroi_min)) * Math.abs(cell.distanceToCoast.toKilometers) * decommissioning_variable
@@ -75,7 +75,9 @@ object OnshoreWindTechnology extends WindTechnology {
   val OM_variable = Gigajoules(21.3)/lifeTime // !! Yearly
   val decommissioning_variable = Joules(0)
   val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4377757 + 366858), Gigajoules(7869000 + 68760), Gigajoules(153422), Gigajoules(6450 + 348921),
-    Gigajoules(38285 + 473322), Gigajoules(41400) / 25, 0.035, 25)
+    Gigajoules(38285 + 473322), 
+    Gigajoules(1600000)/25, 0.035, 25)
+    // Gigajoules(41400) / 25, 0.035, 25)
 }
 
 object OffshoreWindTechnology extends WindTechnology {

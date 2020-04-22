@@ -3,7 +3,7 @@ import utils._
 import squants.energy._
 
 // gpt = -gv
-class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val m: Double = 6.5 / 100, val gpt: Double = 0.0, val theta: Double = 0.4, val energy_units: EnergyUnit = KilowattHours, val pib_units: Int = 1) {
+class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val m: Double = 280.0 / 4000, val gpt: Double = 0.0, val theta: Double = 0.4, val energy_units: EnergyUnit = KilowattHours, val pib_units: Int = 1) {
   val i = Calibration.index_year(year)
   val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
   val delta = (m * delta_e + delta_f) / (1 + m)
@@ -38,36 +38,53 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val Le = le * data.ye(i).to(energy_units);
   val rho = yf / pib
 
-  val k = K / data.ye(i).to(energy_units);
-  val (ki, ks) = interval_k(s, n, ve, vf, qe, qf, le, lf)
+  val (mi, ms) = interval_m(s, n, ve, vf, qe, qf, le, lf)
   val (gki, gks) = interval_gk(s, n, ve, vf, qe, qf, le, lf)
   val (gi, gs) = (gki + gpt, gks + gpt)
 
-  // Conditions d'existence: intervalle admissible pour k = K/U
-  def interval_k(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
-    // n'
-    val m = (1 - s) * n / (1 + s * n)
-    val k1 = m * lf / le + (1 + m) * qf / (1 - qe)
-    val k2 = m * vf / ve + (1 + m) * qf / (1 - qe)
-    val bounds = List(ve + vf / k2, ve + vf / k1)
+  // Conditions d'existence: intervalle admissible pour m et le taux de croissance du capital gk
+  def interval_m(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
+    val n_p = (1 - s) * n / (1 + s * n)
+    val a = (1 + n_p) * qf / (1 - qe)
+    val bounds = List(ve / vf * (n_p * lf / le + a), n_p + ve / vf * a)
     (bounds.min, bounds.max)
   }
-
-  // Conditions d'existence: intervalle admissible pour le taux de croissance du capital gk
   def interval_gk(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
-    val (ki, ks) = interval_k(s, n, ve, vf, qe, qf, le, lf)
+    val (mi, ms) = interval_m(s, n, ve, vf, qe, qf, le, lf)
+    val sy = s * (1 + n) / (1 + s * n); // I/Y
+    val x = 1 / vf * sy
+    (1 / (1 + mi) * (x - mi * delta_e - delta_f), 1 / (1 + ms) * (x - ms * delta_e - delta_f))
+  }
+  def interval_delta(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
+    val (mi, ms) = interval_m(s, n, ve, vf, qe, qf, le, lf)
+    (1 / (1 + mi) * (mi * delta_e + delta_f), 1 / (1 + ms) * (ms * delta_e + delta_f))
+  }
+  def interval_delta_m(mi: Double, ms: Double) = {
+    (1 / (1 + mi) * (mi * delta_e + delta_f), 1 / (1 + ms) * (ms * delta_e + delta_f))
+  }
+  // Old model with k
+  def interval_gk2(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
+    val (ki, ks) = interval_k2(s, n, ve, vf, qe, qf, le, lf)
     val sy = s * (1 + n) / (1 + s * n); // I/Y
     val x = 1 / vf * sy
     val a = x - delta_f
     val b = (delta_f - delta_e - x)
     (a + b * ve / ki, a + b * ve / ks)
   }
-
-  def interval_m(ki: Double, ks: Double, ve: Double) = {
+  def interval_m2(ki: Double, ks: Double, ve: Double) = {
     (ve / (ki - ve), ve / (ks - ve))
   }
-  def interval_delta(ki: Double, ks: Double, ve: Double) = {
+  def interval_delta2(ki: Double, ks: Double, ve: Double) = {
     (delta_f - (delta_f - delta_e) * ve / ki, delta_f - (delta_f - delta_e) * ve / ks)
+  }
+  // Conditions d'existence: intervalle admissible pour k = K/U
+  def interval_k2(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
+    // n'
+    val m = (1 - s) * n / (1 + s * n)
+    val k1 = m * lf / le + (1 + m) * qf / (1 - qe)
+    val k2 = m * vf / ve + (1 + m) * qf / (1 - qe)
+    val bounds = List(ve + vf / k2, ve + vf / k1)
+    (bounds.min, bounds.max)
   }
 }
 

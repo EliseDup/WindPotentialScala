@@ -44,7 +44,10 @@ trait RenewableTechnology {
   // "Upfront" energy inputs: raw materials extractin & processing, transport to site, manufaturing & installation
   def energyInputsInstallation(cell: Cell, eroi_min: Double): Energy = ee.energyInputsInstallation(ratedPower(cell, eroi_min))
   def energyInputsInstallation(cell: Cell): Energy = energyInputsInstallation(cell, 1.0)
-
+  
+  def directEnergyInputsInstallation(cell: Cell, eroi_min: Double): Energy = ee.directEnergyInputsInstallation(ratedPower(cell ,eroi_min))
+  def indirectEnergyInputsInstallation(cell: Cell, eroi_min: Double): Energy = ee.indirectEnergyInputsInstallation(ratedPower(cell ,eroi_min))
+  
   def energyInputsDecomissioning(cell: Cell, eroi_min: Double): Energy = ee.energyInputsDecomissioning(ratedPower(cell, eroi_min))
   def energyInputsDecomissioning(cell: Cell): Energy = energyInputsDecomissioning(cell, 1.0)
 
@@ -84,7 +87,10 @@ class EmbodiedEnergy(val power: Power,
 
   def embodiedEnergy(rated_power: Power): Energy = energyInputsInstallation(rated_power) + energyInputsDecomissioning(rated_power) + lifeTime * energyInputsOMYearly(rated_power)
 
-  def energyInputsInstallation(rated_power: Power): Energy = ratioPower(rated_power) * (raw_materials + manufacturing + installation + transport)
+  def energyInputsInstallation(rated_power: Power) = directEnergyInputsInstallation(rated_power) + indirectEnergyInputsInstallation(rated_power)
+  def indirectEnergyInputsInstallation(rated_power: Power): Energy = ratioPower(rated_power) * (raw_materials + manufacturing)
+  def directEnergyInputsInstallation(rated_power: Power): Energy = ratioPower(rated_power) * (installation + transport)
+  
   def energyInputsDecomissioning(rated_power: Power): Energy = ratioPower(rated_power) * decommissioning
   def energyInputsOMYearly(rated_power: Power): Energy = ratioPower(rated_power) * om_fixed
 
