@@ -38,8 +38,9 @@ trait WindTechnology extends RenewableTechnology {
   private def power(cell: Cell, vr: Velocity, n: Double): Power = {
     val wi = ratedPower(cell, vr, n)
     val res = wi * CapacityFactorCalculation.cubic(cell.wind100m, vr.toMetersPerSecond) * WakeEffect.arrayEfficiency(wi.toMegawatts / 3.0, Math.PI / (4 * Math.pow(n, 2))) * availabilityFactor(cell)
-    if (top_down && res / (suitabilityFactor(cell) * cell.area) > cell.keDissipation) cell.keDissipation * cell.area * suitabilityFactor(cell)
-    else res
+    if (top_down && res / (suitabilityFactor(cell) * cell.area) > cell.keDissipation) {
+      cell.keDissipation * cell.area * suitabilityFactor(cell)
+    } else res
   }
 
   def ratedPower(cell: Cell, vr: Velocity, n: Double): Power = {
@@ -72,12 +73,12 @@ object OnshoreWindTechnology extends WindTechnology {
 
   def construction_depth(depth: Length) = Joules(0)
   val installation_variable = Gigajoules(605.74)
-  val OM_variable = Gigajoules(21.3)/lifeTime // !! Yearly
+  val OM_variable = Gigajoules(21.3) / lifeTime // !! Yearly
   val decommissioning_variable = Joules(0)
   val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(4377757 + 366858), Gigajoules(7869000 + 68760), Gigajoules(153422), Gigajoules(6450 + 348921),
-    Gigajoules(38285 + 473322), 
-    Gigajoules(1600000)/25, 0.035, 25)
-    // Gigajoules(41400) / 25, 0.035, 25)
+    Gigajoules(38285 + 473322),
+    Gigajoules(1600000) / 25, 0.035, 25)
+  // Gigajoules(41400) / 25, 0.035, 25) => this is the value that was given by Rembrandt but it seems low !
 }
 
 object OffshoreWindTechnology extends WindTechnology {
@@ -106,15 +107,15 @@ object OffshoreWindTechnology extends WindTechnology {
   }
 
   def construction_depth(depth: Length): Energy = {
-    if (depth.toMeters > 40) Gigajoules(540000+660000+1125000+6160000)
+    if (depth.toMeters > 40) Gigajoules(540000 + 660000 + 1125000 + 6160000)
     else offshoreFixedFoundations(depth)
   }
   // 0.7 % of electricity directly consumed
   // val operation_variable = 0.007
   val installation_variable = Gigajoules(16904) + Gigajoules(4681 + 105)
-  val OM_variable = Gigajoules(6615)/lifeTime // !! Yearly
+  val OM_variable = Gigajoules(6615) / lifeTime // !! Yearly
   val decommissioning_variable = Joules(0) // Gigajoules(12674)
-  
+
   val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(3442580 + 241686), Gigajoules(8523000 + 82662), Gigajoules(1779159), Gigajoules(1283000 + 192719),
     Gigajoules(64150 + 938343), Gigajoules(65587), 0.007, 25)
 }

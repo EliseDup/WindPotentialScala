@@ -24,7 +24,7 @@ object ProductionFunction {
    * - Installed Capacity : IRENA_RE_Capacity_Statistics_2019
    * - Production: IEA
    */
-   
+
   val initialValues =
     Map((OnshoreWindTechnology, (Gigawatts(540.37), GigawattHours(1127319 * 540.37 / (540.37 + 23.356)))),
       (OffshoreWindTechnology, (Gigawatts(23.356), GigawattHours(1127319 * 23.356 / (540.37 + 23.356)))),
@@ -37,10 +37,10 @@ object ProductionFunction {
   val all_sites = Grid().cells
 
   def main(args: Array[String]): Unit = {
- 
-    val techs = List((OnshoreWindTechnology,0.25), (OffshoreWindTechnology,0.25), (PVMono,0.5)) //, CSPTowerStorage12h)
+
+    val techs = List((OnshoreWindTechnology, 0.25), (OffshoreWindTechnology, 0.25), (PVMono, 0.5)) //, CSPTowerStorage12h)
     val sites_sf = all_sites.filter(s => techs.map(_._1.suitabilityFactor(s)).sum > 0)
-    val delta = 1.0/20.0
+    val delta = 1.0 / 20.0
     val cal = new calibration_results_work()
     val fun = new ProductionFunction(sites_sf, techs)
     // techs.map(tech => simulateGrowth(0.25, initialValues(tech)._1, 2018, 2050, tech, cal.qf, cal.vf, 5))
@@ -115,7 +115,7 @@ object ProductionFunction {
   }
 }
 
-class ProductionFunction(val sites: List[Cell], val techs: List[(RenewableTechnology,Double)], val name: String = "",
+class ProductionFunction(val sites: List[Cell], val techs: List[(RenewableTechnology, Double)], val name: String = "",
     val defaultVR: Velocity = MetersPerSecond(11), val defaultN: Double = 8, val defaultSM: Double = 2.7) {
   import PlotHelper._
   import Helper._
@@ -123,23 +123,22 @@ class ProductionFunction(val sites: List[Cell], val techs: List[(RenewableTechno
   val calib = new calibration_results_work()
   val sites_sf = sites.filter(s => techs.map(_._1.suitabilityFactor(s)).sum > 0)
   println("# Suitable sites for " + name + " = " + sites_sf.size + " / " + sites.size)
-  
-  val res = new GrowthModelResults(calib.delta)
-  val target = (1 to 100).map(i => Exajoules(i*10)).toList
-  val function : List[(Energy,Double,Double)] = 
-  target.map(i => {
-    val techs_it = techs.map(t => new TechnologyIterator(t._1, sites_sf.filter(s => t._1.suitabilityFactor(s) > 0),  calib.delta, calib.qf, calib.qf))
-    val y = i.to(Exajoules).toInt
-    techs_it.map(t => t.simulate_year(y, i*techs.find(_._1.equals(t.tech)).get._2, true))
-    res.sumResults(y, techs_it.map(_.results), calib.qf, calib.energy_units)
-    println("Simulate " + i + "\t" +  res.qe.last + "\t" + res.ve.last)
-    (i, res.qe.last, res.ve.last)
-  })
-  
+
+  val res = new GrowthModelResults(calib.energy_units)
+  val target = (1 to 100).map(i => Exajoules(i * 10)).toList
+  val function: List[(Energy, Double, Double)] =
+    target.map(i => {
+      val techs_it = techs.map(t => new TechnologyIterator(t._1, sites_sf.filter(s => t._1.suitabilityFactor(s) > 0), calib.qf, calib.qf))
+      val y = i.to(Exajoules).toInt
+      techs_it.map(t => t.simulate_year(y, i * techs.find(_._1.equals(t.tech)).get._2, true))
+      res.sumResults(y, techs_it.map(_.results))
+      println("Simulate " + i + "\t" + res.qe.last + "\t" + res.ve(calib.qf))
+      (i, res.qe.last, res.ve(calib.qf))
+    })
+
   plotXY(function.map(_._1.to(MegaTonOilEquivalent)), function.map(_._2))
   plotXY(function.map(_._1.to(MegaTonOilEquivalent)), function.map(_._3))
-  
-  
+
   def energyToDouble(list: (List[Energy], List[Energy])) = (list._1.map(_.to(Exajoules)), list._2.map(_.to(Exajoules)))
   def doubleToEnergy(list: (List[Double], List[Double])) = (list._1.map(Gigajoules(_)), list._2.map(Gigajoules(_)))
 }

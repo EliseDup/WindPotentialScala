@@ -13,76 +13,82 @@ object GrowthModel {
   import PlotHelper._
 
   def main(args: Array[String]): Unit = {
-    simulateTransition(2017, 2050)
 
-    /*    
-    val e_units = KilowattHours; val pib_units = 1; val cal = new calibration_results_work(energy_units = e_units, pib_units = pib_units);
+    val e_units = KilowattHours; val pib_units = 1.toInt; val cal = new calibration_results_work(energy_units = e_units, pib_units = pib_units);
     val qf_f = cal.qf // * math.pow(1 - 2.0 / 100, 33);
     val pib_f = cal.pib // * math.pow(1 + 2.0 / 100, 33);
-    val target = cal.data.e(cal.i) // e_units(pib_f * qf_f) + cal.data.ce(cal.i)
-   
+    val target = cal.data.ye(cal.i) * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve)
+
+    println("Net Energy Target " + target.to(MegaTonOilEquivalent))
     val share = (0 to 10).map(_ * 0.1).toList
-    val techs = List((OnshoreWindTechnology, 1.0 / 4), (OffshoreWindTechnology, 1.0 / 4), (PVPoly, 1.0 / 2))
-
+    // Jacobson scenario for 2050: 
+    // 14.89% rooftop residential + 11.58 % commercial
+    // 21.36 % pv power plants  
+    // 9.72% CSP
+    // 23.52% Onshore wind
+    // 13.62% Offshore wind
+    // Total = 94.69 / 100 
+ val techs = List((OnshoreWindTechnology, 23.52 / 94.69),(OffshoreWindTechnology, 13.62 / 94.69), (PVPoly, (14.89 + 11.58 + 21.36) / 94.69) , (CSPParabolic, 9.72 / 94.69))
+   
+    //val techs = List((OnshoreWindTechnology, 0.3),(OffshoreWindTechnology, 0.1), (PVMono, 0.6))
+  
+   
     // println("RE Share [%]" + "\t" + "EROI" + "\t" + " qe [%] " + "\t" + " ve " + "\t" + " gi " + "\t" + "gs" + "\t" + "Ye" + "\t" + "E" + "\t" + "Ee")
-    val res = share.map(s => {
-      val r = (s, calculate(target, techs, s, cal, qf_f, pib_f, cal.vf * pib_f))
-      val intg = cal.interval_gk(cal.s, cal.n, r._2(1)._3, cal.vf, r._2(1)._2, 0.3, cal.le, cal.lf)
+    val res = share.map(s => (s, calculate(target, techs, s, cal, qf_f, pib_f, cal.vf * pib_f)))
 
-      /*  println(r._1 * 100 + " & " + round(r._2(1)._1) + " & " + round(r._2(1)._2 * 100) + " & " + round(r._2(1)._3) + "& " +
-        round(100 * intg._1) + " & " + round(100 * intg._2) +
-        " & " + r._2(2)._1 + " & " + r._2(2)._2 + " & " + r._2(2)._3 + "\\" + "\\")*/
-      r
-    })
-    plotXY(List((share, res.map(_._2(1)._1), "")), xLabel = "RE Share", yLabel = "EROI")
-    plotXY(List((share, res.map(_._2(1)._2 * 100), "")), xLabel = "RE Share", yLabel = "qe [%]")
-    plotXY(List((share, res.map(_._2(1)._3), "")), xLabel = "RE Share", yLabel = "ve")
-*/
-    // combinedPlots(share.map(_ * 100), List((res.map(_._2(1)._1), "EROI"), (res.map(_._2(1)._2 * 100), "qe [%]"), (res.map(_._2(1)._3), "ve")), xLabel = "RE Share [%]")
+    plotXY(List((share, res.map(_._2.ye.last.to(MegaTonOilEquivalent)), "Ye"),
+      (share, res.map(_._2.netE.to(MegaTonOilEquivalent)), "Net E"),
+      (share, res.map(r => r._2.tilde_ke.last.to(MegaTonOilEquivalent) * r._2.delta_e.last), "tilde(delta_e Ke)"),
+      (share, res.map(_._2.ee.last.to(MegaTonOilEquivalent)), "EE")), xLabel = "RE Share", yLabel = "Mtoe", legend = true)
+    plotXY(List((share, res.map(_._2.tilde_ke.last.to(e_units) / cal.qf * pib_units / 1E9), "Ke [GUS $]"), (share, share.map(i => cal.Kf * pib_units / 1E9), "Kf [GUS $]")), legend = true)
   }
 
-  // For a given target (= final energy demand E), and renewable energy share, gives a estimate of the technical parameters and EROI of the energy system
+  // For a given target (= final net energy demand NE), and renewable energy share, 
+  // gives a estimate of the technical parameters and EROI of the energy system
   def calculate(target: Energy, techs: List[(RenewableTechnology, Double)], share_re: Double = 1.0,
     calib: calibration_results_work, qf_final: Double, pib_final: Double, Kf_final: Double) = {
 
-    val all_sites = Grid().cells; val delta = calib.delta; val qf_0 = calib.qf;
-
+    val all_sites = Grid().cells; val qf_0 = calib.qf;
     // Initialise 
     val start_year = 2017; val ind = Calibration.index_year(start_year)
-    val res = new GrowthModelResults(delta); val res_re = new GrowthModelResults(delta); val res_nre = new GrowthModelResults(delta);
-    res.updateProduction(start_year, calib.data.ye(calib.i), calib.data.ee(calib.i), calib.Ke, qf_0, calib.energy_units)
-    res_nre.updateProduction(start_year, calib.data.ye(calib.i), calib.data.ee(calib.i), calib.Ke, qf_0, calib.energy_units)
-    res_re.updateProduction(start_year, Joules(0), Joules(0), 0, qf_0, calib.energy_units)
+    val (res, res_re, res_nre) = (new GrowthModelResults(calib.energy_units), new GrowthModelResults(calib.energy_units), new GrowthModelResults(calib.energy_units))
+    res.updateProduction(start_year, calib.data.ye(calib.i), calib.data.ee(calib.i), calib.tilde_Ke, calib.delta_e)
+    res_nre.updateProduction(start_year, calib.data.ye(calib.i), calib.data.ee(calib.i), calib.tilde_Ke, calib.delta_e)
+    res_re.updateProduction(start_year, Joules(0), Joules(0), Joules(0), calib.delta_e)
     // res_nre.updateProduction(start_year, calib.data.ye(calib.i) - MegaTonOilEquivalent(45), calib.data.e(calib.i) - MegaTonOilEquivalent(45), calib.data.ee(calib.i), calib.Ke, qf_0, calib.energy_units)
     // res_re.updateProduction(start_year, MegaTonOilEquivalent(45), MegaTonOilEquivalent(45), Joules(0), 0, qf_0, calib.energy_units)
 
     // Iterate on each technology to produce at optimal eroi
-    val techs_it = techs.map(tech => new TechnologyIterator(tech._1, all_sites, delta, qf_0, qf_final, energy_units = calib.energy_units, pib_units = calib.pib_units))
-    techs_it.map(t => t.simulate_static((target * share_re) * techs.find(_._1.equals(t.tech)).get._2, true))
+    val techs_it = techs.map(tech => new TechnologyIterator(tech._1, all_sites, qf_0, qf_final, energy_units = calib.energy_units, pib_units = calib.pib_units))
+    techs_it.map(t => t.simulate_static((target * share_re) * techs.find(_._1.equals(t.tech)).get._2))
 
     // End values
-    res_re.sumResults(2050, techs_it.map(_.results), qf_final, calib.energy_units)
+    res_re.sumResults(2050, techs_it.map(_.results))
 
-    val qe_0 = Calibration.data.qe(ind); val ve_0 = calib.ve; // val ke_0 = calib.Ke
-    val e_nre = target - res_re.e.last; val ye_nre = e_nre / (1 - qe_0)
+    val qe_nre = Calibration.data.qe(ind); val ve_nre = calib.ve; val delta_e_nre = calib.delta_e
+    // Net E = Ye * (1 - qe - delta_e q_f v_e)
+    val net_e_re = if (share_re == 0) MegaTonOilEquivalent(0) else res_re.netE
+    val ye_nre = (target - net_e_re) / (1.0 - qe_nre - ve_nre * delta_e_nre * qf_final)
+    res_nre.updateProduction(2050, ye_nre, ye_nre * qe_nre, calib.energy_units(ye_nre.to(calib.energy_units) * ve_nre * qf_final), delta_e_nre)
 
-    res_nre.updateProduction(2050, ye_nre, ye_nre * qe_0, ye_nre.to(calib.energy_units) * ve_0, qf_final, calib.energy_units)
-
-    res.sumResults(start_year, List(res_re, res_nre), qf_final, calib.energy_units)
+    res.sumResults(start_year, List(res_re, res_nre))
     import Helper._
     // println(delta + "\t" + share_re + "\t" + u + "\t" + a + "\t" + tilde_ke + "\t" + u / (a + tilde_ke * delta) + "\t" + res_re.eroi.last + "\t" + res_nre.eroi.last + "\t" + res.eroi.last)
     // g = s*PIB/K - delta
     //println(share_re * 100 + "\t" + res.ye.last.to(calib.energy_units) + "\t" + res.e.last.to(calib.energy_units) + "\t" + res.ee.last.to(calib.energy_units) + "\t" + res.ke.last + "\t" + res_re.ke.last + "\t" + res_nre.ke.last + "\t" + Kf_final + "\t" + pib_final + "\t" + qf_final)
-    val (gi, gs) = calib.interval_gk(calib.s, calib.n, res.ve.last, calib.vf, res.qe.last, calib.qf, calib.le, calib.lf)
-    val (mi, ms) = calib.interval_m(calib.s, calib.n, res.ve.last, calib.vf, res.qe.last, calib.qf, calib.le, calib.lf)
+    val (gi, gs) = calib.interval_gk(calib.s, calib.n, res.ve(calib.qf), calib.vf, res.qe.last, calib.qf, calib.le, calib.lf)
+    val (mi, ms) = calib.interval_m(calib.s, calib.n, res.ve(calib.qf), calib.vf, res.qe.last, calib.qf, calib.le, calib.lf)
     val (di, ds) = calib.interval_delta_m(mi, ms)
+    println(round(res.ye.last.to(MegaTonOilEquivalent), 0) + " &" +
+      round(share_re * 100, 0) + " & " + round(res.eroi.last) + " & " + round(100 * res.qe.last) + " & " + round(res.ve(qf_final)) + "& " +
+      round(gi * 100) + " & " + round(gs * 100) + " & " + round(mi * 100) + " & " + round(ms * 100) + " & " + round(100 * di) + " & " + round(100 * ds) + " & " +
 
-    println(round(res.ye.last.to(MegaTonOilEquivalent), 0) + " &" + round(share_re * 100, 0) + " & " + round(res.eroi.last) + " & " + round(100 * res.qe.last) + " & " + round(res.ve.last) + "& " +
-      round(gi * 100) + " & " + round(gs * 100) + " & " + round(mi * 100) + " & " + round(ms * 100) + " & " + round(100 * di) + " & " + round(100 * ds) + "\\" + "\\")
+      round(res_re.ye.last.to(MegaTonOilEquivalent), 0) + " &" +
+      round(res_re.eroi.last) + " & " + round(100 * res_re.qe.last) + " & " + round(res_re.ve(qf_final)))
 
-    List((res.eroi(0), res.qe(0), res.ve(0)), (res.eroi(1), res.qe(1), res.ve(1)), (res.ye.last.to(calib.energy_units), res.e.last.to(calib.energy_units), res.ee.last.to(calib.energy_units)))
+    res
   }
-
+  /*
   def simulateTransition(start_year: Int, end_year: Int) {
 
     val all_sites = Grid().cells
@@ -93,31 +99,31 @@ object GrowthModel {
     val ind = Calibration.index_year(start_year)
 
     val res = new GrowthModelResults(calib.delta); val res_re = new GrowthModelResults(calib.delta); val res_nre = new GrowthModelResults(calib.delta);
-    res.updateProduction(start_year, calib.data.ye(calib.i), calib.data.ee(calib.i), calib.Ke, calib.qf, calib.energy_units)
-    res_nre.updateProduction(start_year, calib.data.ye(calib.i) - MegaTonOilEquivalent(45), calib.data.ee(calib.i), calib.Ke, calib.qf, calib.energy_units)
-    res_re.updateProduction(start_year, MegaTonOilEquivalent(45), Joules(0), 0, calib.qf, calib.energy_units)
+    res.updateProduction(start_year, calib.data.ye(calib.i), calib.data.ee(calib.i), calib.tilde_Ke, calib.qf, calib.energy_units)
+    res_nre.updateProduction(start_year, calib.data.ye(calib.i) - MegaTonOilEquivalent(45), calib.data.ee(calib.i), calib.tilde_Ke, calib.qf, calib.energy_units)
+    res_re.updateProduction(start_year, MegaTonOilEquivalent(45), Joules(0), Joules(0), calib.qf, calib.energy_units)
 
     // We want to reach 100% renewables by end_year: 
     val n_year = end_year - start_year;
     val qe_0 = Calibration.data.qe(ind); val ve_0 = calib.ve; val ke_0 = calib.Ke
-    val e_re0 = res_re.e.last; val e_0 = Calibration.data.e(ind)
     // If we consider an exponential growth (i.e. a constant growth rate): 
     // Ere,n = E,2017 & Ere,n = Ere,2017 * g^n => g = (E,2017/Ere,2017)^1/n
-    val growth_rate = math.pow(e_0 / e_re0, 1.0 / n_year)
+    val ye_re0 = res_re.ye.last;
+    val growth_rate = math.pow(Calibration.data.ye(ind) / e_re0, 1.0 / n_year)
     println("Simulation " + n_year + ", exponential growth rate " + growth_rate)
 
     for (y <- 1 to n_year + 50) {
       // The desired total production from RE sources by the end of the year.
-      val target_re = if (res.year.last >= end_year) Joules(0) else List(e_re0 * math.pow(growth_rate, y) - res_re.e.last, Joules(0)).maxBy(_.value)
+      val target_re = if (res.year.last >= end_year) Joules(0) else List(e_re0 * math.pow(growth_rate, y) - res_re.ye.last, Joules(0)).maxBy(_.value)
       println("Simulate year " + res.year.last + " with target " + target_re.to(MegaTonOilEquivalent))
       techs_it.map(it => it.simulate_year(y, target_re / techs.size, true))
       // Update params from RE sector
       res_re.sumResults(start_year + y, techs_it.map(_.results), calib.qf, calib.energy_units)
       // Remove from the total the energy that is now produced by the re sector
       // e_nre < 0 is not supposed to happen before the last year of the simulation !!
-      val e_nre = List(e_0 - res_re.e.last, Joules(0)).maxBy(_.value)
-      val u_nre = e_nre / (1 - qe_0)
-      res_nre.updateProduction(start_year + y, u_nre, u_nre * qe_0, u_nre.to(KilowattHours) * ve_0, calib.qf, calib.energy_units)
+      val ye_nre = List( - res_re.ye.last, Joules(0)).maxBy(_.value)
+      
+      res_nre.updateProduction(start_year + y, ye_nre, ye_nre * qe_0, ye_nre.to(KilowattHours) * ve_0, calib.qf, calib.energy_units)
       res.sumResults(start_year + y, List(res_re, res_nre), calib.qf, calib.energy_units)
     }
 
@@ -132,22 +138,23 @@ object GrowthModel {
     plotXY(List((year_double, res.eroi.toList, "eroi"), (year_double, res_re.eroi.toList, "eroi_RE"), (year_double, res_nre.eroi.toList, "eroi_NRE")), legend = true)
 
   }
-
+*/
 }
 
-class TechnologyIterator(val tech: RenewableTechnology, sites: List[Cell], delta: Double, qf_0: Double, qf_final: Double, log: Boolean = false, energy_units: EnergyUnit = KilowattHours,
+class TechnologyIterator(val tech: RenewableTechnology, sites: List[Cell], qf_0: Double, qf_final: Double, log: Boolean = false, energy_units: EnergyUnit = KilowattHours,
     pib_units: Int = 1) {
   // Initialize with current installed capacity and energy produced
   val (cap0, e0) = (Watts(0), Joules(0)) //ProductionFunction.initialValues(tech)
-  val ke0 = tech.ee.energyInputsInstallation(cap0).to(energy_units) / qf_0;
+  val ke0 = tech.ee.energyInputsInstallation(cap0) // .to(energy_units) / qf_0;
   val oe0 = tech.ee.energyInputsOMYearly(cap0);
-  val results = new GrowthModelResults(delta)
-  results.updateProduction(2017, e0, oe0, ke0, qf_0, energy_units)
+  val results = new GrowthModelResults(energy_units)
+  val delta_e = 1.0 / tech.lifeTime
+  results.updateProduction(2017, e0, oe0, ke0, delta_e)
 
   //assert(math.abs(results.eroi.last - (e0 + oe0) / (oe0 + delta * tech.ee.energyInputsInstallation(cap0))) < 0.1)
 
   val tilde_ke = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ke += tech.ee.energyInputsInstallation(cap0)
-  val tilde_ie = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ie += tilde_ke.last * delta
+  val tilde_ie = scala.collection.mutable.ArrayBuffer.empty[Energy]; tilde_ie += tilde_ke.last * delta_e
   val installed_cap = scala.collection.mutable.ArrayBuffer.empty[Power]; installed_cap += cap0
 
   val sites_sorted = sites.filter(s => tech.suitabilityFactor(s) > 0).sortBy(tech.eroi(_, 1.0)).reverse.toIterator
@@ -188,33 +195,44 @@ class TechnologyIterator(val tech: RenewableTechnology, sites: List[Cell], delta
     val ke_installation = sum(installations.map(_.indirectInstallationE))
     val e_decom = sum(installations.filter(t => t.age == t.tech.lifeTime).map(_.directDecommissioningE))
 
-    results.updateProduction(y, sum(installations.map(_.production)), sum(installations.map(_.operationE)) + e_installation + e_decom,
-      ke_installation.to(energy_units) / qf_final, qf_final, energy_units)
+    results.updateProduction(y, sum(installations.map(_.production)),
+      sum(installations.map(_.operationE)) + e_installation + e_decom,
+      ke_installation, delta_e)
   }
+
   def sum(e: List[Energy]) = e.foldLeft(Joules(0))(_ + _)
-  def simulate_static(target: Energy, target_final: Boolean) {
+  // Net Energy Target !
+  def simulate_static(target: Energy) {
+    // Remove the x % best sites as there are not available in practice
+    /*val limit_pot = 0.5 * sites.map(tech.potential(_, 1.0)).foldLeft(Watts(0))(_ + _);
+    var pot = Watts(0); var ended = !sites_sorted.hasNext;
+    while (pot <= limit_pot && !ended) {
+      pot = pot + tech.potential(sites_sorted.next, 1.0)
+      if (!sites_sorted.hasNext || pot >= limit_pot) {
+        ended = true
+      }
+    }*/
+
     // year += y
     var ended = false
     var newCap = Watts(0); var newProd = Joules(0); var newKe = Joules(0); var newEE = Joules(0);
 
-    def progress = { if (target_final) (newProd - newEE) else newProd }
     if (target.value != 0) {
-      while (progress <= target && !ended) {
+      while (newProd <= (target + newEE + newKe / tech.lifeTime) && !ended) {
         if (sites_sorted.hasNext) {
           val next_site = sites_sorted.next()
-          val prod = tech.potential(next_site, 1.0) * Hours(365 * 24)
-          newProd += prod
-          newEE += tech.energyInputsOMYearly(next_site, 1.0) + (tech.directEnergyInputsInstallation(next_site, 1.0) + tech.energyInputsDecomissioning(next_site, 1.0)) / tech.lifeTime // + prod * tech.operation_variable 
-          newKe += tech.indirectEnergyInputsInstallation(next_site, 1.0)
+          newProd += tech.potential(next_site, 1.0) * Hours(365 * 24)
           newCap += tech.ratedPower(next_site, 1.0)
+          newEE += tech.energyInputsOMYearly(next_site, 1.0) // Is that really in qe ?
+          newKe += (tech.energyInputsInstallation(next_site, 1.0) + tech.energyInputsDecomissioning(next_site, 1.0)) // Total energy embodied in energy sector capital stock; to divise by life time 
         } else {
           ended = true
         }
       }
     }
+    // println(tech.name + "\t" + tech.eroi(sites_sorted.next(), 1.0) + "\t" + newCap.toGigawatts)
 
-    println(tech.name + "\t" + " CF : " + (100 * newProd / (newCap * Hours(365 * 24))) + " EROI : " + (newProd / (newEE + newKe / tech.lifeTime)))
-    if (log) println(tech.name + ",static , new production:" + newProd.to(MegaTonOilEquivalent) + "(Target was : " + target.to(MegaTonOilEquivalent))
+    if (log) println(target.to(MegaTonOilEquivalent) + "\t" + tech.name + ",static , new production:" + newProd.to(MegaTonOilEquivalent) + "(Target was : " + target.to(MegaTonOilEquivalent))
 
     // Update parameters !
     installed_cap += (installed_cap.last + newCap)
@@ -222,7 +240,7 @@ class TechnologyIterator(val tech: RenewableTechnology, sites: List[Cell], delta
     tilde_ie += newKe + tilde_ke.last / tech.lifeTime
     // Energy sector capital stock: Capital stock(t-1) + new capital
     tilde_ke += tilde_ke.last + newKe
-    results.updateProduction(2050, results.ye.last + newProd, results.ee.last + newEE, tilde_ke.last.to(energy_units) / qf_final, qf_final, energy_units)
+    results.updateProduction(2050, results.ye.last + newProd, results.ee.last + newEE, tilde_ke.last, delta_e)
   }
 }
 
@@ -236,36 +254,42 @@ class RenewableInstallation(val tech: RenewableTechnology, val rated_power: Powe
 
 }
 
-class GrowthModelResults(delta: Double) {
+class GrowthModelResults(energy_units: EnergyUnit) {
   val year = scala.collection.mutable.ArrayBuffer.empty[Int];
   val ye = scala.collection.mutable.ArrayBuffer.empty[Energy];
   val ee = scala.collection.mutable.ArrayBuffer.empty[Energy];
-  val e = scala.collection.mutable.ArrayBuffer.empty[Energy];
-  val ke = scala.collection.mutable.ArrayBuffer.empty[Double];
-  val ve = scala.collection.mutable.ArrayBuffer.empty[Double];
-  val qe = scala.collection.mutable.ArrayBuffer.empty[Double];
+  val tilde_ke = scala.collection.mutable.ArrayBuffer.empty[Energy];
+  // Results
   val eroi = scala.collection.mutable.ArrayBuffer.empty[Double];
+  val qe = scala.collection.mutable.ArrayBuffer.empty[Double];
+  val delta_e = scala.collection.mutable.ArrayBuffer.empty[Double];
+  // val ve = scala.collection.mutable.ArrayBuffer.empty[Double];
+  // val qf = scala.collection.mutable.ArrayBuffer.empty[Double];
 
-  def updateProduction(y: Int, newYe: Energy, newEe: Energy, newKe: Double, qf: Double, energy_units: EnergyUnit) {
+  def netE = ye.last - ee.last - tilde_ke.last * delta_e.last
+  // EROI = Ye/(Ee+tilde(delta_e K_e)) = Y_e/(q_e Y_e + \delta_e v_e q_f Y_e) = 1/(q_e + \delta_e v_e q_f) ==> v_e = (1/EROI-q_e)/(\delta_e q_f)
+  def ve(qf: Double) = ((1 / eroi.last) - qe.last) / (delta_e.last * qf)
+
+  def updateProduction(y: Int, newYe: Energy, newEe: Energy, newTildeKe: Energy, newDelta_e: Double) {
     year += y
     ye += newYe
-    e += (newYe - newEe)
     ee += newEe
-    ke += newKe
-    updateParams(qf, energy_units)
+    tilde_ke += newTildeKe
+    delta_e += newDelta_e;
+    // Calculated results
+    qe += (if (newYe.value == 0) 0.0 else newEe / newYe)
+    eroi += (if (newYe.value == 0) 1.0 else newYe / (newEe + newDelta_e * newTildeKe))
   }
-  def updateParams(qf: Double, energy_units: EnergyUnit) {
-    ve += ke.last / ye.last.to(energy_units)
-    qe += ee.last / ye.last
-    eroi += 1 / (qe.last + delta * qf * ve.last)
-  }
-  def sumResults(y: Int, res: List[GrowthModelResults], qf: Double, energy_units: EnergyUnit) {
-    year += y
-    ye += res.map(_.ye.last).foldLeft(Joules(0))(_ + _)
-    e += res.map(_.e.last).foldLeft(Joules(0))(_ + _)
-    ee += res.map(_.ee.last).foldLeft(Joules(0))(_ + _)
-    ke += res.map(_.ke.last).sum
-    updateParams(qf, energy_units)
+
+  def sumResults(y: Int, res: List[GrowthModelResults]) {
+    val new_tke = res.map(_.tilde_ke.last).foldLeft(Joules(0))(_ + _)
+    val new_delta_e = if (new_tke.value == 0) 1.0 else res.map(r => r.delta_e.last * r.tilde_ke.last).foldLeft(Joules(0))(_ + _) / new_tke
+    updateProduction(y,
+      res.map(_.ye.last).foldLeft(Joules(0))(_ + _),
+      res.map(_.ee.last).foldLeft(Joules(0))(_ + _),
+      new_tke,
+      // res.map(_.qf.last).sum / res.size,
+      new_delta_e)
   }
 }
 

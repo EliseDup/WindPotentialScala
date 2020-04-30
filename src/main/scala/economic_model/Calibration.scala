@@ -21,11 +21,11 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val qf = data.ef(i).to(energy_units) / yf // Intensité énergétique de l'économie
   val vf = Kf / yf // Intensité capitalistique de l'économie
   val ve = Ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
-
+  val tilde_Ke = energy_units(Ke * qf)
   val cf = yf - s * pib
   val n = p * data.ce(i).to(energy_units) / cf
-
-  val eroi = 1 / (qe + delta * ve * qf)
+ 
+  val eroi = 1 / (qe + delta_e * ve * qf)
   // println(year + "\t" + eroi + "\t" + qf + "\t" + vf + "\t" + data.qe(i) + "\t" + ve + "\t" + v + "\t" + k / data.ye(i).to(energy_units))
   // val L=3422; % Pop active (10^6 personnes) 
   val L = data.L(i) // .toDouble /1E6 //2871.0 * 1E6; // Pop employee (10^6 personnes)
