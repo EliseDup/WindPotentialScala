@@ -14,12 +14,12 @@ object GrowthModel {
 
   def main(args: Array[String]): Unit = {
 
-    val e_units = KilowattHours; val pib_units = 1.toInt; val cal = new calibration_results_work(energy_units = e_units, pib_units = pib_units);
+    val e_units = MegaTonOilEquivalent; val pib_units = 1E9.toInt; val cal = new calibration_results_work(energy_units = e_units, pib_units = pib_units);
     val qf_f = cal.qf // * math.pow(1 - 2.0 / 100, 33);
     val pib_f = cal.pib // * math.pow(1 + 2.0 / 100, 33);
     val target = cal.data.ye(cal.i) * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve)
 
-    println("Net Energy Target " + target.to(MegaTonOilEquivalent))
+    println("Net Energy Target " + target.to(MegaTonOilEquivalent) + "\t" + cal.s)
     val share = (0 to 10).map(_ * 0.1).toList
     // Jacobson scenario for 2050: 
     // 14.89% rooftop residential + 11.58 % commercial
@@ -28,11 +28,9 @@ object GrowthModel {
     // 23.52% Onshore wind
     // 13.62% Offshore wind
     // Total = 94.69 / 100 
- val techs = List((OnshoreWindTechnology, 23.52 / 94.69),(OffshoreWindTechnology, 13.62 / 94.69), (PVPoly, (14.89 + 11.58 + 21.36) / 94.69) , (CSPParabolic, 9.72 / 94.69))
-   
+    val techs = List((OnshoreWindTechnology, 23.52 / 94.69), (OffshoreWindTechnology, 13.62 / 94.69), (PVPoly, (14.89 + 11.58 + 21.36) / 94.69), (CSPParabolic, 9.72 / 94.69))
+
     //val techs = List((OnshoreWindTechnology, 0.3),(OffshoreWindTechnology, 0.1), (PVMono, 0.6))
-  
-   
     // println("RE Share [%]" + "\t" + "EROI" + "\t" + " qe [%] " + "\t" + " ve " + "\t" + " gi " + "\t" + "gs" + "\t" + "Ye" + "\t" + "E" + "\t" + "Ee")
     val res = share.map(s => (s, calculate(target, techs, s, cal, qf_f, pib_f, cal.vf * pib_f)))
 
@@ -76,15 +74,51 @@ object GrowthModel {
     // println(delta + "\t" + share_re + "\t" + u + "\t" + a + "\t" + tilde_ke + "\t" + u / (a + tilde_ke * delta) + "\t" + res_re.eroi.last + "\t" + res_nre.eroi.last + "\t" + res.eroi.last)
     // g = s*PIB/K - delta
     //println(share_re * 100 + "\t" + res.ye.last.to(calib.energy_units) + "\t" + res.e.last.to(calib.energy_units) + "\t" + res.ee.last.to(calib.energy_units) + "\t" + res.ke.last + "\t" + res_re.ke.last + "\t" + res_nre.ke.last + "\t" + Kf_final + "\t" + pib_final + "\t" + qf_final)
-    val (gi, gs) = calib.interval_gk(calib.s, calib.n, res.ve(calib.qf), calib.vf, res.qe.last, calib.qf, calib.le, calib.lf)
-    val (mi, ms) = calib.interval_m(calib.s, calib.n, res.ve(calib.qf), calib.vf, res.qe.last, calib.qf, calib.le, calib.lf)
-    val (di, ds) = calib.interval_delta_m(mi, ms)
-    println(round(res.ye.last.to(MegaTonOilEquivalent), 0) + " &" +
-      round(share_re * 100, 0) + " & " + round(res.eroi.last) + " & " + round(100 * res.qe.last) + " & " + round(res.ve(qf_final)) + "& " +
-      round(gi * 100) + " & " + round(gs * 100) + " & " + round(mi * 100) + " & " + round(ms * 100) + " & " + round(100 * di) + " & " + round(100 * ds) + " & " +
+    val z = Z(res.ve(calib.qf), calib.vf, res.qe.last, calib.qf, calib.le, calib.lf, res.delta_e.last, calib.delta_f)
+    val s_fixed = calib.s; val n_fixed = calib.n; val gk_fixed = calib.g; val c_fixed = calib.data.ce(calib.i).to(calib.energy_units) / calib.cf
+    val phi = calib.mean_std(calib.interval_phi(z))
+    val gk = calib.mean_std(calib.interval_gk(s_fixed, n_fixed, z))
+    val m_gk_bounds = calib.interval_m_gk(s_fixed, n_fixed, z)
+    val m_gk = calib.mean_std(m_gk_bounds)
+    val mu_gk = calib.mean_std(calib.mu_m(m_gk_bounds._1), calib.mu_m(m_gk_bounds._2))
+    val k_gk = calib.mean_std(calib.k_m(m_gk_bounds._1, z.ve), calib.k_m(m_gk_bounds._2, z.ve))
+    val delta_gk = calib.mean_std((calib.delta_m(m_gk_bounds._1, z), calib.delta_m(m_gk_bounds._2, z)))
 
-      round(res_re.ye.last.to(MegaTonOilEquivalent), 0) + " &" +
-      round(res_re.eroi.last) + " & " + round(100 * res_re.qe.last) + " & " + round(res_re.ve(qf_final)))
+    // Calcus Elise
+    val m_s_bounds = calib.interval_m_s(gk_fixed, n_fixed, z)
+    val m_s = calib.mean_std(m_s_bounds)
+    val mu_s = calib.mean_std(calib.mu_m(m_s_bounds._1), calib.mu_m(m_s_bounds._2))
+    val k_s = calib.mean_std(calib.k_m(m_s_bounds._1, z.ve), calib.k_m(m_s_bounds._2, z.ve))
+    val s = calib.mean_std(calib.interval_s(gk_fixed, n_fixed, z))
+
+    val m_c = calib.m_c(gk_fixed, c_fixed, z)
+    val n_c = calib.mean_std(calib.interval_c(c_fixed, z))
+    val s_c = calib.mean_std(calib.interval_s_c(gk_fixed, c_fixed, z))
+
+    // Calculs Marc
+    val (mui, mus) = calib.mean_std(calib.interval_mu2_s(gk_fixed, n_fixed, z))
+    val (si_mu, ss_mu) = calib.mean_std(calib.interval_s_mu(gk_fixed, n_fixed, z))
+    val (mi_mu, ms_mu) = calib.mean_std((calib.m_mu(mui), calib.m_mu(mus)))
+
+  //  assert(mui == mu_gk._1 && mus == mu_gk._2)
+ //   assert(si_mu == s._1 && ss_mu == s._2)
+
+    /*  println(
+      round(res.ye.last.to(MegaTonOilEquivalent), 0) + " &" +
+        round(share_re * 100, 0) + " & " + round(res.eroi.last) + " & " + round(100 * res.qe.last) + " & " + round(res.ve(qf_final)) + "& " +
+        round(gi * 100) + " & " + round(gs * 100) + " & " + round(mi * 100) + " & " + round(ms * 100) + " & " +
+        
+        round(100 * mi_s) + " & " + round(100 * ms_s) + " & " + round(100 * si) + " & " + round(100 * ss)
+        + " & " + round(100 * mui) + " & " + round(100 * mus) +
+        " & " + round(100 * mi_mu) + " & " + round(100 * ms_mu) +
+        " & " + round(100 * si_mu) + " & " + round(100 * ss_mu))*/
+    // + " & " + round(res_re.ye.last.to(MegaTonOilEquivalent), 0) + " &" + round(res_re.eroi.last) + " & " + round(100 * res_re.qe.last) + " & " + round(res_re.ve(qf_final)))
+    println(round(share_re * 100, 0) + "\t" +
+      round(res.eroi.last) + "\t" +
+      phi._1 + "\t" + phi._2 + "\t" +
+      m_gk._1 + "\t" + m_gk._2 + "\t" + "\t" + gk._1 + "\t" + gk._2 + "\t" +
+      m_s._1 + "\t" + m_s._2 + "\t" + s._1 + "\t" + s._2 + "\t" +
+      m_c + "\t" + n_c._1 + "\t" + n_c._2 + "\t" + s_c._1 + "\t" + s_c._2)
 
     res
   }
@@ -121,8 +155,8 @@ object GrowthModel {
       res_re.sumResults(start_year + y, techs_it.map(_.results), calib.qf, calib.energy_units)
       // Remove from the total the energy that is now produced by the re sector
       // e_nre < 0 is not supposed to happen before the last year of the simulation !!
-      val ye_nre = List( - res_re.ye.last, Joules(0)).maxBy(_.value)
-      
+      val ye_nre = List(-res_re.ye.last, Joules(0)).maxBy(_.value)
+
       res_nre.updateProduction(start_year + y, ye_nre, ye_nre * qe_0, ye_nre.to(KilowattHours) * ve_0, calib.qf, calib.energy_units)
       res.sumResults(start_year + y, List(res_re, res_nre), calib.qf, calib.energy_units)
     }
@@ -138,7 +172,7 @@ object GrowthModel {
     plotXY(List((year_double, res.eroi.toList, "eroi"), (year_double, res_re.eroi.toList, "eroi_RE"), (year_double, res_nre.eroi.toList, "eroi_NRE")), legend = true)
 
   }
-*/
+  */
 }
 
 class TechnologyIterator(val tech: RenewableTechnology, sites: List[Cell], qf_0: Double, qf_final: Double, log: Boolean = false, energy_units: EnergyUnit = KilowattHours,

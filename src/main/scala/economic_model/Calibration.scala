@@ -2,18 +2,22 @@ package economic_model
 import utils._
 import squants.energy._
 
-// gpt = -gv
+// Vector of technical parameters
+case class Z(ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double, deltae: Double, deltaf: Double)
+
 class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val m: Double = 280.0 / 4000, val gpt: Double = 0.0, val theta: Double = 0.4, val energy_units: EnergyUnit = KilowattHours, val pib_units: Int = 1) {
+
   val i = Calibration.index_year(year)
   val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
   val delta = (m * delta_e + delta_f) / (1 + m)
-
   val data = Calibration.data
+  // Observed data  for year i
   val pib = data.pib(i) / pib_units;
-  val g = data.g(i); val s = 0.25 //data.s(i); 
+  val g = data.g(i); val s = data.s(i); 
   val qe = data.qe(i)
   val gv = -gpt
   val gk = g + gv
+  // Calculated data for year i
   val v = s / (gk + delta)
   val K = v * pib; val Ke = m / (1 + m) * K; val Kf = 1 / (1 + m) * K
   val p = alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
@@ -24,12 +28,10 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val tilde_Ke = energy_units(Ke * qf)
   val cf = yf - s * pib
   val n = p * data.ce(i).to(energy_units) / cf
- 
-  val eroi = 1 / (qe + delta_e * ve * qf)
-  // println(year + "\t" + eroi + "\t" + qf + "\t" + vf + "\t" + data.qe(i) + "\t" + ve + "\t" + v + "\t" + k / data.ye(i).to(energy_units))
-  // val L=3422; % Pop active (10^6 personnes) 
-  val L = data.L(i) // .toDouble /1E6 //2871.0 * 1E6; // Pop employee (10^6 personnes)
 
+  val eroi = 1 / (qe + delta_e * ve * qf)
+
+  val L = data.L(i) // .toDouble /1E6 //2871.0 * 1E6; // Pop employee (10^6 personnes)
   val r = theta / v;
   val w = (1 - theta) * pib / L;
   val lf = (1 - p * qf - r * vf) / w;
@@ -37,54 +39,97 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val Lf = lf * yf;
   val Le = le * data.ye(i).to(energy_units);
   val rho = yf / pib
+  val z = Z(ve, vf, qe, qf, le, lf, delta_e, delta_f)
+  // Link between m = Ke/Kf, k = K/Ye, & mu = ve/k = Ke/K
+  def m_mu(mu: Double) = mu / (1 - mu)
+  def mu_m(m: Double) = m / (1 + m)
+  def k_m(m: Double, ve: Double) = ve * (m + 1) / m
 
-  val (mi, ms) = interval_m(s, n, ve, vf, qe, qf, le, lf)
-  val (gki, gks) = interval_gk(s, n, ve, vf, qe, qf, le, lf)
-  val (gi, gs) = (gki + gpt, gks + gpt)
+  def mean_std(a: (Double, Double)) = ((a._1 + a._2) / 2, math.abs(a._1 - (a._1 + a._2) / 2))
 
-  // Conditions d'existence: intervalle admissible pour m et le taux de croissance du capital gk
-  def interval_m(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
+  // Conditions d'existence: intervalle admissible pour phi = 1/p
+  def b1(z: Z) = z.lf * (1 - z.qe) / z.le + z.qf
+  def b2(z: Z) = z.vf * (1 - z.qe) / z.ve + z.qf
+  def interval_phi(z: Z) = (b2(z), b1(z))
+  // Exercice 1 : n & s fixed
+  def interval_m_gk(s: Double, n: Double, z: Z) = {
     val n_p = (1 - s) * n / (1 + s * n)
-    val a = (1 + n_p) * qf / (1 - qe)
-    val bounds = List(ve / vf * (n_p * lf / le + a), n_p + ve / vf * a)
+    val a = (1 + n_p) * z.qf / (1 - z.qe)
+    (n_p + z.ve / z.vf * a, z.ve / z.vf * (n_p * z.lf / z.le + a))
+  }
+  def gk_m(m: Double, s: Double, n: Double, z: Z) = {
+    1 / (1 + m) * (1 / z.vf * (1 + n) * s / (1 + s * n) - m * z.deltae - z.deltaf)
+  }
+  def interval_gk(s: Double, n: Double, z: Z) = {
+    val (mi, ms) = interval_m_gk(s, n, z)
+    (gk_m(mi, s, n, z), gk_m(ms, s, n, z))
+  }
+  def delta_m(m: Double, z: Z) = 1.0 / (1 + m) * (m * z.deltae + z.deltaf)
+  def interval_delta_gk(s: Double, n: Double, z: Z) = {
+    val (mi, ms) = interval_m_gk(s, n, z)
+    (delta_m(mi, z), delta_m(ms, z))
+  }
+  // Exercice 2 : gk & n fixed
+  def interval_m_s(gk: Double, n: Double, z: Z) = {
+    val m_inf = (b1(z) * n * (1 - z.vf * (gk + z.deltaf)) + z.qf) / (z.vf / z.ve * (1 - z.qe) + b1(z) * n * z.vf * (gk + z.deltae))
+    val m_sup = (b2(z) * n * (1 - z.vf * (gk + z.deltaf)) + z.qf) / (z.vf / z.ve * (1 - z.qe) + b2(z) * n * z.vf * (gk + z.deltae))
+    (List(m_inf, m_sup).min, List(m_inf, m_sup).max)
+  }
+  // Link between s and n : (1+s)*n/(1+s*n) = f(m,z)
+  def f(m: Double, gk: Double, z: Z) = z.vf * (m * (gk + z.deltae) + gk + z.deltaf)
+  def s(m: Double, gk: Double, n: Double, z: Z) = {
+    f(m, gk, z) / (1 + n - n * f(m, gk, z))
+  }
+  def interval_s(gk: Double, n: Double, z: Z) = {
+    val m = interval_m_s(gk, n, z)
+    (s(m._1, gk, n, z), s(m._2, gk, n, z))
+  }
+  
+  // Exercice 3: gk & c = Ce/Cf fixed (impact on n & s)
+  def m_c(c: Double, gk: Double, z: Z) = {
+    (c * (1 / vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + c * (gk + z.deltae))
+  }
+  def interval_c(c: Double, z: Z) = (c / b1(z), c / b2(z))
+  def interval_s_c(gk: Double, c: Double,  z: Z) = {
+    val fm = f(m_c(c, gk, z), gk, z)
+    (fm / (1 + c / b2(z) - c / b2(z) * fm), fm / (1 + c / b1(z) - c / b1(z) * fm))
+  }
+
+  // Old model with k
+  def interval_gk2(s: Double, n: Double, z: Z) = {
+    val (ki, ks) = interval_k2(s, n, z: Z)
+    val sy = s * (1 + n) / (1 + s * n); // I/Y
+    val x = 1 / vf * sy
+    val a = x - z.deltaf
+    val b = (z.deltaf - z.deltae - x)
+    (a + b * z.ve / ki, a + b * z.ve / ks)
+  }
+
+  // Conditions d'existence: intervalle admissible pour k = K/U
+  def interval_k2(s: Double, n: Double, z: Z) = {
+    // n'
+    val m = (1 - s) * n / (1 + s * n)
+    val k1 = m * z.lf / z.le + (1 + m) * z.qf / (1 - z.qe)
+    val k2 = m * z.vf / z.ve + (1 + m) * z.qf / (1 - z.qe)
+    val bounds = List(z.ve + z.vf / k2, z.ve + z.vf / k1)
     (bounds.min, bounds.max)
   }
-  def interval_gk(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
-    val (mi, ms) = interval_m(s, n, ve, vf, qe, qf, le, lf)
-    val sy = s * (1 + n) / (1 + s * n); // I/Y
-    val x = 1 / vf * sy
-    (1 / (1 + mi) * (x - mi * delta_e - delta_f), 1 / (1 + ms) * (x - ms * delta_e - delta_f))
+  def interval_mu2_s(gk: Double, n: Double, z: Z) = {
+    val bounds = List(
+      (n * b1(z) * (1 / z.vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + z.qf / z.vf + n * b1(z) * (1 / z.vf - (z.deltaf - z.deltae))),
+      (n * b2(z) * (1 / z.vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + z.qf / z.vf + n * b2(z) * (1 / z.vf - (z.deltaf - z.deltae))))
+    (bounds.min, bounds.max)
   }
-  def interval_delta(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
-    val (mi, ms) = interval_m(s, n, ve, vf, qe, qf, le, lf)
-    (1 / (1 + mi) * (mi * delta_e + delta_f), 1 / (1 + ms) * (ms * delta_e + delta_f))
-  }
-  def interval_delta_m(mi: Double, ms: Double) = {
-    (1 / (1 + mi) * (mi * delta_e + delta_f), 1 / (1 + ms) * (ms * delta_e + delta_f))
-  }
-  // Old model with k
-  def interval_gk2(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
-    val (ki, ks) = interval_k2(s, n, ve, vf, qe, qf, le, lf)
-    val sy = s * (1 + n) / (1 + s * n); // I/Y
-    val x = 1 / vf * sy
-    val a = x - delta_f
-    val b = (delta_f - delta_e - x)
-    (a + b * ve / ki, a + b * ve / ks)
+  def interval_s_mu(gk: Double, n: Double, z: Z) = {
+    val mu = interval_mu2_s(gk, n, z)
+    def s(mu: Double) = 1 / ((1 + n) * (1 - mu) / (z.vf * (gk + z.deltaf - (z.deltaf - z.deltae) * mu)) - n)
+    (s(mu._1), s(mu._2))
   }
   def interval_m2(ki: Double, ks: Double, ve: Double) = {
     (ve / (ki - ve), ve / (ks - ve))
   }
   def interval_delta2(ki: Double, ks: Double, ve: Double) = {
     (delta_f - (delta_f - delta_e) * ve / ki, delta_f - (delta_f - delta_e) * ve / ks)
-  }
-  // Conditions d'existence: intervalle admissible pour k = K/U
-  def interval_k2(s: Double, n: Double, ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double) = {
-    // n'
-    val m = (1 - s) * n / (1 + s * n)
-    val k1 = m * lf / le + (1 + m) * qf / (1 - qe)
-    val k2 = m * vf / ve + (1 + m) * qf / (1 - qe)
-    val bounds = List(ve + vf / k2, ve + vf / k1)
-    (bounds.min, bounds.max)
   }
 }
 

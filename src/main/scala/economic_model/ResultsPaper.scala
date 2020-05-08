@@ -21,10 +21,7 @@ object ResultsPaper {
     println("alpha : " + c.alpha * 100 + ", m :" + c.m * 100 + " , gpt : " + c.gpt * 100)
     println("EROI : " + c.eroi)
     println(c.pib_units + "US $ " + "/ " + c.energy_units.toString)
-    println("(mi, m, ms)" + "\t" + round(c.mi * 100, 2) + "\t" + round(c.m * 100, 2) + "\t" + round(c.ms * 100, 2))
-    println("(gi,g,gs)" + "\t" + round(c.gi * 100, 3) + "\t" + round(c.g * 100, 3) + "\t" + round(c.gs * 100, 3))
-    println("(delta_i,delta,delta_s)" + "\t" + round(c.interval_delta_m(c.mi, c.ms)._1 * 100, 3) + "\t" + round(c.delta * 100, 3) + "\t" + round(c.interval_delta_m(c.mi, c.ms)._2 * 100, 3))
-
+    
     println("Det > 0 ?" + "\t" + ((c.le * c.vf - c.lf * c.ve) > 0))
   }
 
