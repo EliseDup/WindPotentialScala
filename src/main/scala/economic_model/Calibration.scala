@@ -13,7 +13,7 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val data = Calibration.data
   // Observed data  for year i
   val pib = data.pib(i) / pib_units;
-  val g = data.g(i); val s = data.s(i); 
+  val g = data.g(i); val s = data.s(i);
   val qe = data.qe(i)
   val gv = -gpt
   val gk = g + gv
@@ -27,7 +27,8 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val ve = Ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
   val tilde_Ke = energy_units(Ke * qf)
   val cf = yf - s * pib
-  val n = p * data.ce(i).to(energy_units) / cf
+  val c = data.ce(i).to(energy_units) / cf
+  val n = p * c //  data.ce(i).to(energy_units) / cf
 
   val eroi = 1 / (qe + delta_e * ve * qf)
 
@@ -84,14 +85,14 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
     val m = interval_m_s(gk, n, z)
     (s(m._1, gk, n, z), s(m._2, gk, n, z))
   }
-  
+
   // Exercice 3: gk & c = Ce/Cf fixed (impact on n & s)
-  def m_c(c: Double, gk: Double, z: Z) = {
+  def m_c(gk: Double, c: Double, z: Z) = {
     (c * (1 / vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + c * (gk + z.deltae))
   }
   def interval_c(c: Double, z: Z) = (c / b1(z), c / b2(z))
-  def interval_s_c(gk: Double, c: Double,  z: Z) = {
-    val fm = f(m_c(c, gk, z), gk, z)
+  def interval_s_c(gk: Double, c: Double, z: Z) = {
+    val fm = f(m_c(gk, c, z), gk, z)
     (fm / (1 + c / b2(z) - c / b2(z) * fm), fm / (1 + c / b1(z) - c / b1(z) * fm))
   }
 

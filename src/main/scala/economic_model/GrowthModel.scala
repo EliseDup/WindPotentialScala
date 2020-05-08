@@ -18,7 +18,9 @@ object GrowthModel {
     val qf_f = cal.qf // * math.pow(1 - 2.0 / 100, 33);
     val pib_f = cal.pib // * math.pow(1 + 2.0 / 100, 33);
     val target = cal.data.ye(cal.i) * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve)
-
+    
+    println(cal.m_c(cal.c, cal.g, cal.z))
+    
     println("Net Energy Target " + target.to(MegaTonOilEquivalent) + "\t" + cal.s)
     val share = (0 to 10).map(_ * 0.1).toList
     // Jacobson scenario for 2050: 
