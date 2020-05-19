@@ -60,6 +60,7 @@ trait SolarTechnology extends RenewableTechnology {
     val energyPerYear = yearlyProduction(solar, panelArea(ratedPower, solar))
     energyPerYear / (1 - operation_variable) * ee.lifeTime / (embodiedEnergyArea(ratedPower, panelArea(ratedPower, solar)) + energyPerYear / (1 - operation_variable) * operation_variable * ee.lifeTime)
   }
+  def capacityFactor(solar: Irradiance) : Double = (solar.toWattsPerSquareMeter*lifeTimeEfficiency(solar)) / ratedPower(SquareMeters(1), solar).toWatts 
   def potential(solar: Irradiance, panelArea: Area): Power = panelArea * solar * lifeTimeEfficiency(solar)
   def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = potential(solar, panelArea) * Hours(365 * 24)
   // The size of the power block depending on design conditions, and solar multiple for CSP plants

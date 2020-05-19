@@ -13,14 +13,18 @@ object Locomotion {
   import PlotHelper._
 
   def main(args: Array[String]): Unit = {
-
-    val grid = Grid()
+println( (Terawatts(1.47)*Hours(365*25)).to(Exajoules))
+    /*   val grid = Grid()
 
     val tech = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, PVPoly, CSPTowerStorage12h)
     tech.map(t => printResults(grid.cells, t, t.name + "_world"))
     tech.map(t => printResults(grid.country("Spain"), t, t.name + "_Spain"))
     tech.map(t => printResults(grid.eu28, t, t.name + "_eu28"))
-
+*/
+    RooftopPVPotential.printCF_Potential(Some(List("Spain")), List(PVMono,PVPoly), "Spain")
+    RooftopPVPotential.printCF_Potential(Some(Grid().eu28countries), List(PVMono,PVPoly), "EU28")
+    RooftopPVPotential.printCF_Potential(None, List(PVMono,PVPoly), "World")
+    
   }
 
   def printResults(grid: List[Cell], tech: RenewableTechnology, output_file: String = "") {
@@ -29,7 +33,7 @@ object Locomotion {
 
     val sorted = grid.filter(c => tech.suitabilityFactor(c) > 0).filter(c => tech.potential(c, 1).value > 0).sortBy(c => tech.capacityFactor(c, 1)).reverse
     sorted.map(c =>
-      out_stream.print(c.country.replaceAll("\\s","") + "\t" + tech.capacityFactor(c, 1) + "\t" + tech.potential(c, 1).to(Terawatts) + "\t" + c.area.toSquareKilometers
+      out_stream.print(c.country.replaceAll("\\s", "") + "\t" + tech.capacityFactor(c, 1) + "\t" + tech.potential(c, 1).to(Terawatts) + "\t" + c.area.toSquareKilometers
         + "\t" + c.area.toSquareKilometers * tech.suitabilityFactor(c) + "\t" + tech.ratedPower(c, 1).to(Megawatts) + "\n"))
   }
 

@@ -3,9 +3,140 @@ import utils._
 import squants.energy._
 
 // Vector of technical parameters
-case class Z(ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double, deltae: Double, deltaf: Double)
+case class Z(ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double, deltae: Double, deltaf: Double) {
+  override def toString() = { vf + "\t" + qf + "\t" + lf + "\t" + deltaf + "\t" + ve + "\t" + qe + "\t" + le + "\t" + deltae }
+}
 
-class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val m: Double = 280.0 / 4000, val gpt: Double = 0.0, val theta: Double = 0.4, val energy_units: EnergyUnit = KilowattHours, val pib_units: Int = 1) {
+class ModelResolution(val z: Z, val ye: Energy, val energy_units: EnergyUnit, val L: Double, val s: Double,
+    val n: Double) {
+  // L = le Ye + lf Yf
+  val yf = (L - z.le * ye.to(energy_units)) / z.lf
+  val ke = z.ve * ye.to(energy_units)
+  val kf = z.vf * yf
+  // Ce = (1-qe)Ye - qf Yf
+  val ce = (1 - z.qe) * ye - energy_units(z.qf * yf)
+  val cf = cf_s_n(s, n)
+  val p = p_s_n(s, n)
+  // Cf = (1-s)/(1+sn) * yf
+
+  def cf_s_n(s: Double, n: Double) = (1 - s) / (1 + s * n) * yf
+  def p_s_n(s: Double, n: Double) = n * cf_s_n(s, n) / ce.to(energy_units)
+
+  // Pertes / PIN
+  val eroi = 1 / (z.qe + z.deltae * z.ve * z.qf)
+  val p1 = 1 - ((1 - z.qe) * (1 - z.deltaf * z.vf) - (-z.qf * -z.deltae * z.ve))
+  val PIN1 = ye.to(energy_units) / z.qf
+  val PIN2 = PIN1 * (1 - 1.0 / eroi)
+  val PIN3 = PIN1 * (1 - p1)
+  val xi = ce / ye
+  val p2 = (1 - z.deltaf * z.vf - p * z.qf) * xi
+  val PIN4 = PIN1 * (1 - p1 - p2)
+  
+  // Pertes %
+  val perte1 = 1.0/eroi
+  val perte2 = p1
+  val perte3 = p1+p2
+}
+
+class ImpactPER(val z: Z) {
+  // Pertes / PIN
+  val eroi = 1 / (z.qe + z.deltae * z.ve * z.qf)
+
+  // Link between m = Ke/Kf, k = K/Ye, & mu = ve/k = Ke/K
+  def m_mu(mu: Double) = mu / (1 - mu)
+  def mu_m(m: Double) = m / (1 + m)
+  def k_m(m: Double) = z.ve * (m + 1) / m
+
+  def mean_std(a: (Double, Double)) = ((a._1 + a._2) / 2, math.abs(a._1 - (a._1 + a._2) / 2))
+
+  // Conditions d'existence: intervalle admissible pour phi = 1/p
+  val b1 = z.lf * (1 - z.qe) / z.le + z.qf
+  val b2 = z.vf * (1 - z.qe) / z.ve + z.qf
+  val interval_phi = (b2, b1)
+  val interval_p = (1.0 / b1, 1.0 / b2)
+  val p = mean_std(interval_p)
+  // Exercice 1 : n & s fixed
+  def interval_m_gk(s: Double, n: Double) = {
+    val n_p = (1 - s) * n / (1 + s * n)
+    val a = (1 + n_p) * z.qf / (1 - z.qe)
+    (n_p + z.ve / z.vf * a, z.ve / z.vf * (n_p * z.lf / z.le + a))
+  }
+  def gk_m(m: Double, s: Double, n: Double) = {
+    1 / (1 + m) * (1 / z.vf * (1 + n) * s / (1 + s * n) - m * z.deltae - z.deltaf)
+  }
+  def interval_gk(s: Double, n: Double) = {
+    val (mi, ms) = interval_m_gk(s, n)
+    (gk_m(mi, s, n), gk_m(ms, s, n))
+  }
+  def delta_m(m: Double) = 1.0 / (1 + m) * (m * z.deltae + z.deltaf)
+  def interval_delta_gk(s: Double, n: Double) = {
+    val (mi, ms) = interval_m_gk(s, n)
+    (delta_m(mi), delta_m(ms))
+  }
+  // Exercice 2 : gk & n fixed
+  def interval_m_s(gk: Double, n: Double) = {
+    val m_inf = (b1 * n * (1 - z.vf * (gk + z.deltaf)) + z.qf) / (z.vf / z.ve * (1 - z.qe) + b1 * n * z.vf * (gk + z.deltae))
+    val m_sup = (b2 * n * (1 - z.vf * (gk + z.deltaf)) + z.qf) / (z.vf / z.ve * (1 - z.qe) + b2 * n * z.vf * (gk + z.deltae))
+    (List(m_inf, m_sup).min, List(m_inf, m_sup).max)
+  }
+  // Link between s and n : (1+s)*n/(1+s*n) = f(m,z)
+  def f(m: Double, gk: Double) = z.vf * (m * (gk + z.deltae) + gk + z.deltaf)
+  def s(m: Double, gk: Double, n: Double) = {
+    f(m, gk) / (1 + n - n * f(m, gk))
+  }
+  def interval_s(gk: Double, n: Double) = {
+    val m = interval_m_s(gk, n)
+    (s(m._1, gk, n), s(m._2, gk, n))
+  }
+
+  // Exercice 3: gk & c = Ce/Cf fixed (impact on n & s)
+  def m_c(gk: Double, c: Double) = {
+    (c * (1 / z.vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + c * (gk + z.deltae))
+  }
+  def interval_c(c: Double) = (c / b1, c / b2)
+  def interval_s_c(gk: Double, c: Double) = {
+    val fm = f(m_c(gk, c), gk)
+    (fm / (1 + c / b2 - c / b2 * fm), fm / (1 + c / b1 - c / b1 * fm))
+  }
+  /*
+  // Old model with k
+  def interval_gk2(s: Double, n: Double) = {
+    val (ki, ks) = interval_k2(s, n)
+    val sy = s * (1 + n) / (1 + s * n); // I/Y
+    val x = 1 / z.vf * sy
+    val a = x - z.deltaf
+    val b = (z.deltaf - z.deltae - x)
+    (a + b * z.ve / ki, a + b * z.ve / ks)
+  }
+
+  // Conditions d'existence: intervalle admissible pour k = K/U
+  def interval_k2(s: Double, n: Double) = {
+    // n'
+    val m = (1 - s) * n / (1 + s * n)
+    val k1 = m * z.lf / z.le + (1 + m) * z.qf / (1 - z.qe)
+    val k2 = m * z.vf / z.ve + (1 + m) * z.qf / (1 - z.qe)
+    val bounds = List(z.ve + z.vf / k2, z.ve + z.vf / k1)
+    (bounds.min, bounds.max)
+  }
+  def interval_mu2_s(gk: Double, n: Double) = {
+    val bounds = List(
+      (n * b1 * (1 / z.vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + z.qf / z.vf + n * b1 * (1 / z.vf - (z.deltaf - z.deltae))),
+      (n * b2 * (1 / z.vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + z.qf / z.vf + n * b2 * (1 / z.vf - (z.deltaf - z.deltae))))
+    (bounds.min, bounds.max)
+  }
+  def interval_s_mu(gk: Double, n: Double) = {
+    val mu = interval_mu2_s(gk, n)
+    def s(mu: Double) = 1 / ((1 + n) * (1 - mu) / (z.vf * (gk + z.deltaf - (z.deltaf - z.deltae) * mu)) - n)
+    (s(mu._1), s(mu._2))
+  }
+  def interval_m2(ki: Double, ks: Double, ve: Double) = {
+    (ve / (ki - ve), ve / (ks - ve))
+  }
+*/
+}
+
+class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val m: Double = 280.0 / 4000, val gpt: Double = 0.0, val theta: Double = 0.4, val energy_units: EnergyUnit = KilowattHours, val pib_units: Int = 1,
+    val pop_units: Int = 1) {
 
   val i = Calibration.index_year(year)
   val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
@@ -32,7 +163,7 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
 
   val eroi = 1 / (qe + delta_e * ve * qf)
 
-  val L = data.L(i) // .toDouble /1E6 //2871.0 * 1E6; // Pop employee (10^6 personnes)
+  val L = data.L(i) / pop_units // .toDouble /1E6 //2871.0 * 1E6; // Pop employee (10^6 personnes)
   val r = theta / v;
   val w = (1 - theta) * pib / L;
   val lf = (1 - p * qf - r * vf) / w;
@@ -41,97 +172,7 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val Le = le * data.ye(i).to(energy_units);
   val rho = yf / pib
   val z = Z(ve, vf, qe, qf, le, lf, delta_e, delta_f)
-  // Link between m = Ke/Kf, k = K/Ye, & mu = ve/k = Ke/K
-  def m_mu(mu: Double) = mu / (1 - mu)
-  def mu_m(m: Double) = m / (1 + m)
-  def k_m(m: Double, ve: Double) = ve * (m + 1) / m
 
-  def mean_std(a: (Double, Double)) = ((a._1 + a._2) / 2, math.abs(a._1 - (a._1 + a._2) / 2))
-
-  // Conditions d'existence: intervalle admissible pour phi = 1/p
-  def b1(z: Z) = z.lf * (1 - z.qe) / z.le + z.qf
-  def b2(z: Z) = z.vf * (1 - z.qe) / z.ve + z.qf
-  def interval_phi(z: Z) = (b2(z), b1(z))
-  // Exercice 1 : n & s fixed
-  def interval_m_gk(s: Double, n: Double, z: Z) = {
-    val n_p = (1 - s) * n / (1 + s * n)
-    val a = (1 + n_p) * z.qf / (1 - z.qe)
-    (n_p + z.ve / z.vf * a, z.ve / z.vf * (n_p * z.lf / z.le + a))
-  }
-  def gk_m(m: Double, s: Double, n: Double, z: Z) = {
-    1 / (1 + m) * (1 / z.vf * (1 + n) * s / (1 + s * n) - m * z.deltae - z.deltaf)
-  }
-  def interval_gk(s: Double, n: Double, z: Z) = {
-    val (mi, ms) = interval_m_gk(s, n, z)
-    (gk_m(mi, s, n, z), gk_m(ms, s, n, z))
-  }
-  def delta_m(m: Double, z: Z) = 1.0 / (1 + m) * (m * z.deltae + z.deltaf)
-  def interval_delta_gk(s: Double, n: Double, z: Z) = {
-    val (mi, ms) = interval_m_gk(s, n, z)
-    (delta_m(mi, z), delta_m(ms, z))
-  }
-  // Exercice 2 : gk & n fixed
-  def interval_m_s(gk: Double, n: Double, z: Z) = {
-    val m_inf = (b1(z) * n * (1 - z.vf * (gk + z.deltaf)) + z.qf) / (z.vf / z.ve * (1 - z.qe) + b1(z) * n * z.vf * (gk + z.deltae))
-    val m_sup = (b2(z) * n * (1 - z.vf * (gk + z.deltaf)) + z.qf) / (z.vf / z.ve * (1 - z.qe) + b2(z) * n * z.vf * (gk + z.deltae))
-    (List(m_inf, m_sup).min, List(m_inf, m_sup).max)
-  }
-  // Link between s and n : (1+s)*n/(1+s*n) = f(m,z)
-  def f(m: Double, gk: Double, z: Z) = z.vf * (m * (gk + z.deltae) + gk + z.deltaf)
-  def s(m: Double, gk: Double, n: Double, z: Z) = {
-    f(m, gk, z) / (1 + n - n * f(m, gk, z))
-  }
-  def interval_s(gk: Double, n: Double, z: Z) = {
-    val m = interval_m_s(gk, n, z)
-    (s(m._1, gk, n, z), s(m._2, gk, n, z))
-  }
-
-  // Exercice 3: gk & c = Ce/Cf fixed (impact on n & s)
-  def m_c(gk: Double, c: Double, z: Z) = {
-    (c * (1 / vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + c * (gk + z.deltae))
-  }
-  def interval_c(c: Double, z: Z) = (c / b1(z), c / b2(z))
-  def interval_s_c(gk: Double, c: Double, z: Z) = {
-    val fm = f(m_c(gk, c, z), gk, z)
-    (fm / (1 + c / b2(z) - c / b2(z) * fm), fm / (1 + c / b1(z) - c / b1(z) * fm))
-  }
-
-  // Old model with k
-  def interval_gk2(s: Double, n: Double, z: Z) = {
-    val (ki, ks) = interval_k2(s, n, z: Z)
-    val sy = s * (1 + n) / (1 + s * n); // I/Y
-    val x = 1 / vf * sy
-    val a = x - z.deltaf
-    val b = (z.deltaf - z.deltae - x)
-    (a + b * z.ve / ki, a + b * z.ve / ks)
-  }
-
-  // Conditions d'existence: intervalle admissible pour k = K/U
-  def interval_k2(s: Double, n: Double, z: Z) = {
-    // n'
-    val m = (1 - s) * n / (1 + s * n)
-    val k1 = m * z.lf / z.le + (1 + m) * z.qf / (1 - z.qe)
-    val k2 = m * z.vf / z.ve + (1 + m) * z.qf / (1 - z.qe)
-    val bounds = List(z.ve + z.vf / k2, z.ve + z.vf / k1)
-    (bounds.min, bounds.max)
-  }
-  def interval_mu2_s(gk: Double, n: Double, z: Z) = {
-    val bounds = List(
-      (n * b1(z) * (1 / z.vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + z.qf / z.vf + n * b1(z) * (1 / z.vf - (z.deltaf - z.deltae))),
-      (n * b2(z) * (1 / z.vf - (gk + z.deltaf)) + z.qf / z.vf) / ((1 - z.qe) / z.ve + z.qf / z.vf + n * b2(z) * (1 / z.vf - (z.deltaf - z.deltae))))
-    (bounds.min, bounds.max)
-  }
-  def interval_s_mu(gk: Double, n: Double, z: Z) = {
-    val mu = interval_mu2_s(gk, n, z)
-    def s(mu: Double) = 1 / ((1 + n) * (1 - mu) / (z.vf * (gk + z.deltaf - (z.deltaf - z.deltae) * mu)) - n)
-    (s(mu._1), s(mu._2))
-  }
-  def interval_m2(ki: Double, ks: Double, ve: Double) = {
-    (ve / (ki - ve), ve / (ks - ve))
-  }
-  def interval_delta2(ki: Double, ks: Double, ve: Double) = {
-    (delta_f - (delta_f - delta_e) * ve / ki, delta_f - (delta_f - delta_e) * ve / ks)
-  }
 }
 
 object Calibration {
@@ -144,20 +185,21 @@ object Calibration {
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
 
   val cals = data.year.map(y => new calibration_results_work(year = y))
-  val (qe, qf, ve, vf, le, lf) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf), cals.map(_.le), cals.map(_.lf))
+  val (qe, qf, ve, vf, le, lf, v) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf), cals.map(_.le), cals.map(_.lf), cals.map(_.v))
   def growth_rates(ind: List[Double]) = {
     (1 until ind.size).toList.map(i => (1 - ind(i) / ind(i - 1)))
   }
 
   import Helper._
-  def printTableCalibration_new(year: Int = 2017, tfs: List[Int], alphas: List[Double], ms: List[Double], gpts: List[Double]) {
+  def printTableCalibration_new(year: Int = 2017, tfs: List[Int], tes: List[Int], alphas: List[Double], ms: List[Double], gpts: List[Double]) {
 
-    val cals = tfs.map(tf => alphas.map(alpha => ms.map(m => gpts.map(gpt => new calibration_results_work(year, tf, 25, alpha, m, gpt))).flatten).flatten).flatten
+    val cals = tfs.map(tf => tes.map(te => alphas.map(alpha => ms.map(m => gpts.map(gpt => new calibration_results_work(year, tf, te, alpha, m, gpt))).flatten).flatten).flatten).flatten
     val ref = new calibration_results_work(year = year)
 
     print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
 
     print("$T_f$ [years]&"); print("textbf{"); print(ref.Tf); print("}"); cals.map(cal => print(" & " + cal.Tf)); println(" \\" + "\\")
+    print("$T_e$ [years]&"); print("textbf{"); print(ref.Te); print("}"); cals.map(cal => print(" & " + cal.Te)); println(" \\" + "\\")
 
     print("$delta$ [%]&"); print("textbf{"); print(round(ref.delta * 100, 2)); print("}"); cals.map(cal => print(" & " + round(cal.delta * 100))); println(" \\" + "\\")
     print("$alpha$ [%]&"); print("textbf{"); print(ref.alpha * 100.toInt); print("}"); cals.map(cal => print(" & " + cal.alpha * 100)); println(" \\" + "\\")
@@ -169,7 +211,7 @@ object Calibration {
     print("$v_f$ & "); print("textbf{"); print(round(ref.vf)); print("}"); cals.map(cal => print(" & " + round(cal.vf))); println(" \\" + "\\")
     print("$v_e$ & "); print("textbf{"); print(round(ref.ve)); print("}"); cals.map(cal => print(" & " + round(cal.ve))); println(" \\" + "\\")
 
-    print("n [%]& "); print("textbf{"); print(round(ref.n * 100)); print("}"); cals.map(cal => print(" & " + round(cal.n * 100))); println(" \\" + "\\")
+    print("n [/100]& "); print("textbf{"); print(round(ref.n * 100)); print("}"); cals.map(cal => print(" & " + round(cal.n * 100))); println(" \\" + "\\")
     println
     print("textbf{"); print(round(100 * (ref.delta * ref.ve * ref.qf))); print("}");
     cals.map(cal => print(" & " + round(round(100 * (cal.delta * cal.ve * cal.qf))))); println(" \\" + "\\")

@@ -128,7 +128,7 @@ class ProductionFunction(val sites: List[Cell], val techs: List[(RenewableTechno
   val target = (1 to 100).map(i => Exajoules(i * 10)).toList
   val function: List[(Energy, Double, Double)] =
     target.map(i => {
-      val techs_it = techs.map(t => new TechnologyIterator(t._1, sites_sf.filter(s => t._1.suitabilityFactor(s) > 0), calib.qf, calib.qf))
+      val techs_it = techs.map(t => new TechnologyIterator(t._1, sites_sf.filter(s => t._1.suitabilityFactor(s) > 0)))
       val y = i.to(Exajoules).toInt
       techs_it.map(t => t.simulate_year(y, i * techs.find(_._1.equals(t.tech)).get._2, true))
       res.sumResults(y, techs_it.map(_.results))
