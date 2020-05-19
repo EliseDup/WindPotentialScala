@@ -14,7 +14,7 @@ object ResultsPaper {
   def main(args: Array[String]): Unit = {
     // Sensitivity analysis table
     //Calibration.printTableCalibration_new(2017, List(15, 25), List(25), List(0.04, 0.08), List(0.04, 0.1), List(0.0))
-    //plotParametersHistory
+    plotParametersHistory
     // Exercice 1 to 3
     val share = (0 to 10).map(_ * 0.1).toList
     resultsExercices(share)
