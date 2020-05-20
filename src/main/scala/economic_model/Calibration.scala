@@ -6,6 +6,9 @@ import squants.energy._
 case class Z(ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double, deltae: Double, deltaf: Double) {
   override def toString() = { vf + "\t" + qf + "\t" + lf + "\t" + deltaf + "\t" + ve + "\t" + qe + "\t" + le + "\t" + deltae }
 }
+object ModelResolution{
+  def apply(c : calibration_results_work):ModelResolution = new ModelResolution(c.z, c.data.ye(c.i), c.energy_units, c.L, c.s, c.n)
+}
 
 class ModelResolution(val z: Z, val ye: Energy, val energy_units: EnergyUnit, val L: Double, val s: Double,
     val n: Double) {
@@ -135,7 +138,7 @@ class ImpactPER(val z: Z) {
 */
 }
 
-class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val m: Double = 280.0 / 4000, val gpt: Double = 0.0, val theta: Double = 0.4, val energy_units: EnergyUnit = KilowattHours, val pib_units: Int = 1,
+class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val m: Double = 280.0 / 4000, val theta: Double = 0.4, val energy_units: EnergyUnit = KilowattHours, val pib_units: Int = 1,
     val pop_units: Int = 1) {
 
   val i = Calibration.index_year(year)
@@ -146,7 +149,8 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val pib = data.pib(i) / pib_units;
   val g = data.g(i); val s = data.s(i);
   val qe = data.qe(i)
-  val gv = -gpt
+  // val gvs = Helper.getLines("data_eco/gpt","\t").map(j => -j(0).toDouble/100) // -data.gpt(i) //-gpt  
+  val gv = 0 // gvs(i)
   val gk = g + gv
   // Calculated data for year i
   val v = s / (gk + delta)
@@ -189,7 +193,7 @@ object Calibration {
   def growth_rates(ind: List[Double]) = {
     (1 until ind.size).toList.map(i => (1 - ind(i) / ind(i - 1)))
   }
-
+  
   import Helper._
   def printTableCalibration_new(year: Int = 2017, tfs: List[Int], tes: List[Int], alphas: List[Double], ms: List[Double], gpts: List[Double]) {
 
@@ -217,6 +221,27 @@ object Calibration {
     cals.map(cal => print(" & " + round(round(100 * (cal.delta * cal.ve * cal.qf))))); println(" \\" + "\\")
     println
     print("$epsilon$ & "); print("textbf{"); print(round(ref.eroi)); print("}"); cals.map(cal => print(" & " + round(cal.eroi))); println(" \\" + "\\")
+
+  }
+  def printTableCalibration_simple(year: Int = 2017, alphas: List[Double], ms: List[Double]) {
+
+    // val cals = alphas.map(alpha => ms.map(m => new calibration_results_work(year,20,25, alpha,m))).flatten
+    val cals = ms.map(m => alphas.map(alpha => new calibration_results_work(year,20,25, alpha,m))).flatten
+    
+    // val ref = new calibration_results_work(year = year)
+
+    print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
+    print("$alpha$ [%]");
+    cals.map(cal => print(" & " + cal.alpha * 100)); println(" \\" + "\\")
+    print("$m$ [%]"); 
+    cals.map(cal => print(" & " + cal.m * 100)); println(" \\" + "\\")
+   
+    print("$q_f$"); cals.map(cal => print(" & " + round(cal.qf))); println(" \\" + "\\")
+    print("$v_e$"); cals.map(cal => print(" & " + round(cal.ve))); println(" \\" + "\\")
+
+    // print("n [/100]& "); print("textbf{"); print(round(ref.n * 100)); print("}"); cals.map(cal => print(" & " + round(cal.n * 100))); println(" \\" + "\\")
+    cals.map(cal => print(" & " + round(round(100 * (cal.delta_e * cal.ve * cal.qf))))); println(" \\" + "\\")
+    print("$epsilon$ "); cals.map(cal => print(" & " + round(cal.eroi))); println(" \\" + "\\")
 
   }
 }

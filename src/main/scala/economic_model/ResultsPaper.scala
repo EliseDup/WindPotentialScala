@@ -12,12 +12,32 @@ object ResultsPaper {
   import GrowthModel._
 
   def main(args: Array[String]): Unit = {
+
     // Sensitivity analysis table
-    //Calibration.printTableCalibration_new(2017, List(15, 25), List(25), List(0.04, 0.08), List(0.04, 0.1), List(0.0))
-    plotParametersHistory
+    val as = List(0.04, 0.06, 0.08); val ms = List(0.04, 0.07, 0.1)
+    //Calibration.printTableCalibration_simple(2017, as , ms)
     // Exercice 1 to 3
     val share = (0 to 10).map(_ * 0.1).toList
-    resultsExercices(share)
+    //resultsExercices(share)
+
+    // Pin analysis
+    val z = ms.map(m => as.map(a => (a, m, ModelResolution(new calibration_results_work(2017, alpha = a, m = m))))).flatten
+    /* z.map(i => println(i._1 + "\t" + i._2 + "\t" +
+        i._3.z + "\t" + i._3.ye.to(i._3.energy_units) + "\t"  + i._3.p + "\t" + i._3.ce.to(i._3.energy_units) + "\t"
+        +i._3.perte1 + "\t" + i._3.perte2 + "\t" + i._3.perte3 + "\t" +
+        i._3.PIN1 + "\t" + i._3.PIN2 + "\t" + i._3.PIN3  + "\t" + i._3.PIN4))*/
+    print("$m$ [%]"); z.map(cal => print(" & " + (cal._2*100).toInt)); println(" \\" + "\\")
+    print("$alpha$ [%]"); z.map(cal => print(" & " + (cal._1*100).toInt)); println(" \\" + "\\")
+    
+    print("$1 - 1/epsilon$ [%]"); z.map(cal => print(" & " + round(cal._3.perte1*100))); println(" \\" + "\\")
+    print("$1 - P_1$ [%]"); z.map(cal => print(" & " + round(cal._3.perte2*100))); println(" \\" + "\\")
+    print("$1-P_1-P_2$ [%]"); z.map(cal => print(" & " + round(cal._3.perte3*100))); println(" \\" + "\\")
+    
+    print("$PIN_1$ "); z.map(cal => print(" & " + round(cal._3.PIN1/1E9).toInt)); println(" \\" + "\\")
+    print("$PIN_2$"); z.map(cal => print(" & " + round(cal._3.PIN2/1E9,0).toInt)); println(" \\" + "\\")
+    print("$PIN_3$ "); z.map(cal => print(" & " + round(cal._3.PIN3/1E9,0).toInt)); println(" \\" + "\\")
+    print("$PIN_4$"); z.map(cal => print(" & " + round(cal._3.PIN4/1E9,0).toInt)); println(" \\" + "\\")
+    
   }
 
   def resultsExercices(share: List[Double] = (0 to 10).map(_ * 0.1).toList, e_units: EnergyUnit = MegaTonOilEquivalent, pib_units: Int = 1E9.toInt) {
@@ -68,8 +88,8 @@ object ResultsPaper {
     def printPINs(z: (Z, Energy)) {
       val res = new ModelResolution(z._1, z._2, cal.energy_units, cal.L, cal.s, cal.n)
       println(res.eroi + " & " +
-          round(res.PIN1, 0) + " & " + round(res.PIN2, 0) + " & " + round(res.PIN3, 0) + " & " + round(res.PIN4, 0) + " & " +
-          round(res.perte1 * 100) + " & " + round(res.perte2 * 100) + " & " + round(res.perte3 * 100))
+        round(res.PIN1, 0) + " & " + round(res.PIN2, 0) + " & " + round(res.PIN3, 0) + " & " + round(res.PIN4, 0) + " & " +
+        round(res.perte1 * 100) + " & " + round(res.perte2 * 100) + " & " + round(res.perte3 * 100))
     }
 
   }
@@ -79,10 +99,12 @@ object ResultsPaper {
 
     println((growth_rates(qf)).sum / (growth_rates(qf).size))
     println((growth_rates(lf)).sum / (growth_rates(lf).size))
-    
+    val gv = cals.map(_.gv)
+    (0 until year_double.size).map(y => println(data.g(y) + "\t" + data.s(y) + "\t" + gv(y) + "\t" + v(y)))
+
     (0 until year_double.size).map(y => println(data.year(y) + "\t" + v(y) + "\t" + qe(y) + "\t" + qf(y) + "\t" + ve(y) + "\t" + vf(y) + "\t" + le(y) + "\t" + lf(y)))
     val res = List((qe, "qe"), (qf, " qf"), (ve, "ve"), (vf, "vf"), (le.map(_ * 1E6), "le"), (lf.map(_ * 1E6), "lf"))
-    
+
     import CalibrationData._
     res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))
     val year_growth = (1 until year_double.size).map(year_double(_)).toList

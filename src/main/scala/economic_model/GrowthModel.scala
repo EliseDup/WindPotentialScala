@@ -19,7 +19,7 @@ object GrowthModel {
     val qf_f = cal.qf // * math.pow(1 - 2.0 / 100, 33);
     val pib_f = cal.pib // * math.pow(1 + 2.0 / 100, 33);
     val target = cal.data.ye(cal.i) * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve)
-
+    println(cal.delta)
     println("Net Energy Target " + target.to(MegaTonOilEquivalent) + "\t" + cal.s)
 
     val share = (0 to 10).map(_ * 0.1).toList
@@ -33,13 +33,13 @@ object GrowthModel {
     // Total = 94.69 / 100 
     val techs = List((OnshoreWindTechnology, 23.52 / 94.69), (OffshoreWindTechnology, 13.62 / 94.69), (PVPoly, (14.89 + 11.58 + 21.36) / 94.69), (CSPParabolic, 9.72 / 94.69))
     val res = share.map(s => (s, calculate(target, techs, s, cal, qf_f, pib_f, cal.vf * pib_f)))
-  
+
   }
 
   // For a given target (= final net energy demand NE), and renewable energy share, 
   // gives a estimate of the technical parameters and EROI of the energy system
   def calculate(target: Energy, techs: List[(RenewableTechnology, Double)], share_re: Double = 1.0,
-    calib: calibration_results_work, qf_final: Double, pib_final: Double, Kf_final: Double) : (Z,Energy) = {
+    calib: calibration_results_work, qf_final: Double, pib_final: Double, Kf_final: Double): (Z, Energy) = {
 
     val all_sites = Grid().cells;
     // Initialise 
