@@ -4,7 +4,7 @@ import squants.energy._
 
 // Vector of technical parameters
 case class Z(ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double, deltae: Double, deltaf: Double) {
-  override def toString() = { vf + "\t" + qf + "\t" + lf + "\t" + deltaf + "\t" + ve + "\t" + qe + "\t" + le + "\t" + deltae }
+  override def toString() = { ve + "\t" + vf + "\t" + qe + "\t" + qf + "\t" + le + "\t" + lf + "\t" + deltae + "\t" + deltaf }
 }
 
 class ImpactPER(val z: Z) {
@@ -35,7 +35,8 @@ class ImpactPER(val z: Z) {
     (a1 / (1 + a1), a2 / (1 + a2))
   }
   def mu_gk(s: Double, n: Double) = mean_std(interval_mu_gk(s, n))
-  def k_gk(s: Double, n : Double)= mean_std(k_mu(interval_mu_gk(s, n)._1),k_mu(interval_mu_gk(s, n)._2))
+  def k_gk(s: Double, n: Double) = mean_std(k_mu(interval_mu_gk(s, n)._1), k_mu(interval_mu_gk(s, n)._2))
+
   def gk_mu(mu: Double, s: Double, n: Double) = {
     1 / z.vf * (1 + n) * s / (1 + s * n) - z.deltaf + (z.deltaf - z.deltae - 1 / z.vf * (1 + n) * s / (1 + s * n)) * mu
   }
@@ -72,9 +73,32 @@ class ImpactPER(val z: Z) {
     (mu_(phi1), mu_(phi2))
   }
   def mu_s(gk: Double, n: Double) = mean_std(interval_mu_s(gk, n))
-  def k_s(gk: Double, n: Double) = mean_std(k_mu(interval_mu_s(gk, n)._1),k_mu(interval_mu_s(gk, n)._2))
+  def k_s(gk: Double, n: Double) = mean_std(k_mu(interval_mu_s(gk, n)._1), k_mu(interval_mu_s(gk, n)._2))
   def s_s(gk: Double, n: Double) = mean_std(interval_s(gk, n))
 
+  // v calculation
+  // v = s/(gk + delta)
+  def v(s: Double, gk: Double, mu: Double) = s / (gk + delta_mu(mu))
+
+  def v_gk(s: Double, n: Double) = {
+    val mu = interval_mu_gk(s, n);
+    val v1 = v(s, gk_mu(mu._1, s, n), mu._1)
+    val v2 = v(s, gk_mu(mu._2, s, n), mu._2)
+    mean_std(v1,v2)
+  }
+  def v_s(gk: Double, n: Double) = {
+    val mu = interval_mu_s(gk, n)
+    val v1 = v(s_mu(mu._1, gk, n), gk, mu._1)
+    val v2 = v(s_mu(mu._2, gk, n), gk, mu._2)
+     mean_std(v1,v2)
+  }
+  def v_c(gk: Double, c: Double)={
+    val mu = mu_c(gk, c)
+    val s = interval_s_c(gk, c)
+    val v1 = v(s._1, gk, mu)
+    val v2 = v(s._2, gk, mu)
+     mean_std(v1,v2)
+  }
   // Link between s and n : (1+s)*n/(1+s*n) = f(m,z)
   def f_m(m: Double, gk: Double) = z.vf * (m * (gk + z.deltae) + gk + z.deltaf)
   def f_mu(mu: Double, gk: Double) = z.vf * (gk + z.deltaf - mu * (z.deltaf - z.deltae)) / (1 - mu)
