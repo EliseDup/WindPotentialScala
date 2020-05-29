@@ -43,15 +43,16 @@ object Test {
 
   import Helper._
   import PlotHelper._
-  def main(args: Array[String]): Unit = {
   
+  def main(args: Array[String]): Unit = {
+
     val g = Grid()
     val countries = List("United States", "India", "Spain")
     val csps = List(CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     csps.map(csp => print(csp.name + "\t"))
-     println()
-    csps.map(csp => print(csp.embodiedEnergyArea(Megawatts(1), csp.default_aperture_area/1000.0).to(Megajoules) + "\t" ))
-        println()
+    println()
+    csps.map(csp => print(csp.embodiedEnergyArea(Megawatts(1), csp.default_aperture_area / 1000.0).to(Megajoules) + "\t"))
+    println()
     countries.map(c => {
       val cells = g.country(c)
       print(c + "\t")
