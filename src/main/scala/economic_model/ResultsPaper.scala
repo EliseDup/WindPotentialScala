@@ -21,15 +21,15 @@ object ResultsPaper {
     val cal = new calibration_results_work(energy_units = MegaTonOilEquivalent, pib_units = 1E9.toInt, pop_units = 1E6.toInt)
 
     val share = (0 to 4).map(_ * 0.25).toList
-    val lf_f = cal.lf*math.pow(1-1.34/100,33)
-     val qf_f = cal.qf*math.pow(1-1.06/100,33)
-     println(lf_f + "\t" + qf_f)
-   resultsExercices(share, cal.qf,cal.lf)
-   resultsExercices(share, qf_f,lf_f)
-   
-    // resultsExercices(share, false,cal.qf,cal.lf)
+    val lf_f = cal.lf * math.pow(1 - 1.34 / 100, 33)
+    val qf_f = cal.qf * math.pow(1 - 1.06 / 100, 33)
+    println(lf_f + "\t" + qf_f)
+    // resultsExercices(share, cal.qf,cal.lf)
+    println("Results " + qf_f + "\t" + lf_f)
+    resultsExercices(share, qf_f, lf_f)
+    println("Results " + cal.qf + "\t" + cal.lf)
+    resultsExercices(share, cal.qf, cal.lf)
     // 
-
 
   }
 
@@ -141,54 +141,54 @@ object ResultsPaper {
       round(100 * s._1) + " & " + round(100 * s._2) + " & " +
       round(100 * mu_c) + " & " + round(100 * k_c) + " & " + round(100 * n_c._1) + " & " + round(100 * n_c._2) + " & " + round(100 * s_c._1) + " & " + round(100 * s_c._2) + "\\" + "\\")
   }
-  def printCommonResults(zs: List[(Double,Z)]) {
+  def printCommonResults(zs: List[(Double, Z)]) {
     println(" --- Common Results ---")
     println("x & epsilon & q_e & v_e & bar{p} & sigma_p & NER & Pertes CIK SE & Pertes CIK SF \\")
     zs.map(zz => {
       val z = zz._2
       val res = new ImpactPER(z)
-      println(round(100*zz._1,0).toInt + " &  " + round(100 * z.qe) + " & " + round(z.ve) + " & " + round(res.p._1) + " & " + round(res.p._2) + " & " +
+      println(round(100 * zz._1, 0).toInt + " &  " + round(100 * z.qe) + " & " + round(z.ve) + " & " + round(res.p._1) + " & " + round(res.p._2) + " & " +
         round(res.eroi) + " & " + round(100 * res.ner) + " & " +
         round(100 * (1 / res.eroi)) + "& " +
         round(100 * (1 - res.ner - 1 / res.eroi)) + " \\" + "\\")
     })
   }
   // mu, k, gk, s, n
-  def printExercice1(zs: List[(Double,Z)], s_fixed: Double, n_fixed: Double) {
+  def printExercice1(zs: List[(Double, Z)], s_fixed: Double, n_fixed: Double) {
     println(" --- Results Exercice 1 --- ")
     zs.map(zz => {
       val z = zz._2
       val res = new ImpactPER(z)
-      println(round(100*zz._1,0).toInt + " &  " + round(100 * res.mu_gk(s_fixed, n_fixed)._1) + " & " + round(100 * res.mu_gk(s_fixed, n_fixed)._2) + " & " +
+      println(round(100 * zz._1, 0).toInt + " &  " + round(100 * res.mu_gk(s_fixed, n_fixed)._1) + " & " + round(100 * res.mu_gk(s_fixed, n_fixed)._2) + " & " +
         round(res.k_gk(s_fixed, n_fixed)._1) + " & " + round(res.k_gk(s_fixed, n_fixed)._2) + " & " +
         round(100 * res.gk(s_fixed, n_fixed)._1) + " & " + round(100 * res.gk(s_fixed, n_fixed)._2) + " & " +
-        round(100 * s_fixed) + " & - &" + round(100 * n_fixed) + " & - & " + 
+        round(100 * s_fixed) + " & - &" + round(100 * n_fixed) + " & - & " +
         round(res.v_gk(s_fixed, n_fixed)._1) + " & " + round(res.v_gk(s_fixed, n_fixed)._2) + " \\" + "\\")
     })
   }
-  def printExercice2(zs: List[(Double,Z)], gk_fixed: Double, n_fixed: Double) {
+  def printExercice2(zs: List[(Double, Z)], gk_fixed: Double, n_fixed: Double) {
     println(" --- Results Exercice 2 --- ")
     zs.map(zz => {
       val z = zz._2
       val res = new ImpactPER(z)
-      println(round(100*zz._1,0).toInt + " &  "  + round(100 * res.mu_s(gk_fixed, n_fixed)._1) + " & " + round(100 * res.mu_s(gk_fixed, n_fixed)._2) + " & " +
+      println(round(100 * zz._1, 0).toInt + " &  " + round(100 * res.mu_s(gk_fixed, n_fixed)._1) + " & " + round(100 * res.mu_s(gk_fixed, n_fixed)._2) + " & " +
         round(res.k_s(gk_fixed, n_fixed)._1) + " & " + round(res.k_s(gk_fixed, n_fixed)._2) + " & " +
         round(100 * gk_fixed) + " & - & " +
-        round(100 * res.s_s(gk_fixed, n_fixed)._1) + " & " + round(100 * res.s_s(gk_fixed, n_fixed)._2) + " & " + round(100 * n_fixed) + " & - & " + 
+        round(100 * res.s_s(gk_fixed, n_fixed)._1) + " & " + round(100 * res.s_s(gk_fixed, n_fixed)._2) + " & " + round(100 * n_fixed) + " & - & " +
         round(res.v_s(gk_fixed, n_fixed)._1) + " & " + round(res.v_s(gk_fixed, n_fixed)._2) + " \\" + "\\")
- 
+
     })
   }
-  def printExercice3(zs: List[(Double,Z)], gk_fixed: Double, c_fixed: Double) {
+  def printExercice3(zs: List[(Double, Z)], gk_fixed: Double, c_fixed: Double) {
     println(" --- Results Exercice 3 --- ")
     zs.map(zz => {
       val z = zz._2
       val res = new ImpactPER(z)
-      println(round(100*zz._1,0).toInt + " &  " + round(100 * res.mu_c(gk_fixed, c_fixed)) + " & - & " + round(res.k_mu(res.mu_c(gk_fixed, c_fixed))) + " & - & " +
+      println(round(100 * zz._1, 0).toInt + " &  " + round(100 * res.mu_c(gk_fixed, c_fixed)) + " & - & " + round(res.k_mu(res.mu_c(gk_fixed, c_fixed))) + " & - & " +
         round(100 * gk_fixed) + " & - & " + round(100 * res.s_c(gk_fixed, c_fixed)._1) + " & " + round(100 * res.s_c(gk_fixed, c_fixed)._2) + " & " +
-        round(100 * res.n_c(c_fixed)._1) + " & " + round(100 * res.n_c(c_fixed)._2)  + " & "  +
+        round(100 * res.n_c(c_fixed)._1) + " & " + round(100 * res.n_c(c_fixed)._2) + " & " +
         round(res.v_c(gk_fixed, c_fixed)._1) + " & " + round(res.v_c(gk_fixed, c_fixed)._2) + " \\" + "\\")
-      
+
     })
   }
 

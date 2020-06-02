@@ -72,9 +72,8 @@ object GrowthModel {
     // println(delta + "\t" + share_re + "\t" + u + "\t" + a + "\t" + tilde_ke + "\t" + u / (a + tilde_ke * delta) + "\t" + res_re.eroi.last + "\t" + res_nre.eroi.last + "\t" + res.eroi.last)
     // g = s*PIB/K - delta
     //println(share_re * 100 + "\t" + res.ye.last.to(calib.energy_units) + "\t" + res.e.last.to(calib.energy_units) + "\t" + res.ee.last.to(calib.energy_units) + "\t" + res.ke.last + "\t" + res_re.ke.last + "\t" + res_nre.ke.last + "\t" + Kf_final + "\t" + pib_final + "\t" + qf_final)
-    val z = Z(res.ve(calib.qf), calib.vf, res.qe.last, qf_final, calib.le, lf_final, res.delta_e.last, calib.delta_f)
-    println("results -- " + target.to(MegaTonOilEquivalent) + "\t" + share_re + "\t" + net + "\t" + res.ye.last.to(MegaTonOilEquivalent) + "\t" + res.netE.to(MegaTonOilEquivalent))
-    z
+    Z(res.ve(qf_final), calib.vf, res.qe.last, qf_final, calib.le, lf_final, res.delta_e.last, calib.delta_f)
+  
   }
   /*
   def simulateTransition(start_year: Int, end_year: Int) {
