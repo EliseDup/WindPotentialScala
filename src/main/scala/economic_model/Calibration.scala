@@ -3,6 +3,9 @@ import utils._
 import squants.energy._
 
 // Vector of technical parameters
+object Z {
+  def apply(l: List[Double]) = new Z(l(0), l(1), l(2), l(3), l(4), l(5), l(6), l(7))
+}
 case class Z(ve: Double, vf: Double, qe: Double, qf: Double, le: Double, lf: Double, deltae: Double, deltaf: Double) {
   override def toString() = { ve + "\t" + vf + "\t" + qe + "\t" + qf + "\t" + le + "\t" + lf + "\t" + deltae + "\t" + deltaf }
 }
@@ -79,25 +82,40 @@ class ImpactPER(val z: Z) {
   // v calculation
   // v = s/(gk + delta)
   def v(s: Double, gk: Double, mu: Double) = s / (gk + delta_mu(mu))
-
+  // Evolution de la consommation total Cf + pCe
+  // Puisque Ye est constant : C/Ye = (Cf+pCe)/Ye = (1-s)k/v
+  def c_tot(s: Double, gk: Double, mu: Double) = (1 - s) * k_mu(mu) / v(s, gk, mu)
+  def c_tot_gk(s: Double, n: Double) = {
+    val mu = interval_mu_gk(s, n);
+    mean_std(c_tot(s, gk_mu(mu._1, s, n), mu._1), c_tot(s, gk_mu(mu._2, s, n), mu._2))
+  }
+  def c_tot_s(gk: Double, n: Double) = {
+    val mu = interval_mu_s(gk, n);
+    mean_std(c_tot(s_mu(mu._1, gk, n), gk, mu._1), c_tot(s_mu(mu._2, gk, n), gk, mu._2))
+  }
+  def c_tot_c(gk: Double, c: Double) = {
+    val mu = mu_c(gk, c);
+    val s = interval_s_c(gk, c)
+    mean_std(c_tot(s._1, gk, mu), c_tot(s._2, gk, mu))
+  }
   def v_gk(s: Double, n: Double) = {
     val mu = interval_mu_gk(s, n);
     val v1 = v(s, gk_mu(mu._1, s, n), mu._1)
     val v2 = v(s, gk_mu(mu._2, s, n), mu._2)
-    mean_std(v1,v2)
+    mean_std(v1, v2)
   }
   def v_s(gk: Double, n: Double) = {
     val mu = interval_mu_s(gk, n)
     val v1 = v(s_mu(mu._1, gk, n), gk, mu._1)
     val v2 = v(s_mu(mu._2, gk, n), gk, mu._2)
-     mean_std(v1,v2)
+    mean_std(v1, v2)
   }
-  def v_c(gk: Double, c: Double)={
+  def v_c(gk: Double, c: Double) = {
     val mu = mu_c(gk, c)
     val s = interval_s_c(gk, c)
     val v1 = v(s._1, gk, mu)
     val v2 = v(s._2, gk, mu)
-     mean_std(v1,v2)
+    mean_std(v1, v2)
   }
   // Link between s and n : (1+s)*n/(1+s*n) = f(m,z)
   def f_m(m: Double, gk: Double) = z.vf * (m * (gk + z.deltae) + gk + z.deltaf)
@@ -148,8 +166,8 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val g = data.g(i); val s = data.s(i);
   val qe = data.qe(i)
   // val gvs = Helper.getLines("data_eco/gpt","\t").map(j => -j(0).toDouble/100) // -data.gpt(i) //-gpt  
-  val gv = 0 // gvs(i)
-  val gk = g + gv
+  //val gv = 0 // gvs(i)
+  val gk = g // + gv
   // Calculated data for year i
   val v = s / (gk + delta)
   val K = v * pib; val Ke = mu * K; val Kf = (1 - mu) * K
@@ -159,10 +177,11 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val vf = Kf / yf // Intensité capitalistique de l'économie
   val ve = Ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
   val tilde_Ke = energy_units(Ke * qf)
+  def tilde_Ke(qf: Double) = energy_units(Ke * qf)
   val cf = yf - s * pib
   val c = data.ce(i).to(energy_units) / cf
   val n = p * c //  data.ce(i).to(energy_units) / cf
-
+  val ctot = cf + p * data.ce(i).to(energy_units)
   val eroi = 1 / (qe + delta_e * ve * qf)
 
   val L = data.L(i) / pop_units // .toDouble /1E6 //2871.0 * 1E6; // Pop employee (10^6 personnes)
@@ -177,6 +196,15 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
 
   val ner = ((1 - z.qe) * (1 - z.deltaf * z.vf) - (-z.qf * -z.deltae * z.ve))
   val k = K / data.ye(i).to(energy_units)
+  
+  val detA = ((1 - z.qe) * (1 - z.deltaf * z.vf) - (-z.qf * -z.deltae * z.ve))
+  val p1 = 1.0 - detA
+  val xi = data.ce(i).to(energy_units) / data.ye(i).to(energy_units)
+  val p2 = (1 - z.deltaf * z.vf - p * z.qf) * xi
+  // Pertes %
+  val perte1 = 1.0 / eroi
+  val perte2 = p1
+  val perte3 = p1 + p2
 }
 
 object Calibration {
@@ -188,25 +216,37 @@ object Calibration {
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
 
   val cals = data.year.map(y => new calibration_results_work(year = y))
-  val (qe, qf, ve, vf, le, lf, v, eroi, ner) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf), cals.map(_.le), cals.map(_.lf), cals.map(_.v), cals.map(_.eroi), cals.map(_.ner))
+  val (qe, qf, ve, vf, le, lf, v, eroi, ner, p, perte1, perte2) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf), cals.map(_.le), cals.map(_.lf), cals.map(_.v), cals.map(_.eroi), cals.map(_.ner), cals.map(_.p),
+       cals.map(_.perte1), cals.map(_.perte2))
   def growth_rates(ind: List[Double]) = {
     (1 until ind.size).toList.map(i => (1 - ind(i) / ind(i - 1)))
   }
 
   import Helper._
-  def printTableCalibration_simple(year: Int = 2017, alphas: List[Double], ms: List[Double]) {
-    val cals = ms.map(m => alphas.map(alpha => new calibration_results_work(year, 20, 25, alpha, m))).flatten
+  def printTableCalibration_simple(year: Int = 2017, alphas: List[Double], mus: List[Double]) {
+    val cals = mus.map(mu => alphas.map(alpha => new calibration_results_work(year, 20, 25, alpha, mu))).flatten
     print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
     print("$alpha$ [/100]"); cals.map(cal => print(" & " + cal.alpha * 100)); println(" \\" + "\\")
     print("$mu$ [/100]"); cals.map(cal => print(" & " + cal.mu * 100)); println(" \\" + "\\")
-    print("$q_f$"); cals.map(cal => print(" & " + round(cal.qf))); println(" \\" + "\\")
+    print("$q_f$"); cals.map(cal => print(" & " + round(cal.qf, 4))); println(" \\" + "\\")
+    print("$v$"); cals.map(cal => print(" & " + round(cal.v))); println(" \\" + "\\")
+    print("$v_f$"); cals.map(cal => print(" & " + round(cal.vf))); println(" \\" + "\\")
     print("$v_e$"); cals.map(cal => print(" & " + round(cal.ve))); println(" \\" + "\\")
     print("$q_f delta_e v_e$ [/100]"); cals.map(cal => print(" & " + round(round(100 * (cal.delta_e * cal.ve * cal.qf))))); println(" \\" + "\\")
     print("$epsilon$ "); cals.map(cal => print(" & " + round(cal.eroi))); println(" \\" + "\\")
+    print("$NER$ "); cals.map(cal => print(" & " + round(cal.ner*100))); println(" \\" + "\\")
+    print("P_1=CIK SE+CIK SF"); cals.map(cal => print(" & " + round((1.0-cal.ner)*100))); println(" \\" + "\\")
+    print("CIK SE"); cals.map(cal => print(" & " + round(1.0/cal.eroi*100))); println(" \\" + "\\")
+    print("CIK SF"); cals.map(cal => print(" & " + round((1.0-cal.ner-1.0/cal.eroi)*100))); println(" \\" + "\\")
+    print("$P_2$ = Pertes d'$ub$ - $pC_e$");cals.map(cal => print(" & " + round(cal.p2*100))); println(" \\" + "\\")
+    print("=Pertes d'$ub$");cals.map(cal => print(" & " + round(cal.xi*(1-cal.delta_f*cal.vf)*100))); println(" \\" + "\\")
+    print("-Compensation $pC_e$");cals.map(cal => print(" & " + round( (cal.xi * cal.p * cal.qf)*100 ))); println(" \\" + "\\")
+    print("$P_1$ + $P_2$"); cals.map(cal => print(" & " + round((cal.p1+cal.p2)*100))); println(" \\" + "\\")
+    
   }
-  def printTableCalibration_full(year: Int = 2017, tfs: List[Int], tes: List[Int], alphas: List[Double], ms: List[Double], gpts: List[Double]) {
+  def printTableCalibration_full(year: Int = 2017, tfs: List[Int], tes: List[Int], alphas: List[Double], mus: List[Double]) {
 
-    val cals = tfs.map(tf => tes.map(te => alphas.map(alpha => ms.map(m => gpts.map(gpt => new calibration_results_work(year, tf, te, alpha, m, gpt))).flatten).flatten).flatten).flatten
+    val cals = tfs.map(tf => tes.map(te => alphas.map(alpha => mus.map(mu => new calibration_results_work(year, tf, te, alpha, mu))).flatten).flatten).flatten
     val ref = new calibration_results_work(year = year)
 
     print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
@@ -236,6 +276,7 @@ object Calibration {
 object ModelResolution {
   def apply(c: calibration_results_work): ModelResolution = new ModelResolution(c.z, c.data.ye(c.i), c.energy_units, c.L, c.s, c.n)
 }
+
 class ModelResolution(val z: Z, val ye: Energy, val energy_units: EnergyUnit, val L: Double, val s: Double,
     val n: Double) {
   // L = le Ye + lf Yf
@@ -275,19 +316,27 @@ object CalibrationData {
 
   val smoothing = (false, 1)
 
-  val data = getLines(data_folder + "data_calibration", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), i(5).toDouble / 100, i(6).toDouble, i(7).toDouble / 100))
+  val data = getLines(data_folder + "data_calibration", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100, i(7).toDouble, i(8).toDouble / 100))
   val n = data.size
   val ind = (0 until n).toList
 
-  val year = data.map(_._1); val pib = data.map(_._2); val ee = data.map(_._3); val e = data.map(_._4); val ce = data.map(_._5);
+  val year = data.map(_._1); val pib = data.map(_._2);
+  val neu = data.map(_._4*0); val e_neu = data.map(_._5); val ce = data.map(_._6);
+  val oeu = data.map(_._3) 
+  val frac_neu = ind.map(i => neu(i) / e_neu(i))
 
-  val s = smooth_double(data.map(_._6), smoothing); // val gpt = smooth_double(data.map(_._7), smoothing);
-  val PA = data.map(_._7); val ch = data.map(_._8);
+  // val e = ind.map(i => e_neu(i) - neu(i))
+  val ee = ind.map(i => oeu(i) * (1 - frac_neu(i)))
+  val ye = ind.map(i => e_neu(i) - neu(i) + oeu(i) )
+  
+  val s = smooth_double(data.map(_._7), smoothing); // val gpt = smooth_double(data.map(_._7), smoothing);
+  val PA = data.map(_._8); val ch = data.map(_._9);
   val L = ind.map(i => PA(i) * (1 - ch(i)))
   // Calculs directs
-  val ye = ind.map(i => ee(i) + e(i))
+
   val qe = smooth_double(ind.map(i => ee(i) / ye(i)), smoothing)
-  val ef = ind.map(i => e(i) - ce(i))
+  val ef = ind.map(i => ye(i) - ee(i) - ce(i))
+  val e = ind.map(i => ye(i) - ee(i))
   val gamma = smooth_double(ind.map(i => ef(i) / e(i)), smoothing)
   val g = smooth_double(List((pib(1) - pib(0)) / pib(0)) ++ (0 until pib.size - 1).map(i => (pib(i + 1) - pib(i)) / pib(i)), smoothing) // On met pour les 2 premières années le même taux de croissance pour ne pas avoir de pb de dimensions
   // (n, ind, year, pib, a, e, ce, s, u, qe, ey, gamma, g, gpt)
@@ -317,7 +366,7 @@ object CalibrationData {
     val own_use = (1 until own_use_data(0).size).map(i =>
       (own_use_data(0)(i).toString, (1 until own_use_data.size).map(j => -TonOilEquivalent(if (own_use_data(j)(i).nonEmpty) own_use_data(j)(i).toDouble * 1000 else 0.0)).toList)).toMap
 
-    val sources = tfc.keys.toList.filter(i => !i.contains("Crude oil"))
+    val sources = tfc.keys.toList.filter(i => !i.contains("Crude oil") && !i.contains("Heat") && !i.contains("Wind"))
     val qe = sources.map(s => (s, (0 until tfc(s).size).map(i => own_use(s)(i) / (own_use(s)(i) + tfc(s)(i))).toList)).toMap
     val qe_total = (0 until tfc(sources(0)).size).map(i => sources.map(s => own_use(s)(i).toJoules).sum / (sources.map(s => own_use(s)(i).toJoules).sum + sources.map(s => tfc(s)(i).toJoules).sum)).toList
     plotXY(qe.map(q => (years, q._2.map(_ * 100), q._1)).toList ++ List((years, qe_total.map(_ * 100), "Total")), yLabel = "qe [%]", legend = true, title = "qe_i")

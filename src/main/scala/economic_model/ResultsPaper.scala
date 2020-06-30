@@ -13,61 +13,27 @@ object ResultsPaper {
   import GrowthModel._
 
   def main(args: Array[String]): Unit = {
-    // Sensitivity analysis table
-    //val as = List(0.04, 0.06, 0.08); val mus = List(0.03, 280.0 / 4280, 0.1)
-    //pinAnalysis(as,mus)
-    //Calibration.printTableCalibration_simple(2017, as, mus)
+    exercice
+  }
+
+  def exercice {
     // Exercice 1 to 3
+
     val cal = new calibration_results_work(energy_units = MegaTonOilEquivalent, pib_units = 1E9.toInt, pop_units = 1E6.toInt)
 
     val share = (0 to 4).map(_ * 0.25).toList
-    val lf_f = cal.lf * math.pow(1 - 1.34 / 100, 33)
-    val qf_f = cal.qf * math.pow(1 - 1.06 / 100, 33)
-    println(lf_f + "\t" + qf_f)
-    // resultsExercices(share, cal.qf,cal.lf)
-    println("Results " + qf_f + "\t" + lf_f)
-    resultsExercices(share, qf_f, lf_f)
-    println("Results " + cal.qf + "\t" + cal.lf)
-    resultsExercices(share, cal.qf, cal.lf)
-    // 
+    val T = (30.0 / share.size).toInt
+    val share_qf = (0 until share.size).map(i => (share(i), cal.qf * math.pow(1 - 1.06 / 100, T * i), cal.lf * math.pow(1 - 1.34 / 100, T * i))).toList
+    val share_qf0 = (0 until share.size).map(i => (share(i), cal.qf, cal.lf)).toList
+    //resultsExercices(share_qf)
+    //resultsExercices(share_qf0)
+    val res2017 = getLines("zs_2017", "\t").map(l => (l(0).toDouble, Z((1 to 8).toList.map(i => l(i).toDouble))))
+    val res2050 = getLines("zs_2050", "\t").map(l => (l(0).toDouble, Z((1 to 8).toList.map(i => l(i).toDouble))))
 
+    printResultsExercices(res2017)
+    printResultsExercices(res2050)
   }
-
-  def pinAnalysis(as: List[Double], mus: List[Double]) {
-    // Pin analysis
-    val z = mus.map(mu => as.map(a => (a, mu, ModelResolution(new calibration_results_work(2017, alpha = a, mu = mu))))).flatten
-    /* z.map(i => println(i._1 + "\t" + i._2 + "\t" +
-        i._3.z + "\t" + i._3.ye.to(i._3.energy_units) + "\t"  + i._3.p + "\t" + i._3.ce.to(i._3.energy_units) + "\t"
-        +i._3.perte1 + "\t" + i._3.perte2 + "\t" + i._3.perte3 + "\t" +
-        i._3.PIN1 + "\t" + i._3.PIN2 + "\t" + i._3.PIN3  + "\t" + i._3.PIN4))*/
-    print("$mu$ [%]"); z.map(cal => print(" & " + (cal._2 * 100).toInt)); println(" \\" + "\\")
-    print("$alpha$ [%]"); z.map(cal => print(" & " + (cal._1 * 100).toInt)); println(" \\" + "\\")
-    print("$EROI$"); z.map(cal => print(" & " + round(cal._3.eroi))); println(" \\" + "\\")
-    print("$NER$"); z.map(cal => print(" & " + round(cal._3.ner * 100))); println(" \\" + "\\")
-
-    print("$1 - 1/epsilon$ [%]"); z.map(cal => print(" & " + round(cal._3.perte1 * 100))); println(" \\" + "\\")
-    print("$1 - P_1$ [%]"); z.map(cal => print(" & " + round(cal._3.perte2 * 100))); println(" \\" + "\\")
-    print("$1-P_1-P_2$ [%]"); z.map(cal => print(" & " + round(cal._3.perte3 * 100))); println(" \\" + "\\")
-
-    print("$PIN_1$ "); z.map(cal => print(" & " + round(cal._3.PIN1 / 1E9).toInt)); println(" \\" + "\\")
-    print("$PIN_2$"); z.map(cal => print(" & " + round(cal._3.PIN2 / 1E9, 0).toInt)); println(" \\" + "\\")
-    print("$PIN_3$ "); z.map(cal => print(" & " + round(cal._3.PIN3 / 1E9, 0).toInt)); println(" \\" + "\\")
-    print("$PIN_4$"); z.map(cal => print(" & " + round(cal._3.PIN4 / 1E9, 0).toInt)); println(" \\" + "\\")
-
-    printPinLosses(z.map(_._3))
-  }
-  def printPinLosses(res: List[ModelResolution]) {
-    print("Pertes CIK SE "); res.map(r => print(" & " + round(100 * ((r.PIN1 - r.PIN2) / r.PIN1)))); println(" \\" + "\\")
-    print("+ Pertes CIK SF"); res.map(r => print(" & " + round(100 * ((r.PIN2 - r.PIN3) / r.PIN1)))); println(" \\" + "\\")
-    print("+ Pertes $C_e$"); res.map(r => print(" & " + round(100 * ((r.PIN3 - r.PIN4) / r.PIN1)))); println(" \\" + "\\")
-
-    println(" Pertes d'$ub$"); res.map(r => print(" & " + round(100 * (r.xi * (1 - r.z.deltaf * r.z.vf))))); println(" \\" + "\\")
-    println("Compensation $pC_e$"); res.map(r => print(" & " + round(100 * (r.xi * r.p * r.z.qf)))); println(" \\" + "\\")
-    print("Pertes totals"); res.map(r => print(" & " + round(100 * ((r.PIN1 - r.PIN4) / r.PIN1)))); println(" \\" + "\\")
-  }
-
-  def resultsExercices(share: List[Double] = (0 to 10).map(_ * 0.1).toList,
-    qf: Double, lf: Double, net: Boolean = false, e_units: EnergyUnit = MegaTonOilEquivalent, pib_units: Int = 1E9.toInt) {
+  def resultsExercices(share: List[(Double, Double, Double)], net: Boolean = false, e_units: EnergyUnit = MegaTonOilEquivalent, pib_units: Int = 1E9.toInt) {
 
     val cal = new calibration_results_work(energy_units = e_units, pib_units = pib_units, pop_units = 1E6.toInt);
     val target = if (net) cal.data.ye(cal.i) * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve) else cal.data.ye(cal.i)
@@ -82,7 +48,7 @@ object ResultsPaper {
     // 13.62% Offshore wind
     // Total = 94.69 / 100 
     val techs = List((OnshoreWindTechnology, 23.52 / 94.69), (OffshoreWindTechnology, 13.62 / 94.69), (PVPoly, (14.89 + 11.58 + 21.36) / 94.69), (CSPParabolic, 9.72 / 94.69))
-    val res = share.map(s => (s, calculate(target, net, techs, s, cal, qf, lf)))
+    val res = share.map(s => (s._1, calculate(target, net, techs, s._1, cal, s._2, s._3)))
 
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("zs_" + System.currentTimeMillis()))
     res.map(r => out_stream.println(r._1 + "\t" + r._2))
@@ -143,7 +109,7 @@ object ResultsPaper {
   }
   def printCommonResults(zs: List[(Double, Z)]) {
     println(" --- Common Results ---")
-    println("x & epsilon & q_e & v_e & bar{p} & sigma_p & NER & Pertes CIK SE & Pertes CIK SF \\")
+    println("x & q_e & v_e & bar{p} & sigma_p & EROI & NER & Pertes CIK SE & Pertes CIK SF \\")
     zs.map(zz => {
       val z = zz._2
       val res = new ImpactPER(z)
@@ -163,7 +129,9 @@ object ResultsPaper {
         round(res.k_gk(s_fixed, n_fixed)._1) + " & " + round(res.k_gk(s_fixed, n_fixed)._2) + " & " +
         round(100 * res.gk(s_fixed, n_fixed)._1) + " & " + round(100 * res.gk(s_fixed, n_fixed)._2) + " & " +
         round(100 * s_fixed) + " & - &" + round(100 * n_fixed) + " & - & " +
-        round(res.v_gk(s_fixed, n_fixed)._1) + " & " + round(res.v_gk(s_fixed, n_fixed)._2) + " \\" + "\\")
+        round(res.v_gk(s_fixed, n_fixed)._1) + " & " + round(res.v_gk(s_fixed, n_fixed)._2) +
+        " & " + round(res.c_tot_gk(s_fixed, n_fixed)._1) + " & " + round(res.c_tot_gk(s_fixed, n_fixed)._2) +
+        " \\" + "\\")
     })
   }
   def printExercice2(zs: List[(Double, Z)], gk_fixed: Double, n_fixed: Double) {
@@ -175,7 +143,9 @@ object ResultsPaper {
         round(res.k_s(gk_fixed, n_fixed)._1) + " & " + round(res.k_s(gk_fixed, n_fixed)._2) + " & " +
         round(100 * gk_fixed) + " & - & " +
         round(100 * res.s_s(gk_fixed, n_fixed)._1) + " & " + round(100 * res.s_s(gk_fixed, n_fixed)._2) + " & " + round(100 * n_fixed) + " & - & " +
-        round(res.v_s(gk_fixed, n_fixed)._1) + " & " + round(res.v_s(gk_fixed, n_fixed)._2) + " \\" + "\\")
+        round(res.v_s(gk_fixed, n_fixed)._1) + " & " + round(res.v_s(gk_fixed, n_fixed)._2) +
+        " & " + round(res.c_tot_s(gk_fixed, n_fixed)._1) + " & " + round(res.c_tot_s(gk_fixed, n_fixed)._2)
+        + " \\" + "\\")
 
     })
   }
@@ -187,23 +157,54 @@ object ResultsPaper {
       println(round(100 * zz._1, 0).toInt + " &  " + round(100 * res.mu_c(gk_fixed, c_fixed)) + " & - & " + round(res.k_mu(res.mu_c(gk_fixed, c_fixed))) + " & - & " +
         round(100 * gk_fixed) + " & - & " + round(100 * res.s_c(gk_fixed, c_fixed)._1) + " & " + round(100 * res.s_c(gk_fixed, c_fixed)._2) + " & " +
         round(100 * res.n_c(c_fixed)._1) + " & " + round(100 * res.n_c(c_fixed)._2) + " & " +
-        round(res.v_c(gk_fixed, c_fixed)._1) + " & " + round(res.v_c(gk_fixed, c_fixed)._2) + " \\" + "\\")
+        round(res.v_c(gk_fixed, c_fixed)._1) + " & " + round(res.v_c(gk_fixed, c_fixed)._2) +
+        " & " + round(res.c_tot_c(gk_fixed, c_fixed)._1) + " & " + round(res.c_tot_c(gk_fixed, c_fixed)._2) + " \\" + "\\")
 
     })
+  }
+
+  def EROISocietalPaper {
+    sensitivityAnalysis
+    plotParametersHistory
+  }
+  def sensitivityAnalysis {
+    val cal = new calibration_results_work
+    println("---------- Tableau 2 ----------")
+    println(round(cal.vf) + " & " + round(cal.qf) + " & " + round(cal.ve) + " & " + round(cal.qe) + " & " + round(cal.v) + " & " + round(cal.eroi) + " & " + round(cal.ner))
+    println("---------- Tableau 3 ----------")
+    println("$P_1$" + " & " + round(cal.p1 * 100) + "\\" + "\\")
+    println("CIK SE" + " & " + round((1 / cal.eroi) * 100) + "\\" + "\\")
+    println("CIK SF" + " & " + round((cal.p1 - 1 / cal.eroi) * 100) + "\\" + "\\")
+    println("$P_2$" + " & " + round(cal.p2 * 100) + "\\" + "\\")
+    println("Pertes d'$ub$" + " & " + round(cal.xi * (1 - cal.delta_f * cal.vf) * 100) + "\\" + "\\")
+    println("-Compensation $pC_e$" + " & " + round((cal.xi * cal.p * cal.qf) * 100) + "\\" + "\\")
+    println("P_1 + P_2$" + " & " + round(100 * (cal.p1 + cal.p2)) + "\\" + "\\")
+
+    val as = List(0.04, 0.06, 0.08); val mus = List(0.03, 280.0 / 4280, 0.1);
+    val tfs = List(15, 20, 25); val tes = List(20, 25, 30);
+    println("---------- Tableau 5 ----------")
+    Calibration.printTableCalibration_simple(2017, as, mus)
   }
 
   def plotParametersHistory {
     import Calibration._
 
-    println((growth_rates(qf)).sum / (growth_rates(qf).size))
-    println((growth_rates(lf)).sum / (growth_rates(lf).size))
-    val gv = cals.map(_.gv)
-    (0 until year_double.size).map(y => println(data.g(y) + "\t" + data.s(y) + "\t" + gv(y) + "\t" + v(y)))
-    (0 until year_double.size).map(y => println(data.year(y) + "\t" + v(y) + "\t" + qe(y) + "\t" + qf(y) + "\t" + ve(y) + "\t" + vf(y) + "\t" + le(y) + "\t" + lf(y)))
-    val res = List((qe, "qe"), (qf, " qf"), (ve, "ve"), (vf, "vf"), (le.map(_ * 1E6), "le"), (lf.map(_ * 1E6), "lf"), (eroi, "eroi"), (ner, "ner"))
+    println("mean qf growth rate = " + round(growth_rates(qf).sum / (growth_rates(qf).size)))
+    println("mean lf growth rate = " + round(growth_rates(lf).sum / (growth_rates(lf).size)))
+
+    val index = List(0, 5, 10, 15, 20, 25, 27)
+    index.map(y => {
+      println(data.year(y) + " & " + round(eroi(y), 2) + " & " + round(ner(y) * 100, 2)
+        + " & " + round(perte1(y) * 100, 2) + " & " + round((perte2(y) - perte1(y)) * 100, 2) + "\\" + "\\")
+    })
+    val res = List((qe, "qe"), (qf, "qf"), (ve, "ve"), (vf, "vf"), (eroi, "eroi"), (ner, "ner"),
+      (v, "v"))
 
     import CalibrationData._
     res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))
+
+    plotXY(List((year_double, perte2.map(_ * 100), "CIK SE+SF"), (year_double, perte1.map(_ * 100), "CIK SE"), (year_double, (0 until perte2.size).toList.map(i => (perte2(i) * 100 - perte1(i) * 100)), "CIK SF")), legend = true, title = "pertes")
+
     val year_growth = (1 until year_double.size).map(year_double(_)).toList
     plotXY(List((year_growth, CalibrationData.smooth_double(growth_rates(qf), (true, 10)).map(_ * 100), "")), yLabel = "qf growth rate [%/y]")
     plotXY(List((year_growth, CalibrationData.smooth_double(growth_rates(lf), (true, 10)).map(_ * 100), "")), yLabel = "lf growth rate [%/y]")
