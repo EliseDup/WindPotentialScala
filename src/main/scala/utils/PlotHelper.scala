@@ -22,6 +22,7 @@ import java.awt.Font
 import java.awt.image.BufferedImage
 import java.awt.geom._
 import java.awt.BasicStroke
+import java.text.DecimalFormat
 import java.io.FileOutputStream
 import com.sun.image.codec.jpeg.JPEGCodec
 import org.jfree.util.ShapeUtilities
@@ -100,9 +101,12 @@ object PlotHelper {
 
     val max = xys.map(_._2).flatten.max
     val min = xys.map(_._2).flatten.min
-    
-    // plot.getRangeAxis().setRange(10,12.5)
-    // plot.getDomainAxis().setRange(0,800)
+
+    val format = new DecimalFormat("####");
+    plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(format)
+
+   // plot.getRangeAxis().setRange(50, 85)
+    //plot.getDomainAxis().setRange(0,800)
     if (drawPlot)
       createFrame(chart, name = title, save = save, tick = tick)
     return plot
@@ -185,20 +189,20 @@ object PlotHelper {
     val y = new NumberAxis(yLabel)
     val x = new NumberAxis(xLabel)
     val plot = new FastScatterPlot(Array(values.map(_._1.toFloat).toArray, values.map(_._2.toFloat).toArray), x, y);
-    
+
     val chart = new JFreeChart(title, plot);
     createFrame(chart, name = title, save = true, xy = false)
   }
 
   def combinedPlots(x: List[Double], y: List[(List[Double], String)], title: String = "", save: Boolean = true, xLabel: String = "") {
-    
+
     val list = y.map(i => getPlotXY(x, i._1, i._2))
     val plots = new CombinedDomainXYPlot(new NumberAxis(xLabel))
     list.map(p => plots.add(p))
     plots.getDomainAxis().setRange(x.min, x.max)
     
     val chart = new JFreeChart("", plots);
-    applyChartTheme(chart, (false,1,1))
+    applyChartTheme(chart, (false, 1, 1))
     if (save) {
       ChartUtilities.writeScaledChartAsPNG(new FileOutputStream(("images/" + (if (title.isEmpty()) i else title)) + ".jpg"), chart, 500, 270, 5, 5)
       i = i + 1
@@ -212,7 +216,7 @@ object PlotHelper {
   }
   def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf: Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
-   applyChartTheme(chart, tick)
+    applyChartTheme(chart, tick)
 
     if (xy) {
       val n = chart.getXYPlot().getSeriesCount()

@@ -153,6 +153,68 @@ class ImpactPER(val z: Z) {
   }
 }
 
+class calibration_results_CI(
+    val alpha: Double = 0.05, val eta: Double = 4.3 / 100, val zf: Double = 0.49,
+    val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val mu: Double = 280.0 / 4280, val theta: Double = 0.4,
+    val energy_units: EnergyUnit = MegaTonOilEquivalent, val pib_units: Int = 1E9.toInt,
+    val pop_units: Int = 1E6.toInt) {
+  val i = Calibration.index_year(year)
+
+  val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
+  val delta = mu * delta_e + (1 - mu) * delta_f
+  val data = Calibration.data
+  // Observed data  for year i
+  val pib = data.pib(i) / pib_units;
+  val va_e = alpha * pib; val va_f = (1 - alpha) * pib
+  val g = data.g(i); val s = data.s(i);
+  val qe = data.qe(i)
+  val gk = g // + gv
+  // Calculated data for year i
+  val v = s / (gk + delta)
+  val K = v * pib; val Ke = mu * K; val Kf = (1 - mu) * K
+  val I = s * pib; val C = (1 - s) * pib
+  val p_min = va_e / data.e(i).to(energy_units)
+  val eta_min = p_min * data.ce(i).to(energy_units) / C
+  val p = eta * C / data.ce(i).to(energy_units) //va_e/((1-ze)*data.ye(i).to(energy_units)) //alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
+
+  val Cf = (1 - eta) * C
+  val Xe = p * data.e(i).to(energy_units) - va_e
+  val xe = Xe / data.ye(i).to(energy_units)
+
+  val yf = va_f / (1 - zf)
+  val qf = data.ef(i).to(energy_units) / yf // Intensité énergétique de l'économie
+  val xf = zf - p * qf
+  val vf = Kf / yf // Intensité capitalistique de l'économie
+  val ve = Ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
+  val tilde_Ke = energy_units(Ke * qf)
+  def tilde_Ke(qf: Double) = energy_units(Ke * qf)
+  // val cf = yf - s * pib
+
+  val eroi = 1 / (qe + (xe + delta_e * ve) * qf)
+ 
+  val L = data.L(i) / pop_units // .toDouble /1E6 //2871.0 * 1E6; // Pop employee (10^6 personnes)
+  val r = theta / v;
+  val w = (1 - theta) * pib / L;
+  val lf = (1 - p * qf - r * vf) / w;
+  val le = ((1 - qe) * p - r * ve) / w;
+  val Lf = lf * yf;
+  val Le = le * data.ye(i).to(energy_units);
+  val rho = yf / pib
+  val z = Z(ve, vf, qe, qf, le, lf, delta_e, delta_f)
+
+  // val ner = (1 - z.qe)*(1 - (xf + z.deltaf * z.vf)) - z.qf*(z.deltae * z.ve + xe)
+  val ner = (1 - (xf + z.deltaf * z.vf)) * (1 - z.qe) - z.qf * (xe + z.deltae * z.ve)
+  val k = K / data.ye(i).to(energy_units)
+
+  val p1 = 1.0 - ner
+  val xi = data.ce(i).to(energy_units) / data.ye(i).to(energy_units)
+  val p2 = (1 - (xf + z.deltaf * z.vf) - p * z.qf) * xi
+  // Pertes %
+  val perte1 = 1.0 / eroi
+  val perte2 = p1
+  val perte3 = p1 + p2
+}
+
 class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val mu: Double = 280.0 / 4280, val theta: Double = 0.4,
     val energy_units: EnergyUnit = MegaTonOilEquivalent, val pib_units: Int = 1E9.toInt,
     val pop_units: Int = 1E6.toInt) {
@@ -173,6 +235,7 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
   val K = v * pib; val Ke = mu * K; val Kf = (1 - mu) * K
   val p = alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
   val yf = pib - p * data.ce(i).to(energy_units)
+
   val qf = data.ef(i).to(energy_units) / yf // Intensité énergétique de l'économie
   val vf = Kf / yf // Intensité capitalistique de l'économie
   val ve = Ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
@@ -196,7 +259,7 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
 
   val ner = ((1 - z.qe) * (1 - z.deltaf * z.vf) - (-z.qf * -z.deltae * z.ve))
   val k = K / data.ye(i).to(energy_units)
-  
+
   val detA = ((1 - z.qe) * (1 - z.deltaf * z.vf) - (-z.qf * -z.deltae * z.ve))
   val p1 = 1.0 - detA
   val xi = data.ce(i).to(energy_units) / data.ye(i).to(energy_units)
@@ -215,9 +278,9 @@ object Calibration {
 
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
 
-  val cals = data.year.map(y => new calibration_results_work(year = y))
-  val (qe, qf, ve, vf, le, lf, v, eroi, ner, p, perte1, perte2) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf), cals.map(_.le), cals.map(_.lf), cals.map(_.v), cals.map(_.eroi), cals.map(_.ner), cals.map(_.p),
-       cals.map(_.perte1), cals.map(_.perte2))
+  val cals = data.year.map(y => new calibration_results_CI(year = y))
+  val (qe, qf, ve, vf, xe, xf, le, lf, v, eroi, ner, p, perte1, perte2) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf),cals.map(_.xe), cals.map(_.xf), cals.map(_.le), cals.map(_.lf), cals.map(_.v), cals.map(_.eroi), cals.map(_.ner), cals.map(_.p),
+    cals.map(_.perte1), cals.map(_.perte2))
   def growth_rates(ind: List[Double]) = {
     (1 until ind.size).toList.map(i => (1 - ind(i) / ind(i - 1)))
   }
@@ -234,15 +297,41 @@ object Calibration {
     print("$v_e$"); cals.map(cal => print(" & " + round(cal.ve))); println(" \\" + "\\")
     print("$q_f delta_e v_e$ [/100]"); cals.map(cal => print(" & " + round(round(100 * (cal.delta_e * cal.ve * cal.qf))))); println(" \\" + "\\")
     print("$epsilon$ "); cals.map(cal => print(" & " + round(cal.eroi))); println(" \\" + "\\")
-    print("$NER$ "); cals.map(cal => print(" & " + round(cal.ner*100))); println(" \\" + "\\")
-    print("P_1=CIK SE+CIK SF"); cals.map(cal => print(" & " + round((1.0-cal.ner)*100))); println(" \\" + "\\")
-    print("CIK SE"); cals.map(cal => print(" & " + round(1.0/cal.eroi*100))); println(" \\" + "\\")
-    print("CIK SF"); cals.map(cal => print(" & " + round((1.0-cal.ner-1.0/cal.eroi)*100))); println(" \\" + "\\")
-    print("$P_2$ = Pertes d'$ub$ - $pC_e$");cals.map(cal => print(" & " + round(cal.p2*100))); println(" \\" + "\\")
-    print("=Pertes d'$ub$");cals.map(cal => print(" & " + round(cal.xi*(1-cal.delta_f*cal.vf)*100))); println(" \\" + "\\")
-    print("-Compensation $pC_e$");cals.map(cal => print(" & " + round( (cal.xi * cal.p * cal.qf)*100 ))); println(" \\" + "\\")
-    print("$P_1$ + $P_2$"); cals.map(cal => print(" & " + round((cal.p1+cal.p2)*100))); println(" \\" + "\\")
-    
+    print("$NER$ "); cals.map(cal => print(" & " + round(cal.ner * 100))); println(" \\" + "\\")
+    print("P_1=CIK SE+CIK SF"); cals.map(cal => print(" & " + round((1.0 - cal.ner) * 100))); println(" \\" + "\\")
+    print("CIK SE"); cals.map(cal => print(" & " + round(1.0 / cal.eroi * 100))); println(" \\" + "\\")
+    print("CIK SF"); cals.map(cal => print(" & " + round((1.0 - cal.ner - 1.0 / cal.eroi) * 100))); println(" \\" + "\\")
+    print("$P_2$ = Pertes d'$ub$ - $pC_e$"); cals.map(cal => print(" & " + round(cal.p2 * 100))); println(" \\" + "\\")
+    print("=Pertes d'$ub$"); cals.map(cal => print(" & " + round(cal.xi * (1 - cal.delta_f * cal.vf) * 100))); println(" \\" + "\\")
+    print("-Compensation $pC_e$"); cals.map(cal => print(" & " + round((cal.xi * cal.p * cal.qf) * 100))); println(" \\" + "\\")
+    print("$P_1$ + $P_2$"); cals.map(cal => print(" & " + round((cal.p1 + cal.p2) * 100))); println(" \\" + "\\")
+
+  }
+  def printTableCalibrationCI(year: Int = 2017, alphas: List[Double], etas: List[Double], zfs: List[Double], mus: List[Double]) {
+    val cals = alphas.map(alpha => etas.map(eta => (mus.map(mu => zfs.map(zf => new calibration_results_CI(alpha = alpha, eta = eta, zf = zf, mu = mu)))).flatten).flatten).flatten
+    print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
+    print("$alpha$ [/100]"); cals.map(cal => print(" & " + round(cal.alpha * 100, 0))); println(" \\" + "\\")
+    print("$eta$ [/100]"); cals.map(cal => print(" & " + round(cal.eta * 100,1))); println(" \\" + "\\")
+    print("$zf$ [/100]"); cals.map(cal => print(" & " + round(cal.zf * 100,0))); println(" \\" + "\\")
+    print("$mu$ [/100]"); cals.map(cal => print(" & " + round(cal.mu * 100,1))); println(" \\" + "\\")
+    print("$p$"); cals.map(cal => print(" & " + round(cal.p))); println(" \\" + "\\")
+    print("$q_f$"); cals.map(cal => print(" & " + round(cal.qf))); println(" \\" + "\\")
+    print("$x_f$"); cals.map(cal => print(" & " + round(cal.xf))); println(" \\" + "\\")
+    print("$x_e$"); cals.map(cal => print(" & " + round(cal.xe))); println(" \\" + "\\")
+    print("$v$"); cals.map(cal => print(" & " + round(cal.v))); println(" \\" + "\\")
+    print("$v_f$"); cals.map(cal => print(" & " + round(cal.vf))); println(" \\" + "\\")
+    print("$v_e$"); cals.map(cal => print(" & " + round(cal.ve))); println(" \\" + "\\")
+    print("$q_f (x_e + delta_e v_e)$ [/100]"); cals.map(cal => print(" & " + round(round(100 * ((cal.xe + cal.delta_e * cal.ve) * cal.qf))))); println(" \\" + "\\")
+    print("$EROI$ "); cals.map(cal => print(" & " + round(cal.eroi))); println(" \\" + "\\")
+    print("$NER$ "); cals.map(cal => print(" & " + round(cal.ner * 100))); println(" \\" + "\\")
+    print("P_1=CIK SE+CIK SF"); cals.map(cal => print(" & " + round((1.0 - cal.ner) * 100))); println(" \\" + "\\")
+    print("CIK SE"); cals.map(cal => print(" & " + round(1.0 / cal.eroi * 100))); println(" \\" + "\\")
+    print("CIK SF"); cals.map(cal => print(" & " + round((1.0 - cal.ner - 1.0 / cal.eroi) * 100))); println(" \\" + "\\")
+    print("$P_2$ = Pertes d'$ub$ - $pC_e$"); cals.map(cal => print(" & " + round(cal.p2 * 100))); println(" \\" + "\\")
+    print("=Pertes d'$ub$"); cals.map(cal => print(" & " + round(cal.xi * (1 - cal.delta_f * cal.vf) * 100))); println(" \\" + "\\")
+    print("-Compensation $pC_e$"); cals.map(cal => print(" & " + round((cal.xi * cal.p * cal.qf) * 100))); println(" \\" + "\\")
+    print("$P_1$ + $P_2$"); cals.map(cal => print(" & " + round((cal.p1 + cal.p2) * 100))); println(" \\" + "\\")
+
   }
   def printTableCalibration_full(year: Int = 2017, tfs: List[Int], tes: List[Int], alphas: List[Double], mus: List[Double]) {
 
@@ -321,14 +410,14 @@ object CalibrationData {
   val ind = (0 until n).toList
 
   val year = data.map(_._1); val pib = data.map(_._2);
-  val neu = data.map(_._4*0); val e_neu = data.map(_._5); val ce = data.map(_._6);
-  val oeu = data.map(_._3) 
+  val neu = data.map(_._4); val e_neu = data.map(_._5); val ce = data.map(_._6);
+  val oeu = data.map(_._3)
   val frac_neu = ind.map(i => neu(i) / e_neu(i))
 
   // val e = ind.map(i => e_neu(i) - neu(i))
   val ee = ind.map(i => oeu(i) * (1 - frac_neu(i)))
-  val ye = ind.map(i => e_neu(i) - neu(i) + oeu(i) )
-  
+  val ye = ind.map(i => e_neu(i) - neu(i) + oeu(i))
+
   val s = smooth_double(data.map(_._7), smoothing); // val gpt = smooth_double(data.map(_._7), smoothing);
   val PA = data.map(_._8); val ch = data.map(_._9);
   val L = ind.map(i => PA(i) * (1 - ch(i)))
@@ -366,7 +455,9 @@ object CalibrationData {
     val own_use = (1 until own_use_data(0).size).map(i =>
       (own_use_data(0)(i).toString, (1 until own_use_data.size).map(j => -TonOilEquivalent(if (own_use_data(j)(i).nonEmpty) own_use_data(j)(i).toDouble * 1000 else 0.0)).toList)).toMap
 
-    val sources = tfc.keys.toList.filter(i => !i.contains("Crude oil") && !i.contains("Heat") && !i.contains("Wind"))
+    val sources = tfc.keys.toList.filter(i => !i.contains("Crude oil") && !i.contains("Heat") && !i.contains("Wind")
+      && !i.contains("brut") && !i.contains("Chaleur") && !i.contains("Eolien"))
+
     val qe = sources.map(s => (s, (0 until tfc(s).size).map(i => own_use(s)(i) / (own_use(s)(i) + tfc(s)(i))).toList)).toMap
     val qe_total = (0 until tfc(sources(0)).size).map(i => sources.map(s => own_use(s)(i).toJoules).sum / (sources.map(s => own_use(s)(i).toJoules).sum + sources.map(s => tfc(s)(i).toJoules).sum)).toList
     plotXY(qe.map(q => (years, q._2.map(_ * 100), q._1)).toList ++ List((years, qe_total.map(_ * 100), "Total")), yLabel = "qe [%]", legend = true, title = "qe_i")
@@ -377,5 +468,20 @@ object CalibrationData {
     plotXY(List((years, tfc("Coal").map(_.to(MegaTonOilEquivalent)), "Total"), (years, coal_tfc_china.map(_.to(MegaTonOilEquivalent)), "China")), yLabel = "Coal - TFC [Mtoe]", legend = true)
     plotXY(List((years, qe("Coal").map(_ * 100), "Total"), (years, coal_qe_china.map(_ * 100), "China")), yLabel = "Coal - qe [%]", legend = true)
 
+  }
+
+  def alpha_ze_zf(pib_units: Int): (Double, Double, Double) = {
+    // Calcul de alpha
+    val ci_va_y = Helper.getLines("CI_VA_Y", "\t").map(i => (i(0).toString, (i(1).toDouble / pib_units, i(2).toDouble / pib_units, i(3).toDouble / pib_units), (i(4).toDouble / pib_units, i(5).toDouble / pib_units, i(6).toDouble / pib_units)))
+    val total_e = (ci_va_y.map(_._2._1).sum, ci_va_y.map(_._2._2).sum, ci_va_y.map(_._2._3).sum)
+    val total_f = (ci_va_y.map(_._3._1).sum, ci_va_y.map(_._3._2).sum, ci_va_y.map(_._3._3).sum)
+
+    // = CIe / pYe
+    val ze = total_e._1 / total_e._3
+    // = CIf / Yf
+    val zf = total_f._1 / total_f._3
+    // VAe / (VAe+Vaf)
+    val alpha = 0.06 ///  total_e._2 / (total_e._2 + total_f._2)
+    (alpha, ze, zf)
   }
 }

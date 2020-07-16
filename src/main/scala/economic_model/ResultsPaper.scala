@@ -13,7 +13,8 @@ object ResultsPaper {
   import GrowthModel._
 
   def main(args: Array[String]): Unit = {
-    exercice
+ EROISocietalPaper   
+    
   }
 
   def exercice {
@@ -22,8 +23,12 @@ object ResultsPaper {
     val cal = new calibration_results_work(energy_units = MegaTonOilEquivalent, pib_units = 1E9.toInt, pop_units = 1E6.toInt)
 
     val share = (0 to 4).map(_ * 0.25).toList
+    val qf_2050 = cal.qf * math.pow(1 - 1.06 / 100, 33)
+    val lf_2050 = cal.lf * math.pow(1 - 1.34 / 100, 33)
+
+    println("qf 2050 " + qf_2050 + "\t" + " lf 2050 " + lf_2050)
     val T = (30.0 / share.size).toInt
-    val share_qf = (0 until share.size).map(i => (share(i), cal.qf * math.pow(1 - 1.06 / 100, T * i), cal.lf * math.pow(1 - 1.34 / 100, T * i))).toList
+    val share_qf = (0 until share.size).map(i => (share(i), qf_2050, lf_2050)).toList //cal.qf * math.pow(1 - 1.06 / 100, T * i), cal.lf * math.pow(1 - 1.34 / 100, T * i))).toList
     val share_qf0 = (0 until share.size).map(i => (share(i), cal.qf, cal.lf)).toList
     //resultsExercices(share_qf)
     //resultsExercices(share_qf0)
@@ -165,25 +170,30 @@ object ResultsPaper {
 
   def EROISocietalPaper {
     sensitivityAnalysis
-    plotParametersHistory
+   // plotParametersHistory
   }
   def sensitivityAnalysis {
-    val cal = new calibration_results_work
+    val cal = new calibration_results_CI
+    println("ETA min " + cal.alpha*cal.data.ce(cal.i)/((1-cal.s)*cal.data.e(cal.i)) )
+    println("Ee :" + 100*cal.eroi*cal.qe + ", Xe " + 100*cal.eroi*cal.xe*cal.qf + ", Ke " + 100*cal.eroi*cal.qf*cal.delta_e*cal.ve)
+
     println("---------- Tableau 2 ----------")
-    println(round(cal.vf) + " & " + round(cal.qf) + " & " + round(cal.ve) + " & " + round(cal.qe) + " & " + round(cal.v) + " & " + round(cal.eroi) + " & " + round(cal.ner))
+    println(round(cal.vf) + " & " + round(cal.qf) + " & " +round(cal.xf) + " & " + round(cal.ve) + " & " + round(cal.qe) + " & " + + round(cal.xe) + " & " + round(cal.v) + " & " + round(cal.eroi) + " & " + round(cal.ner))
     println("---------- Tableau 3 ----------")
     println("$P_1$" + " & " + round(cal.p1 * 100) + "\\" + "\\")
     println("CIK SE" + " & " + round((1 / cal.eroi) * 100) + "\\" + "\\")
     println("CIK SF" + " & " + round((cal.p1 - 1 / cal.eroi) * 100) + "\\" + "\\")
     println("$P_2$" + " & " + round(cal.p2 * 100) + "\\" + "\\")
-    println("Pertes d'$ub$" + " & " + round(cal.xi * (1 - cal.delta_f * cal.vf) * 100) + "\\" + "\\")
+    println("Pertes d'$ub$" + " & " + round(cal.xi * (1 - (cal.xf+cal.delta_f * cal.vf)) * 100) + "\\" + "\\")
     println("-Compensation $pC_e$" + " & " + round((cal.xi * cal.p * cal.qf) * 100) + "\\" + "\\")
     println("P_1 + P_2$" + " & " + round(100 * (cal.p1 + cal.p2)) + "\\" + "\\")
-
-    val as = List(0.04, 0.06, 0.08); val mus = List(0.03, 280.0 / 4280, 0.1);
+    
+    val zfs = List(0.4,0.49,0.6); val etas = List(0.028, 0.043, 0.058)
+    val as = List(0.03, 0.05, 0.07); val mus = List(0.03, 280.0 / 4280, 0.1);
     val tfs = List(15, 20, 25); val tes = List(20, 25, 30);
     println("---------- Tableau 5 ----------")
-    Calibration.printTableCalibration_simple(2017, as, mus)
+    Calibration.printTableCalibrationCI(2017,List(0.05), etas,zfs, List(280.0 / 4280))
+  
   }
 
   def plotParametersHistory {
@@ -197,18 +207,19 @@ object ResultsPaper {
       println(data.year(y) + " & " + round(eroi(y), 2) + " & " + round(ner(y) * 100, 2)
         + " & " + round(perte1(y) * 100, 2) + " & " + round((perte2(y) - perte1(y)) * 100, 2) + "\\" + "\\")
     })
-    val res = List((qe, "qe"), (qf, "qf"), (ve, "ve"), (vf, "vf"), (eroi, "eroi"), (ner, "ner"),
+    val res = List((qe.map(_*100), "qe [%]"), (qf, "qf"), (ve, "ve"), (vf, "vf"),(xe,"xe"),(xf,"xf"), (eroi, "EROI"), (ner.map(_*100), "NER [%]"),
       (v, "v"))
+    combinedPlots(year_double, List((qe.map(_*100), "qe [%]"), (qf, "qf"), (ve, "ve"), (vf, "vf"),(v, "v")))
 
     import CalibrationData._
     res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))
+   
+    plotXY(List((year_double, perte2.map(_ * 100), "CIK SE+SF"), (year_double, perte1.map(_ * 100), "CIK SE"), (year_double, (0 until perte2.size).toList.map(i => (perte2(i) * 100 - perte1(i) * 100)), "CIK SF")), yLabel = "Pertes [%]", legend = true, title = "pertes")
 
-    plotXY(List((year_double, perte2.map(_ * 100), "CIK SE+SF"), (year_double, perte1.map(_ * 100), "CIK SE"), (year_double, (0 until perte2.size).toList.map(i => (perte2(i) * 100 - perte1(i) * 100)), "CIK SF")), legend = true, title = "pertes")
-
-    val year_growth = (1 until year_double.size).map(year_double(_)).toList
-    plotXY(List((year_growth, CalibrationData.smooth_double(growth_rates(qf), (true, 10)).map(_ * 100), "")), yLabel = "qf growth rate [%/y]")
-    plotXY(List((year_growth, CalibrationData.smooth_double(growth_rates(lf), (true, 10)).map(_ * 100), "")), yLabel = "lf growth rate [%/y]")
-
-  }
+    //val year_growth = (1 until year_double.size).map(year_double(_)).toList
+    //plotXY(List((year_growth, CalibrationData.smooth_double(growth_rates(qf), (true, 10)).map(_ * 100), "")), yLabel = "qf growth rate [%/y]")
+    //plotXY(List((year_growth, CalibrationData.smooth_double(growth_rates(lf), (true, 10)).map(_ * 100), "")), yLabel = "lf growth rate [%/y]")
+  
+     }
 
 }
