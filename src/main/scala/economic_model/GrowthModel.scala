@@ -149,6 +149,23 @@ object GrowthModel {
     }
     out_stream.close()
   }
+    def simulate_qe_xe_ve(techs: List[(RenewableTechnology, Double)], qf_final: Double) {
+    val calib = new calibration_results_work
+    val all_sites = Grid().cells
+    val techs_it = techs.map(tech => (new TechnologyIterator(tech._1, all_sites, energy_units = calib.energy_units, pib_units = calib.pib_units), tech._2))
+    val res = new GrowthModelResults(calib.energy_units)
+    res.updateProduction(2017, Joules(0), Joules(0), Joules(0), calib.delta_e)
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("ye_qe_ve"))
+
+    for (i <- (1 to 2000)) {
+      val target = MegaTonOilEquivalent(10)
+      techs_it.map(tech => tech._1.simulate_year(i + 2017, target * tech._2, false, qf_final / calib.qf))
+      res.sumResults(i + 2017, techs_it.map(_._1.results))
+      out_stream.print(res.ye.last.to(MegaTonOilEquivalent).toString +
+        "\t" + res.qe.last.toString + "\t" + res.ve(qf_final).toString + "\n")
+    }
+    out_stream.close()
+  }
 }
 
 class TechnologyIterator(val tech: RenewableTechnology, sites: List[Cell], log: Boolean = false, energy_units: EnergyUnit = KilowattHours,

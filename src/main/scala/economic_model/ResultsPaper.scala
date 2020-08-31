@@ -170,11 +170,13 @@ object ResultsPaper {
 
   def EROISocietalPaper {
     sensitivityAnalysis
-   // plotParametersHistory
+    // plotParametersHistory
   }
   def sensitivityAnalysis {
     val cal = new calibration_results_CI
+    println(cal.yf + "\t" + cal.Xe + "\t" + cal.Xf + "\t" + cal.Cf + "\t" + cal.s*cal.pib)
     println("ETA min " + cal.alpha*cal.data.ce(cal.i)/((1-cal.s)*cal.data.e(cal.i)) )
+    println((cal.xe+cal.delta_e*cal.ve)*cal.qf)
     println("Ee :" + 100*cal.eroi*cal.qe + ", Xe " + 100*cal.eroi*cal.xe*cal.qf + ", Ke " + 100*cal.eroi*cal.qf*cal.delta_e*cal.ve)
 
     println("---------- Tableau 2 ----------")
@@ -188,27 +190,31 @@ object ResultsPaper {
     println("-Compensation $pC_e$" + " & " + round((cal.xi * cal.p * cal.qf) * 100) + "\\" + "\\")
     println("P_1 + P_2$" + " & " + round(100 * (cal.p1 + cal.p2)) + "\\" + "\\")
     
-    val zfs = List(0.4,0.49,0.6); val etas = List(0.028, 0.043, 0.058)
-    val as = List(0.03, 0.05, 0.07); val mus = List(0.03, 280.0 / 4280, 0.1);
+    val zfs = List(0.4,0.5,0.6); val etas = List(0.03, 0.04, 0.05)
+    val as = List(0.04, 0.06, 0.08); val mus = List(0.03, 280.0 / 4280, 0.1);
     val tfs = List(15, 20, 25); val tes = List(20, 25, 30);
     println("---------- Tableau 5 ----------")
-    Calibration.printTableCalibrationCI(2017,List(0.05), etas,zfs, List(280.0 / 4280))
+    Calibration.printTableCalibrationCI(2017,List(0.06), etas,zfs, List(280.0 / 4280))
+  
+    Calibration.printTableCalibrationCI(2017,as, List(0.04), List(0.5), List(280.0 / 4280))
+  Calibration.printTableCalibrationCI(2017,List(0.06), List(0.04), List(0.5), mus)
   
   }
 
   def plotParametersHistory {
     import Calibration._
-
-    println("mean qf growth rate = " + round(growth_rates(qf).sum / (growth_rates(qf).size)))
-    println("mean lf growth rate = " + round(growth_rates(lf).sum / (growth_rates(lf).size)))
-
     val index = List(0, 5, 10, 15, 20, 25, 27)
-    index.map(y => {
+    /*index.map(y => {
       println(data.year(y) + " & " + round(eroi(y), 2) + " & " + round(ner(y) * 100, 2)
         + " & " + round(perte1(y) * 100, 2) + " & " + round((perte2(y) - perte1(y)) * 100, 2) + "\\" + "\\")
-    })
+    })*/
+    // plotXY(List((year_double, alphas,"alpha"),(year_double, etas,"eta")))
     val res = List((qe.map(_*100), "qe [%]"), (qf, "qf"), (ve, "ve"), (vf, "vf"),(xe,"xe"),(xf,"xf"), (eroi, "EROI"), (ner.map(_*100), "NER [%]"),
-      (v, "v"))
+      (v, "v"), (p, "p"))
+      
+       println("mean qf growth rate = " + round(growth_rates(qf).sum / (growth_rates(qf).size)))
+    println("mean lf growth rate = " + round(growth_rates(lf).sum / (growth_rates(lf).size)))
+
     combinedPlots(year_double, List((qe.map(_*100), "qe [%]"), (qf, "qf"), (ve, "ve"), (vf, "vf"),(v, "v")))
 
     import CalibrationData._

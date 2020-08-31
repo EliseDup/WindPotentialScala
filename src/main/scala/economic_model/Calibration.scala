@@ -154,19 +154,24 @@ class ImpactPER(val z: Z) {
 }
 
 class calibration_results_CI(
-    val alpha: Double = 0.05, val eta: Double = 4.3 / 100, val zf: Double = 0.49,
+    val alpha: Double = 0.06, val eta: Double = 4.0 / 100, val zf: Double = 0.5,
     val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val mu: Double = 280.0 / 4280, val theta: Double = 0.4,
     val energy_units: EnergyUnit = MegaTonOilEquivalent, val pib_units: Int = 1E9.toInt,
     val pop_units: Int = 1E6.toInt) {
   val i = Calibration.index_year(year)
-
+    
   val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
   val delta = mu * delta_e + (1 - mu) * delta_f
   val data = Calibration.data
+  def ce(i : Int) = data.ce(i).to(energy_units)
+ 
   // Observed data  for year i
   val pib = data.pib(i) / pib_units;
+
   val va_e = alpha * pib; val va_f = (1 - alpha) * pib
-  val g = data.g(i); val s = data.s(i);
+  val g = data.g(i); 
+  val s = data.s(i);
+
   val qe = data.qe(i)
   val gk = g // + gv
   // Calculated data for year i
@@ -174,8 +179,8 @@ class calibration_results_CI(
   val K = v * pib; val Ke = mu * K; val Kf = (1 - mu) * K
   val I = s * pib; val C = (1 - s) * pib
   val p_min = va_e / data.e(i).to(energy_units)
-  val eta_min = p_min * data.ce(i).to(energy_units) / C
-  val p = eta * C / data.ce(i).to(energy_units) //va_e/((1-ze)*data.ye(i).to(energy_units)) //alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
+  val eta_min = p_min * ce(i) / C
+  val p = eta * C / ce(i) //va_e/((1-ze)*data.ye(i).to(energy_units)) //alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
 
   val Cf = (1 - eta) * C
   val Xe = p * data.e(i).to(energy_units) - va_e
@@ -184,6 +189,7 @@ class calibration_results_CI(
   val yf = va_f / (1 - zf)
   val qf = data.ef(i).to(energy_units) / yf // Intensité énergétique de l'économie
   val xf = zf - p * qf
+  val Xf = xf*yf
   val vf = Kf / yf // Intensité capitalistique de l'économie
   val ve = Ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
   val tilde_Ke = energy_units(Ke * qf)
@@ -207,7 +213,7 @@ class calibration_results_CI(
   val k = K / data.ye(i).to(energy_units)
 
   val p1 = 1.0 - ner
-  val xi = data.ce(i).to(energy_units) / data.ye(i).to(energy_units)
+  val xi = ce(i) / data.ye(i).to(energy_units)
   val p2 = (1 - (xf + z.deltaf * z.vf) - p * z.qf) * xi
   // Pertes %
   val perte1 = 1.0 / eroi
@@ -218,8 +224,7 @@ class calibration_results_CI(
 class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val alpha: Double = 6.0 / 100, val mu: Double = 280.0 / 4280, val theta: Double = 0.4,
     val energy_units: EnergyUnit = MegaTonOilEquivalent, val pib_units: Int = 1E9.toInt,
     val pop_units: Int = 1E6.toInt) {
-
-  val i = Calibration.index_year(year)
+ val i = Calibration.index_year(year)
   val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
   val delta = mu * delta_e + (1 - mu) * delta_f
   val data = Calibration.data
@@ -273,14 +278,21 @@ class calibration_results_work(val year: Int = 2017, val Tf: Int = 20, val Te: I
 object Calibration {
   val data = CalibrationData
   val year_double = data.year.map(_.toDouble)
+  // Test: linear extrapolation for alpha & eta
+  val a_alpha = (5.3-5.0)/(2005-2015)/100.0
+  val b_alpha = 5.0/100-a_alpha*2015
+  val a_eta = (4.68-4.3)/(2005-2015)/100.0
+  val b_eta = 4.3/100-a_eta*2015
+  def alpha(year: Int) = a_alpha*year + b_alpha
+  def eta(year: Int) = a_eta*year + b_eta
 
   def index_year(year: Int) = data.year.zipWithIndex.find(i => i._1 == year).get._2
 
   def rho(alpha: Double, gamma: Double) = 1 - alpha + alpha * gamma
 
-  val cals = data.year.map(y => new calibration_results_CI(year = y))
-  val (qe, qf, ve, vf, xe, xf, le, lf, v, eroi, ner, p, perte1, perte2) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf),cals.map(_.xe), cals.map(_.xf), cals.map(_.le), cals.map(_.lf), cals.map(_.v), cals.map(_.eroi), cals.map(_.ner), cals.map(_.p),
-    cals.map(_.perte1), cals.map(_.perte2))
+  val cals = data.year.map(y => new calibration_results_CI(year = y, alpha=alpha(y),eta=eta(y)))
+  val (qe, qf, ve, vf, xe, xf, le, lf, v, eroi, ner, p, perte1, perte2,alphas,etas) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf),cals.map(_.xe), cals.map(_.xf), cals.map(_.le), cals.map(_.lf), cals.map(_.v), cals.map(_.eroi), cals.map(_.ner), cals.map(_.p),
+    cals.map(_.perte1), cals.map(_.perte2),cals.map(_.alpha),cals.map(_.eta))
   def growth_rates(ind: List[Double]) = {
     (1 until ind.size).toList.map(i => (1 - ind(i) / ind(i - 1)))
   }
