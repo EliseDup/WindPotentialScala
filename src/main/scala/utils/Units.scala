@@ -32,6 +32,10 @@ object MegaTonOilEquivalent extends EnergyUnit {
   val conversionFactor = TonOilEquivalent.conversionFactor * MetricSystem.Mega
   val symbol = "Mtoe"
 }
+object KiloTonOilEquivalent extends EnergyUnit {
+  val conversionFactor = TonOilEquivalent.conversionFactor * MetricSystem.Kilo
+  val symbol = "ktoe"
+}
 object Exajoules extends EnergyUnit {
   val conversionFactor = Joules.conversionFactor * MetricSystem.Exa
   val symbol = "EJ"

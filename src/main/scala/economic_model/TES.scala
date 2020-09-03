@@ -15,13 +15,13 @@ object TES {
   import GrowthModel._
 
   def main(args: Array[String]): Unit = {
-    for (i <- 1995 to 2011) {
+   /*for (i <- 1995 to 2011) {
       val tes = new TES(i, true)
       println(i + "\t" + tes.eta_tot+ "\t" + tes.alpha_tot  + "\t" + tes.zf_tot)
-    }
+    }*/
     for (i <- 2005 to 2015) {
       val tes = new TES(i, false)
-      println(i + "\t" + tes.eta_tot+ "\t" + tes.alpha_tot +"\t" + tes.zf_tot)
+      println(i + "\t" + tes.eta_tot+ "\t" + tes.alpha_tot +"\t" + tes.zf_tot + "\t" +tes.z_e +"\t" + tes.va_tot  )
     }
     
     val tes = new TES(2015, false)
@@ -102,7 +102,7 @@ class TES(year: Int, v3: Boolean) {
   val ci_row_indexes = row_index.filter(i => is_ci_row(i._1)).map(_._2)
   val sf_col_indexes = ci_col_indexes.filter(i => !is_se(col_index(i)._1))
   val sf_row_indexes = ci_row_indexes.filter(i => !is_se(row_index(i)._1))
-
+  
   // Final consumption = HFCE	Households final consumption expenditure
   // NPISH	Non-profit institutions serving households
   // GGFC	General government final consumption
