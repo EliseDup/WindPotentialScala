@@ -37,7 +37,7 @@ class calibration_results_CI(
   val p_min = va_e / data.e(i).to(energy_units)
   val eta_min = p_min * ce(i) / C
   val p = eta * C / ce(i) //va_e/((1-ze)*data.ye(i).to(energy_units)) //alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
-
+  val gamma = ce(i)/C
   val Cf = (1 - eta) * C
   val Xe = p * data.e(i).to(energy_units) - va_e
   val xe = Xe / data.ye(i).to(energy_units)
@@ -52,7 +52,7 @@ class calibration_results_CI(
   val tilde_Xe =  energy_units(Xe * qf)
   def tilde_Ke(qf: Double) = energy_units(Ke * qf)
   def tilde_Xe(qf: Double) = energy_units(Xe * qf)
-
+  val y = yf/data.ye(i).to(energy_units)
   // val cf = yf - s * pib
 
   val eroi = 1 / (qe + (xe + delta_e * ve) * qf)

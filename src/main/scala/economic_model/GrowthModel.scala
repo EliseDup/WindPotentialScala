@@ -22,7 +22,7 @@ object GrowthModel {
     val pib_f = cal.pib // * math.pow(1 + 2.0 / 100, 33);
     val target = cal.data.ye(cal.i) // * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve)
 
-    val share = (0 to 100).map(_ / 100.0).toList
+    val share = (0 to 1000).map(_ / 1000.0).toList
 
     // val share = (1 to 5).map(_ * 0.2).toList
     // Jacobson scenario for 2050: 
@@ -35,8 +35,8 @@ object GrowthModel {
     val techs = List((OnshoreWindTechnology, 23.52 / 94.69), (OffshoreWindTechnology, 13.62 / 94.69), (PVMono, (14.89 + 11.58 + 21.36) / 94.69), (CSPTowerStorage12h, 9.72 / 94.69))
     // techs.map(t => println(t._1.name + "\t" + t._1.lifeTime + "\t" + t._1.ee.energyInputsOMYearly(Gigawatts(1)).to(KiloTonOilEquivalent) + "\t" + t._1.ee.energyInputsInstallation(Gigawatts(1)).to(KiloTonOilEquivalent) + "\t" + t._1.ee.energyInputsDecomissioning(Gigawatts(1)).to(KiloTonOilEquivalent)))
 
-    simulateTransition(share, techs, "x_qe_ve_xe")
-    simulate_qe_xe_ve(techs, qf_f)
+    simulateTransition(share, techs)
+   // simulate_qe_xe_ve(techs, qf_f)
 
   }
 
@@ -72,7 +72,7 @@ object GrowthModel {
     Z_xi(res.ve(qf), calib.vf, res.qe.last, qf, res.xe(qf), calib.xf, res.delta_e.last, calib.delta_f)
   }
 
-  def simulateTransition(shares: List[Double], techs: List[(RenewableTechnology, Double)], file_name: String) {
+  def simulateTransition(shares: List[Double], techs: List[(RenewableTechnology, Double)], file_name: String="x_qe_xe_ve") {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(file_name))
 
     val all_sites = Grid().cells
@@ -110,7 +110,7 @@ object GrowthModel {
 
       // println(s + "\t" + res.qe.last + "\t" + res.ve(calib.qf) + "\t" + res.xe(calib.qf) + "\t" + res.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res.tilde_xe.last.to(MegaTonOilEquivalent) + "\t" + res.ye.last.to(MegaTonOilEquivalent))
       // println(s + "\t" + res_re.qe.last + "\t" + res_re.ve(qf) + "\t" + res_re.xe(qf)  + "\t" + res_re.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res_re.tilde_xe.last.to(MegaTonOilEquivalent) + "\t" + res_re.delta_e.last + "\t" + res_re.ye.last.to(MegaTonOilEquivalent) + "\t" + res_re.ee.last.to(MegaTonOilEquivalent))
-      out_stream.print(s + "\t" + res.qe.last + "\t" + res.ve(calib.qf) + "\t" + res.xe(calib.qf) + "\t" + res.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res.tilde_xe.last.to(MegaTonOilEquivalent) + "\t" + res.ye.last.to(MegaTonOilEquivalent))
+      out_stream.print(s + "\t" + res.qe.last  + "\t" + res.xe(calib.qf) + "\t" + res.ve(calib.qf)+ "\t" +  res.tilde_xe.last.to(MegaTonOilEquivalent) + "\t" +res.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res.ye.last.to(MegaTonOilEquivalent) + "\n")
     }
     out_stream.close()
   }
