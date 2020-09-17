@@ -85,7 +85,7 @@ object PlotHelper {
   def plotXY(xy: List[((List[Double], List[Double]), String)], xLabel: String, yLabel: String): XYPlot = { plotXY(xy.map(i => (i._1._1, i._1._2, i._2)), xLabel = xLabel, yLabel = yLabel) }
 
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
-    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1), drawPlot: Boolean = true): XYPlot = {
+    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1), drawPlot: Boolean = true, int_x_axis:Boolean=false): XYPlot = {
 
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
@@ -102,10 +102,12 @@ object PlotHelper {
     val max = xys.map(_._2).flatten.max
     val min = xys.map(_._2).flatten.min
 
-    val format = new DecimalFormat("####");
-    plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(format)
-
-   // plot.getRangeAxis().setRange(50, 85)
+    // If years !!
+    if (int_x_axis) {
+      val format = new DecimalFormat("####");
+      plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(format)
+    }
+    // plot.getRangeAxis().setRange(50, 85)
     //plot.getDomainAxis().setRange(0,800)
     if (drawPlot)
       createFrame(chart, name = title, save = save, tick = tick)
@@ -200,7 +202,7 @@ object PlotHelper {
     val plots = new CombinedDomainXYPlot(new NumberAxis(xLabel))
     list.map(p => plots.add(p))
     plots.getDomainAxis().setRange(x.min, x.max)
-    
+
     val chart = new JFreeChart("", plots);
     applyChartTheme(chart, (false, 1, 1))
     if (save) {
