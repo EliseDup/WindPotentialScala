@@ -21,7 +21,7 @@ object GrowthModel {
     val qf_f = cal.qf // * math.pow(1 - 0.7 / 100, 33);
     val pib_f = cal.pib // * math.pow(1 + 2.0 / 100, 33);
     val target = cal.data.ye(cal.i) // * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve)
-    val n = 1000
+    val n = 100
     val share = (0 to n).map(_ / n.toDouble).toList
 
     // val share = (1 to 5).map(_ * 0.2).toList
@@ -72,7 +72,7 @@ object GrowthModel {
     Z_xi(res.ve(qf), calib.vf, res.qe.last, qf, res.xe(qf), calib.xf, res.delta_e.last, calib.delta_f)
   }
 
-  def simulateTransition(shares: List[Double], techs: List[(RenewableTechnology, Double)], file_name: String="x_qe_xe_ve_1k") {
+  def simulateTransition(shares: List[Double], techs: List[(RenewableTechnology, Double)], file_name: String="x_qe_xe_ve_100") {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(file_name))
 
     val all_sites = Grid().cells
