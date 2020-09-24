@@ -13,12 +13,17 @@ object DynamicXi {
   val dyn_1 = new Dynamic_s_eta(calib.s, calib.eta)
   val dyn_2a = new Dynamic_s_gamma(calib.s, calib.gamma)
   val dyn_2b = new Dynamic_s_gamma_b(calib.s, calib.gammab)
-  val dyn_3 = new Dynamic_gk_eta(calib.gk, calib.eta, calib.delta)
+  val dyn_3 = new Dynamic_gk_eta(0.05, calib.eta, calib.delta)
 
   import CalibrationDataXi._
   import PlotHelper._
   def main(args: Array[String]): Unit = {
-    qf_detailed_results(10)
+    //qf_detailed_results(100, false)
+    dyn_3.simulate_int(calib, calib.qf / 2, nyears = 25, plot = true)
+   // dyn_2b.simulate_int(calib, calib.qf / 2, nyears = 200, plot = true)
+   // dyn_3.simulate_int(calib, calib.qf / 2, nyears = 200, plot = true)
+    //dyn_3.simulate_int(calib, calib.qf / 2, nyears = 45, plot = true)
+    //dyn_3.simulate_int(calib,calib.qf/2,nyears=200,max=true,plot=false)
   }
 
   def printTable(qf_min: Double, ny: Int) {
@@ -33,24 +38,26 @@ object DynamicXi {
     println("\t" + "x" + "\t" + "k" + "\t" + "gk" + "\t" + "s" + "\t" + "eroi" + "\t" + "theta" + "\t" + "#years_transition")
     res.map(r => println(r._1 + "\t" + r._2))
   }
-  def qf_detailed_results(step_qf: Int) {
+  def qf_detailed_results(step_qf: Int, max: Boolean) {
     val qf_min = (0 until step_qf).map(i => calib.qf * (1 - i / step_qf.toDouble)).toList
-    detailedResults(qf_min, dyn_3, calib, "3")
-    detailedResults(qf_min, dyn_1, calib, "1")
-    detailedResults(qf_min, dyn_2a, calib, "2a")
-    detailedResults(qf_min, dyn_2b, calib, "2b")
+    detailedResults(qf_min, dyn_1, calib, "1", max)
+    // detailedResults(qf_min, dyn_2a, calib, "2a")
+    detailedResults(qf_min, dyn_2b, calib, "2b", max)
+    detailedResults(qf_min, dyn_3, calib, "3", max)
   }
-  def detailedResults(qf_max: List[Double], dyn: Dynamic_Params, calib: calibration_results_CI, label: String) {
+
+  def detailedResults(qf_max: List[Double], dyn: Dynamic_Params, calib: calibration_results_CI, label: String, max: Boolean) {
     val out = new java.io.PrintStream(new java.io.FileOutputStream("res_" + label))
 
-    val res = qf_max.map(qf => dyn.simulate_int(calib, qf, 1.0 / 100, 1000, false))
+    val res = qf_max.map(qf => dyn.simulate_int(calib, qf, 1.0 / 100, 10000, false, max = max))
     (0 until qf_max.size) map (i => out.print(qf_max(i) + "\t" + res(i).x + "\t" + res(i).k + "\t" + res(i).gk + "\t" + res(i).eroi + "\n"))
     out.close()
     println("--- Exercice " + label + " Ended --- ")
 
-    plotXY(List((qf_max, res.map(_.x), "")), xLabel = "qf_min", yLabel = "x", title = "qf_x_max_" + label)
-    plotXY(List((qf_max, res.map(_.k), "")), xLabel = "qf_min", yLabel = "k", title = "qf_k_max_" + label)
-    plotXY(List((qf_max, res.map(_.gk), "")), xLabel = "qf_min", yLabel = "gk", title = "qf_gk_max_" + label)
+    plotXY(List((qf_max, res.map(_.x), "")), xLabel = "qf_min", yLabel = "x", title = "qf_min_x_" + label + max)
+    //plotXY(List((qf_max, res.map(_.k), "")), xLabel = "qf_min", yLabel = "k", title = "qf_min_k_" + label + max)
+    plotXY(List((qf_max, res.map(_.gk), "")), xLabel = "qf_min", yLabel = "gk", title = "qf_min_gk_" + label + max)
+    plotXY(List((qf_max, res.map(_.s), "")), xLabel = "qf_min", yLabel = "s_max", title = "qf_min_s_max_" + label + max)
 
   }
 }
@@ -75,6 +82,7 @@ class Dynamic_s_eta(s: Double, eta: Double) extends Dynamic_Params(s, eta) {
   def ratio_spib_k(k: Double, z: Z_xi) = {
     (1 / z.vf * s / (1 - eta * (1 - s))) * ((1 - z.xf) * (1 - z.ve / k) - z.xe * z.vf / k)
   }
+  def p(Ce : Double, Cf: Double) = eta*Cf/Ce
 }
 // Gamma = Ce/C constant
 class Dynamic_s_gamma(s: Double, gamma: Double) extends Dynamic_Params(s, gamma) {
@@ -120,9 +128,10 @@ class Dynamic_gk_eta(gk: Double, eta: Double, val delta: Double) extends Dynamic
 
   def ratio_spib_k(k: Double, z: Z_xi) = gk + delta
   override def s_k(k: Double, z: Z_xi) = (1 - eta) * (gk + delta) / ((1 - z.xf) / z.vf - eta * (gk + delta) - ((1 - z.xf) / z.vf * z.ve + z.xe) / k)
+  def p(Ce : Double, Cf: Double) = eta*Cf/Ce
 }
 
-abstract class Dynamic_Params(param1: Double, param2: Double) {
+abstract class Dynamic_Params(val param1: Double, val param2: Double) {
   import Helper._
   import PlotHelper._
   import GrowthModel._
@@ -155,6 +164,8 @@ abstract class Dynamic_Params(param1: Double, param2: Double) {
       getLines("x_qe_xe_ve_100", "\t").map(i => (i(2).toDouble)),
       getLines("x_qe_xe_ve_100", "\t").map(i => (i(3).toDouble)))
   }
+  def x_fun_ye(ye: Double) = GrowthModel.x_qe_xe_ve(MegaTonOilEquivalent(ye))
+
   def A(z: Z_xi) = z.xe / (1 - z.qe)
   def B(z: Z_xi) = (1 - z.xf) / z.qf;
   def C(z: Z_xi, k: Double) = {
@@ -162,11 +173,12 @@ abstract class Dynamic_Params(param1: Double, param2: Double) {
     ((1 - z.xf) * y - z.xe) / (1 - z.qe - z.qf * y)
   }
   def qf_fun(qf_0: Double, qf_max: Double, qf_rate: Double, T: Int) = {
-    qf_max + (qf_0 - qf_max) * Math.pow(1 - qf_rate, T - 1)
+    qf_max + (qf_0 - qf_max) * Math.pow(1 - qf_rate, T)
   }
 
   def p_int(z: Z_xi) = Interval(A(z), B(z))
   def eroi_z(z: Z_xi) = 1 / (z.qe + (z.deltae * z.ve + z.xe) * z.qf)
+  def ner_z(z: Z_xi) = 1 - (z.qe + z.qf * (z.xe + z.deltae * z.ve) + (1 - z.qe) * (z.xf + z.deltaf * z.vf)) //( //(1 - (z.xf + z.deltaf * z.vf)) * (1 - z.qe) - z.qf * (z.xe + z.deltae * z.ve)
 
   def find_indexes(k: Double, k_fun: List[(Double, Interval)], max: Boolean): (Int, Int) = {
     val index = {
@@ -217,61 +229,85 @@ abstract class Dynamic_Params(param1: Double, param2: Double) {
     val z0 = calib.z
     val beta_k = if (max) 1 else (calib.k - k_bounds(z0)._1) / (k_bounds(z0)._2 - k_bounds(z0)._1)
     val k = scala.collection.mutable.ArrayBuffer.empty[Interval];
-    val gk, s, k_mean, x, qf, eroi = scala.collection.mutable.ArrayBuffer.empty[Double];
+    val gk, s, k_mean, x, qf, eroi, ner = scala.collection.mutable.ArrayBuffer.empty[Double];
     val z = scala.collection.mutable.ArrayBuffer.empty[Z_xi];
     // Variables de résultats
     z += z0; k += k_int(z0, beta_k);
     gk += gk_k(mean(k.last, max), z0, calib.delta);
     x += 0.0; qf += z0.qf; s += calib.s;
     k_mean += mean(k_int(z0, beta_k), max)
-
-    val C, Ce, Cf, K, Ke, Kf, yf, pib = scala.collection.mutable.ArrayBuffer.empty[Double];
+    eroi += calib.eroi; ner += calib.ner;
+    val C, Ce, Cf, K, Ke, Kf, yf, pib, I, mu, p = scala.collection.mutable.ArrayBuffer.empty[Double];
     val ye = calib.data.ye(calib.i).to(calib.energy_units)
-    C += calib.C; Ce += calib.ce(calib.i); Cf += calib.Cf; K += calib.K; Ke += calib.Ke; Kf += calib.Kf; yf += calib.yf; pib += calib.pib
-    val years = (1 to nyears).map(i => i + 2017).toList
-    println("Initialize k = " + k.last + "(k0 = " + calib.k + "), gk = " + gk.last + "(gk_0 =" + calib.gk + ")" + "(beta_k= " + beta_k + ")")
+    C += calib.C; Ce += calib.ce(calib.i); Cf += calib.Cf; K += calib.K; Ke += calib.Ke; Kf += calib.Kf; yf += calib.yf; pib += calib.pib; mu += calib.mu; p += calib.p;
+    val years = (1 until nyears).map(i => i + 2017).toList
+    //println("Initialize k = " + k.last + "(k0 = " + calib.k + "), gk = " + gk.last + "(gk_0 =" + calib.gk + ")" + "(beta_k= " + beta_k + ")")
+    //println("gk bounds " + "\t" + gk_k(k.last.max, z0, calib.delta) + "\t" + gk_k(k.last.min, z0, calib.delta))
     var end = false; var endYear = Int.MaxValue
     for (y <- years) {
-      k_mean += mean(k.last, max) * (1 + gk.last)
       // vqy=qys+(qy-qys)*(1-.01).^(0:T-1)
       qf += qf_fun(z0.qf, qf_max, qf_rate, y - 2017) //qf_max + (qf.last - qf_max) * (1 - qf_rate)
-      val k_x_fun = k_x(qf.last, z0, beta_k)
-      val indexes_x = find_indexes(k_mean.last, k_x(qf.last, z0, beta_k), max)
-      val k1 = mean(k_x_fun(indexes_x._1)._2, max); val k2 = mean(k_x_fun(indexes_x._2)._2, max);
-      val x1 = k_x_fun(indexes_x._1)._1; val x2 = k_x_fun(indexes_x._2)._1
-      val newX = interpolation(k_mean.last, (k1, x1), (k2, x2))
-      if ((x.last == 1 || math.abs(x.last - newX) < 0.001) && !end) {
-        println("Transition stops after " + (y - 2017) + " years")
-        endYear = y - 2017
-        end = true
+      // Transition is over, z and x are not changing anymore
+      if (x.last == 1) {
+        k_mean += k_mean.last * (1 + gk.last)
+        k += Interval(k_mean.last, k_mean.last, beta_k)
+        z += z.last
+        x += x.last
+      } else {
+        k_mean += mean(k.last, max) * (1 + gk.last)
+        val k_x_fun = k_x(qf.last, z0, beta_k)
+        val indexes_x = find_indexes(k_mean.last, k_x(qf.last, z0, beta_k), max)
+        val k1 = mean(k_x_fun(indexes_x._1)._2, max); val k2 = mean(k_x_fun(indexes_x._2)._2, max);
+        val x1 = k_x_fun(indexes_x._1)._1; val x2 = k_x_fun(indexes_x._2)._1
+        val newX = interpolation(k_mean.last, (k1, x1), (k2, x2))
+        if ((x.last == 1 || math.abs(x.last - newX) < 0.001) && !end) {
+          println("Transition stops after " + (y - 2017) + " years")
+          endYear = y - 2017
+          end = true
+        }
+        x += newX
+        val ve = interpolation(x.last, (x1, ve_x(indexes_x._1)), (x2, ve_x(indexes_x._2)))
+        val qe = interpolation(x.last, (x1, qe_x(indexes_x._1)), (x2, qe_x(indexes_x._2)))
+        val xe = interpolation(x.last, (x1, xe_x(indexes_x._1)), (x2, xe_x(indexes_x._2)))
+        z += Z_xi(ve, z0.vf, qe, qf.last, xe, z0.xf, z0.deltae, z0.deltaf)
+        k += k_int(z.last, beta_k);
       }
-      x += newX
-      val ve = interpolation(x.last, (x1, ve_x(indexes_x._1)), (x2, ve_x(indexes_x._2)))
-      val qe = interpolation(x.last, (x1, qe_x(indexes_x._1)), (x2, qe_x(indexes_x._2)))
-      val xe = interpolation(x.last, (x1, xe_x(indexes_x._1)), (x2, xe_x(indexes_x._2)))
-
-      z += Z_xi(ve, z0.vf, qe, qf.last, xe, z0.xf, z0.deltae, z0.deltaf)
-
-      k += k_int(z.last, beta_k);
       s += s_k(mean(k.last, max), z.last)
       gk += gk_k(mean(k.last, max), z.last, calib.delta);
       eroi += eroi_z(z.last)
+      ner += ner_z(z.last)
       if (z.last.xe / (1 - z.last.xf) > (1 - z.last.qe) / z.last.qf) println("Constraint on y violated" + "\t" + z.last)
+      
       // Calculated parameters
-      K += mean(k.last, max) * ye; Ke += ye * z.last.ve; Ke += K.last - Ke.last; yf += Kf.last / calib.vf;
-      pib += (gk.last + calib.delta) * K.last / s_k(mean(k.last, max), z.last); C += (1 - s.last) * pib.last
-      Ce += ye * (1 - z.last.qe) - qf.last * yf.last; // Cf += C-p*Ce
-      // if (C(z.last, k.last.mean) < 0) println("C becomes < 0 in year " + y)
-      // println(y + "\t" + mean(k.last,max) + "\t" + k_mean.last + "\t" + gk.last + "\t" + x.last + "\t" + s.last + "\t" + eroi.last)  
+      K += mean(k.last, max) * ye; Ke += ye * z.last.ve; Kf += K.last - Ke.last; yf += Kf.last / calib.vf;
+      pib += (gk.last + calib.delta) * K.last / s_k(mean(k.last, max), z.last); C += (1 - s.last) * pib.last; I += s.last * pib.last
+      Ce += ye * (1 - z.last.qe) - qf.last * yf.last;  mu += Ke.last/K.last; p += param2*Cf.last/Ce.last; // Cf += C-p*Ce
+      if (Ce.last < 0) println("Ce becomes < 0 in year " + y)
+      // println(y + "\t" + x.last + "\t" + mean(k.last, max) + "\t" + k_mean.last + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + qf.last)
     }
+
     println("x" + "\t" + "k" + "\t" + "gk" + "\t" + "s" + "\t" + "eroi" + "\t" + "theta")
     println(x.last + "\t" + mean(k.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k)
     if (plot) {
-      plot_(years, x, "x_" + toString()); plot_(years, gk, "gk_" + toString());
-      plot_int(years, k, "k_" + toString());
-      plot_(years, s, "s_" + toString()); plot_(years, eroi, "eroi_" + toString());
-    }
-    DynamicResult(x.last, mean(k.last, max), gk.last, s.last, eroi.last, beta_k, endYear)
+     
+     // plotXY(List((years.map(_.toDouble), pib.toList, "pib"), (years.map(_.toDouble), I.toList, "I"),
+     //    (years.map(_.toDouble), C.toList, "C")), yLabel = "", title = "pib_c_i", legend = true, int_x_axis = true)
+      
+         plotXY(List((years.map(_.toDouble), Cf.toList, "Cf"), 
+             (years.map(_.toDouble), (0 until p.toList.size).map(i => p.toList(i)*Ce.toList(i)).toList, "pCe"),
+         (years.map(_.toDouble), C.toList, "C")), yLabel = "", title = "pib_c_i", legend = true, int_x_axis = true)
+      
+      //  plotXY(List((years.map(_.toDouble), pib.toList, "pib"), (years.map(_.toDouble), I.toList, "I"),
+      //    (years.map(_.toDouble), C.toList, "C")), yLabel = "", title = "pib_c_i", legend = true, int_x_axis = true)
+      //plotXY(x.toList, s.toList)
+      //plot_(years, x, "x_" + toString());
+      //plot_(years, gk, "gk_" + toString());
+      //plot_int(years, k, "k_" + toString());
+      //plot_(years, mu, "mu_" + toString())
+      //plot_(years, s, "s_" + toString())
+      plotXY(years.map(_.toDouble), C.toList.map(i => i/calib.C))
+  }
+    DynamicResult(x.last, mean(k.last, max), gk.last, s.toList.max, eroi.last, beta_k, endYear)
   }
   def round(x: Double, dec: Int = 0) = {
     math.round(x * math.pow(10, dec)) / math.pow(10, dec)

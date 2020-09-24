@@ -11,35 +11,59 @@ object GrowthModel {
 
   import Helper._
   import PlotHelper._
+  // Jacobson scenario for 2050: 
+  // 14.89% rooftop residential + 11.58 % commercial
+  // 21.36 % pv power plants  
+  // 9.72% CSP
+  // 23.52% Onshore wind
+  // 13.62% Offshore wind
+  // Total = 94.69 / 100 
+  val techs = List((OnshoreWindTechnology, 23.52 / 94.69), (OffshoreWindTechnology, 13.62 / 94.69), (PVMono, (14.89 + 11.58 + 21.36) / 94.69), (CSPTowerStorage12h, 9.72 / 94.69))
+  val calib = new calibration_results_CI
+  val e_units = MegaTonOilEquivalent; val pib_units = 1E9.toInt;
+  val n = 100
+  val share = (0 to n).map(_ / n.toDouble).toList
 
   def main(args: Array[String]): Unit = {
-
-    val e_units = MegaTonOilEquivalent; val pib_units = 1E9.toInt;
-    val cal = new calibration_results_CI(energy_units = e_units, pib_units = pib_units, pop_units = 1E6.toInt);
-    // val cal_w = new calibration_results_work()
-
-    val qf_f = cal.qf // * math.pow(1 - 0.7 / 100, 33);
-    val pib_f = cal.pib // * math.pow(1 + 2.0 / 100, 33);
-    val target = cal.data.ye(cal.i) // * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve)
-    val n = 100
-    val share = (0 to n).map(_ / n.toDouble).toList
-
-    // val share = (1 to 5).map(_ * 0.2).toList
-    // Jacobson scenario for 2050: 
-    // 14.89% rooftop residential + 11.58 % commercial
-    // 21.36 % pv power plants  
-    // 9.72% CSP
-    // 23.52% Onshore wind
-    // 13.62% Offshore wind
-    // Total = 94.69 / 100 
-    val techs = List((OnshoreWindTechnology, 23.52 / 94.69), (OffshoreWindTechnology, 13.62 / 94.69), (PVMono, (14.89 + 11.58 + 21.36) / 94.69), (CSPTowerStorage12h, 9.72 / 94.69))
-    // techs.map(t => println(t._1.name + "\t" + t._1.lifeTime + "\t" + t._1.ee.energyInputsOMYearly(Gigawatts(1)).to(KiloTonOilEquivalent) + "\t" + t._1.ee.energyInputsInstallation(Gigawatts(1)).to(KiloTonOilEquivalent) + "\t" + t._1.ee.energyInputsDecomissioning(Gigawatts(1)).to(KiloTonOilEquivalent)))
-
-    simulateTransition(share, techs)
-   // simulate_qe_xe_ve(techs, qf_f)
-
+    // simulateTransition(share, techs)
+    val r = x_qe_xe_ve(5 * calib.data.ye(calib.i))
   }
 
+  def x_qe_xe_ve(ye: Energy, s: List[Double] = share) = {
+    val all_sites = Grid().cells
+    val techs_it = techs.map(tech => (new TechnologyIterator(tech._1, all_sites, energy_units = calib.energy_units, pib_units = calib.pib_units), tech._2))
+    val ind = Calibration.index_year(2017)
+
+    val (res, res_re, res_nre) = (new GrowthModelResults(calib.energy_units), new GrowthModelResults(calib.energy_units), new GrowthModelResults(calib.energy_units))
+    res.updateProduction(2017, ye, ye * calib.qe, ye * calib.xe * calib.qf, ye * calib.ve * calib.qf, calib.delta_e)
+    res_nre.updateProduction(2017, ye, ye * calib.qe, ye * calib.xe * calib.qf, ye * calib.ve * calib.qf, calib.delta_e)
+    res_re.updateProduction(2017, Joules(0), Joules(0), Joules(0), Joules(0), calib.delta_e)
+
+    // We want to reach 100% renewables by end_year: 
+    val n_year = 2017 + share.size;
+    val qe_nre = Calibration.data.qe(ind); val xe_nre = calib.xe; val ve_nre = calib.ve; val delta_e_nre = calib.delta_e; val qf = calib.qf
+
+    // If we consider an exponential growth (i.e. a constant growth rate): 
+    // Ere,n = E,2017 & Ere,n = Ere,2017 * g^n => g = (E,2017/Ere,2017)^1/n
+    val target = ye
+    var i = 0
+    val list = share.map(s => {
+      i += 1
+      // The desired total production from RE sources by the end of the year.
+      val target_re = (s * target) - res_re.ye.last
+      // println("Simulate year " + res.year.last + " with target " + target_re.to(MegaTonOilEquivalent))
+      techs_it.map(it => it._1.simulate_year(2017 + i, target_re * it._2, true, 1.0))
+      // Update params from RE sector
+      res_re.sumResults(2017 + i, techs_it.map(_._1.results))
+      // Remove from the total the energy that is now produced by the re sector
+      // e_nre < 0 is not supposed to happen before the last year of the simulation !!
+      val ye_nre = (1 - s) * target
+      res_nre.updateProduction(2017 + i, ye_nre, ye_nre * qe_nre, calib.energy_units(ye_nre.to(calib.energy_units) * xe_nre * qf), calib.energy_units(ye_nre.to(calib.energy_units) * ve_nre * qf), delta_e_nre)
+      res.sumResults(2017 + i, List(res_re, res_nre))
+      (s, res.qe.last, res.xe(calib.qf), res.ve(calib.qf))
+    })
+    (list.map(_._1), list.map(_._2), list.map(_._3), list.map(_._4))
+  }
   // For a given target (= final net energy demand NE), and renewable energy share, 
   // gives a estimate of the technical parameters and EROI of the energy system
   def calculate(target: Energy, net: Boolean, techs: List[(RenewableTechnology, Double)], share_re: Double = 1.0,
@@ -72,7 +96,7 @@ object GrowthModel {
     Z_xi(res.ve(qf), calib.vf, res.qe.last, qf, res.xe(qf), calib.xf, res.delta_e.last, calib.delta_f)
   }
 
-  def simulateTransition(shares: List[Double], techs: List[(RenewableTechnology, Double)], file_name: String="x_qe_xe_ve_100") {
+  def simulateTransition(shares: List[Double], techs: List[(RenewableTechnology, Double)], file_name: String = "x_qe_xe_ve_100_new") {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(file_name))
 
     val all_sites = Grid().cells
@@ -88,7 +112,7 @@ object GrowthModel {
 
     // We want to reach 100% renewables by end_year: 
     val n_year = 2017 + shares.size;
-    val qe_nre = Calibration.data.qe(ind); val xe_nre = 0.14 /*calib.xe*/ ; val ve_nre = calib.ve; val delta_e_nre = calib.delta_e; val qf = calib.qf
+    val qe_nre = Calibration.data.qe(ind); val xe_nre = calib.xe; val ve_nre = calib.ve; val delta_e_nre = calib.delta_e; val qf = calib.qf
 
     // If we consider an exponential growth (i.e. a constant growth rate): 
     // Ere,n = E,2017 & Ere,n = Ere,2017 * g^n => g = (E,2017/Ere,2017)^1/n
@@ -110,7 +134,7 @@ object GrowthModel {
 
       // println(s + "\t" + res.qe.last + "\t" + res.ve(calib.qf) + "\t" + res.xe(calib.qf) + "\t" + res.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res.tilde_xe.last.to(MegaTonOilEquivalent) + "\t" + res.ye.last.to(MegaTonOilEquivalent))
       // println(s + "\t" + res_re.qe.last + "\t" + res_re.ve(qf) + "\t" + res_re.xe(qf)  + "\t" + res_re.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res_re.tilde_xe.last.to(MegaTonOilEquivalent) + "\t" + res_re.delta_e.last + "\t" + res_re.ye.last.to(MegaTonOilEquivalent) + "\t" + res_re.ee.last.to(MegaTonOilEquivalent))
-      out_stream.print(s + "\t" + res.qe.last  + "\t" + res.xe(calib.qf) + "\t" + res.ve(calib.qf)+ "\t" +  res.tilde_xe.last.to(MegaTonOilEquivalent) + "\t" +res.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res.ye.last.to(MegaTonOilEquivalent) + "\n")
+      out_stream.print(s + "\t" + res.qe.last + "\t" + res.xe(calib.qf) + "\t" + res.ve(calib.qf) + "\t" + res.tilde_xe.last.to(MegaTonOilEquivalent) + "\t" + res.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res.ye.last.to(MegaTonOilEquivalent) + "\n")
     }
     out_stream.close()
   }
