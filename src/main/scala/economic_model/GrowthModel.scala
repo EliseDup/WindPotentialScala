@@ -23,15 +23,22 @@ object GrowthModel {
   val e_units = MegaTonOilEquivalent; val pib_units = 1E9.toInt;
   val n = 100
   val share = (0 to n).map(_ / n.toDouble).toList
-
+  val all_sites ={
+    val s = System.currentTimeMillis() 
+    val c = Grid().cells
+    println("Loading Sites in " + (System.currentTimeMillis()-s)/1000  + " s ")
+    c
+  }
+   
   def main(args: Array[String]): Unit = {
     // simulateTransition(share, techs)
-    val r = x_qe_xe_ve(5 * calib.data.ye(calib.i))
+    val r = x_qe_xe_ve(calib.data.ye(calib.i))
+    val r2 = x_qe_xe_ve(2*calib.data.ye(calib.i))
+    val r3 = x_qe_xe_ve(5*calib.data.ye(calib.i))
   }
 
   def x_qe_xe_ve(ye: Energy, s: List[Double] = share) = {
-    val all_sites = Grid().cells
-    val techs_it = techs.map(tech => (new TechnologyIterator(tech._1, all_sites, energy_units = calib.energy_units, pib_units = calib.pib_units), tech._2))
+     val techs_it = techs.map(tech => (new TechnologyIterator(tech._1, all_sites, energy_units = calib.energy_units, pib_units = calib.pib_units), tech._2))
     val ind = Calibration.index_year(2017)
 
     val (res, res_re, res_nre) = (new GrowthModelResults(calib.energy_units), new GrowthModelResults(calib.energy_units), new GrowthModelResults(calib.energy_units))
@@ -51,7 +58,7 @@ object GrowthModel {
       i += 1
       // The desired total production from RE sources by the end of the year.
       val target_re = (s * target) - res_re.ye.last
-      // println("Simulate year " + res.year.last + " with target " + target_re.to(MegaTonOilEquivalent))
+      // println("Simulate year " + res.year.last + " with target " + target_re.to(MegaTonOilEquivalent) + "\t" + res_re.ye.last.to(MegaTonOilEquivalent))
       techs_it.map(it => it._1.simulate_year(2017 + i, target_re * it._2, true, 1.0))
       // Update params from RE sector
       res_re.sumResults(2017 + i, techs_it.map(_._1.results))
