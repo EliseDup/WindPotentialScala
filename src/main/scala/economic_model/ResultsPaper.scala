@@ -211,7 +211,7 @@ object ResultsPaper {
     //   (v, "v"), (p, "p"))
 
     val res = List((alphas, "alpha"), (etas, "eta"), (zfs, "zf"), (qf, "qf"), (ve, "ve"), (vf, "vf"), (xe, "xe"), (xf, "xf"), (eroi, "EROI"), (ner.map(_ * 100), "NER [%]"))
-
+    (0 until qf.size).map(i => println(qf(i)))
     println("mean qf growth rate = " + (growth_rates(qf).sum / (growth_rates(qf).size)))
     println("mean xf growth rate = " + (growth_rates(xf).sum / (growth_rates(xf).size)))
 
@@ -219,6 +219,7 @@ object ResultsPaper {
     //(0 until eroi.size).map(i => println(alphas(i) + "\t" + etas(i) + "\t" + zfs(i) + "\t" + p(i) + "\t" + eroi(i) + "\t" + ner(i) + "\t" + xe(i)))
     import CalibrationDataXi._
     ye.map(i => println(i.to(MegaTonOilEquivalent)))
+pib.map(i => println(i))
 
     res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))
 

@@ -79,7 +79,7 @@ class calibration_results_CI(
     println("pib" + "\t" + pib + "\n" + "pibm" + "\t" + data.pib(i - 1) / pib_units + "\n" + "s" + "\t" + s + "\n" + "mu" + "\t" + mu)
     println("delta" + "\t" + delta + "\n" + "qe" + "\t" + qe + "\n" + "gk" + "\t" + gk + "\n" + "v" + "\t" + v + "\n" + "ve" + "\t" + ve + "\n" + "xe" + "\t" + xe + "\n" + "ze" + "\t" + ze + "\n" + "qf" + "\t" + qf + "\n" + "vf" + "\t" + vf + "\n" + "xf" + "\t" + xf + "\n" + "eps" + "\t" + eroi + "\n" + "gamma" + "\t" + gammab)
     println("K" + "\t" + K + "\n" + "Ke" + "\t" + Ke + "\n" + "Kf" + "\t" + Kf + "\n" + "Xe" + "\t" + Xe + "\n" + "Xf" + "\t" + Xf + "\n" + "Yf" + "\t" + yf + "\n" + "Ce" + "\t" + ce(i) + "\n" + "Cf" + "\t" + Cf + "\n" + "C" + "\t" + C)
-    println("I" + "\t" + (s * pib) + "\n" + "VAe" + "\t" + (alpha * pib) +"\n"+ "VAf" + "\t" + ((1 - alpha) * pib) + "\n" + "p" + "\t" + p + "\n" + "k" + "\t" + k + "\n" + "y" + "\t" + y + "\n" + "p1" + "\t" + p1 + "\n" + "p2" + "\t" + p2)
+    println("I" + "\t" + (s * pib) + "\n" + "VAe" + "\t" + (alpha * pib) + "\n" + "VAf" + "\t" + ((1 - alpha) * pib) + "\n" + "p" + "\t" + p + "\n" + "k" + "\t" + k + "\n" + "y" + "\t" + y + "\n" + "p1" + "\t" + p1 + "\n" + "p2" + "\t" + p2)
   }
 }
 
