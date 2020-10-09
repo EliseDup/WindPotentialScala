@@ -33,11 +33,12 @@ object GrowthModel {
   }
 
   def main(args: Array[String]): Unit = {
+    simulate_potential
     // simulateTransition(share, List((PVMono, 1.0,None)),file_name="pv_mono")
-    simulate_tech(OnshoreWindTechnology)
-    simulate_tech(OffshoreWindTechnology)
-    simulate_tech(PVMono)
-    simulate_tech(CSPTowerStorage12h)
+    //simulate_tech(OnshoreWindTechnology)
+    //simulate_tech(OffshoreWindTechnology)
+    //simulate_tech(PVMono)
+    //simulate_tech(CSPTowerStorage12h)
     //simulateTransition(share, techs)
     //val r = x_qe_xe_ve(calib.data.ye(calib.i))
     //val r2 = x_qe_xe_ve(2 * calib.data.ye(calib.i))
@@ -183,10 +184,44 @@ object GrowthModel {
     val n = tech_it.sites_for_tech.filter(s => tech.suitabilityFactor(s) > 0).size
     (0 until n).map(i => {
       tech_it.simulate_site(i + 2017, 1)
-      
+
       out_stream.print(tech_it.results.ye.last.to(MegaTonOilEquivalent).toString +
         "\t" + tech_it.results.tilde_xe.last.to(MegaTonOilEquivalent).toString + "\t" + tech_it.results.tilde_ke.last.to(MegaTonOilEquivalent).toString + "\n")
 
+    })
+
+  }
+  def simulate_potential {
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("potential_"))
+    val out_stream_simple = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_100"))
+    val out_stream_simple_avg = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_avg_100"))
+
+    val sites = all_sites
+    def results(tech: RenewableTechnology, competingTech: Option[RenewableTechnology] = None) = {
+      val sites_for_tech = if (competingTech.isDefined) sites.filter(s => tech.eroi(s, 1) > competingTech.get.eroi(s, 1)) else sites
+      val sites_sorted = sites_for_tech.filter(s => tech.suitabilityFactor(s) > 0).sortBy(tech.eroi(_, 1.0)).reverse
+      sites_sorted.map(s => {
+        val ye = tech.potential(s, 1.0) * Hours(365 * 24)
+        val tilde_xe = tech.energyInputsOMYearly(s, 1.0)
+        val tilde_ke = tech.directEnergyInputsInstallation(s, 1.0) + tech.indirectEnergyInputsInstallation(s, 1.0) + tech.energyInputsDecomissioning(s, 1.0)
+        ((tilde_xe + tilde_ke / 25.0) / ye, ye, tilde_xe, tilde_ke)
+      })
+    }
+
+    val res = results(OnshoreWindTechnology) ++ results(OffshoreWindTechnology) ++ results(PVMono, Some(CSPTowerStorage12h)) ++ results(CSPTowerStorage12h, Some(PVMono))
+    val res_sorted = res.sortBy(_._1)
+    val res_sorted_cum = (res_sorted.map(_._2.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), res_sorted.map(_._3.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), res_sorted.map(_._4.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _))
+    (0 until res_sorted_cum._1.size).map(i => out_stream.print(res_sorted_cum._1(i) + "\t" + res_sorted_cum._2(i) + "\t" + res_sorted_cum._3(i) + "\n"))
+    //res_sorted.map(i => out_stream.print(i._1 + "\t" + i._2.to(MegaTonOilEquivalent) + "\t" + i._3.to(MegaTonOilEquivalent) + "\t" + i._4.to(MegaTonOilEquivalent) +"\n"))
+    val k = 100
+    val n = res_sorted_cum._1.size / k
+    (0 until n).map(i => out_stream_simple.print(res_sorted_cum._1(i * k) + "\t" + res_sorted_cum._2(i * k) + "\t" + res_sorted_cum._3(i * k) + "\n"))
+    (0 until n).map(i => {
+      val mean_1 = (i * k until (i + 1) * k).map(res_sorted_cum._1(_)).sum / k
+      val mean_2 = (i * k until (i + 1) * k).map(res_sorted_cum._2(_)).sum / k
+      val mean_3 = (i * k until (i + 1) * k).map(res_sorted_cum._3(_)).sum / k
+
+      out_stream_simple_avg.print(mean_1 + "\t" + mean_2 + "\t" + mean_3 + "\n")
     })
 
   }
@@ -335,7 +370,7 @@ class GrowthModelResults(energy_units: EnergyUnit) {
   // def le(le_0: Double) = le_0 * (1 + (qe.last - qe(0)) / qe(0))
 
   def updateSiteProduction(y: Int, newYe: Energy, newEe: Energy, newTildeXe: Energy, newTildeKe: Energy, newDelta_e: Double) {
-    updateProduction(y : Int, newYe+ye.last, newEe+ee.last, newTildeXe+tilde_xe.last, newTildeKe+tilde_ke.last, newDelta_e)
+    updateProduction(y: Int, newYe + ye.last, newEe + ee.last, newTildeXe + tilde_xe.last, newTildeKe + tilde_ke.last, newDelta_e)
   }
   def updateProduction(y: Int, newYe: Energy, newEe: Energy, newTildeXe: Energy, newTildeKe: Energy, newDelta_e: Double) {
     year += y

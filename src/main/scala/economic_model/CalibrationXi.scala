@@ -5,6 +5,8 @@ import squants.energy._
 // Vector of technical parameters
 
 case class Z_xi(ve: Double, vf: Double, qe: Double, qf: Double, xe: Double, xf: Double, deltae: Double, deltaf: Double) {
+  val we = xe+deltae*ve
+  val wf = xf+deltaf*vf
   override def toString() = { ve + "\t" + vf + "\t" + qe + "\t" + qf + "\t" + xe + "\t" + xf + "\t" + deltae + "\t" + deltaf }
 }
 
