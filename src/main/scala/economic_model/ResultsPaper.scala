@@ -219,6 +219,7 @@ object ResultsPaper {
     //(0 until eroi.size).map(i => println(alphas(i) + "\t" + etas(i) + "\t" + zfs(i) + "\t" + p(i) + "\t" + eroi(i) + "\t" + ner(i) + "\t" + xe(i)))
     import CalibrationDataXi._
     ye.map(i => println(i.to(MegaTonOilEquivalent)))
+qf.map(i => println(i))
 pib.map(i => println(i))
 
     res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))

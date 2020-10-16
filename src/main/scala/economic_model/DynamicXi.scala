@@ -9,74 +9,100 @@ import java.io.FileOutputStream
 import scala.collection.mutable.ArrayBuffer
 
 object DynamicXi {
-  val calib = new calibration_results_CI()
-  val dyn_1 = new Dynamic_s_eta(calib.s, calib.eta)
-  //val dyn_2a = new Dynamic_s_gamma(calib.s, calib.gamma)
-  val dyn_2b = new Dynamic_s_gamma_b(calib.s, calib.gammab)
-  val dyn_3 = new Dynamic_gk_eta(calib.gk, calib.eta, calib.delta)
 
   import CalibrationDataXi._
   import PlotHelper._
   import Helper._
+
+  val calib = new calibration_results_CI()
+  val dyn_1 = new Dynamic_s_eta(calib.s, calib.eta)
+  val ye_0 = calib.data.ye(calib.i).to(calib.energy_units)
+  //val dyn_2a = new Dynamic_s_gamma(calib.s, calib.gamma)
+  val dyn_2b = new Dynamic_s_gamma_b(calib.s, calib.gammab)
+  val dyn_3 = new Dynamic_gk_eta(calib.gk, calib.eta, calib.delta)
+  val qf_0 = calib.qf; val qf_f = calib.qf * 0.5; val ye_f = 3 * ye_0
+  // Based on history : Ye +2% / year, qf - 0.7 % / year
+  val baseline = new Scenario(qf_0, qf_0 / 2, 0.01, ye_0, 2 * ye_0, 0.01)
+  val history = Scenario(qf_0, qf_f, qf_0 * 0.85, ye_0, ye_f, ye_0 * math.pow(1 + 1.62433159 / 100, 2040 - 2017), 2040 - 2017)
+  val new_policies = Scenario(qf_0, qf_f, qf_0 * 0.58 * 0.85 / 0.64, ye_0, ye_f, 12581, 2040 - 2017)
+  val sustainable_dev = Scenario(qf_0, qf_f, qf_0 * 0.45 * 0.85 / 0.64, ye_0, ye_0, ye_0, 2040 - 2017)
+
+  println("BAU" + " & " + (100 * history.ye_rate) + " & " + 100 * history.qf_rate)
+  println("New Policies" + " & " + 100 * new_policies.ye_rate + " & " + 100 * new_policies.qf_rate)
+  println("DD" + " & " + 100 * sustainable_dev.ye_rate + "& " + 100 * sustainable_dev.qf_rate)
+  /* 
+  val t = (0 until 100).toList
+  plotXY(List(
+    (t.map(i => (i + 2017).toDouble), t.map(i => history.ye(i)), "BAU"),
+    (t.map(i => (i + 2017).toDouble), t.map(i => new_policies.ye(i)), "New Policies"),
+    (t.map(i => (i + 2017).toDouble), t.map(i => sustainable_dev.ye(i)), "Sustainable Dev")), yLabel = "Ye [Mtoe]", legend = true, title = "Ye_scenarios")
+  plotXY(List(
+    (t.map(i => (i + 2017).toDouble), t.map(i => history.qf(i)), "BAU"),
+    (t.map(i => (i + 2017).toDouble), t.map(i => new_policies.qf(i)), "New Policies"),
+    (t.map(i => (i + 2017).toDouble), t.map(i => sustainable_dev.qf(i)), "Sustainable Dev")), yLabel = "qf [toe/kUS$2010]", legend = true, title = "qf_scenarios")
+*/
   def main(args: Array[String]): Unit = {
-    val ye_m = 2 * calib.data.ye(calib.i).to(calib.energy_units)
-    dyn_1.simulate_int(calib, calib.qf / 2, 0.01, 1000, ye_max = ye_m, ye_rate = 0.01, plot=true)
-    
-    dyn_2b.simulate_int(calib, calib.qf / 2, 0.01, 1000, ye_max = ye_m, ye_rate = 0.01, plot=true)
-    // printTable(calib.qf/2, 1000, ye_max)
-    // printTable(calib.qf/2, 100, ye_max)
-    // printTable(calib.qf/2, 100, calib.data.ye(calib.i).to(calib.energy_units))
-    // printTable(calib.qf/2, 800, calib.data.ye(calib.i).to(calib.energy_units))
-    //qf_detailed_results(10, false, ye_m)
-    // printTablesScenarios(List(50,100))
-    // printTable(calib.qf / 2, 200, 0)
-    // dyn_1.simulate_int(calib, calib.qf / 2,  0.01,800, ye_max = 2*calib.data.ye(calib.i).to(calib.energy_units), ye_rate = 0.01, plot = true)
+    val res = (dyn_1.simulate_int(calib, history, 100, false),
+      dyn_1.simulate_int(calib, new_policies, 100, false),
+      dyn_1.simulate_int(calib, sustainable_dev, 100, false))
+    plotXY(List((res._1.years.map(_.toDouble), res._1.gk.map(_ * 100), "BAU"),
+      (res._2.years.map(_.toDouble), res._2.gk.map(_ * 100), "Current Policies"),
+      (res._3.years.map(_.toDouble), res._3.gk.map(_ * 100), "Sustainable Dev")), legend = true, yLabel = "Economy growth rate [%]", title="gk")
+  plotXY(List((res._1.years.map(_.toDouble), res._1.x.map(_ * 100), "BAU"),
+      (res._2.years.map(_.toDouble), res._2.x.map(_ * 100), "Current Policies"),
+      (res._3.years.map(_.toDouble), res._3.x.map(_ * 100), "Sustainable Dev")), legend = true, yLabel = "Renewable Penetration [%]",title="x")
+
+       plotXY(List((res._1.years.map(_.toDouble), res._1.model.mu.toList.map(_ * 100), "BAU"),
+      (res._2.years.map(_.toDouble), res._2.model.mu.toList.map(_ * 100), "Current Policies"),
+      (res._3.years.map(_.toDouble), res._3.model.mu.toList.map(_ * 100), "Sustainable Dev")), legend = true, yLabel = "Relative Size of the energy sector [%]",title="mu")
+
+    //printTable(current_policies, 50)
+    //printTable(current_policies, 100)
+    //printTable(current_policies, 800)
   }
 
   def printTablesScenarios(nys: List[Int]) {
     nys.map(ny => {
+      println("Past extrapolation Scenario after " + ny + " years ")
+      printTable(history, ny)
+      println("New policies Scenario after " + ny + " years ")
+      printTable(new_policies, ny)
       println("Sustainable development Scenario after " + ny + " years ")
-      printTable(calib.qf / 2, ny, 0.1 / 100, 3.4 / 100)
-      println("New policies Scenario")
-      printTable(calib.qf / 2, ny, 1.1 / 100, 2.34 / 100)
-      println("Current policies Scenario")
-      printTable(calib.qf / 2, ny, 1.5 / 100, 1.9 / 100)
+      printTable(sustainable_dev, ny)
+
     })
   }
 
-  def printTable(qf_min: Double, ny: Int, ye_m: Double, ye_r: Double = 1.0 / 100, qf_r: Double = 1.0 / 100) {
+  def printTable(scenario: Scenario, ny: Int) {
     val res = List(
-      ("Ex1", dyn_1.simulate_int(calib, qf_min, qf_rate = qf_r, nyears = ny, ye_max = ye_m, ye_rate = ye_r, plot = false)),
-      //("Ex1", dyn_1.simulate_int(calib, qf_min, qf_rate = qf_r, nyears = ny, ye_max = ye_m, ye_rate = ye_r, max = true, plot = false)),
-      ("Ex2b", dyn_2b.simulate_int(calib, qf_min, qf_rate = qf_r, nyears = ny, ye_max = ye_m, ye_rate = ye_r, plot = false)),
-      //("Ex2b", dyn_2b.simulate_int(calib, qf_min, qf_rate = qf_r, nyears = ny,ye_max = ye_m,  ye_rate = ye_r, max = true, plot = false)),
-      ("Ex3", dyn_3.simulate_int(calib, qf_min, qf_rate = qf_r, nyears = ny, ye_max = ye_m, ye_rate = ye_r, plot = false)))
-    //("Ex3", dyn_3.simulate_int(calib, qf_min, qf_rate = qf_r, nyears = ny, ye_max = ye_m, ye_rate = ye_r, max = true, plot = false)))
+      ("Ex1", dyn_1.simulate_int(calib, scenario, nyears = ny, plot = false)),
+      ("Ex2b", dyn_2b.simulate_int(calib, scenario, nyears = ny, plot = false)),
+      ("Ex3", dyn_3.simulate_int(calib, scenario, nyears = ny, plot = false)))
     println("--Results--")
     println("\t" + "x" + "\t" + "k" + "\t" + "gk" + "\t" + "s" + "\t" + "eroi" + "\t" + "theta" + "\t" + "#years_transition")
     res.map(r => println(r._1 + "\t" + r._2))
   }
 
-  def qf_detailed_results(step_qf: Int, max: Boolean, ye_max: Double) {
-    val qf_min = (0 until step_qf).map(i => calib.qf * (1 - i / step_qf.toDouble)).toList
-    detailedResults(qf_min, dyn_1, calib, "1", max, ye_max)
+  def qf_detailed_results(step_qf: Int, scenario: Scenario, max: Boolean) {
+    val qf_min = (0 until step_qf).map(i => Scenario(scenario, calib.qf * (1 - i / step_qf.toDouble))).toList
+    detailedResults(qf_min, dyn_1, calib, "1", max)
     // detailedResults(qf_min, dyn_2a, calib, "2a")
-    detailedResults(qf_min, dyn_2b, calib, "2b", max, ye_max)
-    detailedResults(qf_min, dyn_3, calib, "3", max, ye_max)
+    detailedResults(qf_min, dyn_2b, calib, "2b", max)
+    detailedResults(qf_min, dyn_3, calib, "3", max)
   }
 
-  def detailedResults(qf_max: List[Double], dyn: Dynamic_Params, calib: calibration_results_CI, label: String, max: Boolean, ye_m: Double) {
+  def detailedResults(qf_max: List[Scenario], dyn: Dynamic_Params, calib: calibration_results_CI, label: String, max: Boolean) {
     val out = new java.io.PrintStream(new java.io.FileOutputStream("res_" + label))
 
-    val res = qf_max.map(qf => dyn.simulate_int(calib, qf, 1.0 / 100, 5000, plot = false, max = max, ye_max = ye_m, ye_rate = 0.01))
+    val res = qf_max.map(qf => dyn.simulate_int(calib, qf, 5000, plot = false, max = max))
     (0 until qf_max.size) map (i => out.print(qf_max(i) + "\t" + res(i).x + "\t" + res(i).k + "\t" + res(i).gk + "\t" + res(i).eroi + "\n"))
     out.close()
     println("--- Exercice " + label + " Ended --- ")
-    val qf_rel = qf_max.map(q => q / calib.qf)
-    plotXY(List((qf_rel, res.map(_.x), "")), xLabel = "qf_min/qf_0", yLabel = "x", title = "qf_min_x_" + label + max)
+    val qf_rel = qf_max.map(q => q.qf_f / calib.qf)
+    plotXY(List((qf_rel, res.map(r => r.x(r.last)), "")), xLabel = "qf_min/qf_0", yLabel = "x", title = "qf_min_x_" + label + max)
     //plotXY(List((qf_max, res.map(_.k), "")), xLabel = "qf_min", yLabel = "k", title = "qf_min_k_" + label + max)
     //plotXY(List((qf_max, res.map(_.gk), "")), xLabel = "qf_min", yLabel = "gk", title = "qf_min_gk_" + label + max)
-    plotXY(List((qf_rel, res.map(_.s), "")), xLabel = "qf_min/qf_0", yLabel = "s_max", title = "qf_min_s_max_" + label + max)
+    plotXY(List((qf_rel, res.map(r => r.s.max), "")), xLabel = "qf_min/qf_0", yLabel = "s_max", title = "qf_min_s_max_" + label + max)
 
     plotXY(List((qf_rel, res.map(_.end_year).map(_.getOrElse(0).toDouble), "")), xLabel = "qf_min/qf_0", yLabel = "years to finish transition", title = "qf_min_y_" + label + max)
 
@@ -109,10 +135,27 @@ object DynamicXi {
 
   }
 }
+object Scenario {
+  def apply(qf_0: Double, qf_f: Double, qf_t: Double, ye_0: Double, ye_f: Double, ye_t: Double, t: Int) = {
+    val ye_rate = if (ye_0 == ye_f) 0.0 else 1 - math.pow((ye_t - ye_f) / (ye_0 - ye_f), 1.0 / t)
+    val qf_rate = if (qf_0 == qf_f) 0.0 else 1 - math.pow((qf_t - qf_f) / (qf_0 - qf_f), 1.0 / t)
+    new Scenario(qf_0, qf_f, qf_rate, ye_0, ye_f, ye_rate)
+  }
+  def apply(scen: Scenario, qf_f: Double) = new Scenario(scen.qf_0, qf_f, scen.qf_rate, scen.ye_0, scen.ye_f, scen.ye_rate)
+}
+class Scenario(val qf_0: Double, val qf_f: Double, val qf_rate: Double, val ye_0: Double, val ye_f: Double, val ye_rate: Double) {
+  def qf(T: Int) = {
+    qf_f + (qf_0 - qf_f) * Math.pow(1 - qf_rate, T)
+  }
+  def ye(T: Int) = {
+    ye_f + (ye_0 - ye_f) * Math.pow(1 - ye_rate, T)
+  }
+}
 
-case class DynamicResult(val x: Double, val k: Double, val gk: Double, val s: Double, val eroi: Double, val theta: Double, val end_year: Option[Int],
-    val mu: Double, val p_ratio: Double, val ce_ratio: Double, val cf_ratio: Double) {
-  override def toString() = x + "\t" + k + "\t" + gk + "\t" + s + "\t" + eroi + "\t" + theta + "\t" + end_year + "\t" + mu + "\t" + p_ratio + "\t" + ce_ratio + "\t" + cf_ratio
+case class DynamicResult(val years: List[Int], val x: List[Double], val k: List[Double], val gk: List[Double], val s: List[Double], val eroi: List[Double], val theta: Double, val end_year: Option[Int],
+    val model: Model) { //val mu: List[Double], val p_ratio: List[Double], val ce_ratio: List[Double], val cf_ratio: List[Double]) {
+  val last = x.size - 1
+  override def toString() = x(last) + "\t" + k(last) + "\t" + gk(last) + "\t" + s(last) + "\t" + eroi(last) + "\t" + theta + "\t" + end_year + "\t" + model.mu(last) // + "\t" + p_ratio(last) + "\t" + ce_ratio(last) + "\t" + cf_ratio(last)
 }
 class Model(calib: calibration_results_CI, params: Dynamic_Params) {
   val C, Ce, Df, Cf, Ke, Kf, Yf, pib, I, mu, p, eta, gamma = scala.collection.mutable.ArrayBuffer.empty[Double];
@@ -308,15 +351,15 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
 
   def mean(int: Interval, max: Boolean) = if (max) int.max else int.mean
 
-  def simulate_int(calib: calibration_results_CI, qf_max: Double, qf_rate: Double = 1 / 100.0, nyears: Int = 100, plot: Boolean = true, max: Boolean = false, ye_max: Double = 0, ye_rate: Double = 0.0): DynamicResult = {
+  def simulate_int(calib: calibration_results_CI, scenario: Scenario, nyears: Int = 100, plot: Boolean = true, max: Boolean = false): DynamicResult = {
     val z0 = calib.z; val beta_k = if (max) 1 else (calib.k - k_bounds(z0)._1) / (k_bounds(z0)._2 - k_bounds(z0)._1)
-    val k = scala.collection.mutable.ArrayBuffer.empty[Interval];
-    val gk, s, K, k_mean, x, qf, eroi, ner, ye = scala.collection.mutable.ArrayBuffer.empty[Double];
+    val k_interval = scala.collection.mutable.ArrayBuffer.empty[Interval];
+    val gk, s, K, k, x, qf, eroi, ner, ye = scala.collection.mutable.ArrayBuffer.empty[Double];
     val z = scala.collection.mutable.ArrayBuffer.empty[Z_xi];
-    z += z0; k += k_int(z0, beta_k); K += calib.K
-    gk += gk_k(mean(k.last, max), z0, calib.delta);
+    z += z0; k_interval += k_int(z0, beta_k); K += calib.K
+    gk += gk_k(mean(k_interval.last, max), z0, calib.delta);
     x += 0.0; qf += z0.qf; s += calib.s;
-    k_mean += mean(k_int(z0, beta_k), max)
+    k += mean(k_int(z0, beta_k), max)
     eroi += calib.eroi; ner += calib.ner;
     val ye0 = calib.data.ye(calib.i).to(calib.energy_units)
     ye += ye0
@@ -328,75 +371,71 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
     var end = false; var endYear: Option[Int] = None
     for (y <- years) {
       // vqy=qys+(qy-qys)*(1-.01).^(0:T-1)
-      qf += qf_fun(z0.qf, qf_max, qf_rate, y - 2017) //qf_max + (qf.last - qf_max) * (1 - qf_rate)
-      ye += qf_fun(ye0, ye_max, ye_rate, y - 2017)
+      qf += scenario.qf(y - 2017) // qf_fun(z0.qf, qf_max, qf_rate, y - 2017) //qf_max + (qf.last - qf_max) * (1 - qf_rate)
+      ye += scenario.ye(y - 2017) //qf_fun(ye0, ye_max, ye_rate, y - 2017)
+
+      K += K.last * (1 + gk.last)
+      k += K.last / ye.last
       // Transition is over, z and x are not changing anymore
       if (end) {
-        /* K += K.last * (1 + gk.last)
-        ye += ye.last * (1 + ye_rate)
-        k_mean += K.last / ye.last // k_mean.last * (1 + gk.last)
-        k += Interval(k_mean.last, k_mean.last, beta_k)
         z += z.last
-        x += x.last*/
+        x += 1 // x.last
       } else {
-        K += K.last * (1 + gk.last)
-        //ye += ye.last * (1 + ye_rate)
-        k_mean += K.last / ye.last
-
         val k_x_fun = {
-          //if (ye_rate == 0) k_x(qf.last, z0, beta_k)
-          //else
           k_x_ye(qf.last, z0, beta_k, ye.last)
         }
         val (x_x, qe_x, xe_x, ve_x) = /*if (ye_rate == 0) x_fun else*/ x_fun_ye(ye.last, z0)
-        val indexes_x = find_indexes(k_mean.last, k_x_fun, max)
+        val indexes_x = find_indexes(k.last, k_x_fun, max)
         val k1 = mean(k_x_fun(indexes_x._1)._2, max); val k2 = mean(k_x_fun(indexes_x._2)._2, max);
         val x1 = k_x_fun(indexes_x._1)._1; val x2 = k_x_fun(indexes_x._2)._1
-        val newX = interpolation(k_mean.last, (k1, x1), (k2, x2))
-        if (math.abs(newX - 1) < 0.01 && !end) {
-          println("Transition stops after " + (y - 2017) + " years")
-          endYear = Some(y - 2017)
-          end = true
-        }
+        val newX = math.max(0, interpolation(k.last, (k1, x1), (k2, x2)))
+
         x += newX
         val ve = interpolation(x.last, (x1, ve_x(indexes_x._1)), (x2, ve_x(indexes_x._2)))
         val qe = interpolation(x.last, (x1, qe_x(indexes_x._1)), (x2, qe_x(indexes_x._2)))
         val xe = interpolation(x.last, (x1, xe_x(indexes_x._1)), (x2, xe_x(indexes_x._2)))
         z += Z_xi(ve, z0.vf, qe, qf.last, xe, z0.xf, z0.deltae, z0.deltaf)
-        k += k_int(z.last, beta_k);
       }
-      s += s_k(mean(k.last, max), z.last)
-      gk += gk_k(mean(k.last, max), z.last, calib.delta);
+      k_interval += k_int(z.last, beta_k);
+      if (!end && k.last >= mean(k_interval.last, max) && x.last > 0.9) {
+        println("Transition stops after " + (y - 2017) + " years")
+        endYear = Some(y - 2017)
+        end = true
+      }
+      s += s_k(k.last, z.last) //s_k(mean(k.last, max), z.last)
+      gk += gk_k(k.last, z.last, calib.delta); // gk_k(mean(k.last, max), z.last, calib.delta);
       eroi += eroi_z(z.last)
       ner += ner_z(z.last)
       if (z.last.xe / (1 - z.last.xf) > (1 - z.last.qe) / z.last.qf) println("Constraint on y violated" + "\t" + z.last)
       // Calculated parameters
-      model.update(mean(k.last, max), K.last, z.last, gk.last, s.last, ye.last)
-      //println(y+ "\t" + ye.last + "\t" + qf.last + "\t" +x.last + "\t" + mean(k.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last+ "\t" + model.gamma.last +"\t"  + model.p.last/calib.p+"\t" +"\t"  + model.Ce.last/calib.ce(calib.i) + "\t" + model.Cf.last/calib.Cf)
+      model.update(k.last, K.last, z.last, gk.last, s.last, ye.last)
+      //println(y + "\t" + ye.last + "\t" + qf.last + "\t" + x.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
     }
-    //println("ye/ye0" + "\t" + ye.last / ye.toList(0))
     println("x" + "\t" + "k" + "\t" + "gk" + "\t" + "s" + "\t" + "eroi" + "\t" + "theta" + "\t" + "mu" + "\t" + "eta" + "\t" + "gamma" + "\t" + "p/p0")
-    println(x.last + "\t" + mean(k.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
+    println(x.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
     if (plot) {
-      val years_new = if (!end) years else (2017 until endYear.get + 2017).toList
+      val years_new = years // if (!end) years else (2017 until endYear.get + 2017).toList
       //  plotXY(List((years.map(_.toDouble), model.pib.toList, "pib"), (years.map(_.toDouble), model.I.toList, "I"),
       //     (years.map(_.toDouble), model.C.toList, "C")), yLabel = "", title = "pib_c_i", legend = true, int_x_axis = true)
-      plotXY(List((years_new.map(_.toDouble), model.C.toList, "C"), (years_new.map(_.toDouble), model.pCe, "pCe"),
-        (years_new.map(_.toDouble), model.Cf.toList, "Cf")), yLabel = "", title = "c", legend = true, int_x_axis = true)
+      // plotXY(List((years_new.map(_.toDouble), model.C.toList, "C"), (years_new.map(_.toDouble), model.pCe, "pCe"),
+      //   (years_new.map(_.toDouble), model.Cf.toList, "Cf")), yLabel = "", title = "c", legend = true, int_x_axis = true)
 
       //plotXY(x.toList, s.toList)
       plot_(years_new, x, "x_" + toString());
-      //plot_(years, gk, "gk_" + toString());
+      plot_(years_new, gk, "gk_" + toString());
       //plot_int(years, k, "k_" + toString());
       //plot_(years, ye, "ye_" + toString());
-      plot_(years_new, model.mu, "mu_" + toString())
-      plot_(years_new, model.p, "p_" + toString())
+      //plot_(years_new, model.mu, "mu_" + toString())
+      //plot_(years_new, model.p, "p_" + toString())
       //plot_(years, model.gamma, "gamma_" + toString())
       // plot_(years, model.eta, "eta_" + toString())
       //plot_(years, s, "s_" + toString())
+      // Plot interval and k mean   
+
+      // plotXY(List((x.toList, k.toList, "k"), (x.toList, k_interval.toList.map(_.mean), "k_env"), (x.toList, k_interval.toList.map(_.min), "k_env" + "_min"), (x.toList, k_interval.toList.map(_.max), "k_env" + "_max")), yLabel = "k", title = "k", legend = true, int_x_axis = false)
 
     }
-    DynamicResult(x.last, mean(k.last, max), gk.last, s.toList.max, eroi.last, beta_k, endYear, model.mu.last, model.p.last / calib.p, model.Ce.last / calib.ce(calib.i), model.Cf.last / calib.Cf)
+    DynamicResult(years, x.toList, k_interval.toList.map(k => mean(k, max)), gk.toList, s.toList, eroi.toList, beta_k, endYear, model) // model.mu.toList, model.p.toList.map(i=> i / calib.p), model.Ce.toList.map(i => i / calib.ce(calib.i)), model.Cf.toList.map(i => i / calib.Cf))
   }
   def round(x: Double, dec: Int = 0) = {
     math.round(x * math.pow(10, dec)) / math.pow(10, dec)
