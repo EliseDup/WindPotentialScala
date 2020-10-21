@@ -29,7 +29,7 @@ object DynamicXi {
   // val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenario(ye_0, ye_0 * math.pow(1 + 1.62433159 / 100, t_lim), ye_f, t_lim))
   // val new_policies = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, 12581, ye_f, t_lim))
   // val sustainable_dev = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.45 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, ye_0, ye_0, 0))
-
+  println(ye_0 + "\t" + qf_0)
   val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenario(ye_0, ye_0 * math.pow(1 + 1.62433159 / 100, t_lim), ye_f, t_lim))
   val new_policies = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, 12581, ye_f, t_lim))
   val sustainable_dev = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.45 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, ye_0, ye_0, t_lim))
@@ -50,12 +50,12 @@ object DynamicXi {
 */
 
   def main(args: Array[String]): Unit = {
-   dyn_1.simulate_int(calib, bau, 50, false)
-   dyn_1.simulate_int(calib, bau, 300, true)
-   // dyn_1.simulate_int(calib, new_policies, 50, false)
-   // dyn_1.simulate_int(calib, new_policies, 300, true)
-   // dyn_1.simulate_int(calib, sustainable_dev, 50, false)
-   // dyn_1.simulate_int(calib, sustainable_dev, 300, true)
+    dyn_1.simulate_int(calib, sustainable_dev, 50, false)
+    dyn_1.simulate_int(calib, sustainable_dev, 300, true)
+    // dyn_1.simulate_int(calib, new_policies, 50, false)
+    // dyn_1.simulate_int(calib, new_policies, 300, true)
+    // dyn_1.simulate_int(calib, sustainable_dev, 50, false)
+    // dyn_1.simulate_int(calib, sustainable_dev, 300, true)
     /*
     val res = (dyn_1.simulate_int(calib, history, 100, false),
       dyn_1.simulate_int(calib, new_policies, 100, false),
