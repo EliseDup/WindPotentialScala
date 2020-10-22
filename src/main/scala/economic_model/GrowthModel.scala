@@ -190,9 +190,9 @@ object GrowthModel {
   }
 
   def simulate_potential {
-    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("potential_de"))
-    val out_stream_simple = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_100_de"))
-    val out_stream_simple_avg = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_avg_100_de"))
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("potential_"))
+    val out_stream_simple = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_100"))
+    val out_stream_simple_avg = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_avg_100"))
 
     val sites = all_sites
     def results(tech: RenewableTechnology, competingTech: Option[RenewableTechnology] = None) = {
