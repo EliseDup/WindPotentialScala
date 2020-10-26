@@ -4,7 +4,7 @@ import squants.energy._
 
 // Vector of technical parameters
 
-case class Z_xi(ve: Double, vf: Double, qe: Double, qf: Double, xe: Double, xf: Double, deltae: Double, deltaf: Double) {
+case class Z_xi(ve: Double, vf: Double, qe: Double, qf: Double, xe: Double, xf: Double, deltae: Double, deltaf: Double, delta: Double) {
   val we = xe+deltae*ve
   val wf = xf+deltaf*vf
   override def toString() = { ve + "\t" + vf + "\t" + qe + "\t" + qf + "\t" + xe + "\t" + xf + "\t" + deltae + "\t" + deltaf }
@@ -62,7 +62,7 @@ class calibration_results_CI(
 
   val eroi = 1 / (qe + (xe + delta_e * ve) * qf)
 
-  val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f)
+  val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f,delta)
 
   // val ner = (1 - z.qe)*(1 - (xf + z.deltaf * z.vf)) - z.qf*(z.deltae * z.ve + xe)
   val ner = 1 - (z.qe + z.qf * (z.xe + z.deltae * z.ve) + (1 - z.qe) * (z.xf + z.deltaf * z.vf)) //( //(1 - (z.xf + z.deltaf * z.vf)) * (1 - z.qe) - z.qf * (z.xe + z.deltae * z.ve)

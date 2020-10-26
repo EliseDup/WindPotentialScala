@@ -55,10 +55,10 @@ object ResultsPaper {
     // 13.62% Offshore wind
     // Total = 94.69 / 100 
     val techs = List((OnshoreWindTechnology, 23.52 / 94.69), (OffshoreWindTechnology, 13.62 / 94.69), (PVPoly, (14.89 + 11.58 + 21.36) / 94.69), (CSPParabolic, 9.72 / 94.69))
-    val res = share.map(s => (s._1, calculate(target, net, techs, s._1, cal, s._2, s._3)))
+    //val res = share.map(s => (s._1, calculate(target, net, techs, s._1, cal, s._2, s._3)))
 
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("zs_" + System.currentTimeMillis()))
-    res.map(r => out_stream.println(r._1 + "\t" + r._2))
+    //res.map(r => out_stream.println(r._1 + "\t" + r._2))
     out_stream.close()
     // printResultsExercices(res)
   }

@@ -82,7 +82,7 @@ object GrowthModel {
   }
   // For a given target (= final net energy demand NE), and renewable energy share, 
   // gives a estimate of the technical parameters and EROI of the energy system
-  def calculate(target: Energy, net: Boolean, techs: List[(RenewableTechnology, Double)], share_re: Double = 1.0,
+  /*def calculate(target: Energy, net: Boolean, techs: List[(RenewableTechnology, Double)], share_re: Double = 1.0,
     calib: calibration_results_CI, qf: Double, lf: Double): Z_xi = {
     val all_sites = Grid().cells;
     // Initialise 
@@ -109,8 +109,8 @@ object GrowthModel {
     import Helper._
 
     println(share_re + "\t" + res_re.qe.last + "\t" + res_re.tilde_ke.last.to(MegaTonOilEquivalent) + "\t" + res_re.delta_e.last + "\t" + res_re.ye.last.to(MegaTonOilEquivalent) + "\t" + res_re.ee.last.to(MegaTonOilEquivalent))
-    Z_xi(res.ve(qf), calib.vf, res.qe.last, qf, res.xe(qf), calib.xf, res.delta_e.last, calib.delta_f)
-  }
+    Z_xi(res.ve(qf), calib.vf, res.qe.last, qf, res.xe(qf), calib.xf, res.delta_e.last, calib.delta_f,res.delta_e.last*)
+  }*/
 
   def simulateTransition(shares: List[Double], techs: List[(RenewableTechnology, Double, Option[RenewableTechnology])], file_name: String = "") {
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("x_qe_xe_ve" + file_name))
@@ -190,9 +190,9 @@ object GrowthModel {
   }
 
   def simulate_potential {
-    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("potential_"))
-    val out_stream_simple = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_100"))
-    val out_stream_simple_avg = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_avg_100"))
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("potential"))
+    val out_stream_simple = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced"))
+    val out_stream_simple_avg = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_avg"))
 
     val sites = all_sites
     def results(tech: RenewableTechnology, competingTech: Option[RenewableTechnology] = None) = {
@@ -202,28 +202,50 @@ object GrowthModel {
         val ye = tech.potential(s, 1.0) * Hours(365 * 24)
         val tilde_xe = tech.energyInputsOMYearly(s, 1.0)
         val tilde_ke = tech.directEnergyInputsInstallation(s, 1.0) + tech.indirectEnergyInputsInstallation(s, 1.0) + tech.energyInputsDecomissioning(s, 1.0)
-        ((tilde_xe + tilde_ke / 25.0) / ye, ye, tilde_xe, tilde_ke, 1.0 / tech.lifeTime)
+        ((tilde_xe + tilde_ke / 25.0) / ye, ye, tilde_xe, tilde_ke, 1.0 / 25.0, tech)
       })
     }
-
-    val res = results(OnshoreWindTechnology) ++ results(OffshoreWindTechnology) ++ results(PVMono, Some(CSPTowerStorage12h)) ++ results(CSPTowerStorage12h, Some(PVMono))
+    val res = results(OnshoreWindTechnology) ++ results(OffshoreWindTechnology) ++ results(PVMono, Some(CSPParabolicStorage12h)) ++ results(CSPParabolicStorage12h, Some(PVMono))
     val res_sorted = res.sortBy(_._1)
+    val wind_on = res_sorted.map(i => if (i._6.name == "Wind-onshore") i._2.to(MegaTonOilEquivalent) else 0.0).scanLeft(0.0)(_ + _)
+    val wind_off = res_sorted.map(i => if (i._6.name == "Wind-offshore") i._2.to(MegaTonOilEquivalent) else 0.0).scanLeft(0.0)(_ + _)
+    val csp = res_sorted.map(i => if (i._6.csp) i._2.to(MegaTonOilEquivalent) else 0.0).scanLeft(0.0)(_ + _)
+    val pv = res_sorted.map(i => if (i._6.pv) i._2.to(MegaTonOilEquivalent) else 0.0).scanLeft(0.0)(_ + _)
+
     // How to calculate the cumulated "delta_e" : sum Ke_i delta_e_i / sum Ke_i
     val sum_delta_k = res_sorted.map(i => i._5 * i._4.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _)
     val sum_k = res_sorted.map(i => i._4.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _)
     val delta_e = (0 until sum_k.size).toList.map(i => sum_delta_k(i) / sum_k(i))
-    val res_sorted_cum = (res_sorted.map(_._2.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), res_sorted.map(_._3.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), res_sorted.map(_._4.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), delta_e)
-    (0 until res_sorted_cum._1.size).map(i => out_stream.print(res_sorted_cum._1(i) + "\t" + res_sorted_cum._2(i) + "\t" + res_sorted_cum._3(i) + "\t" + res_sorted_cum._4(i) + "\n"))
+
+    val res_sorted_cum = (res_sorted.map(_._2.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), res_sorted.map(_._3.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _),
+      res_sorted.map(_._4.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), delta_e)
+
+    val ye_cum = res_sorted_cum._1
+    val res_repartition_cum = ((0 until ye_cum.size).map(i => wind_on(i) / ye_cum(i)),
+      (0 until ye_cum.size).map(i => wind_off(i) / ye_cum(i)),
+      (0 until ye_cum.size).map(i => pv(i) / ye_cum(i)),
+      (0 until ye_cum.size).map(i => csp(i) / ye_cum(i)))
+
+    (0 until res_sorted_cum._1.size).map(i => out_stream.print(res_sorted_cum._1(i) + "\t" + res_sorted_cum._2(i) + "\t" + res_sorted_cum._3(i) + "\t" + res_sorted_cum._4(i)
+      + "\t" + res_repartition_cum._1(i) + "\t" + res_repartition_cum._2(i) + "\t" + res_repartition_cum._3(i) + "\t" + res_repartition_cum._4(i) + "\n"))
     //res_sorted.map(i => out_stream.print(i._1 + "\t" + i._2.to(MegaTonOilEquivalent) + "\t" + i._3.to(MegaTonOilEquivalent) + "\t" + i._4.to(MegaTonOilEquivalent) +"\n"))
-    val k = 100
+    val k = 20
     val n = res_sorted_cum._1.size / k
-    (0 until n).map(i => out_stream_simple.print(res_sorted_cum._1(i * k) + "\t" + res_sorted_cum._2(i * k) + "\t" + res_sorted_cum._3(i * k) + "\t" + res_sorted_cum._4(i * k) + "\n"))
+
+    (0 until n).map(i => out_stream_simple.print(res_sorted_cum._1(i * k) + "\t" + res_sorted_cum._2(i * k) + "\t" + res_sorted_cum._3(i * k) + "\t" + res_sorted_cum._4(i * k)
+      + "\t" + res_repartition_cum._1(i * k) + "\t" + res_repartition_cum._2(i * k) + "\t" + res_repartition_cum._3(i * k) + "\t" + res_repartition_cum._4(i * k) + "\n"))
     (0 until n).map(i => {
       val mean_1 = (i * k until (i + 1) * k).map(res_sorted_cum._1(_)).sum / k
       val mean_2 = (i * k until (i + 1) * k).map(res_sorted_cum._2(_)).sum / k
       val mean_3 = (i * k until (i + 1) * k).map(res_sorted_cum._3(_)).sum / k
       val mean_4 = (i * k until (i + 1) * k).map(res_sorted_cum._4(_)).sum / k
-      out_stream_simple_avg.print(mean_1 + "\t" + mean_2 + "\t" + mean_3 + "\t" + mean_4 + "\n")
+      val mean_11 = (i * k until (i + 1) * k).map(res_repartition_cum._1(_)).sum / k
+      val mean_21 = (i * k until (i + 1) * k).map(res_repartition_cum._2(_)).sum / k
+      val mean_31 = (i * k until (i + 1) * k).map(res_repartition_cum._3(_)).sum / k
+      val mean_41 = (i * k until (i + 1) * k).map(res_repartition_cum._4(_)).sum / k
+
+      out_stream_simple_avg.print(mean_1 + "\t" + mean_2 + "\t" + mean_3 + "\t" + mean_4
+        + "\t" + mean_11 + "\t" + mean_21 + "\t" + mean_31 + "\t" + mean_41 + "\n")
     })
   }
 }

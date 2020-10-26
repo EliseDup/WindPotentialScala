@@ -19,11 +19,11 @@ object Dynamic_Xi {
     //simulate_test_gamma(calib.k, calib.gk, calib.z, calib.s, calib.gamma, calib.delta, 1 / 100.0, calib.qf / 2, true)
     
     // simulate_x_s_eta(calib.z, calib.s, calib.eta, calib.delta, 1 / 100.0, calib.qf / 2, true)
-    simulate_x_s_gamma(calib.z, calib.s, calib.gamma, calib.delta, 1 / 100.0, calib.qf / 2, true)
+    //simulate_x_s_gamma(calib.z, calib.s, calib.gamma, calib.delta, 1 / 100.0, calib.qf / 2, true)
 
     // simulate_Ye(0.0)
   }
-
+/*
   def x_fun = {
     (getLines("x_qe_xe_ve", "\t").map(i => (i(0).toDouble)),
       getLines("x_qe_xe_ve", "\t").map(i => (i(1).toDouble)),
@@ -73,7 +73,7 @@ object Dynamic_Xi {
     val (x_x, qe_x, xe_x, ve_x) = x_fun
     def k_x(qf: Double): List[(Double, (Double, Double, Double))] = {
       (0 until x_x.size).toList.map(i => {
-        val z = new Z_xi(ve_x(i), z0.vf, qe_x(i), qf, xe_x(i), z0.xf, z0.deltae, z0.deltaf)
+        val z = new Z_xi(ve_x(i), z0.vf, qe_x(i), qf, xe_x(i), z0.xf, z0.deltae, z0.deltaf, z0.delta)
         (x_x(i), k_int_s_eta(z, s, eta))
       })
     }
@@ -235,7 +235,7 @@ object Dynamic_Xi {
       ve += ve_x(index_x)
       xe += xe_x(index_x)
       qe += qe_x(index_x)
-      z += Z_xi(ve.last, z0.vf, qe.last, qf.last, xe.last, z0.xf, z0.deltae, z0.deltaf)
+      z += Z_xi(ve.last, z0.vf, qe.last, qf.last, xe.last, z0.xf, z0.deltae, z0.deltaf,)
       k += k_int_s_gamma(z.last, s, gamma)
       gk += gk_int_s_gamma(z.last, s, gamma, delta) // 1/z0.vf*s/(1-eta*(1-s))*((1-z0.xf)*(1-ve.last/k.last)-xe.last*z0.vf/k.last) - delta
       eroi += eroi_z(z.last)
@@ -326,6 +326,6 @@ object Dynamic_Xi {
     plotXY(List((years.map(_.toDouble), k.toList, "")), yLabel = "k", title = "k")
     plotXY(List((years.map(_.toDouble), x.toList, "")), yLabel = "x", title = "x")
 
-  }
+  }*/
 
 }
