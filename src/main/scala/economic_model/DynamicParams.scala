@@ -20,7 +20,9 @@ class Dynamic_s_eta(s: Double, eta: Double) extends Dynamic_Params(s, eta) {
   def ratio_spib_K(k: Double, z: Z_xi) = {
     (1 / z.vf * s / (1 - eta * (1 - s))) * ((1 - z.xf) * (1 - z.ve / k) - z.xe * z.vf / k)
   }
-  def p(model: ModelResults) = eta * model.C.last / model.Ce.last
+  def p(model: ModelResults) = {
+    eta * model.C.last / model.Ce.last
+  }
 }
 
 // Gamma = Ce/Cf constant
@@ -96,14 +98,13 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
   def p_int(z: Z_xi) = Interval(A(z), B(z))
   def mean(int: Interval, max: Boolean) = if (max) int.max else int.mean
 
-  
   def simulate_int(calib: calibration_results_CI, scenario: Scenario, nyears: Int = 100, plot: Boolean = true, max: Boolean = false): DynamicResults = {
     // Les variables qui sont résultats de la simulation sont ici, toutes les autres variables calculées sont dans ModelResults.
     val z0 = calib.z; val beta_k = if (max) 1 else (calib.k - k_bounds(z0)._1) / (k_bounds(z0)._2 - k_bounds(z0)._1)
     val k_interval = scala.collection.mutable.ArrayBuffer.empty[Interval];
     val gK, s, K, k, x, qf, ye = scala.collection.mutable.ArrayBuffer.empty[Double];
     val z = scala.collection.mutable.ArrayBuffer.empty[Z_xi];
-    z += z0; x += 0.0; qf += z0.qf; s += calib.s;
+    x += 0.0; qf += z0.qf; s += calib.s;
 
     val ye0 = calib.data.ye(calib.i).to(calib.energy_units)
     ye += ye0
@@ -111,11 +112,15 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
     k_interval += k_int(z0, beta_k); k += mean(k_int(z0, beta_k), max)
     // Le K de début de simulation ne correspond pas au K de la calibration de le cas où on se place sur la courbe max ! Il faut le faire correspondre avec k_max !
     K += k.last * ye.last
-    gK += gK_k(k.last, z0);
-
+    val mu = z0.ve/k.last
+    val delta = mu*z0.deltae+(1-mu)*z0.deltaf
+    z += new Z_xi(z0.ve,z0.vf,z0.qe,z0.qf,z0.xe,z0.xf,z0.deltae,z0.deltaf,delta)
+    gK += gK_k(k.last, z.last);
     // Variables de résultats -> à mettre à jour chaque année
     val model = new ModelResults(calib, this)
-    // println("Initialize " + k.last + " " + gk.last + " " + beta_k)
+    model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
+    
+    println("Initialize " + k.last + " " + beta_k +  "(" + k_interval.last+ ")")
     val years = (1 until nyears).map(i => i + 2017).toList
     var end = false; var endYear: Option[Int] = None; var out_interval = false; var year_out: Option[Int] = None;
     for (y <- years) {
@@ -174,10 +179,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
         // println(y + "\t" + ye.last + "\t" + qf.last + "\t" + x.last + "\t" + k.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
       }
     }
-    //println("x" + "\t" + "k" + "\t" + "gk" + "\t" + "s" + "\t" + "eroi" + "\t" + "theta" + "\t" + "mu" + "\t" + "eta" + "\t" + "gamma" + "\t" + "p/p0")
-    //println(x.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
-    //println("x" + "\t" + "k" + "\t" + "mu" + "\t" + "alpha")
-    //println(x.last + "\t" + mean(k_interval.last, max) + "\t" + model.mu.last + "\t" + model.alpha.last) //+ "\t"+ model.alpha.last)
+    println(x.last + "\t" + mean(k_interval.last, max) + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + z.last.delta)
     val years_new = if (!out_interval) years else (2017 until year_out.get + 2017).toList
 
     if (plot) {
@@ -188,9 +190,12 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
       //plotXY(x.toList, s.toList)
       plot_(years_new, x, "x_" + toString());
       plot_(years_new, gK, "gk_" + toString());
-      plot_(years_new, ye, "ye_" + toString());
-      plot_(years_new, model.mu, "mu_" + toString())
-      plot_(years_new, model.alpha, "alpha_" + toString())
+      // plot_(years_new, model.mu, "mu_" + toString())
+
+      plotXY(List((years_new.map(_.toDouble), model.VAe.toList, "VAe"), (years_new.map(_.toDouble), model.VANe.toList, "VANe"),
+        (years_new.map(_.toDouble), model.VAf.toList, "VAf"), (years_new.map(_.toDouble), model.VANf.toList, "VANf"),
+        (years_new.map(_.toDouble), model.pib.toList, "PIB")), yLabel = "pib", title = "pib", legend = true, int_x_axis = true)
+
       //plot_(years_new, model.p, "p_" + toString())
       //plot_(years, model.gamma, "gamma_" + toString())
       // plot_(years, model.eta, "eta_" + toString())
@@ -202,7 +207,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
     }
     DynamicResults(years_new.map(_.toInt), x.toList, k_interval.toList.map(k => mean(k, max)), gK.toList, s.toList, ye.toList, z.toList, beta_k, endYear, model) // model.mu.toList, model.p.toList.map(i=> i / calib.p), model.Ce.toList.map(i => i / calib.ce(calib.i)), model.Cf.toList.map(i => i / calib.Cf))
   }
-  
+
   def ye_fun(ye: Double) = {
     val lines = getLines("potential_reduced", "\t").filter(i => (i(0).toDouble <= ye))
     (lines.map(i => (i(0).toDouble)),

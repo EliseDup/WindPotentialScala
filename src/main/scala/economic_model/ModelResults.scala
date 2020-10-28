@@ -7,25 +7,30 @@ case class DynamicResults(val years: List[Int], val x: List[Double], val k: List
 }
 
 class ModelResults(calib: calibration_results_CI, params: Dynamic_Params) {
-  val C, Ce, Df, Cf, Ke, Kf, Yf, pib, I, mu, p, eta, gamma, alpha, VAe, VAf, eroi, ner = scala.collection.mutable.ArrayBuffer.empty[Double];
-  C += calib.C; Ce += calib.ce(calib.i); Cf += calib.Cf; Df += (calib.yf - calib.Xe - calib.Xf); Ke += calib.Ke; Kf += calib.Kf; Yf += calib.yf; pib += calib.pib;
-  mu += calib.mu; p += calib.p; eta += calib.eta; gamma += calib.gammab;
+  val C, Ce, Df, Cf, Ke, Kf, Yf, pib, I, mu, p, eta, gamma, alpha, VAe, VAf, VANe,VANf, eroi, ner, Xe, Xf = scala.collection.mutable.ArrayBuffer.empty[Double];
+ 
+  /*C += calib.C; Ce += calib.ce(calib.i); Cf += calib.Cf; Df += (calib.yf - calib.Xe - calib.Xf); Ke += calib.Ke; Kf += calib.Kf; Yf += calib.yf; pib += calib.pib;
+  mu += calib.mu; p += calib.p; eta += calib.eta; gamma += calib.gammab; Xe += calib.Xe; Xf += calib.Xf;
   alpha += calib.alpha; VAe += calib.va_e; VAf += calib.va_f; eroi += calib.eroi; ner += calib.ner
-
+  VANe += calib.va_e - calib.z.deltae*calib.Ke; VANf += calib.va_f - calib.z.deltaf*calib.Kf*/
+  
   def update(k: Double, K: Double, z: Z_xi, s: Double, ye: Double, gK: Double) {
-
-    Ke += ye * z.ve; Kf += K - Ke.last; Yf += Kf.last / calib.vf;
-    Ce += ye * (1 - z.qe) - z.qf * Yf.last; mu += Ke.last / K;
-    Df += Yf.last * (1 - z.xf) - ye * z.xe
+    mu += z.ve/k
+    Ke += mu.last*K; Kf += (1-mu.last)*K
+    // Ke += ye * z.ve; Kf += K - Ke.last; 
+    Yf += Kf.last / z.vf; Xe += ye * z.xe; Xf += Yf.last * z.xf;
+    Ce += ye * (1 - z.qe) - z.qf * Yf.last;
+    Df += Yf.last - Xe.last - Xf.last
     // delta += (z.deltae * Ke.last + z.deltaf * Kf.last) / K
+    pib += (gK + z.delta) * K / params.s_k(k, z); C += (1 - s) * pib.last; I += s * pib.last
+    
     p += params.p(this)
     Cf += C.last - p.last * Ce.last
     eta += p.last * Ce.last / C.last; gamma += Ce.last / Cf.last
-    pib += (gK + z.delta) * K / params.s_k(k, z); C += (1 - s) * pib.last; I += s * pib.last
-    VAe += (p.last * (1 - z.qe) - z.xe) * ye
-    VAf += (1 - z.xf - p.last * z.qf) * Yf.last
+    
+    VAe += (p.last * (1 - z.qe) - z.xe) * ye; VANe += VAe.last - z.deltae*Ke.last
+    VAf += (1 - z.xf - p.last * z.qf) * Yf.last; VANf += VAf.last - z.deltaf*Kf.last
     alpha += VAe.last / pib.last
-
     eroi += eroi_z(z)
     ner += ner_z(z)
   }
@@ -33,8 +38,8 @@ class ModelResults(calib: calibration_results_CI, params: Dynamic_Params) {
   def g_pib = (1 until pib.toList.size).toList.map(i => (pib(i) - pib(i - 1)) / pib(i - 1))
   def pCe = (0 until p.toList.size).toList.map(i => p.toList(i) * Ce.toList(i))
 
-  def eroi_z(z: Z_xi) = 1 / (z.qe + (z.deltae * z.ve + z.xe) * z.qf)
-  def ner_z(z: Z_xi) = 1 - (z.qe + z.qf * (z.xe + z.deltae * z.ve) + (1 - z.qe) * (z.xf + z.deltaf * z.vf))
+  def eroi_z(z: Z_xi) = 1.0 / (z.qe + (z.deltae * z.ve + z.xe) * z.qf)
+  def ner_z(z: Z_xi) = 1.0 - (z.qe + z.qf * (z.xe + z.deltae * z.ve) + (1.0 - z.qe) * (z.xf + z.deltaf * z.vf))
 }
 
 class Scenario(val qf: ParamsScenario, val ye: ParamsScenario, val name: String = "") {

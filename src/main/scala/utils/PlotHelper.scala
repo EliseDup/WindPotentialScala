@@ -107,8 +107,8 @@ object PlotHelper {
       val format = new DecimalFormat("####");
       plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(format)
     }
-    // plot.getRangeAxis().setRange(50, 85)
-    //plot.getDomainAxis().setRange(0,800)
+    //plot.getRangeAxis().setRange(0,1)
+    //plot.getDomainAxis().setRange(2017, xys.map(_._1).flatten.max)
     if (drawPlot)
       createFrame(chart, name = title, save = save, tick = tick)
     return plot

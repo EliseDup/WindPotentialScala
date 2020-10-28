@@ -205,7 +205,7 @@ object GrowthModel {
         ((tilde_xe + tilde_ke / 25.0) / ye, ye, tilde_xe, tilde_ke, 1.0 / 25.0, tech)
       })
     }
-    val res = results(OnshoreWindTechnology) ++ results(OffshoreWindTechnology) ++ results(PVMono, Some(CSPParabolicStorage12h)) ++ results(CSPParabolicStorage12h, Some(PVMono))
+    val res = results(OnshoreWindTechnology) ++ results(OffshoreWindTechnology) ++ results(PVMono, Some(CSPTowerStorage12h)) ++ results(CSPTowerStorage12h, Some(PVMono))
     val res_sorted = res.sortBy(_._1)
     val wind_on = res_sorted.map(i => if (i._6.name == "Wind-onshore") i._2.to(MegaTonOilEquivalent) else 0.0).scanLeft(0.0)(_ + _)
     val wind_off = res_sorted.map(i => if (i._6.name == "Wind-offshore") i._2.to(MegaTonOilEquivalent) else 0.0).scanLeft(0.0)(_ + _)

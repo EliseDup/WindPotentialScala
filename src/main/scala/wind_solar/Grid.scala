@@ -62,6 +62,8 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
 
   // List eroi vs cumulated potential for a given renewable technology
   def eroi_potential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))))
+  def eroi_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1))))
+
   def eroi_netpotential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): (List[Double], List[Double]) = eroi_netpotential(cells, List(tech), eroi_min)
   def eroi_netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi(c, eroi_min), tech.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1))))
 
@@ -79,6 +81,8 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   // List eroi vs cumulated net potential for the sum of the technologies (for technologies that can be combined, i.e. solar and wind)
   def sum_netpotential(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double): Double =
     cells.map(c => techs.map(tech => tech.map(t => (t.eroi(c, eroi_min), t.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1)._2).sum).sum
+def sum_potential(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double): Double =
+    cells.map(c => techs.map(tech => tech.map(t => (t.eroi(c, eroi_min), (t.potential(c, eroi_min)*Hours(365*24)).to(Exajoules))).maxBy(_._1)._2).sum).sum
 
   def plot_eroi_netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double) {
     val list = techs.map(t => {

@@ -6,6 +6,7 @@ import utils._
 import squants.energy._
 import squants.time.Hours
 import java.io.FileOutputStream
+import squants.time.Megahertz
 
 object ResultsPaper {
   import Helper._
@@ -13,10 +14,22 @@ object ResultsPaper {
   import GrowthModel._
 
   def main(args: Array[String]): Unit = {
-    plotXY(CalibrationDataXi.year.map(_.toDouble), CalibrationDataXi.qtot.map(_.to(TonOilEquivalent)))
-    println(100*CalibrationXi.growth_rates(CalibrationDataXi.qtot.map(_.to(TonOilEquivalent))).sum/CalibrationDataXi.qtot.size)
-   // EROISocietalPaper
-   plotParametersHistory
+
+    import CalibrationDataXi._
+    println(MegaTonOilEquivalent(9717.29).to(Exajoules))
+    println(MegaTonOilEquivalent(816.82).to(Exajoules))
+    println(MegaTonOilEquivalent(878.7899).to(Exajoules))
+    println(MegaTonOilEquivalent(3358.831228).to(Exajoules))
+    println(MegaTonOilEquivalent(2064).to(Exajoules))
+    println(MegaTonOilEquivalent(2808).to(Exajoules))
+    val calib = new calibration_results_CI
+    println(calib.data.ye(calib.i).to(Exajoules))
+    println(calib.data.ee(calib.i).to(Exajoules))
+    println(calib.data.e(calib.i).to(Exajoules))
+    println(calib.data.ef(calib.i).to(Exajoules))
+
+    //EROISocietalPaper
+    //plotParametersHistory
   }
 
   def exercice {
@@ -176,7 +189,7 @@ object ResultsPaper {
     // plotParametersHistory
   }
   def sensitivityAnalysis {
-    val cal = new calibration_results_CI
+    val cal = new calibration_results_CI(energy_units = Exajoules)
     println(cal.yf + "\t" + cal.Xe + "\t" + cal.Xf + "\t" + cal.Cf + "\t" + cal.s * cal.pib)
     println("ETA min " + cal.alpha * cal.data.ce(cal.i) / ((1 - cal.s) * cal.data.e(cal.i)))
     println((cal.xe + cal.delta_e * cal.ve) * cal.qf)
@@ -219,8 +232,8 @@ object ResultsPaper {
     //(0 until eroi.size).map(i => println(alphas(i) + "\t" + etas(i) + "\t" + zfs(i) + "\t" + p(i) + "\t" + eroi(i) + "\t" + ner(i) + "\t" + xe(i)))
     import CalibrationDataXi._
     ye.map(i => println(i.to(MegaTonOilEquivalent)))
-qf.map(i => println(i))
-pib.map(i => println(i))
+    qf.map(i => println(i))
+    pib.map(i => println(i))
 
     res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))
 
