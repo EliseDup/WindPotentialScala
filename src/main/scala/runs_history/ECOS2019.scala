@@ -18,17 +18,16 @@ object ECOS2019 {
   def main(args: Array[String]): Unit = {
     ECOSPaperResults
   }
-  
 
   // Results for the paper of ECOS 2019 conference - 15/02/19
   def ECOSPaperResults {
     var t = System.currentTimeMillis()
-    val grid = Grid() // .eu()
-    val cells = grid.cells // .eu28
+    val grid = Grid.eu()
+    val cells = grid.eu28
     println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
-    plotGrossResults(grid,cells)
-    
-    plotResults(grid,cells)
+    plotGrossResults(grid, cells)
+
+    plotResults(grid, cells)
     printResultsPerCountry(grid, 1)
     printPotentialTable(grid, cells, List(2, 4, 6, 8, 10, 12).map(_.toDouble))
     List(4, 6, 9, 12).map(e => grid.writeWindPotential(e, cells))
@@ -102,23 +101,24 @@ object ECOS2019 {
 
   }
   def plotGrossResults(grid: Grid, cells: List[Cell]) {
-
-    val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     val eroi_min = (2 until 40).map(_ * 0.5).toList
-    val onshorepotential = (eroi_min.map(e => grid.potential(cells, OnshoreWindTechnology, e)), eroi_min, OnshoreWindTechnology.name)
-    val offshorepotential = (eroi_min.map(e => grid.potential(cells, OffshoreWindTechnology, e)), eroi_min, OffshoreWindTechnology.name)
     val windPotential = (eroi_min.map(e => grid.sum_potential(cells, List(List(OnshoreWindTechnology), List(OffshoreWindTechnology)), e)), eroi_min, "Wind")
-
     val solarPot = {
       val res = grid.eroi_potential(cells, List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), 1)
       (res._1, res._2, "Solar")
     }
+    val total = (eroi_min.map(e => grid.sum_potential(cells, List(List(OnshoreWindTechnology), List(OffshoreWindTechnology), List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), e)), eroi_min, "Total")
+    plotXY(List(windPotential, solarPot, total), legend = true, yLabel = "EROI", xLabel = "Potential [EJ/year]", title = "wind_solar_tot_GrossPotential")
+
+    val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
+    val onshorepotential = (eroi_min.map(e => grid.potential(cells, OnshoreWindTechnology, e)), eroi_min, OnshoreWindTechnology.name)
+    val offshorepotential = (eroi_min.map(e => grid.potential(cells, OffshoreWindTechnology, e)), eroi_min, OffshoreWindTechnology.name)
     val listSolar = List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h).map(t => solarGrossPotential(List(t), grid, cells, t.name))
 
     plotXY(List(windPotential, onshorepotential, offshorepotential), legend = true, yLabel = "EROI", xLabel = "Wind Potential [EJ/year]", title = "windGrossPotential")
     plotXY(listSolar, legend = true, yLabel = "EROI", xLabel = "Solar Potential [EJ/year]", title = "solarGrossPotential")
     plotXY(List(windPotential, solarPot), legend = true, yLabel = "EROI", xLabel = "Potential [EJ/year]", title = "wind_solarGrossPotential")
-    plotXY(List((eroi_min.map(e => grid.sum_netpotential(cells, List(List(OnshoreWindTechnology), List(OffshoreWindTechnology), List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), e)), eroi_min, "")), yLabel = "EROI", xLabel = "Potential [EJ/year]", title = "totalGrossPotential")
+    plotXY(List(total), yLabel = "EROI", xLabel = "Potential [EJ/year]", title = "totalGrossPotential")
 
   }
 }

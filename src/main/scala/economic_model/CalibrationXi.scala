@@ -31,9 +31,9 @@ class calibration_results_CI(
   val s = data.s(i);
 
   val qe = data.qe(i)
-  val gk = g // + gv
+  val gK = g // + gv
   // Calculated data for year i
-  val v = s / (gk + delta)
+  val v = s / (gK + delta)
   val K = v * pib; val Ke = mu * K; val Kf = (1 - mu) * K
   val I = s * pib; val C = (1 - s) * pib
   val p_min = va_e / data.e(i).to(energy_units)
@@ -79,7 +79,7 @@ class calibration_results_CI(
   def printCalib {
     println("Ye" + "\t" + data.ye(i).to(energy_units) + "\n" + "Ee" + "\t" + data.ee(i).to(energy_units) + "\n" + "Ef" + "\t" + data.ef(i).to(energy_units))
     println("pib" + "\t" + pib + "\n" + "pibm" + "\t" + data.pib(i - 1) / pib_units + "\n" + "s" + "\t" + s + "\n" + "mu" + "\t" + mu)
-    println("delta" + "\t" + delta + "\n" + "qe" + "\t" + qe + "\n" + "gk" + "\t" + gk + "\n" + "v" + "\t" + v + "\n" + "ve" + "\t" + ve + "\n" + "xe" + "\t" + xe + "\n" + "ze" + "\t" + ze + "\n" + "qf" + "\t" + qf + "\n" + "vf" + "\t" + vf + "\n" + "xf" + "\t" + xf + "\n" + "eps" + "\t" + eroi + "\n" + "gamma" + "\t" + gammab)
+    println("delta" + "\t" + delta + "\n" + "qe" + "\t" + qe + "\n" + "gk" + "\t" + gK + "\n" + "v" + "\t" + v + "\n" + "ve" + "\t" + ve + "\n" + "xe" + "\t" + xe + "\n" + "ze" + "\t" + ze + "\n" + "qf" + "\t" + qf + "\n" + "vf" + "\t" + vf + "\n" + "xf" + "\t" + xf + "\n" + "eps" + "\t" + eroi + "\n" + "gamma" + "\t" + gammab)
     println("K" + "\t" + K + "\n" + "Ke" + "\t" + Ke + "\n" + "Kf" + "\t" + Kf + "\n" + "Xe" + "\t" + Xe + "\n" + "Xf" + "\t" + Xf + "\n" + "Yf" + "\t" + yf + "\n" + "Ce" + "\t" + ce(i) + "\n" + "Cf" + "\t" + Cf + "\n" + "C" + "\t" + C)
     println("I" + "\t" + (s * pib) + "\n" + "VAe" + "\t" + (alpha * pib) + "\n" + "VAf" + "\t" + ((1 - alpha) * pib) + "\n" + "p" + "\t" + p + "\n" + "k" + "\t" + k + "\n" + "y" + "\t" + y + "\n" + "p1" + "\t" + p1 + "\n" + "p2" + "\t" + p2)
   }
@@ -108,8 +108,8 @@ object CalibrationXi {
 
   import Helper._
 
-  def printTableCalibrationCI(year: Int = 2017, alphas: List[Double], etas: List[Double], zfs: List[Double], mus: List[Double]) {
-    val cals = alphas.map(alpha => etas.map(eta => (mus.map(mu => zfs.map(zf => new calibration_results_CI(alpha = alpha, eta = eta, zf = zf, mu = mu)))).flatten).flatten).flatten
+  def printTableCalibrationCI(year: Int = 2018, alphas: List[Double], etas: List[Double], zfs: List[Double], mus: List[Double], e_units:EnergyUnit, p_units:Int) {
+    val cals = alphas.map(alpha => etas.map(eta => (mus.map(mu => zfs.map(zf => new calibration_results_CI(alpha = alpha, eta = eta, zf = zf, mu = mu,energy_units=e_units, pib_units=p_units)))).flatten).flatten).flatten
     print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
     print("$alpha$ [/100]"); cals.map(cal => print(" & " + round(cal.alpha * 100, 0))); println(" \\" + "\\")
     print("$eta$ [/100]"); cals.map(cal => print(" & " + round(cal.eta * 100, 1))); println(" \\" + "\\")
@@ -129,7 +129,7 @@ object CalibrationXi {
     print("CIK SE"); cals.map(cal => print(" & " + round(1.0 / cal.eroi * 100))); println(" \\" + "\\")
     print("CIK SF"); cals.map(cal => print(" & " + round((1.0 - cal.ner - 1.0 / cal.eroi) * 100))); println(" \\" + "\\")
     print("$P_2$ = Pertes d'$ub$ - $pC_e$"); cals.map(cal => print(" & " + round(cal.p2 * 100))); println(" \\" + "\\")
-    print("=Pertes d'$ub$"); cals.map(cal => print(" & " + round(cal.xi * (1 - cal.delta_f * cal.vf) * 100))); println(" \\" + "\\")
+    print("=Pertes d'$ub$"); cals.map(cal => print(" & " + round(cal.xi * (1 - (cal.xf + cal.delta_f * cal.vf)) * 100))); println(" \\" + "\\")
     print("-Compensation $pC_e$"); cals.map(cal => print(" & " + round((cal.xi * cal.p * cal.qf) * 100))); println(" \\" + "\\")
     print("$P_1$ + $P_2$"); cals.map(cal => print(" & " + round((cal.p1 + cal.p2) * 100))); println(" \\" + "\\")
 
@@ -141,7 +141,7 @@ object CalibrationDataXi {
   import PlotHelper._
 
   val data_folder = "../model_data/"
-  val data = getLines(data_folder + "data_calibration_xi", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100, i(7).toDouble, i(8).toDouble, i(9).toDouble))
+  val data = getLines(data_folder + "data_calibration_xi_old", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100, i(7).toDouble, i(8).toDouble, i(9).toDouble))
   val n = data.size
   val ind = (0 until n).toList
 

@@ -7,35 +7,42 @@ import squants.energy._
 import squants.time.Hours
 import java.io.FileOutputStream
 import scala.collection.mutable.ArrayBuffer
+import wind_solar.Grid
 
 object DynamicXi {
 
   import CalibrationDataXi._
   import PlotHelper._
   import Helper._
-  
-  val calib = new calibration_results_CI()
+
+  val calib = new calibration_results_CI(energy_units = MegaTonOilEquivalent)
+
   val dyn_1 = new Dynamic_s_eta(calib.s, calib.eta)
   val dyn_2b = new Dynamic_s_gamma_b(calib.s, calib.gammab)
-  val dyn_3 = new Dynamic_gk_eta(calib.gk, calib.eta)
+  val dyn_3 = new Dynamic_gk_eta(calib.gK, calib.eta)
+
   val ye_0 = calib.data.ye(calib.i).to(calib.energy_units)
   val qf_0 = calib.qf; val qf_f = calib.qf * 0.5; val ye_f = 3 * ye_0
   // Based on history : Ye +2% / year, qf - 0.7 % / year
-
-  val t_lim = 2040 - 2017
-  val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenario(ye_0, ye_0 * math.pow(1 + 1.62433159 / 100, t_lim), ye_f, t_lim), "BAU")
-  val new_policies = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, 12581, ye_f, t_lim), "New Policies")
-  val sustainable_dev = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.45 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, ye_0, ye_0, t_lim), "Sustainable Dev")
+  val t_lim = 2040 - calib.year
+  val ye_40_bau = 13986.655116005899; // ye_0 * math.pow(1 + 0.0162, t_lim)
+  println(ye_40_bau)
+  val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, ye_40_bau, ye_f, t_lim), "BAU") // Old value : 
+  val new_policies = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 12581, ye_f, t_lim), "New Policies")
+  val sustainable_dev = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.45 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, ye_0, ye_0, t_lim), "Sustainable Dev")
   // printScenario(bau, "BAU"); printScenario(new_policies, "NP"); printScenario(sustainable_dev, "SD")
 
   def printScenario(scn: Scenario, name: String) {
     println(name + "\t" + scn.ye.r1 + "\t" + scn.ye.r2 + "\t" + scn.qf.r1 + "\t" + scn.qf.r2 + "\t" + scn.ye.r_old + "\t" + scn.qf.r_old)
   }
-
   def main(args: Array[String]): Unit = {
-   dyn_3.simulate_int(calib, bau, 50, false)
-    dyn_3.simulate_int(calib, bau, 100, false)
-    
+    val thetas = (0 to 10).toList.map(_ / 10.0)
+    thetaResults(thetas, bau, dyn_1)
+    //dyn_3.simulate_int(calib, bau, 50, false, false)
+    //dyn_3.simulate_int(calib, bau, 91, false, false)
+    //  dyn_2b.simulate_int(calib, bau, 10,false)
+    //  dyn_3.simulate_int(calib, bau, 10,false)
+
     //dyn_1.simulate_int(calib, bau, 600, true)
     //qf_detailed_results(100, bau)
     //qf_detailed_results(100, sustainable_dev)
@@ -75,7 +82,11 @@ object DynamicXi {
     val qf_list = res.map(i => (years_pib(i._1), i._1.z.toList.map(_.qf), i._2))
     plotXY(qf_list, legend = true, yLabel = "qf [toe/kUS$]", title = "qf")*/
   }
-
+  def thetaResults(thetas: List[Double], scn: Scenario, dyn: Dynamic_Params) {
+    val endY = (thetas, thetas.map(t => dyn.simulate_int(calib, scn, 1000, false, Some(t))))
+    plotXY(endY._1, endY._2.map(_.end_year.getOrElse(10000).toDouble))
+    plotXY(endY._1, endY._2.map(_.x.last))
+  }
   def plotDetailedResults(names: List[(String, String)]) {
     //out.print(qf.qf.xf + "\t" + r.x.last + "\t" + r.k.last + "\t" + r.gK.last + "\t" + r.end_year.getOrElse(0.0) + "\t" + r.s.toList.max + "\t" + r.model.mu.last + "\t" + r.model.alpha.last + "\n")
     val list = names.map(name => (name._2, getLines(name._1, "\t")))
@@ -141,15 +152,15 @@ object DynamicXi {
     // val list = qfs.map(qf => (t.map(_.toDouble), t.map(qf.qf_t(_)), (qf.qf.xf / qf.qf.x0).toString))
     // plotXY(list, legend = true)
 
-    detailedResults(qfs, dyn_1, calib, scenario.name + "1", false)
-    detailedResults(qfs, dyn_2b, calib, scenario.name + "2b", false)
-    detailedResults(qfs, dyn_3, calib, scenario.name + "3", false)
+    detailedResults(qfs, dyn_1, calib, scenario.name + "1")
+    detailedResults(qfs, dyn_2b, calib, scenario.name + "2b")
+    detailedResults(qfs, dyn_3, calib, scenario.name + "3")
   }
 
-  def detailedResults(qfs: List[Scenario], dyn: Dynamic_Params, calib: calibration_results_CI, label: String, max: Boolean) {
+  def detailedResults(qfs: List[Scenario], dyn: Dynamic_Params, calib: calibration_results_CI, label: String, theta: Option[Double] = None) {
     val out = new java.io.PrintStream(new java.io.FileOutputStream("res_" + label))
     val res = qfs.map(qf => {
-      val r = dyn.simulate_int(calib, qf, 500, plot = false, max = max)
+      val r = dyn.simulate_int(calib, qf, 500, plot = false, theta)
       out.print(qf.qf.xf + "\t" + r.x.last + "\t" + r.k.last + "\t" + r.gK.last + "\t" + r.end_year.getOrElse(0.0) + "\t" + r.s.toList.max + "\t" + r.model.mu.last + "\t" + r.model.alpha.last + "\t" + r.z.last.toString() + "\n")
       r
     })

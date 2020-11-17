@@ -42,21 +42,30 @@ class Dynamic_s_gamma_b(s: Double, gamma: Double) extends Dynamic_Params(s, gamm
   def p(model: ModelResults) = (1 - s) / s * model.Df.last / model.Ce.last - 1 / (s * gamma)
 }
 
-class Dynamic_gk_eta(gk: Double, eta: Double) extends Dynamic_Params(gk, eta) {
+class Dynamic_gk_eta(gK: Double, eta: Double) extends Dynamic_Params(gK, eta) {
   override def toString() = "Ex3"
   def y_int(z: Z_xi) = {
     val (k1, k2) = k_bounds(z)
     Interval((k1 - z.ve) / z.vf, (k2 - z.ve) / z.vf)
   }
+
   override def k_bounds(z: Z_xi): (Double, Double) = {
     val A1 = (1 - eta) / eta * A(z)
     val B1 = (1 - eta) / eta * B(z)
-    def coef(a: Double) = (a * (1 - z.qe + z.qf * z.ve / z.vf) + (1 - z.xf) * z.ve / z.vf + z.xe) / (a * z.qf / z.vf + (1 - z.xf) / z.vf - (gk + z.delta))
+    //def coef(a: Double) = (a * (1 - z.qe + z.qf * z.ve / z.vf) + (1 - z.xf) * z.ve / z.vf + z.xe) / (a * z.qf / z.vf + (1 - z.xf) / z.vf - (gK + z.delta))  
+    def coef(a: Double) = (a * (1 - z.qe + z.qf * z.ve / z.vf) + ((1 - z.xf) / z.vf - (z.deltaf - z.deltae)) * z.ve + z.xe) / (a * z.qf / z.vf + (1 - z.xf) / z.vf - (gK + z.deltaf))
+
     (coef(A1), coef(B1))
   }
 
-  def ratio_spib_K(k: Double, z: Z_xi) = gk + z.delta
-  override def s_k(k: Double, z: Z_xi) = (1 - eta) * (gk + z.delta) / ((1 - z.xf) / z.vf - eta * (gk + z.delta) - ((1 - z.xf) / z.vf * z.ve + z.xe) / k)
+  def ratio_spib_K(k: Double, z: Z_xi) = {
+    val delta = z.deltaf + z.ve / k * (z.deltae - z.deltaf)
+    gK + delta
+  }
+  override def s_k(k: Double, z: Z_xi) = {
+    val delta = z.deltaf + z.ve / k * (z.deltae - z.deltaf)
+    (1 - eta) * (gK + delta) / ((1 - z.xf) / z.vf - eta * (gK + delta) - ((1 - z.xf) / z.vf * z.ve + z.xe) / k)
+  }
   def p(model: ModelResults) = eta * model.C.last / model.Ce.last
 }
 
@@ -96,11 +105,10 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
   }
 
   def p_int(z: Z_xi) = Interval(A(z), B(z))
-  def mean(int: Interval, max: Boolean) = if (max) int.max else int.mean
-
-  def simulate_int(calib: calibration_results_CI, scenario: Scenario, nyears: Int = 100, plot: Boolean = true, max: Boolean = false): DynamicResults = {
+  
+  def simulate_int(calib: calibration_results_CI, scenario: Scenario, nyears: Int = 100, plot: Boolean = true, theta: Option[Double]=None): DynamicResults = {
     // Les variables qui sont résultats de la simulation sont ici, toutes les autres variables calculées sont dans ModelResults.
-    val z0 = calib.z; val beta_k = if (max) 1 else (calib.k - k_bounds(z0)._1) / (k_bounds(z0)._2 - k_bounds(z0)._1)
+    val z0 = calib.z; val theta_k = theta.getOrElse((calib.k - k_bounds(z0)._1) / (k_bounds(z0)._2 - k_bounds(z0)._1))
     val k_interval = scala.collection.mutable.ArrayBuffer.empty[Interval];
     val gK, s, K, k, x, qf, ye = scala.collection.mutable.ArrayBuffer.empty[Double];
     val z = scala.collection.mutable.ArrayBuffer.empty[Z_xi];
@@ -109,23 +117,25 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
     val ye0 = calib.data.ye(calib.i).to(calib.energy_units)
     ye += ye0
 
-    k_interval += k_int(z0, beta_k); k += mean(k_int(z0, beta_k), max)
+    k_interval += k_int(z0, theta_k); k += k_int(z0, theta_k).mean
     // Le K de début de simulation ne correspond pas au K de la calibration de le cas où on se place sur la courbe max ! Il faut le faire correspondre avec k_max !
-    K += k.last * ye.last
-    val mu = z0.ve/k.last
-    val delta = mu*z0.deltae+(1-mu)*z0.deltaf
-    z += new Z_xi(z0.ve,z0.vf,z0.qe,z0.qf,z0.xe,z0.xf,z0.deltae,z0.deltaf,delta)
+    K += calib.K //k.last * ye.last
+    val mu = z0.ve / k.last
+    val delta = mu * z0.deltae + (1 - mu) * z0.deltaf
+    z += new Z_xi(z0.ve, z0.vf, z0.qe, z0.qf, z0.xe, z0.xf, z0.deltae, z0.deltaf, delta)
     gK += gK_k(k.last, z.last);
     // Variables de résultats -> à mettre à jour chaque année
     val model = new ModelResults(calib, this)
     model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
-    
-    println("Initialize " + k.last + " " + beta_k +  "(" + k_interval.last+ ")")
+
+    println("Initialize " + k.last + " " + theta_k +  "(" + k_interval.last+ ")")
     val years = (1 until nyears).map(i => i + 2017).toList
     var end = false; var endYear: Option[Int] = None; var out_interval = false; var year_out: Option[Int] = None;
+    // println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + ye.last)
+
     for (y <- years) {
 
-      if (!end && k.last >= mean(k_interval.last, max) && x.last > 0.9) {
+      if (!end && k.last >= k_interval.last.mean && x.last > 0.9) {
         println("Transition stops after " + (y - 2017) + " years" + "(ie in " + y + ")")
         endYear = Some(y - 2017)
         end = true
@@ -152,34 +162,35 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
           // println("Continue during year " + y + "\t" + k.last + "\t" + k_interval.last)
         } else {
           // Mapping between x and the interval for k
-          val k_x_fun = k_x_ye(qf.last, z0, beta_k, ye.last, K.last)
+          val k_x_fun = k_x_ye(qf.last, z0, theta_k, ye.last)
           val (x_x, qe_x, xe_x, ve_x, deltae_x) = x_fun_ye(ye.last, z0)
-          val indexes_x = find_indexes(k.last, k_x_fun, max)
-          val k1 = mean(k_x_fun(indexes_x._1)._2, max); val k2 = mean(k_x_fun(indexes_x._2)._2, max);
+          val indexes_x = find_indexes(k.last, k_x_fun)
+          val k1 = k_x_fun(indexes_x._1)._2.mean; val k2 = k_x_fun(indexes_x._2)._2.mean;
           val x1 = k_x_fun(indexes_x._1)._1; val x2 = k_x_fun(indexes_x._2)._1
           val newX = math.max(0, interpolation(k.last, (k1, x1), (k2, x2)))
-
           x += newX
           val ve = interpolation(x.last, (x1, ve_x(indexes_x._1)), (x2, ve_x(indexes_x._2)))
           val qe = interpolation(x.last, (x1, qe_x(indexes_x._1)), (x2, qe_x(indexes_x._2)))
           val xe = interpolation(x.last, (x1, xe_x(indexes_x._1)), (x2, xe_x(indexes_x._2)))
           val deltae = interpolation(x.last, (x1, deltae_x(indexes_x._1)), (x2, deltae_x(indexes_x._2)))
-          val mu = ye.last * ve / K.last
+          val mu = ve / k.last
           z += Z_xi(ve, z0.vf, qe, qf.last, xe, z0.xf, deltae, z0.deltaf, mu * deltae + (1 - mu) * z0.deltaf)
         }
 
-        k_interval += k_int(z.last, beta_k);
+        k_interval += k_int(z.last, theta_k);
         gK += gK_k(k.last, z.last);
         s += s_k(k.last, z.last)
 
-        if (z.last.xe / (1 - z.last.xf) > (1 - z.last.qe) / z.last.qf) println("Constraint on y violated" + "\t" + z.last)
+        if (z.last.xe / (1 - z.last.xf) > (1 - z.last.qe) / z.last.qf) println("Constraint on y violated" + "\t" + z.last + "\t" + model.p.last)
         // Calculated model parameters
         // !! We need the new delta before calculating gK
         model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
-        // println(y + "\t" + ye.last + "\t" + qf.last + "\t" + x.last + "\t" + k.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
+        //println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last+ "\t" + model.mu.last+ "\t" +ye.last)
+        //println(y + "\t" + ye.last + "\t" + qf.last + "\t" + x.last + "\t" + k.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
+        
       }
     }
-    println(x.last + "\t" + mean(k_interval.last, max) + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + z.last.delta)
+    println(x.last + "\t" + k_interval.last.mean + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + z.last.delta + "\t" + s.last + "\t" + model.p.last)
     val years_new = if (!out_interval) years else (2017 until year_out.get + 2017).toList
 
     if (plot) {
@@ -205,15 +216,23 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
       // plotXY(List((x.toList, k.toList, "k"), (x.toList, k_interval.toList.map(_.mean), "k_env"), (x.toList, k_interval.toList.map(_.min), "k_env" + "_min"), (x.toList, k_interval.toList.map(_.max), "k_env" + "_max")), yLabel = "k", title = "k", legend = true, int_x_axis = false)
 
     }
-    DynamicResults(years_new.map(_.toInt), x.toList, k_interval.toList.map(k => mean(k, max)), gK.toList, s.toList, ye.toList, z.toList, beta_k, endYear, model) // model.mu.toList, model.p.toList.map(i=> i / calib.p), model.Ce.toList.map(i => i / calib.ce(calib.i)), model.Cf.toList.map(i => i / calib.Cf))
+    DynamicResults(years_new.map(_.toInt), x.toList, k_interval.toList.map(k => k.mean), gK.toList, s.toList, ye.toList, z.toList, theta_k, endYear, model) // model.mu.toList, model.p.toList.map(i=> i / calib.p), model.Ce.toList.map(i => i / calib.ce(calib.i)), model.Cf.toList.map(i => i / calib.Cf))
   }
 
   def ye_fun(ye: Double) = {
-    val lines = getLines("potential_reduced", "\t").filter(i => (i(0).toDouble <= ye))
-    (lines.map(i => (i(0).toDouble)),
-      lines.map(i => (i(1).toDouble)),
-      lines.map(i => (i(2).toDouble)),
-      lines.map(i => (i(3).toDouble)))
+    val l = getLines("potential_reduced", "\t")
+    val index = find_index_list(ye, l.map(_(0).toDouble))
+    val tildeK1 = l(index)(2).toDouble; val tildeK2 = l(index + 1)(2).toDouble;
+    val tildeX1 = l(index)(1).toDouble; val tildeX2 = l(index + 1)(1).toDouble;
+    val Ye1 = l(index)(0).toDouble; val Ye2 = l(index + 1)(0).toDouble;
+    val newTildeK = tildeK1 + (ye - Ye1) * (tildeK2 - tildeK1) / (Ye2 - Ye1)
+    val newTildeX = tildeX1 + (ye - Ye1) * (tildeX2 - tildeX1) / (Ye2 - Ye1)
+    val lines = l.filter(i => (i(0).toDouble <= ye))
+
+    (lines.map(i => (i(0).toDouble)) ++ List(ye),
+      lines.map(i => (i(1).toDouble)) ++ List(newTildeX),
+      lines.map(i => (i(2).toDouble)) ++ List(newTildeK),
+      lines.map(i => (i(3).toDouble)) ++ List(1 / 25.0))
   }
 
   def x_fun_ye(ye: Double, z0: Z_xi) = {
@@ -229,11 +248,11 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
     (res.map(_._1), res.map(_._2), res.map(_._3), res.map(_._4), res.map(_._5))
   }
 
-  def k_x_ye(qf: Double, z0: Z_xi, beta: Double = 0.5, ye: Double, K: Double): List[(Double, Interval)] = {
+  def k_x_ye(qf: Double, z0: Z_xi, beta: Double = 0.5, ye: Double): List[(Double, Interval)] = {
     val (x_x, qe_x, xe_x, ve_x, deltae_x) = x_fun_ye(ye, z0)
     (0 until x_x.size).toList.map(i => {
-      val mu = ye * ve_x(i) / K
-      val z = new Z_xi(ve_x(i), z0.vf, qe_x(i), qf, xe_x(i), z0.xf, deltae_x(i), z0.deltaf, mu * deltae_x(i) + (1 - mu) * z0.deltaf)
+      // We should never use delta in the following calculations !!
+      val z = new Z_xi(ve_x(i), z0.vf, qe_x(i), qf, xe_x(i), z0.xf, deltae_x(i), z0.deltaf, Double.NaN)
       (x_x(i), k_int(z, beta))
     })
   }
@@ -248,19 +267,19 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
     }
   }
 
-  def find_indexes(k: Double, k_fun: List[(Double, Interval)], max: Boolean): (Int, Int) = {
+  def find_indexes(k: Double, k_fun: List[(Double, Interval)]): (Int, Int) = {
     val index = {
-      if (k < mean(k_fun(0)._2, max)) 0
-      else if (k > mean(k_fun(k_fun.size - 1)._2, max)) k_fun.size - 1
-      else (0 until k_fun.size - 1).toList.find(i => mean(k_fun(i)._2, max) <= k && mean(k_fun(i + 1)._2, max) >= k).get
+      if (k < k_fun(0)._2.mean) 0
+      else if (k > k_fun(k_fun.size - 1)._2.mean) k_fun.size - 1
+      else (0 until k_fun.size - 1).toList.find(i => k_fun(i)._2.mean <= k &&k_fun(i + 1)._2.mean >= k).get
     }
     (index, math.min(k_fun.size - 1, index + 1))
   }
   def find_index(k: Double, k_fun: List[(Double, Interval)], max: Boolean): Int = {
     val res = {
-      if (k < mean(k_fun(0)._2, max)) 0
-      else if (k > mean(k_fun(k_fun.size - 1)._2, max)) k_fun.size - 1
-      else (0 until k_fun.size - 1).toList.find(i => mean(k_fun(i)._2, max) <= k && mean(k_fun(i + 1)._2, max) >= k).get
+      if (k < k_fun(0)._2.mean) 0
+      else if (k > k_fun(k_fun.size - 1)._2.mean) k_fun.size - 1
+      else (0 until k_fun.size - 1).toList.find(i => k_fun(i)._2.mean <= k && k_fun(i + 1)._2.mean >= k).get
     }
     res
   }

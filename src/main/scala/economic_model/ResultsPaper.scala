@@ -16,19 +16,26 @@ object ResultsPaper {
   def main(args: Array[String]): Unit = {
 
     import CalibrationDataXi._
-    println(MegaTonOilEquivalent(9717.29).to(Exajoules))
-    println(MegaTonOilEquivalent(816.82).to(Exajoules))
-    println(MegaTonOilEquivalent(878.7899).to(Exajoules))
-    println(MegaTonOilEquivalent(3358.831228).to(Exajoules))
-    println(MegaTonOilEquivalent(2064).to(Exajoules))
-    println(MegaTonOilEquivalent(2808).to(Exajoules))
-    val calib = new calibration_results_CI
-    println(calib.data.ye(calib.i).to(Exajoules))
-    println(calib.data.ee(calib.i).to(Exajoules))
-    println(calib.data.e(calib.i).to(Exajoules))
-    println(calib.data.ef(calib.i).to(Exajoules))
+    println("TFC" + "\t" + MegaTonOilEquivalent(9937.703).to(Exajoules))
+    println("EIOU" + "\t" + MegaTonOilEquivalent(839.185).to(Exajoules))
+    println("Losses" + "\t" + MegaTonOilEquivalent(222.503).to(Exajoules))
+    println("NEU" + "\t" + MegaTonOilEquivalent(916.762).to(Exajoules))
+    println("Ce" + "\t" + MegaTonOilEquivalent(3441.9099).to(Exajoules))
+    println("Residential" + "\t" + MegaTonOilEquivalent(2109.205).to(Exajoules))
+    println("Transport" + "\t" + MegaTonOilEquivalent(2890.9).to(Exajoules))
+    println("Fraction NEU" + "\t" + (916.762 / 9937.703) * 100)
+    val calib = new calibration_results_CI()
+    println("Ce" + "\t" + calib.data.ce(calib.i).to(Exajoules))
+    println("Ye" + "\t" + calib.data.ye(calib.i).to(Exajoules))
+    println("Ee" + "\t" + calib.data.ee(calib.i).to(Exajoules))
+    println("E" + "\t" + calib.data.e(calib.i).to(Exajoules))
+    println("Ef" + "\t" + calib.data.ef(calib.i).to(Exajoules))
+    println("qe" + "\t" + calib.qe)
+    println("ratio Ce/E" + "\t" + calib.data.ce(calib.i) / calib.data.e(calib.i))
+    println("ratio Ce/Ye" + "\t" + calib.data.ce(calib.i) / calib.data.ye(calib.i))
 
-    //EROISocietalPaper
+    println("Repartition Yf " + "\t" + "\t" + (calib.Xe + calib.Xf) / calib.yf + "\t" + calib.Xe / (calib.yf) + "\t" + calib.Cf / calib.yf + "\t" + calib.I / calib.yf)
+    EROISocietalPaper
     //plotParametersHistory
   }
 
@@ -189,14 +196,15 @@ object ResultsPaper {
     // plotParametersHistory
   }
   def sensitivityAnalysis {
-    val cal = new calibration_results_CI(energy_units = Exajoules)
+    val cal = new calibration_results_CI(energy_units = Gigajoules, pib_units = 1)
+
     println(cal.yf + "\t" + cal.Xe + "\t" + cal.Xf + "\t" + cal.Cf + "\t" + cal.s * cal.pib)
     println("ETA min " + cal.alpha * cal.data.ce(cal.i) / ((1 - cal.s) * cal.data.e(cal.i)))
     println((cal.xe + cal.delta_e * cal.ve) * cal.qf)
     println("Ee :" + 100 * cal.eroi * cal.qe + ", Xe " + 100 * cal.eroi * cal.xe * cal.qf + ", Ke " + 100 * cal.eroi * cal.qf * cal.delta_e * cal.ve)
 
     println("---------- Tableau 2 ----------")
-    println(round(cal.vf) + " & " + round(cal.qf) + " & " + round(cal.xf) + " & " + round(cal.ve) + " & " + round(cal.qe) + " & " + +round(cal.xe) + " & " + round(cal.v) + " & " + round(cal.eroi) + " & " + round(cal.ner))
+    println(round(cal.vf) + " & " + round(cal.qf, 4) + " & " + round(cal.xf) + " & " + round(cal.ve, 2) + " & " + round(cal.qe) + " & " + +round(cal.xe, 2) + " & " + round(cal.v) + " & " + round(cal.eroi) + " & " + round(cal.ner))
     println("---------- Tableau 3 ----------")
     println("$P_1$" + " & " + round(cal.p1 * 100) + "\\" + "\\")
     println("CIK SE" + " & " + round((1 / cal.eroi) * 100) + "\\" + "\\")
@@ -210,10 +218,11 @@ object ResultsPaper {
     val as = List(0.04, 0.06, 0.08); val mus = List(0.03, 280.0 / 4280, 0.1);
     val tfs = List(15, 20, 25); val tes = List(20, 25, 30);
     println("---------- Tableau 5 ----------")
-    CalibrationXi.printTableCalibrationCI(2017, List(0.06), etas, zfs, List(280.0 / 4280))
-
-    CalibrationXi.printTableCalibrationCI(2017, as, List(0.04), List(0.5), List(280.0 / 4280))
-    CalibrationXi.printTableCalibrationCI(2017, List(0.06), List(0.04), List(0.5), mus)
+    CalibrationXi.printTableCalibrationCI(2018, List(0.06), etas, zfs, List(280.0 / 4280), Megajoules, 1)
+    println("Alpha influence")
+    CalibrationXi.printTableCalibrationCI(2018, as, List(0.04), List(0.5), List(280.0 / 4280), Gigajoules, 1)
+    println("Mus influence")
+    CalibrationXi.printTableCalibrationCI(2018, List(0.06), List(0.04), List(0.5), mus, Gigajoules, 1)
 
   }
 
