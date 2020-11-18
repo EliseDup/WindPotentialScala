@@ -38,6 +38,8 @@ object DynamicXi {
   def main(args: Array[String]): Unit = {
     val thetas = (0 to 10).toList.map(_ / 10.0)
     thetaResults(thetas, bau, dyn_1)
+    // dyn_1.simulate_int(calib, bau, 600, false, Some(1.0))
+    //dyn_2b.simulate_int(calib, bau, 250, false, Some(1.0))
     //dyn_3.simulate_int(calib, bau, 50, false, false)
     //dyn_3.simulate_int(calib, bau, 91, false, false)
     //  dyn_2b.simulate_int(calib, bau, 10,false)
@@ -82,11 +84,15 @@ object DynamicXi {
     val qf_list = res.map(i => (years_pib(i._1), i._1.z.toList.map(_.qf), i._2))
     plotXY(qf_list, legend = true, yLabel = "qf [toe/kUS$]", title = "qf")*/
   }
+  
   def thetaResults(thetas: List[Double], scn: Scenario, dyn: Dynamic_Params) {
-    val endY = (thetas, thetas.map(t => dyn.simulate_int(calib, scn, 1000, false, Some(t))))
-    plotXY(endY._1, endY._2.map(_.end_year.getOrElse(10000).toDouble))
-    plotXY(endY._1, endY._2.map(_.x.last))
+    val endY = (thetas, thetas.map(t => dyn.simulate_int(calib, scn, 600, false, Some(t))))
+    plotXY(List((endY._1, endY._2.map(_.end_year.getOrElse(0).toDouble + 2017), "")), xLabel = "theta", yLabel = "end_year", title="theta_endY")
+    plotXY(List((endY._1, endY._2.map(_.start_year.getOrElse(0).toDouble), "")), xLabel = "theta", yLabel = "# years before start", title="theta_Td")
+    plotXY(List((endY._1, endY._2.map(_.x.last), "")), xLabel = "theta", yLabel = "x", title="theta_x")
+    (0 until endY._1.size).map(i => println(endY._1(i) + "\t" + endY._2(i).x.last + "\t" + endY._2(i).s.last +  "\t" + endY._2(i).end_year.getOrElse(0) + "\t" + endY._2(i).start_year.getOrElse(0)))
   }
+  
   def plotDetailedResults(names: List[(String, String)]) {
     //out.print(qf.qf.xf + "\t" + r.x.last + "\t" + r.k.last + "\t" + r.gK.last + "\t" + r.end_year.getOrElse(0.0) + "\t" + r.s.toList.max + "\t" + r.model.mu.last + "\t" + r.model.alpha.last + "\n")
     val list = names.map(name => (name._2, getLines(name._1, "\t")))

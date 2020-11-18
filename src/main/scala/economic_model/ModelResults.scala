@@ -1,6 +1,6 @@
 package economic_model
 
-case class DynamicResults(val years: List[Int], val x: List[Double], val k: List[Double], val gK: List[Double], val s: List[Double], val ye: List[Double], val z: List[Z_xi], val theta: Double, val end_year: Option[Int],
+case class DynamicResults(val years: List[Int], val x: List[Double], val k: List[Double], val gK: List[Double], val s: List[Double], val ye: List[Double], val z: List[Z_xi], val theta: Double, val start_year: Option[Int],val end_year: Option[Int],
     val model: ModelResults) { //val mu: List[Double], val p_ratio: List[Double], val ce_ratio: List[Double], val cf_ratio: List[Double]) {
   val last = x.size - 1
   override def toString() = x(last) + "\t" + k(last) + "\t" + gK(last) + "\t" + s(last) + "\t" + theta + "\t" + end_year + "\t" + model.mu(last) // + "\t" + p_ratio(last) + "\t" + ce_ratio(last) + "\t" + cf_ratio(last)
