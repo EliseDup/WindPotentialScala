@@ -8,6 +8,7 @@ import squants.time.Hours
 import java.io.FileOutputStream
 import scala.collection.mutable.ArrayBuffer
 import wind_solar.Grid
+import com.sun.org.apache.bcel.internal.generic.NEW
 
 object DynamicXi {
 
@@ -15,7 +16,7 @@ object DynamicXi {
   import PlotHelper._
   import Helper._
 
-  val calib = new calibration_results_CI(energy_units = MegaTonOilEquivalent)
+  val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
 
   val dyn_1 = new Dynamic_s_eta(calib.s, calib.eta)
   val dyn_2b = new Dynamic_s_gamma_b(calib.s, calib.gammab)
@@ -26,18 +27,21 @@ object DynamicXi {
   // Based on history : Ye +2% / year, qf - 0.7 % / year
   val t_lim = 2040 - calib.year
   val ye_40_bau = 13986.655116005899; // ye_0 * math.pow(1 + 0.0162, t_lim)
-  println(ye_40_bau)
-  val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, ye_40_bau, ye_f, t_lim), "BAU") // Old value : 
-  val new_policies = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 12581, ye_f, t_lim), "New Policies")
-  val sustainable_dev = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.45 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, ye_0, ye_0, t_lim), "Sustainable Dev")
-  // printScenario(bau, "BAU"); printScenario(new_policies, "NP"); printScenario(sustainable_dev, "SD")
 
+  val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, ye_40_bau, ye_f, t_lim), "BAU") // Old value : 
+  val np = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 12581, ye_f, t_lim), "New Policies")
+  val sd = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.45 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, ye_0, ye_0, t_lim), "Sustainable Dev")
+ // printScenario(bau, "BAU"); printScenario(np, "NP"); printScenario(sd, "SD")
+  
   def printScenario(scn: Scenario, name: String) {
-    println(name + "\t" + scn.ye.r1 + "\t" + scn.ye.r2 + "\t" + scn.qf.r1 + "\t" + scn.qf.r2 + "\t" + scn.ye.r_old + "\t" + scn.qf.r_old)
-  }
+    println(name + "\t" + " ye " + scn.ye + ", qf " + scn.qf)
+  } 
+  
   def main(args: Array[String]): Unit = {
-    val thetas = (0 to 10).toList.map(_ / 10.0)
-    thetaResults(thetas, bau, dyn_1)
+    // plotYeCurve
+    // thetaResults((0 to 100).toList.map(_/100.0), bau, dyn_3)
+
+    /* */
     // dyn_1.simulate_int(calib, bau, 600, false, Some(1.0))
     //dyn_2b.simulate_int(calib, bau, 250, false, Some(1.0))
     //dyn_3.simulate_int(calib, bau, 50, false, false)
@@ -54,8 +58,8 @@ object DynamicXi {
 
   def plotScenarios(dyn: Dynamic_Params, ny: Int, name: String = "") {
     val res = List((dyn.simulate_int(calib, bau, ny, false), "BAU"),
-      (dyn.simulate_int(calib, new_policies, ny, false), "NP"),
-      (dyn.simulate_int(calib, sustainable_dev, ny, false), "SD"))
+      (dyn.simulate_int(calib, np, ny, false), "NP"),
+      (dyn.simulate_int(calib, sd, ny, false), "SD"))
 
     def years_pib(res: DynamicResults) = (1 until res.years.size).toList.map(res.years(_).toDouble)
     def years(res: DynamicResults) = res.years.map(_.toDouble)
@@ -84,15 +88,18 @@ object DynamicXi {
     val qf_list = res.map(i => (years_pib(i._1), i._1.z.toList.map(_.qf), i._2))
     plotXY(qf_list, legend = true, yLabel = "qf [toe/kUS$]", title = "qf")*/
   }
-  
+
   def thetaResults(thetas: List[Double], scn: Scenario, dyn: Dynamic_Params) {
-    val endY = (thetas, thetas.map(t => dyn.simulate_int(calib, scn, 600, false, Some(t))))
-    plotXY(List((endY._1, endY._2.map(_.end_year.getOrElse(0).toDouble + 2017), "")), xLabel = "theta", yLabel = "end_year", title="theta_endY")
-    plotXY(List((endY._1, endY._2.map(_.start_year.getOrElse(0).toDouble), "")), xLabel = "theta", yLabel = "# years before start", title="theta_Td")
-    plotXY(List((endY._1, endY._2.map(_.x.last), "")), xLabel = "theta", yLabel = "x", title="theta_x")
-    (0 until endY._1.size).map(i => println(endY._1(i) + "\t" + endY._2(i).x.last + "\t" + endY._2(i).s.last +  "\t" + endY._2(i).end_year.getOrElse(0) + "\t" + endY._2(i).start_year.getOrElse(0)))
+    val endY = (thetas, thetas.map(t => {
+      val res = dyn.simulate_int(calib, scn, 600, false, Some(t))
+      println(t + "\t" + res.x.last + "\t" + res.end_year.getOrElse(0) + "\t" + res.start_year.getOrElse(0) + "\t" + res.gK.last + "\t" + res.model.mu.toList(res.model.mu.size - 2) + "\t" + res.s.toList(res.s.size - 2) + "\t" + res.model.p.toList(res.model.p.size - 2) / calib.p)
+      res
+    }))
+    plotXY(List((endY._1, endY._2.map(_.end_year.getOrElse(0).toDouble + 2017), "")), xLabel = "theta", yLabel = "end_year", title = "theta_endY")
+    plotXY(List((endY._1, endY._2.map(_.start_year.getOrElse(0).toDouble), "")), xLabel = "theta", yLabel = "# years before start", title = "theta_Td")
+    plotXY(List((endY._1, endY._2.map(_.x.last), "")), xLabel = "theta", yLabel = "x", title = "theta_x")
   }
-  
+
   def plotDetailedResults(names: List[(String, String)]) {
     //out.print(qf.qf.xf + "\t" + r.x.last + "\t" + r.k.last + "\t" + r.gK.last + "\t" + r.end_year.getOrElse(0.0) + "\t" + r.s.toList.max + "\t" + r.model.mu.last + "\t" + r.model.alpha.last + "\n")
     val list = names.map(name => (name._2, getLines(name._1, "\t")))
@@ -133,8 +140,8 @@ object DynamicXi {
   def printTable(dyn: Dynamic_Params, ny: Int) {
     val res = List(
       ("BAU", dyn.simulate_int(calib, bau, nyears = ny, plot = false)),
-      ("NP", dyn.simulate_int(calib, new_policies, nyears = ny, plot = false)),
-      ("SD", dyn.simulate_int(calib, sustainable_dev, nyears = ny, plot = false)))
+      ("NP", dyn.simulate_int(calib, np, nyears = ny, plot = false)),
+      ("SD", dyn.simulate_int(calib, sd, nyears = ny, plot = false)))
     println("--Results--")
     println("\t" + "x" + "\t" + "gk" + "\t" + "gpib" + "\t" + "mu" + "\t" + "alpha")
     res.map(r => println(r._1 + " & " + round(r._2.x.last * 100, 2) + " & " + round(r._2.gK.last * 100, 2) + " & " + round(r._2.model.g_pib(r._2.model.g_pib.size - 1) * 100, 2) + " & " +
@@ -180,43 +187,5 @@ object DynamicXi {
     //plotXY(List((qf_rel, res.map(_.end_year).map(_.getOrElse(0).toDouble), "")), xLabel = "qf_min/qf_0", yLabel = "years to finish transition", title = "qf_min_y_" + label + max)
   }
 
-  def plotYeCurve {
-    val lines = getLines("potential_reduced", "\t")
-    val lines2 = getLines("potential_reduced_avg", "\t")
-
-    val ye = lines.map(_(0).toDouble)
-    val xe = lines.map(_(1).toDouble)
-    val ke = lines.map(_(2).toDouble)
-    val ye2 = lines2.map(_(0).toDouble)
-    val xe2 = lines2.map(_(1).toDouble)
-    val ke2 = lines2.map(_(2).toDouble)
-    val is = (1 until ye.size).toList
-    val is2 = (1 until ye2.size).toList
-    val ye_i = is.map(i => ye(i))
-    val ye_i2 = is2.map(i => ye2(i))
-
-    val cout_i = is.map(i => xe(i) + ke(i) / 25.0)
-    val cout_i2 = is2.map(i => xe2(i) + ke2(i) / 25.0)
-    val delta_xe = is.map(i => (xe(i) - xe(i - 1)) / (ye(i) - ye(i - 1)))
-    val delta_ke = is.map(i => (ke(i) - ke(i - 1)) / (ye(i) - ye(i - 1)))
-    plotXY(List((ye_i, cout_i, "1 point sur 20"), (ye_i2, cout_i2, "moyenne sur 20 points")), legend = true, xLabel = "Ye", yLabel = "Coûts Totaux")
-
-    val cout_margi = (1 until cout_i.size).toList.map(i => (cout_i(i) - cout_i(i - 1)) / (ye_i(i) - ye_i(i - 1)))
-    val cout_margi2 = (1 until cout_i2.size).toList.map(i => (cout_i2(i) - cout_i2(i - 1)) / (ye_i2(i) - ye_i2(i - 1)))
-
-    plotXY(List(((1 until cout_i.size).toList.map(ye_i(_)), cout_margi, "1 point sur 20"), ((1 until cout_i2.size).toList.map(ye_i2(_)), cout_margi2, "moyenne sur 20 points")), legend = true, xLabel = "Ye", yLabel = "Coûts Marginaux")
-  }
-
-  def plotYeQf {
-    val t = (0 until 100).toList
-    plotXY(List(
-      (t.map(i => (i + 2017).toDouble), t.map(i => bau.ye_t(i)), "BAU"),
-      (t.map(i => (i + 2017).toDouble), t.map(i => new_policies.ye_t(i)), "New Policies"),
-      (t.map(i => (i + 2017).toDouble), t.map(i => sustainable_dev.ye_t(i)), "Sustainable Dev")), yLabel = "Ye [Mtoe]", legend = true, title = "Ye_scenarios")
-    plotXY(List(
-      (t.map(i => (i + 2017).toDouble), t.map(i => bau.qf_t(i)), "BAU"),
-      (t.map(i => (i + 2017).toDouble), t.map(i => new_policies.qf_t(i)), "New Policies"),
-      (t.map(i => (i + 2017).toDouble), t.map(i => sustainable_dev.qf_t(i)), "Sustainable Dev")), yLabel = "qf [toe/kUS$2010]", legend = true, title = "qf_scenarios")
-  }
 }
 

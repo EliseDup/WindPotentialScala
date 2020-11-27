@@ -16,7 +16,13 @@ object ECOS2019 {
   import PlotHelper._
   import Helper._
   def main(args: Array[String]): Unit = {
-    ECOSPaperResults
+    var t = System.currentTimeMillis()
+    val grid = Grid()
+    val cells = grid.cells
+    println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
+    plotGrossResults(grid, cells)
+
+//    ECOSPaperResults
   }
 
   // Results for the paper of ECOS 2019 conference - 15/02/19
@@ -108,17 +114,17 @@ object ECOS2019 {
       (res._1, res._2, "Solar")
     }
     val total = (eroi_min.map(e => grid.sum_potential(cells, List(List(OnshoreWindTechnology), List(OffshoreWindTechnology), List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), e)), eroi_min, "Total")
-    plotXY(List(windPotential, solarPot, total), legend = true, yLabel = "EROI", xLabel = "Potential [EJ/year]", title = "wind_solar_tot_GrossPotential")
+    plotXY(List(windPotential, solarPot, total), legend = true, yLabel = "EROI", xLabel = "Final Energy Produced [EJ/year]", title = "wind_solar_tot_GrossPotential")
 
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     val onshorepotential = (eroi_min.map(e => grid.potential(cells, OnshoreWindTechnology, e)), eroi_min, OnshoreWindTechnology.name)
     val offshorepotential = (eroi_min.map(e => grid.potential(cells, OffshoreWindTechnology, e)), eroi_min, OffshoreWindTechnology.name)
     val listSolar = List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h).map(t => solarGrossPotential(List(t), grid, cells, t.name))
 
-    plotXY(List(windPotential, onshorepotential, offshorepotential), legend = true, yLabel = "EROI", xLabel = "Wind Potential [EJ/year]", title = "windGrossPotential")
-    plotXY(listSolar, legend = true, yLabel = "EROI", xLabel = "Solar Potential [EJ/year]", title = "solarGrossPotential")
-    plotXY(List(windPotential, solarPot), legend = true, yLabel = "EROI", xLabel = "Potential [EJ/year]", title = "wind_solarGrossPotential")
-    plotXY(List(total), yLabel = "EROI", xLabel = "Potential [EJ/year]", title = "totalGrossPotential")
+    plotXY(List(windPotential, onshorepotential, offshorepotential), legend = true, yLabel = "EROI", xLabel = "Final Wind Energy Produced [EJ/year]", title = "windGrossPotential")
+    plotXY(listSolar, legend = true, yLabel = "EROI", xLabel = "Final Solar Energy Produced [EJ/year]", title = "solarGrossPotential")
+    plotXY(List(windPotential, solarPot), legend = true, yLabel = "EROI", xLabel = "Final Energy Produced [EJ/year]", title = "wind_solarGrossPotential")
+    plotXY(List(total), yLabel = "EROI", xLabel = "Final Energy Produced [EJ/year]", title = "totalGrossPotential")
 
   }
 }

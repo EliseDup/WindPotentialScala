@@ -33,7 +33,8 @@ object GrowthModel {
   }
 
   def main(args: Array[String]): Unit = {
-    simulate_potential
+    
+    // simulate_potential
     // simulateTransition(share, List((PVMono, 1.0,None)),file_name="pv_mono")
     //simulate_tech(OnshoreWindTechnology)
     //simulate_tech(OffshoreWindTechnology)

@@ -129,7 +129,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
     val model = new ModelResults(calib, this)
     model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
 
-    println("Initialize " + k.last + " " + theta_k + "(" + k_interval.last + ")")
+    //println("Initialize " + k.last + " " + theta_k + "(" + k_interval.last + ")")
     val years = (1 until nyears).map(i => i + 2017).toList
     var end = false; var endYear: Option[Int] = None;
     var start = false; var startYear: Option[Int] = None;
@@ -157,7 +157,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
         }
         // Transition is over, z and x are not changing anymore
         if (!end && k_x_fun.map(_._2.mean).forall(i => i <= k.last)) {
-          println("Transition stops after " + (y - 2017) + " years" + "(ie in " + y + ")")
+          // println("Transition stops after " + (y - 2017) + " years" + "(ie in " + y + ")")
           endYear = Some(y - 2017)
           end = true
           z += z.last
@@ -180,12 +180,12 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
         // Calculated model parameters
         // !! We need the new delta before calculating gK
         model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
-        //println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last+ "\t" + model.mu.last+ "\t" +ye.last)
+        //println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last+ "\t" + model.mu.last+ "\t" +ye.last + "\t" +qf.last)
         //println(y + "\t" + ye.last + "\t" + qf.last + "\t" + x.last + "\t" + k.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
 
       }
     }
-    println(x.last + "\t" + k_interval.last.mean + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + z.last.delta + "\t" + s.last + "\t" + model.p.last)
+    // println(x.last + "\t" + k_interval.last.mean + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + z.last.delta + "\t" + s.last + "\t" + model.p.last/calib.p)
     val years_new = if (!end) years else (2017 until endYear.get + 2017).toList
 
     if (plot) {
@@ -195,7 +195,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double) {
       //   (years_new.map(_.toDouble), model.Cf.toList, "Cf")), yLabel = "", title = "c", legend = true, int_x_axis = true)
       //plotXY(x.toList, s.toList)
       plot_(years_new, x, "x_" + toString());
-      plot_(years_new, gK, "gk_" + toString());
+      plot_(years_new, s, "s_" + toString());
       // plot_(years_new, model.mu, "mu_" + toString())
 
       plotXY(List((years_new.map(_.toDouble), model.VAe.toList, "VAe"), (years_new.map(_.toDouble), model.VANe.toList, "VANe"),

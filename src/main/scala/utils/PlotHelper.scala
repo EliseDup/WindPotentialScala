@@ -26,11 +26,12 @@ import java.text.DecimalFormat
 import java.io.FileOutputStream
 import com.sun.image.codec.jpeg.JPEGCodec
 import org.jfree.util.ShapeUtilities
-import com.itextpdf.text.Rectangle
 import com.itextpdf.text.Document
+import com.itextpdf.text.Rectangle
 import com.itextpdf.text.pdf.PdfWriter
 import com.itextpdf.awt.DefaultFontMapper
 import com.itextpdf.text.pdf.codec.Base64.OutputStream
+import java.awt.geom.Ellipse2D;
 
 object PlotHelper {
 
@@ -85,7 +86,7 @@ object PlotHelper {
   def plotXY(xy: List[((List[Double], List[Double]), String)], xLabel: String, yLabel: String): XYPlot = { plotXY(xy.map(i => (i._1._1, i._1._2, i._2)), xLabel = xLabel, yLabel = yLabel) }
 
   def plotXY(xys: List[(List[Double], List[Double], String)], title: String = "", xLabel: String = "", yLabel: String = "",
-    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1), drawPlot: Boolean = true, int_x_axis:Boolean=false): XYPlot = {
+    legend: Boolean = false, logX: Boolean = false, logY: Boolean = false, save: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1), drawPlot: Boolean = true, int_x_axis: Boolean = false): XYPlot = {
 
     val dataSet = new XYSeriesCollection()
     xys.map { xy =>
@@ -102,12 +103,26 @@ object PlotHelper {
     val max = xys.map(_._2).flatten.max
     val min = xys.map(_._2).flatten.min
 
+    // Add point instead of a straight line, serie #3 in the example of ResultsPaper_PER.plotCTExample
+  /*  val r = new XYLineAndShapeRenderer();
+    r.setSeriesShape(0, new Ellipse2D.Double(-2, -2, 4, 4));
+    r.setSeriesShapesVisible(0, true);
+    r.setBaseShapesFilled(true);
+    plot.setRenderer(0, r);
+    * /
+    */
+    
     // If years !!
     if (int_x_axis) {
       val format = new DecimalFormat("####");
       plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(format)
     }
-    //plot.getRangeAxis().setRange(0,1)
+    if(min >= 2017){
+         val format = new DecimalFormat("####");
+      plot.getRangeAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(format)
+      plot.getRangeAxis().setRange(min,max)
+    }
+    // plot.getRangeAxis().setRange(1,xys.map(_._2).flatten.max)
     //plot.getDomainAxis().setRange(2017, xys.map(_._1).flatten.max)
     if (drawPlot)
       createFrame(chart, name = title, save = save, tick = tick)
@@ -187,6 +202,7 @@ object PlotHelper {
     val chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset, PlotOrientation.VERTICAL, legend, false, false)
     createFrame(chart, save = false, xy = false)
   }
+
   def scatterPlot(values: List[(Double, Double)], title: String = "", xLabel: String = "", yLabel: String = "") {
     val y = new NumberAxis(yLabel)
     val x = new NumberAxis(xLabel)
@@ -216,7 +232,7 @@ object PlotHelper {
     frame.pack()
     frame.setVisible(true)
   }
-  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf: Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf: Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean =false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
     applyChartTheme(chart, tick)
 
@@ -232,7 +248,7 @@ object PlotHelper {
           r.setSeriesPaint(i, Color.BLACK)
           r.setSeriesStroke(i, dashed(i))
         }
-      }
+            }
       r.setBaseShapesVisible(false);
       r.setBaseShapesFilled(true);
       r.setDrawSeriesLineAsPath(true);

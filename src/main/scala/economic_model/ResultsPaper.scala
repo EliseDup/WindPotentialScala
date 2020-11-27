@@ -16,25 +16,31 @@ object ResultsPaper {
   def main(args: Array[String]): Unit = {
 
     import CalibrationDataXi._
-    println("TFC" + "\t" + MegaTonOilEquivalent(9937.703).to(Exajoules))
-    println("EIOU" + "\t" + MegaTonOilEquivalent(839.185).to(Exajoules))
-    println("Losses" + "\t" + MegaTonOilEquivalent(222.503).to(Exajoules))
-    println("NEU" + "\t" + MegaTonOilEquivalent(916.762).to(Exajoules))
-    println("Ce" + "\t" + MegaTonOilEquivalent(3441.9099).to(Exajoules))
-    println("Residential" + "\t" + MegaTonOilEquivalent(2109.205).to(Exajoules))
-    println("Transport" + "\t" + MegaTonOilEquivalent(2890.9).to(Exajoules))
-    println("Fraction NEU" + "\t" + (916.762 / 9937.703) * 100)
+    println("TFC" + "\t" + round(MegaTonOilEquivalent(9937.703).to(Exajoules),1))
+    println("EIOU" + "\t" + round(MegaTonOilEquivalent(839.185).to(Exajoules),1))
+    println("Losses" + "\t" + round(MegaTonOilEquivalent(222.503).to(Exajoules),1))
+    println("NEU" + "\t" + round(MegaTonOilEquivalent(916.762).to(Exajoules),1))
+    println("Ce" + "\t" + round(MegaTonOilEquivalent(3441.9099).to(Exajoules),1))
+    println("Residential" + "\t" + round(MegaTonOilEquivalent(2109.205).to(Exajoules),1))
+    println("Transport" + "\t" + round(MegaTonOilEquivalent(2890.9).to(Exajoules),1))
+    println("Fraction NEU" + "\t" + round((916.762 / 9937.703) * 100,1))
     val calib = new calibration_results_CI()
-    println("Ce" + "\t" + calib.data.ce(calib.i).to(Exajoules))
-    println("Ye" + "\t" + calib.data.ye(calib.i).to(Exajoules))
-    println("Ee" + "\t" + calib.data.ee(calib.i).to(Exajoules))
-    println("E" + "\t" + calib.data.e(calib.i).to(Exajoules))
-    println("Ef" + "\t" + calib.data.ef(calib.i).to(Exajoules))
-    println("qe" + "\t" + calib.qe)
-    println("ratio Ce/E" + "\t" + calib.data.ce(calib.i) / calib.data.e(calib.i))
-    println("ratio Ce/Ye" + "\t" + calib.data.ce(calib.i) / calib.data.ye(calib.i))
-
+    println("Ce" + "\t" + round(calib.data.ce(calib.i).to(Exajoules),1))
+    println("Ye" + "\t" + round(calib.data.ye(calib.i).to(Exajoules),1))
+    println("Ee" + "\t" + round(calib.data.ee(calib.i).to(Exajoules),1))
+    println("E" + "\t" + round(calib.data.e(calib.i).to(Exajoules),1))
+    println("Ef" + "\t" + round(calib.data.ef(calib.i).to(Exajoules),1))
+    println("qe" + "\t" + round(calib.qe*100,1))
+    println("ratio Ce/E" + "\t" + round( (calib.data.ce(calib.i) / calib.data.e(calib.i))*100,1))
+    println("ratio Ce/Ye" + "\t" + round( (calib.data.ce(calib.i) / calib.data.ye(calib.i))*100,1))
+    println("ratio E/Ye" + "\t" + calib.data.e(calib.i)/calib.data.ye(calib.i))
+    
     println("Repartition Yf " + "\t" + "\t" + (calib.Xe + calib.Xf) / calib.yf + "\t" + calib.Xe / (calib.yf) + "\t" + calib.Cf / calib.yf + "\t" + calib.I / calib.yf)
+    
+    println("EROI " + "\t" + calib.eroi)
+    println("EROI without losses " + "\t" + ((calib.data.ye(calib.i)-MegaTonOilEquivalent(222.503)).to(calib.energy_units)/(calib.qf*(calib.Xe/calib.pib_units+calib.z.deltae*calib.Ke/calib.pib_units)+MegaTonOilEquivalent(839.185).to(calib.energy_units)*(1-0.092))))
+    println("net EROI" + "\t" + calib.eroi*calib.data.e(calib.i)/calib.data.ye(calib.i))
+    println("qf*we" + "\t" +calib.qf*calib.z.we)
     EROISocietalPaper
     //plotParametersHistory
   }
@@ -218,7 +224,7 @@ object ResultsPaper {
     val as = List(0.04, 0.06, 0.08); val mus = List(0.03, 280.0 / 4280, 0.1);
     val tfs = List(15, 20, 25); val tes = List(20, 25, 30);
     println("---------- Tableau 5 ----------")
-    CalibrationXi.printTableCalibrationCI(2018, List(0.06), etas, zfs, List(280.0 / 4280), Megajoules, 1)
+    CalibrationXi.printTableCalibrationCI(2018, List(0.06), etas, zfs, List(280.0 / 4280), Gigajoules, 1)
     println("Alpha influence")
     CalibrationXi.printTableCalibrationCI(2018, as, List(0.04), List(0.5), List(280.0 / 4280), Gigajoules, 1)
     println("Mus influence")

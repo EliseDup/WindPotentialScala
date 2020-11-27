@@ -124,6 +124,7 @@ object CalibrationXi {
     print("$v_e$"); cals.map(cal => print(" & " + round(cal.ve))); println(" \\" + "\\")
     print("$q_f (x_e + delta_e v_e)$ [/100]"); cals.map(cal => print(" & " + round(round(100 * ((cal.xe + cal.delta_e * cal.ve) * cal.qf))))); println(" \\" + "\\")
     print("$EROI$ "); cals.map(cal => print(" & " + round(cal.eroi))); println(" \\" + "\\")
+    print("$EROI_{net}$ "); cals.map(cal => print(" & " + round(cal.eroi*(1-cal.qe)))); println(" \\" + "\\")
     print("$NER$ "); cals.map(cal => print(" & " + round(cal.ner * 100))); println(" \\" + "\\")
     print("P_1=CIK SE+CIK SF"); cals.map(cal => print(" & " + round((1.0 - cal.ner) * 100))); println(" \\" + "\\")
     print("CIK SE"); cals.map(cal => print(" & " + round(1.0 / cal.eroi * 100))); println(" \\" + "\\")
@@ -149,7 +150,7 @@ object CalibrationDataXi {
   val neu = data.map(_._4); val e_neu = data.map(_._5); val ce = data.map(_._6);
   val oeu = data.map(_._3)
   val frac_neu = ind.map(i => neu(i) / e_neu(i))
-  val ee = ind.map(i => oeu(i) * (1 - frac_neu(i)))
+  val ee = ind.map(i => (1 - frac_neu(i))*oeu(i)) // ind.map(i => (1 - frac_neu(i))*MegaTonOilEquivalent(839.185)+MegaTonOilEquivalent(222.503)) //
   val ye = ind.map(i => e_neu(i) - neu(i) + oeu(i))
   val s = data.map(_._7);
   val eta = data.map(_._8);

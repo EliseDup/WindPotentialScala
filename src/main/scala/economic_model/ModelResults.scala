@@ -1,5 +1,7 @@
 package economic_model
 
+import utils.MegaTonOilEquivalent
+
 case class DynamicResults(val years: List[Int], val x: List[Double], val k: List[Double], val gK: List[Double], val s: List[Double], val ye: List[Double], val z: List[Z_xi], val theta: Double, val start_year: Option[Int],val end_year: Option[Int],
     val model: ModelResults) { //val mu: List[Double], val p_ratio: List[Double], val ce_ratio: List[Double], val cf_ratio: List[Double]) {
   val last = x.size - 1
@@ -60,7 +62,7 @@ class ParamsScenario(val x0: Double, val xt: Double, val xf: Double, val t: Int)
   def old_x(T: Int) = {
     xf + (x0 - xf) * Math.pow(1 - r_old, T)
   }
-  override def toString() = "x0 = " + x0 + " , xt = " + xt + " , xf = " + xf + ", rate before " + (2017 + t) + " = " + r1 + " , rate after " + r2
+  override def toString() = "x0 = " + x0 + " , xt = " + xt + " , xf = " + xf + "," + "rate " + r_old
 }
 
 class ParamsScenarioLogistic(x0: Double, xt: Double, xf: Double, t: Int) extends ParamsScenario(x0, xt, xf, t) {
@@ -79,6 +81,8 @@ class ParamsScenarioLogistic(x0: Double, xt: Double, xf: Double, t: Int) extends
     (0 until T).map(i => new_x = new_x * (1 + new_r * (1 - new_x / xf)))
     new_x
   }
+    override def toString() = "x0 = " + x0 + " , xt = " + xt + " , xf = " + xf + "," + "rate " + new_r
+  
 }
 case class Interval(val min: Double, val max: Double, val beta: Double = 0.5) {
   val mean = (1 - beta) * min + beta * max
