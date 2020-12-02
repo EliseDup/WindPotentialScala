@@ -140,9 +140,9 @@ object CalibrationXi {
 object CalibrationDataXi {
   import Helper._
   import PlotHelper._
-
+val is2018 = false
   val data_folder = "../model_data/"
-  val data = getLines(data_folder + "data_calibration_xi_old", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100, i(7).toDouble, i(8).toDouble, i(9).toDouble))
+  val data = getLines(data_folder + (if(is2018) "data_calibration_2018" else "data_calibration_xi_old"), "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100, i(7).toDouble, i(8).toDouble, i(9).toDouble))
   val n = data.size
   val ind = (0 until n).toList
 
@@ -150,7 +150,7 @@ object CalibrationDataXi {
   val neu = data.map(_._4); val e_neu = data.map(_._5); val ce = data.map(_._6);
   val oeu = data.map(_._3)
   val frac_neu = ind.map(i => neu(i) / e_neu(i))
-  val ee = ind.map(i => (1 - frac_neu(i))*oeu(i)) // ind.map(i => (1 - frac_neu(i))*MegaTonOilEquivalent(839.185)+MegaTonOilEquivalent(222.503)) //
+  val ee = if(is2018) ind.map(i => (1 - frac_neu(i))*MegaTonOilEquivalent(839.185)+MegaTonOilEquivalent(222.503)) else ind.map(i => (1 - frac_neu(i))*oeu(i)) //  // ! To change to use data from 2018 !!
   val ye = ind.map(i => e_neu(i) - neu(i) + oeu(i))
   val s = data.map(_._7);
   val eta = data.map(_._8);

@@ -13,18 +13,63 @@ object ResultsPaper_PER {
   import PlotHelper._
   import DynamicXi._
 
+  val scenarios = List(bau, np, sd)
+  val exercices = List(dyn_1, dyn_2b, dyn_3)
+
+  val res_path = "../model_data/simulations_2018/"
+
   def main(args: Array[String]): Unit = {
-    //plotCTExample
-    //plotScenarios()
-    //plotMarginalCostCurve()
-    plotThetaPaths()
+    println("Verification " + "\t" + calib.eroi + "\t" + calib.year)
+    //compute
+    // plot
+ dyn_1.simulate_int(calib, bau, 1000, true, theta_var_ref(dyn_1,1000))
+  }
+  def compute {
+    // First STEP compute results
+    computeThetaResults
+    computeQfResuts
+
+  }
+  def plot {
+    //Then plot results in the order of apparition in the paper
+    plotCTExample
+    plotScenarios()
+    plotMarginalCostCurve()
+    plotThetaPaths(250)
+    plotEcoVariables(dyn_1, bau, 250)
+    tableScenario(dyn_1)
+    plotQfResults(dyn_1)
+    plotThetaResults
+    plotEcoVariables(dyn_3, bau, 98)
+    // Cf comparison for ex3 - BAU and SD 
+    val res_bau = dyn_3.simulate_int(calib, bau, 98, false, theta_var_ref(dyn_3))
+    val res_sd = dyn_3.simulate_int(calib, sd, 61, false, theta_var_ref(dyn_3))
+    plotXY(List((res_bau.years.map(_.toDouble), res_bau.model.Cf.toList.map(_ / 1E5), "BAU"), (res_sd.years.map(_.toDouble), res_sd.model.Cf.toList.map(_ / 1E5), "SD")), int_x_axis = true, yLabel = "Cf [1E5 GUS $ 2010] ", legend = true, title = "cf_ex3_bau_sd")
+
+  }
+  // Reference theta path : begin at k0 and tends towards 1 after 600 years !
+  def theta_var_ref(dyn: Dynamic_Params, T : Int = 600) = {
+    val calib_theta = (calib.k - dyn.k_bounds(calib.z)._1) / (dyn.k_bounds(calib.z)._2 - dyn.k_bounds(calib.z)._1)
+    Some(list_th_var(calib_theta, 1, T))
+  }
+  def list_th(th: Double, n: Int) = (0 until n).toList.map(i => th)
+  def list_th_var(th0: Double, th1: Double, n: Int) = {
+    (0 until n).toList.map(i => th0 + (th1 - th0) * i / n)
+  }
+
+  def computeThetaResults {
+    val theta = (0 to 100).toList.map(_ / 100.0)
+    exercices.map(dyn => scenarios.map(scn => thetaResults(theta, scn, dyn)))
+  }
+  def computeQfResuts {
+    exercices.map(dyn => qf_results(50, dyn))
   }
 
   def plotCTExample {
     val scn_constant = new Scenario(new ParamsScenario(qf_0, qf_0, qf_0, 1), new ParamsScenario(ye_0, ye_0, ye_0, 1))
     // Enveloppe k_up(x) et k_inf(x)
     val k_env = dyn_1.k_x_ye(qf_0, calib.z, 0.5, ye_0)
-    val res = dyn_1.simulate_int(calib, scn_constant, 20, false, Some(0.5))
+    val res = dyn_1.simulate_int(calib, scn_constant, 20, false, Some(list_th(0.5, 20)))
     val index = (0 until res.x.size / 2).map(_ * 2).toList
 
     plotXY(List((index.map(res.x.toList(_)), index.map(res.k.toList(_)), "CT"), (k_env.map(_._1), k_env.map(_._2.min), "k_inf"),
@@ -32,69 +77,27 @@ object ResultsPaper_PER {
       (k_env.map(_._1), k_env.map(_._2.mean), "k, theta = 1/2")), xLabel = "x", yLabel = "k", title = "CT_example")
   }
 
-  def plotThetaPaths(thetas: List[(Double, String)] = List((0.0, "th=0"), (0.5, "th=1/2"), (1.0, "th=1"))) {
+  def plotThetaPaths(nyears: Int) {
+    plotXY((0 until nyears).toList.map(_.toDouble), list_th_var(0.5, 1.0, nyears))
 
-    val res = thetas.map(i => (i, dyn_1.simulate_int(calib, bau, 600, false, Some(i._1))))
+    val thetas = List((list_th(0.5, nyears), "th=1/2"), (list_th_var(0.5, 1.0, nyears), "th var"), (list_th(1, nyears), "th=1"))
+
+    val res = thetas.map(i => (i, dyn_1.simulate_int(calib, bau, nyears, false, Some(i._1))))
     plotXY(res.map(i => (i._2.x.toList, i._2.k.toList, i._1._2)), xLabel = "x", yLabel = "k", legend = true, title = "k_x_3CT")
     plotXY(res.map(i => (i._2.x.toList, i._2.gK.toList.map(_ * 100), i._1._2)), xLabel = "x", yLabel = "gK [%]", legend = true, title = "gk_x_3CT")
     plotXY(res.map(i => (i._2.years.map(_.toDouble), i._2.x.toList, i._1._2)), yLabel = "x", legend = true, title = "t_x_3CT", int_x_axis = true)
     plotXY(res.map(i => (i._2.years.map(_.toDouble), i._2.gK.toList, i._1._2)), yLabel = "gK [%]", legend = true, title = "t_gk_3CT", int_x_axis = true)
   }
-  
-  def plotThetaResults(file: String = "../model_data/theta_ex1") {
-    val res = getLines(file, "\t").map(i => (0 to 18).toList.map(j => i(j).toDouble))
-    val theta = res.map(_(0))
-    val x_bau = (theta, res.map(_(1)), "BAU"); val ts_bau = (theta, res.map(_(3) + 2017), "BAU"); val gk_bau = (theta, res.map(_(5)), "BAU")
-    plotXY(List(x_bau, (theta, res.map(_(7)), "NP"), (theta, res.map(_(13)), "DD")), xLabel = "theta", yLabel = "x", legend = true, title = "theta_x")
-    plotXY(List(ts_bau, (theta, res.map(_(9) + 2017), "NP"), (theta, res.map(_(15) + 2017), "DD")), xLabel = "theta", yLabel = "Ts", legend = true, title = "theta_ts")
-    plotXY(List(gk_bau, (theta, res.map(_(11)), "NP"), (theta, res.map(_(17)), "DD")), xLabel = "theta", yLabel = "gK [%]", legend = true, title = "theta_gk")
-
-    val tf_bau = {
-      val indexes = res.map(_(2)).zipWithIndex.filter(_._1 > 0).map(_._2)
-      ((indexes).map(i => res(i)(0)), (indexes).map(i => res(i)(2) + 2017), "BAU")
-    }
-    val tf_np = {
-      val indexes = res.map(_(8)).zipWithIndex.filter(_._1 > 0).map(_._2)
-      ((indexes).map(i => res(i)(0)), (indexes).map(i => res(i)(8) + 2017), "NP")
-    }
-    val tf_dd = {
-      val indexes = res.map(_(14)).zipWithIndex.filter(_._1 > 0).map(_._2)
-      ((indexes).map(i => res(i)(0)), (indexes).map(i => res(i)(14) + 2017), "DD")
-    }
-
-    plotXY(List(tf_bau, tf_np, tf_dd), xLabel = "theta", yLabel = "Tf", legend = true, title = "theta_tf")
-    val y_bau = {
-      val indexes = res.map(_(4)).zipWithIndex.filter(_._1 > 0).map(_._2)
-      ((indexes).map(i => res(i)(0)), (indexes).map(i => res(i)(4)), "BAU")
-    }
-    val y_np = {
-      val indexes = res.map(_(10)).zipWithIndex.filter(_._1 > 0).map(_._2)
-      ((indexes).map(i => res(i)(0)), (indexes).map(i => res(i)(10)), "NP")
-    }
-    val y_dd = {
-      val indexes = res.map(_(16)).zipWithIndex.filter(_._1 > 0).map(_._2)
-      ((indexes).map(i => res(i)(0)), (indexes).map(i => res(i)(16)), "DD")
-    }
-    plotXY(List(y_bau, y_np, y_dd), xLabel = "theta", yLabel = "# years to finish transtion", legend = true, title = "theta_y")
-
-    // Plot for BAU only
-    plotXY(List(x_bau), xLabel = "theta", yLabel = "x", title = "theta_x_bau")
-    plotXY(List(ts_bau), xLabel = "theta", yLabel = "Ts", title = "theta_ts_bau")
-    plotXY(List(gk_bau), xLabel = "theta", yLabel = "gK [%]", title = "theta_gk_bau")
-    plotXY(List(y_bau), xLabel = "theta", yLabel = "# years to finish transtion", title = "theta_y_bau")
-    plotXY(List(tf_bau), xLabel = "theta", yLabel = "Tf", title = "theta_tf_bau")
-
-  }
 
   def plotScenarios(tf: Int = 2150) {
-    val t = (0 until (2150 - 2017)).toList
+    val t = (0 until (2150 - calib.year)).toList
 
-    plotXY(List((t.map(_.toDouble + 2017), t.map(i => MegaTonOilEquivalent(bau.ye_t(i)).to(Exajoules)), "BAU"), (t.map(_.toDouble + 2017), t.map(i => MegaTonOilEquivalent(np.ye_t(i)).to(Exajoules)), "NP"),
-      (t.map(_.toDouble + 2017), t.map(i => MegaTonOilEquivalent(sd.ye_t(i)).to(Exajoules)), "SD")), yLabel = "Ye [EJ/year]", title = "ye_scenarios", legend = true, int_x_axis = true)
+    plotXY(List((t.map(_.toDouble + calib.year), t.map(i => MegaTonOilEquivalent(bau.ye_t(i)).to(Exajoules)), "BAU"), (t.map(_.toDouble + calib.year), t.map(i => MegaTonOilEquivalent(np.ye_t(i)).to(Exajoules)), "NP"),
+      (t.map(_.toDouble + calib.year), t.map(i => MegaTonOilEquivalent(sd.ye_t(i)).to(Exajoules)), "SD")), yLabel = "Ye [EJ/year]", title = "ye_scenarios", legend = true, int_x_axis = true)
 
-    plotXY(List((t.map(_.toDouble + 2017), t.map(bau.qf_t(_) / bau.qf.x0), "BAU"),
-      (t.map(_.toDouble + 2017), t.map(np.qf_t(_) / bau.qf.x0), "NP"),
-      (t.map(_.toDouble + 2017), t.map(sd.qf_t(_) / bau.qf.x0), "SD")), yLabel = "qf/qf0", title = "qf_scenarios", legend = true, int_x_axis = true)
+    plotXY(List((t.map(_.toDouble + calib.year), t.map(bau.qf_t(_) / bau.qf.x0), "BAU"),
+      (t.map(_.toDouble + calib.year), t.map(np.qf_t(_) / bau.qf.x0), "NP"),
+      (t.map(_.toDouble + calib.year), t.map(sd.qf_t(_) / bau.qf.x0), "SD")), yLabel = "qf/qf0", title = "qf_scenarios", legend = true, int_x_axis = true)
 
   }
 
@@ -147,5 +150,197 @@ object ResultsPaper_PER {
     println("xe from " + "\t" + calib.xe + " to " + xe_x(f))
     println("EROI from " + "\t" + calib.eroi + " to " + 1.0 / (qe_x(f) + calib.qf * (ve_x(f) * deltae_x(f) + xe_x(f))))
   }
+  def plotEcoVariables(dyn: Dynamic_Params, scn: Scenario, ny: Int) {
+    val name = "_" + dyn.name + "_" + scn.name
+    val res = dyn.simulate_int(calib, scn, ny, false, theta_var_ref(dyn))
+    println("END - " + res.end_year.getOrElse(0))
+    val y_double = res.years.map(_.toDouble)
+    val indexes = (0 until res.years.size).toList
+    val pib = (y_double, res.model.pib.toList.map(_ / 1E5), "PIB")
 
+    plotXY(List((y_double, res.x, "x")), yLabel = "x", int_x_axis = true, title = "x" + name)
+
+    plotXY(List((y_double, res.model.mu.toList.map(_ * 100), "mu")), yLabel = "mu [%]", int_x_axis = true, title = "mu" + name)
+    plotXY(List((y_double, res.s.toList.map(_ * 100), "s")), yLabel = "s [%]", int_x_axis = true, title = "s" + name)
+
+    plotXY(List((y_double, res.model.p.toList.map(i => i / calib.p), "p/p0")), yLabel = "p/p0", int_x_axis = true, title = "p_p0" + name)
+    plotXY(List((y_double, res.model.eroi.toList, "eroi")), yLabel = "eroi", int_x_axis = true, title = "eroi" + name)
+
+    plotXY(List((y_double, indexes.map(i => res.model.X(i) / res.model.Yf(i) * 100), "X/Yf"),
+      (y_double, indexes.map(i => res.model.Cf(i) / res.model.Yf(i) * 100), "Cf/Yf"),
+      (y_double, indexes.map(i => res.model.I(i) / res.model.Yf(i) * 100), "I/Yf")) //(y_double, indexes.map(i => res.model.Xf(i) / res.model.Yf(i) * 100), "Xf/Yf"),
+      , yLabel = "% Yf", int_x_axis = true, legend = true, title = "Yf_rel" + name)
+
+    plotXY(List((y_double, res.model.Yf.toList.map(_ / 1E5), "Yf"), (y_double, res.model.X.toList.map(_ / 1E5), "X"), (y_double, res.model.Cf.toList.map(_ / 1E5), "Cf"), (y_double, res.model.I.toList.map(_ / 1E5), "I")), yLabel = "1E5 GUS $ 2010", int_x_axis = true, legend = true, title = "Yf" + name)
+
+    plotXY(List((y_double, res.ye.map(_ / 1E4), "Ye"), (y_double, res.Ef.map(_ / 1E4), "Ef"), (y_double, res.model.Ce.toList.map(_ / 1E4), "Ce"), (y_double, res.Ee.map(_ / 1E4), "Ee")), yLabel = "1E4 Mtoe", int_x_axis = true, legend = true, title = "Ye" + name)
+    plotXY(List((y_double, indexes.map(i => res.Ef(i) / res.ye(i) * 100), "Ef/Ye"), (y_double, indexes.map(i => res.model.Ce.toList(i) / res.ye(i) * 100), "Ce/Ye"), (y_double, indexes.map(i => res.Ee(i) / res.ye(i) * 100), "Ee/Ye")), yLabel = "% Ye", int_x_axis = true, legend = true, title = "Ye_rel" + name)
+
+    plotXY(List((y_double, indexes.map(i => res.pin(i) / res.model.pib(i) * 100), "PIN/PIB"), (y_double, indexes.map(i => res.model.pib(i) / res.model.Yf(i) * 100), "PIB/Yf")), yLabel = "%", int_x_axis = true, legend = true, title = "pin_pib_rel" + name)
+
+    // PIB C K 
+    // PIN VANe VANf
+    plotXY(List(pib, (y_double, res.model.VAe.toList.map(_ / 1E5), "VAe"), (y_double, res.model.VAf.toList.map(_ / 1E5), "VAf"),
+      (y_double, res.pin.toList.map(_ / 1E5), "PIN"), (y_double, res.model.VANe.toList.map(_ / 1E5), "VANe"), (y_double, res.model.VANf.toList.map(_ / 1E5), "VANf")), yLabel = "1E5 GUS $ 2010", legend = true, title = "pib_pin" + name, int_x_axis = true)
+    plotXY(List((y_double, res.model.alpha.toList.map(_ * 100), "VAe/PIB [%]"), (y_double, res.alphan.map(_ * 100), "VANe/PIN [%]")), legend = true, title = "alpha" + name, int_x_axis = true)
+
+    // NER
+    plotXY(List((y_double, indexes.map(i => (res.P1(i) + res.P2(i)) * 100), "P1+P2 [%]"), (y_double, res.P1.map(_ * 100), "P1 [%]"), (y_double, res.P2.map(_ * 100), "P2 [%]")), int_x_axis = true, legend = true, title = "ner" + name)
+
+    plotXY(List((y_double, res.gK.map(_ * 100), "gK [%]"), (y_double, res.model.g_pib.map(_ * 100), "g [%]")), int_x_axis = true, legend = true, title = "g" + name)
+    plotXY(List((y_double, res.v, "v")), yLabel = "v", int_x_axis = true, legend = true, title = "v" + name)
+
+    // PIB C 
+    plotXY(List(pib, (y_double, res.model.C.toList.map(_ / 1E5), "C"), (y_double, res.model.pCe.map(_ / 1E5), "pCe"), (y_double, res.model.Cf.toList.map(_ / 1E5), "Cf")), int_x_axis = true, legend = true, yLabel = "1E5 GUS $ 2010", title = "C" + name)
+    plotXY(List((y_double, indexes.map(i => res.model.I(i) / res.model.pib(i) * 100), "I/PIB"),
+      (y_double, indexes.map(i => res.model.C.toList(i) / res.model.pib(i) * 100), "C/PIB"),
+      (y_double, indexes.map(i => res.model.Cf.toList(i) / res.model.pib(i) * 100), "Cf/PIB"),
+      (y_double, indexes.map(i => res.model.pCe(i) / res.model.pib(i) * 100), "pCe/PIB")), int_x_axis = true, legend = true, yLabel = "% PIB", title = "c_pib" + name)
+
+  }
+
+  def tableScenario(dyn: Dynamic_Params) {
+    println("Table scenarios comparison for " + dyn.name)
+    val theta = theta_var_ref(dyn)
+    val ny = List(2050 - calib.year, 2100 - calib.year, 600)
+    val scn = List(bau, np, sd)
+
+    val res = scn.map(s => ny.map(y => dyn.simulate_int(calib, s, y, false, theta))).flatten
+    // Print table
+    print("$T_s$"); res.map(i => print(" & " + i.start_year.get)); println("\\" + "\\")
+    print("$T_f$"); res.map(i => print(" & " + i.end_year.getOrElse(0))); println("\\" + "\\")
+    print("$varkappa$"); res.map(i => print(" & " + round(i.x.last * 100, 1))); println("\\" + "\\")
+    print("$mu$"); res.map(i => print(" & " + round(i.model.mu.last * 100, 1))); println("\\" + "\\")
+    print("$gK$"); res.map(i => print(" & " + round(i.gK.last * 100, 3))); println("\\" + "\\")
+    print("$alpha$"); res.map(i => print(" & " + round(i.model.alpha.last * 100, 1))); println("\\" + "\\")
+    print("$p$"); res.map(i => print(" & " + round(i.model.p.last / calib.p, 1))); println("\\" + "\\")
+  }
+
+  // Choix de la CT (influence de theta)
+  def thetaResults(thetas: List[Double], scn: Scenario, dyn: Dynamic_Params) {
+    val out = new java.io.PrintStream(new java.io.FileOutputStream(res_path + "theta_" + dyn.name + "_" + scn.name))
+    val endY = (thetas, thetas.map(t => {
+      val list_th = (0 until 600).toList.map(i => t)
+      val res = dyn.simulate_int(calib, scn, 600, false, Some(list_th))
+      printRes(out, t, res)
+    }))
+    out.close()
+  }
+
+  // A line of the file: theta - x - Tf - Ts - #years
+  class ThetaResults(file: String, name: String) {
+    val lines = getLines(file, "\t").map(i => (0 to 7).toList.map(j => i(j).toDouble))
+    val theta = lines.map(_(0))
+    val res = new SimulationResults(lines, theta, name)
+    val x = res.x; val ts = res.ts; val tf = res.tf; val gk = res.gk; val y = res.y; val s = res.s; val mu = res.mu; val p = res.p
+  }
+
+  def plotThetaResults {
+    // val model_path = "../model_data/simulations/theta_"
+    val bau_ex1 = new ThetaResults(res_path + "theta_ex1_bau", "ex1 - BAU")
+    val np_ex1 = new ThetaResults(res_path + "theta_ex1_np", "ex1 - NP")
+    val sd_ex1 = new ThetaResults(res_path + "theta_ex1_sd", "ex1 - SD")
+    val bau_ex2 = new ThetaResults(res_path + "theta_ex2_bau", "ex2 - BAU")
+    val np_ex2 = new ThetaResults(res_path + "theta_ex2_np", "ex2 - NP")
+    val sd_ex2 = new ThetaResults(res_path + "theta_ex2_sd", "ex2 - SD")
+    val bau_ex3 = new ThetaResults(res_path + "theta_ex3_bau", "ex3 - BAU")
+    val np_ex3 = new ThetaResults(res_path + "theta_ex3_np", "ex3 - NP")
+    val sd_ex3 = new ThetaResults(res_path + "theta_ex3_sd", "ex3 - SD")
+    //Comparaison des différents scénarios
+    def plotScenarios(scn: List[ThetaResults], name: String) {
+      plotXY(scn.map(_.x), xLabel = "theta", yLabel = "x", legend = (scn.size > 1), title = "theta_x_" + name)
+      plotXY(scn.map(_.ts), xLabel = "theta", yLabel = "Ts", legend = (scn.size > 1), title = "theta_ts_" + name)
+      plotXY(scn.map(_.gk), xLabel = "theta", yLabel = "gK [%]", legend = (scn.size > 1), title = "theta_gk_" + name)
+      plotXY(scn.map(_.tf), xLabel = "theta", yLabel = "Tf", legend = (scn.size > 1), title = "theta_tf_" + name)
+      plotXY(scn.map(_.y), xLabel = "theta", yLabel = "Tf-Ts", legend = (scn.size > 1), title = "theta_y_" + name)
+      plotXY(scn.map(_.s), xLabel = "theta", yLabel = "s [%]", legend = (scn.size > 1), title = "theta_s_" + name)
+      plotXY(scn.map(_.mu), xLabel = "theta", yLabel = "mu [%]", legend = (scn.size > 1), title = "theta_mu_" + name)
+      plotXY(scn.map(_.p), xLabel = "theta", yLabel = "p/p0", legend = (scn.size > 1), title = "theta_p_" + name)
+    }
+    plotScenarios(List(bau_ex1, np_ex1, sd_ex1), "ex1")
+    plotScenarios(List(bau_ex1), "ex1_bau")
+    plotScenarios(List(bau_ex1, bau_ex2), "ex1_ex2_bau")
+    plotScenarios(List(bau_ex2, np_ex2, sd_ex2), "ex2")
+    plotScenarios(List(bau_ex3, np_ex3, sd_ex3), "ex3")
+  }
+
+  // Rôle du PT !
+
+  def qf_results(step_qf: Int, dyn: Dynamic_Params) {
+    qf_detailed_results(step_qf, bau, dyn)
+    qf_detailed_results(step_qf, np, dyn)
+    qf_detailed_results(step_qf, sd, dyn)
+  }
+
+  def qf_detailed_results(step_qf: Int, scenario: Scenario, dyn: Dynamic_Params) {
+    val qfs = (0 until step_qf).toList.map(i => {
+      val ratio_qf = (1 - i / step_qf.toDouble)
+      val ratio_qt = scenario.qf.xt / scenario.qf.x0
+      // Si la nouvelle limite est plus petite que la valeur en 2040, on hausse la valeur en 2040 pour dire qu'on a fait 1/3 du chemin d'ici 2040.
+      val ratio_qt_corr = 1 - 1.0 / 3 * (1 - ratio_qf) // else ratio_qt
+      new Scenario(new ParamsScenario(scenario.qf.x0, scenario.qf.x0 * ratio_qt_corr, scenario.qf.x0 * ratio_qf, scenario.qf.t), scenario.ye)
+    })
+    detailedResults(qfs, dyn, calib, dyn.name + "_" + scenario.name)
+  }
+
+  def detailedResults(qfs: List[Scenario], dyn: Dynamic_Params, calib: calibration_results_CI, label: String) {
+    val out = new java.io.PrintStream(new java.io.FileOutputStream(res_path + "qf_" + label))
+    qfs.map(qf => {
+      val r = dyn.simulate_int(calib, qf, 600, plot = false, theta_var_ref(dyn))
+      // out.print(qf.qf.xf + "\t" + r.x.last + "\t" + r.k.last + "\t" + r.gK.last + "\t" + r.end_year.getOrElse(0.0) + "\t" + r.s.toList.max + "\t" + r.model.mu.last + "\t" + r.model.alpha.last + "\t" + r.z.last.toString() + "\n")
+      printRes(out, qf.qf.xf, r)
+    })
+    out.close()
+  }
+  def printRes(out: java.io.PrintStream, param: Double, r: DynamicResults) {
+    out.print(param + "\t" + r.x.last + "\t" + r.end_year.getOrElse(0) + "\t" + r.start_year.getOrElse(0) + "\t" + r.gK.last + "\t" + r.model.mu.toList(r.model.mu.size - 2) + "\t" + r.s.toList(r.s.size - 2) + "\t" + r.model.p.toList(r.model.p.size - 2) / calib.p + "\n")
+  }
+  // A line of the file: theta - x - Tf - Ts - gK - mu - s - p/p0
+  class QfResults(file: String, name: String) {
+    val lines = getLines(file).map(i => (0 to 7).toList.map(j => i(j).toDouble))
+    val qfs = (lines.map(i => i(0) / calib.qf))
+    val res = new SimulationResults(lines, qfs, name)
+    val x = res.x; val ts = res.ts; val tf = res.tf; val gk = res.gk; val y = res.y
+    val s = res.s; val mu = res.mu; val p = res.p
+
+  }
+
+  // A line of the file: qfl - x - Tf - Ts - gK - mu - s - p/p0
+  class SimulationResults(res: List[List[Double]], xs: List[Double], name: String) {
+    val x = (xs, res.map(_(1)), name)
+    val ts = (xs, res.map(_(3) + calib.year), name)
+    val gk = (xs, res.map(_(4) * 100), name)
+    val tf = tf_(res, name)
+    val y = y_(res, name);
+    def tf_(res: List[List[Double]], name: String) = {
+      val indexes = res.map(_(2)).zipWithIndex.filter(_._1 > 0).map(_._2)
+      ((indexes).map(i => xs(i)), (indexes).map(i => res(i)(2) + calib.year), name)
+    }
+    def y_(res: List[List[Double]], name: String) = {
+      val indexes = res.map(_(2)).zipWithIndex.filter(_._1 > 0).map(_._2)
+      ((indexes).map(i => xs(i)), (indexes).map(i => res(i)(2) - res(i)(3)), name)
+    }
+    val mu = (xs, res.map(_(5) * 100), name)
+    val s = (xs, res.map(_(6) * 100), name)
+    val p = (xs, res.map(_(7)), name)
+  }
+
+  def plotQfResults(dyn: Dynamic_Params) {
+    //val model_path = "../model_data/simulations/qf_"
+    val bau = new QfResults(res_path + "qf_" + dyn.name + "_bau", "BAU")
+    val np = new QfResults(res_path + "qf_" + dyn.name + "_np", "NP")
+    val sd = new QfResults(res_path + "qf_" + dyn.name + "_sd", "SD")
+    // Plot xl vs qfl/qf0
+    plotXY(List(bau.x, np.x, sd.x), xLabel = "qfl/qf0", yLabel = "x", legend = true, title = "qfl_x_" + dyn.name)
+    plotXY(List(bau.gk, np.gk, sd.gk), xLabel = "qfl/qf0", yLabel = "gK [%]", legend = true, title = "qfl_gk_" + dyn.name)
+
+    // Plot tf vs qfl/qf0
+    plotXY(List(bau.tf, np.tf, sd.tf), xLabel = "qfl/qf0", yLabel = "Tf", legend = true, title = "qfl_tf_" + dyn.name)
+    plotXY(List(bau.ts, np.ts, sd.ts), xLabel = "qfl/qf0", yLabel = "Ts", legend = true, title = "qfl_ts_" + dyn.name)
+    plotXY(List(bau.y, np.y, sd.y), xLabel = "qfl/qf0", yLabel = "Tf - Ts", legend = true, title = "qfl_y_" + dyn.name)
+    plotXY(List(bau.s, np.s, sd.s), xLabel = "qfl/qf0", yLabel = "s [%]", legend = true, title = "qfl_s_" + dyn.name)
+    plotXY(List(bau.mu, np.mu, sd.mu), xLabel = "qfl/qf0", yLabel = "mu [%]", legend = true, title = "qfl_mu_" + dyn.name)
+    plotXY(List(bau.p, np.p, sd.p), xLabel = "qfl/qf0", yLabel = "p/p0", legend = true, title = "qfl_p_" + dyn.name)
+
+  }
 }
