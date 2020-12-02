@@ -15,14 +15,19 @@ object ResultsPaper_PER {
 
   val scenarios = List(bau, np, sd)
   val exercices = List(dyn_1, dyn_2b, dyn_3)
+  val calib_2018 = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent,is2018=true)
+  val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
 
   val res_path = "../model_data/simulations_2018/"
 
   def main(args: Array[String]): Unit = {
     println("Verification " + "\t" + calib.eroi + "\t" + calib.year)
+    println("Verification " + "\t" + calib_2018.eroi + "\t" + calib_2018.year)
+   
     //compute
     // plot
- dyn_1.simulate_int(calib, bau, 1000, true, theta_var_ref(dyn_1,1000))
+    dyn_1.simulate_int(calib, bau, 600, true, Some(list_th(0.8, 600)))
+    dyn_1.simulate_int(calib_2018, bau, 600, true, Some(list_th(0.8, 600)))
   }
   def compute {
     // First STEP compute results
@@ -48,7 +53,7 @@ object ResultsPaper_PER {
 
   }
   // Reference theta path : begin at k0 and tends towards 1 after 600 years !
-  def theta_var_ref(dyn: Dynamic_Params, T : Int = 600) = {
+  def theta_var_ref(dyn: Dynamic_Params, T: Int = 600) = {
     val calib_theta = (calib.k - dyn.k_bounds(calib.z)._1) / (dyn.k_bounds(calib.z)._2 - dyn.k_bounds(calib.z)._1)
     Some(list_th_var(calib_theta, 1, T))
   }

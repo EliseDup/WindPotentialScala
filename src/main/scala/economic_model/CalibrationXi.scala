@@ -5,8 +5,8 @@ import squants.energy._
 // Vector of technical parameters
 
 case class Z_xi(ve: Double, vf: Double, qe: Double, qf: Double, xe: Double, xf: Double, deltae: Double, deltaf: Double, delta: Double) {
-  val we = xe+deltae*ve
-  val wf = xf+deltaf*vf
+  val we = xe + deltae * ve
+  val wf = xf + deltaf * vf
   override def toString() = { ve + "\t" + vf + "\t" + qe + "\t" + qf + "\t" + xe + "\t" + xf + "\t" + deltae + "\t" + deltaf + "\t" + delta }
 }
 
@@ -14,62 +14,63 @@ class calibration_results_CI(
     val alpha: Double = 0.06, val eta: Double = 4.0 / 100, val zf: Double = 0.5,
     val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val mu: Double = 280.0 / 4280,
     val energy_units: EnergyUnit = MegaTonOilEquivalent, val pib_units: Int = 1E9.toInt,
-    val pop_units: Int = 1E6.toInt) {
-
-  val i = CalibrationXi.index_year(year)
+    val pop_units: Int = 1E6.toInt, val is2018: Boolean = false) {
+  
+  import Helper._
+  // Observed data
+  val data_folder = "../model_data/"
+  val lines = getLines(data_folder + (if (is2018) "data_calibration_2018" else "data_calibration_xi_old"), "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100)) //, i(7).toDouble, i(8).toDouble, i(9).toDouble))
+  val (year_data, pib_dollars, oeu, neu, e_neu, ce, s) = lines.find(_._1 == year).get
+  val pib = pib_dollars / pib_units;
+  val pib_before = lines.find(_._1 == (year - 1)).get._2 / pib_units;
+  val g = (pib - pib_before) / pib_before
+  val frac_neu = neu / e_neu; val ye = e_neu - neu + oeu
+  val ee = if (is2018) (1 - frac_neu) * MegaTonOilEquivalent(839.185) + MegaTonOilEquivalent(222.503) else (1-frac_neu) * oeu
+  val qe = ee / ye; val ef = ye - ee - ce; val e = ye - ee
 
   val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
   val delta = mu * delta_e + (1 - mu) * delta_f
-  val data = CalibrationXi.data
-  def ce(i: Int) = data.ce(i).to(energy_units)
-
-  // Observed data  for year i
-  val pib = data.pib(i) / pib_units;
 
   val va_e = alpha * pib; val va_f = (1 - alpha) * pib
-  val g = data.g(i);
-  val s = data.s(i);
-
-  val qe = data.qe(i)
   val gK = g // + gv
   // Calculated data for year i
   val v = s / (gK + delta)
   val K = v * pib; val Ke = mu * K; val Kf = (1 - mu) * K
   val I = s * pib; val C = (1 - s) * pib
-  val p_min = va_e / data.e(i).to(energy_units)
-  val eta_min = p_min * ce(i) / C
-  val p = eta * C / ce(i) //va_e/((1-ze)*data.ye(i).to(energy_units)) //alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
-  val gamma = ce(i) / C
+  val p_min = va_e / e.to(energy_units)
+  val eta_min = p_min * ce.to(energy_units) / C
+  val p = eta * C / ce.to(energy_units) //va_e/((1-ze)*data.ye(i).to(energy_units)) //alpha * pib / data.e(i).to(energy_units) // Prix réel de l'énergie
+  val gamma = ce.to(energy_units) / C
 
   val Cf = (1 - eta) * C
-  val gammab = ce(i) / Cf
-  val Xe = p * data.e(i).to(energy_units) - va_e
-  val xe = Xe / data.ye(i).to(energy_units)
+  val gammab = ce.to(energy_units) / Cf
+  val Xe = p * e.to(energy_units) - va_e
+  val xe = Xe / ye.to(energy_units)
   // val xe = (ze-qe)*p
   val ze = qe + xe / p
   val yf = va_f / (1 - zf)
-  val qf = data.ef(i).to(energy_units) / yf // Intensité énergétique de l'économie
+  val qf = ef.to(energy_units) / yf // Intensité énergétique de l'économie
   val xf = zf - p * qf
   val Xf = xf * yf
   val vf = Kf / yf // Intensité capitalistique de l'économie
-  val ve = Ke / data.ye(i).to(energy_units) // Intensité capitalistique du secteur énergétique
+  val ve = Ke / ye.to(energy_units) // Intensité capitalistique du secteur énergétique
   val tilde_Ke = energy_units(Ke * qf)
   val tilde_Xe = energy_units(Xe * qf)
   def tilde_Ke(qf: Double) = energy_units(Ke * qf)
   def tilde_Xe(qf: Double) = energy_units(Xe * qf)
-  val y = yf / data.ye(i).to(energy_units)
+  val y = yf / ye.to(energy_units)
   // val cf = yf - s * pib
 
   val eroi = 1 / (qe + (xe + delta_e * ve) * qf)
 
-  val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f,delta)
-  
+  val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f, delta)
+
   // val ner = (1 - z.qe)*(1 - (xf + z.deltaf * z.vf)) - z.qf*(z.deltae * z.ve + xe)
   val ner = 1 - (z.qe + z.qf * (z.xe + z.deltae * z.ve) + (1 - z.qe) * (z.xf + z.deltaf * z.vf)) //( //(1 - (z.xf + z.deltaf * z.vf)) * (1 - z.qe) - z.qf * (z.xe + z.deltae * z.ve)
-  val k = K / data.ye(i).to(energy_units)
+  val k = K / ye.to(energy_units)
 
   val p1 = 1.0 - ner
-  val xi = ce(i) / data.ye(i).to(energy_units)
+  val xi = ce / ye
   val p2 = (1 - (z.xf + z.deltaf * z.vf) - p * z.qf) * xi
   // Pertes %
   val perte1 = 1.0 / eroi
@@ -77,10 +78,10 @@ class calibration_results_CI(
   val perte3 = p1 + p2
 
   def printCalib {
-    println("Ye" + "\t" + data.ye(i).to(energy_units) + "\n" + "Ee" + "\t" + data.ee(i).to(energy_units) + "\n" + "Ef" + "\t" + data.ef(i).to(energy_units))
-    println("pib" + "\t" + pib + "\n" + "pibm" + "\t" + data.pib(i - 1) / pib_units + "\n" + "s" + "\t" + s + "\n" + "mu" + "\t" + mu)
+    println("Ye" + "\t" + ye.to(energy_units) + "\n" + "Ee" + "\t" + ee.to(energy_units) + "\n" + "Ef" + "\t" + ef.to(energy_units))
+    println("pib" + "\t" + pib + "\n" + "pibm" + "\t" + pib_before + "\n" + "s" + "\t" + s + "\n" + "mu" + "\t" + mu)
     println("delta" + "\t" + delta + "\n" + "qe" + "\t" + qe + "\n" + "gk" + "\t" + gK + "\n" + "v" + "\t" + v + "\n" + "ve" + "\t" + ve + "\n" + "xe" + "\t" + xe + "\n" + "ze" + "\t" + ze + "\n" + "qf" + "\t" + qf + "\n" + "vf" + "\t" + vf + "\n" + "xf" + "\t" + xf + "\n" + "eps" + "\t" + eroi + "\n" + "gamma" + "\t" + gammab)
-    println("K" + "\t" + K + "\n" + "Ke" + "\t" + Ke + "\n" + "Kf" + "\t" + Kf + "\n" + "Xe" + "\t" + Xe + "\n" + "Xf" + "\t" + Xf + "\n" + "Yf" + "\t" + yf + "\n" + "Ce" + "\t" + ce(i) + "\n" + "Cf" + "\t" + Cf + "\n" + "C" + "\t" + C)
+    println("K" + "\t" + K + "\n" + "Ke" + "\t" + Ke + "\n" + "Kf" + "\t" + Kf + "\n" + "Xe" + "\t" + Xe + "\n" + "Xf" + "\t" + Xf + "\n" + "Yf" + "\t" + yf + "\n" + "Ce" + "\t" + ce.to(energy_units) + "\n" + "Cf" + "\t" + Cf + "\n" + "C" + "\t" + C)
     println("I" + "\t" + (s * pib) + "\n" + "VAe" + "\t" + (alpha * pib) + "\n" + "VAf" + "\t" + ((1 - alpha) * pib) + "\n" + "p" + "\t" + p + "\n" + "k" + "\t" + k + "\n" + "y" + "\t" + y + "\n" + "p1" + "\t" + p1 + "\n" + "p2" + "\t" + p2)
   }
 }
@@ -108,8 +109,8 @@ object CalibrationXi {
 
   import Helper._
 
-  def printTableCalibrationCI(year: Int = 2018, alphas: List[Double], etas: List[Double], zfs: List[Double], mus: List[Double], e_units:EnergyUnit, p_units:Int) {
-    val cals = alphas.map(alpha => etas.map(eta => (mus.map(mu => zfs.map(zf => new calibration_results_CI(alpha = alpha, eta = eta, zf = zf, mu = mu,energy_units=e_units, pib_units=p_units)))).flatten).flatten).flatten
+  def printTableCalibrationCI(year: Int = 2018, alphas: List[Double], etas: List[Double], zfs: List[Double], mus: List[Double], e_units: EnergyUnit, p_units: Int) {
+    val cals = alphas.map(alpha => etas.map(eta => (mus.map(mu => zfs.map(zf => new calibration_results_CI(alpha = alpha, eta = eta, zf = zf, mu = mu, energy_units = e_units, pib_units = p_units)))).flatten).flatten).flatten
     print("begin{tabular}{c "); cals.map(i => print("c ")); println("}");
     print("$alpha$ [/100]"); cals.map(cal => print(" & " + round(cal.alpha * 100, 0))); println(" \\" + "\\")
     print("$eta$ [/100]"); cals.map(cal => print(" & " + round(cal.eta * 100, 1))); println(" \\" + "\\")
@@ -124,7 +125,7 @@ object CalibrationXi {
     print("$v_e$"); cals.map(cal => print(" & " + round(cal.ve))); println(" \\" + "\\")
     print("$q_f (x_e + delta_e v_e)$ [/100]"); cals.map(cal => print(" & " + round(round(100 * ((cal.xe + cal.delta_e * cal.ve) * cal.qf))))); println(" \\" + "\\")
     print("$EROI$ "); cals.map(cal => print(" & " + round(cal.eroi))); println(" \\" + "\\")
-    print("$EROI_{net}$ "); cals.map(cal => print(" & " + round(cal.eroi*(1-cal.qe)))); println(" \\" + "\\")
+    print("$EROI_{net}$ "); cals.map(cal => print(" & " + round(cal.eroi * (1 - cal.qe)))); println(" \\" + "\\")
     print("$NER$ "); cals.map(cal => print(" & " + round(cal.ner * 100))); println(" \\" + "\\")
     print("P_1=CIK SE+CIK SF"); cals.map(cal => print(" & " + round((1.0 - cal.ner) * 100))); println(" \\" + "\\")
     print("CIK SE"); cals.map(cal => print(" & " + round(1.0 / cal.eroi * 100))); println(" \\" + "\\")
@@ -140,17 +141,17 @@ object CalibrationXi {
 object CalibrationDataXi {
   import Helper._
   import PlotHelper._
-val is2018 = false
+  val is2018 = false
   val data_folder = "../model_data/"
-  val data = getLines(data_folder + (if(is2018) "data_calibration_2018" else "data_calibration_xi_old"), "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100, i(7).toDouble, i(8).toDouble, i(9).toDouble))
+  val data = getLines(data_folder + (if (is2018) "data_calibration_2018" else "data_calibration_xi_old"), "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100, i(7).toDouble, i(8).toDouble, i(9).toDouble))
   val n = data.size
   val ind = (0 until n).toList
-
+  // (year,pib,oeu,neu,e_neu,ce,s,eta,alpha,zf)
   val year = data.map(_._1); val pib = data.map(_._2);
   val neu = data.map(_._4); val e_neu = data.map(_._5); val ce = data.map(_._6);
   val oeu = data.map(_._3)
   val frac_neu = ind.map(i => neu(i) / e_neu(i))
-  val ee = if(is2018) ind.map(i => (1 - frac_neu(i))*MegaTonOilEquivalent(839.185)+MegaTonOilEquivalent(222.503)) else ind.map(i => (1 - frac_neu(i))*oeu(i)) //  // ! To change to use data from 2018 !!
+  val ee = if (is2018) ind.map(i => (1 - frac_neu(i)) * MegaTonOilEquivalent(839.185) + MegaTonOilEquivalent(222.503)) else ind.map(i => (1 - frac_neu(i)) * oeu(i)) //  // ! To change to use data from 2018 !!
   val ye = ind.map(i => e_neu(i) - neu(i) + oeu(i))
   val s = data.map(_._7);
   val eta = data.map(_._8);

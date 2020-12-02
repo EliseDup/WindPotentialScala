@@ -12,18 +12,17 @@ import com.sun.org.apache.bcel.internal.generic.NEW
 
 object DynamicXi {
 
-  import CalibrationDataXi._
   import PlotHelper._
   import Helper._
 
   //val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
   val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
-
+  
   val dyn_1 = new Dynamic_s_eta(calib.s, calib.eta)
   val dyn_2b = new Dynamic_s_gamma_b(calib.s, calib.gammab)
   val dyn_3 = new Dynamic_gk_eta(calib.gK, calib.eta)
 
-  val ye_0 = calib.data.ye(calib.i).to(calib.energy_units)
+  val ye_0 = calib.ye.to(calib.energy_units)
   val qf_0 = calib.qf; val qf_f = calib.qf * 0.5; val ye_f = 3 * ye_0
   // Based on history : Ye +2% / year, qf - 0.7 % / year
   val t_lim = 2040 - calib.year

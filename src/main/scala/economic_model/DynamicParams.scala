@@ -115,7 +115,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
     val z = scala.collection.mutable.ArrayBuffer.empty[Z_xi];
     x += 0.0; qf += z0.qf; s += calib.s;
 
-    val ye0 = calib.data.ye(calib.i).to(calib.energy_units)
+    val ye0 = calib.ye.to(calib.energy_units)
     ye += ye0
 
     k_interval += k_int(z0, thetas(0));
@@ -187,7 +187,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
       }
     }
 
-    //println(x.last + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
+    println(x.last + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
     val last = x.toList.size - 2
     //println("Values in Tf-1")
     //println(x.toList(last) + "\t" + k.toList(last) + "\t" + gK.toList(last) + "\t" + model.mu.toList(last) + "\t" + s.toList(last) + "\t" + model.p.toList(last)/calib.p)

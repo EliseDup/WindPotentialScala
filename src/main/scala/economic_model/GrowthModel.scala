@@ -124,8 +124,8 @@ object GrowthModel {
     println(calib.qf + "\t" + calib.qe + "\t" + calib.ve + "\t" + calib.xe + "\t" + calib.tilde_Ke.to(MegaTonOilEquivalent) + "\t" + calib.tilde_Xe.to(MegaTonOilEquivalent))
 
     val (res, res_re, res_nre) = (new GrowthModelResults(calib.energy_units), new GrowthModelResults(calib.energy_units), new GrowthModelResults(calib.energy_units))
-    res.updateProduction(2017, calib.data.ye(calib.i), calib.data.ee(calib.i), Joules(0), calib.tilde_Ke(calib.qf), calib.delta_e)
-    res_nre.updateProduction(2017, calib.data.ye(calib.i), calib.data.ee(calib.i), calib.tilde_Xe(calib.qf), calib.tilde_Ke(calib.qf), calib.delta_e)
+    res.updateProduction(2017, calib.ye, calib.ee, Joules(0), calib.tilde_Ke(calib.qf), calib.delta_e)
+    res_nre.updateProduction(2017, calib.ye, calib.ee, calib.tilde_Xe(calib.qf), calib.tilde_Ke(calib.qf), calib.delta_e)
     res_re.updateProduction(2017, Joules(0), Joules(0), Joules(0), Joules(0), calib.delta_e)
 
     // We want to reach 100% renewables by end_year: 
@@ -134,7 +134,7 @@ object GrowthModel {
 
     // If we consider an exponential growth (i.e. a constant growth rate): 
     // Ere,n = E,2017 & Ere,n = Ere,2017 * g^n => g = (E,2017/Ere,2017)^1/n
-    val target = calib.data.ye(ind)
+    val target = calib.ye
     var i = 0
     for (s <- shares) {
       i += 1

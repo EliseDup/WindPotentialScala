@@ -15,7 +15,6 @@ object ResultsPaper {
 
   def main(args: Array[String]): Unit = {
 
-    import CalibrationDataXi._
     println("TFC" + "\t" + round(MegaTonOilEquivalent(9937.703).to(Exajoules),1))
     println("EIOU" + "\t" + round(MegaTonOilEquivalent(839.185).to(Exajoules),1))
     println("Losses" + "\t" + round(MegaTonOilEquivalent(222.503).to(Exajoules),1))
@@ -25,21 +24,21 @@ object ResultsPaper {
     println("Transport" + "\t" + round(MegaTonOilEquivalent(2890.9).to(Exajoules),1))
     println("Fraction NEU" + "\t" + round((916.762 / 9937.703) * 100,1))
     val calib = new calibration_results_CI()
-    println("Ce" + "\t" + round(calib.data.ce(calib.i).to(Exajoules),1))
-    println("Ye" + "\t" + round(calib.data.ye(calib.i).to(Exajoules),1))
-    println("Ee" + "\t" + round(calib.data.ee(calib.i).to(Exajoules),1))
-    println("E" + "\t" + round(calib.data.e(calib.i).to(Exajoules),1))
-    println("Ef" + "\t" + round(calib.data.ef(calib.i).to(Exajoules),1))
+    println("Ce" + "\t" + round(calib.ce.to(Exajoules),1))
+    println("Ye" + "\t" + round(calib.ye.to(Exajoules),1))
+    println("Ee" + "\t" + round(calib.ee.to(Exajoules),1))
+    println("E" + "\t" + round(calib.e.to(Exajoules),1))
+    println("Ef" + "\t" + round(calib.ef.to(Exajoules),1))
     println("qe" + "\t" + round(calib.qe*100,1))
-    println("ratio Ce/E" + "\t" + round( (calib.data.ce(calib.i) / calib.data.e(calib.i))*100,1))
-    println("ratio Ce/Ye" + "\t" + round( (calib.data.ce(calib.i) / calib.data.ye(calib.i))*100,1))
-    println("ratio E/Ye" + "\t" + calib.data.e(calib.i)/calib.data.ye(calib.i))
+    println("ratio Ce/E" + "\t" + round( (calib.ce / calib.e)*100,1))
+    println("ratio Ce/Ye" + "\t" + round( (calib.ce / calib.ye)*100,1))
+    println("ratio E/Ye" + "\t" + calib.e/calib.ye)
     
     println("Repartition Yf " + "\t" + "\t" + (calib.Xe + calib.Xf) / calib.yf + "\t" + calib.Xe / (calib.yf) + "\t" + calib.Cf / calib.yf + "\t" + calib.I / calib.yf)
     
     println("EROI " + "\t" + calib.eroi)
-    println("EROI without losses " + "\t" + ((calib.data.ye(calib.i)-MegaTonOilEquivalent(222.503)).to(calib.energy_units)/(calib.qf*(calib.Xe/calib.pib_units+calib.z.deltae*calib.Ke/calib.pib_units)+MegaTonOilEquivalent(839.185).to(calib.energy_units)*(1-0.092))))
-    println("net EROI" + "\t" + calib.eroi*calib.data.e(calib.i)/calib.data.ye(calib.i))
+    println("EROI without losses " + "\t" + ((calib.ye-MegaTonOilEquivalent(222.503)).to(calib.energy_units)/(calib.qf*(calib.Xe/calib.pib_units+calib.z.deltae*calib.Ke/calib.pib_units)+MegaTonOilEquivalent(839.185).to(calib.energy_units)*(1-0.092))))
+    println("net EROI" + "\t" + calib.eroi*calib.e/calib.ye)
     println("qf*we" + "\t" +calib.qf*calib.z.we)
     EROISocietalPaper
     //plotParametersHistory
@@ -69,7 +68,7 @@ object ResultsPaper {
   def resultsExercices(share: List[(Double, Double, Double)], net: Boolean = false, e_units: EnergyUnit = MegaTonOilEquivalent, pib_units: Int = 1E9.toInt) {
 
     val cal = new calibration_results_CI(energy_units = e_units, pib_units = pib_units, pop_units = 1E6.toInt);
-    val target = if (net) cal.data.ye(cal.i) * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve) else cal.data.ye(cal.i)
+    val target = if (net) cal.ye * (1 - cal.qe - cal.delta_e * cal.qf * cal.ve) else cal.ye
     println("Results Exercices " + target.to(MegaTonOilEquivalent) + " Mtoe")
 
     // val share = (1 to 5).map(_ * 0.2).toList
@@ -205,7 +204,7 @@ object ResultsPaper {
     val cal = new calibration_results_CI(energy_units = Gigajoules, pib_units = 1)
 
     println(cal.yf + "\t" + cal.Xe + "\t" + cal.Xf + "\t" + cal.Cf + "\t" + cal.s * cal.pib)
-    println("ETA min " + cal.alpha * cal.data.ce(cal.i) / ((1 - cal.s) * cal.data.e(cal.i)))
+    println("ETA min " + (cal.alpha * cal.ce) / ((1 - cal.s) * cal.e))
     println((cal.xe + cal.delta_e * cal.ve) * cal.qf)
     println("Ee :" + 100 * cal.eroi * cal.qe + ", Xe " + 100 * cal.eroi * cal.xe * cal.qf + ", Ke " + 100 * cal.eroi * cal.qf * cal.delta_e * cal.ve)
 
@@ -245,13 +244,8 @@ object ResultsPaper {
 
     // combinedPlots(year_double, List((qe.map(_ * 100), "qe [%]"), (qf, "qf"), (ve, "ve"), (vf, "vf"), (v, "v")))
     //(0 until eroi.size).map(i => println(alphas(i) + "\t" + etas(i) + "\t" + zfs(i) + "\t" + p(i) + "\t" + eroi(i) + "\t" + ner(i) + "\t" + xe(i)))
-    import CalibrationDataXi._
-    ye.map(i => println(i.to(MegaTonOilEquivalent)))
-    qf.map(i => println(i))
-    pib.map(i => println(i))
-
+   
     res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))
-
     plotXY(List((year_double, perte2.map(_ * 100), "CIK SE+SF"), (year_double, perte1.map(_ * 100), "CIK SE"), (year_double, (0 until perte2.size).toList.map(i => (perte2(i) * 100 - perte1(i) * 100)), "CIK SF")), yLabel = "Pertes [%]", legend = true, title = "pertes")
 
   }
