@@ -15,36 +15,48 @@ object ResultsPaper_PER {
 
   val scenarios = List(bau, np, sd)
   val exercices = List(dyn_1, dyn_2b, dyn_3)
-  val calib_2018 = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent,is2018=true)
+  // val calib = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent, is2018 = true)
   val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
 
-  val res_path = "../model_data/simulations_2018/"
+  val res_path = "../model_data/simulations/"
 
   def main(args: Array[String]): Unit = {
     println("Verification " + "\t" + calib.eroi + "\t" + calib.year)
-    println("Verification " + "\t" + calib_2018.eroi + "\t" + calib_2018.year)
+    
+    println((1-bau.qf_t(50)/calib.qf)/0.5 + "\t" + (1-sd.qf_t(50)/calib.qf)/0.5)
+   println((1-bau.qf_t(100)/calib.qf)/0.5 + "\t" + (1-sd.qf_t(100)/calib.qf)/0.5)
    
+    // println("Verification " + "\t" + calib_2018.eroi + "\t" + calib_2018.year)
     //compute
     // plot
-    dyn_1.simulate_int(calib, bau, 600, true, Some(list_th(0.8, 600)))
-    dyn_1.simulate_int(calib_2018, bau, 600, true, Some(list_th(0.8, 600)))
+    // plotScenarios(2100)
+   // plotMarginalCostCurve("potential_reduced_avg",true)
+  val res = dyn_1.simulate_int(calib, bau, 100,false, theta_var_ref(dyn_1))
+        
+    // C/pop
+      (0 until pop_projections._1.size).map(i => {
+        val j = res.years.indexOf(pop_projections._1(i))
+        println(res.model.pib(j) + "\t" + res.model.C(j) + "\t" + res.model.Cf(j) + "\t" + res.model.pCe(j))
+      })
   }
   def compute {
     // First STEP compute results
     computeThetaResults
     computeQfResuts
-
   }
-  def plot {
+  val pop_projections =(List(2020,2025,	2030,	2035,	2040,	2045,	2050,	2055,	2060,	2065,	2070,	2075,	2080,	2085,	2090,	2095,	2100),
+      List(7794799.0,8184437.0,8548487.0,8887524.0,9198847.0,9481803.0,9735034.0,9958099.0,10151470.0,10317879.0,10459240.0,	10577288.0,	10673904.0,	10750662.0,	10809892.0,	10851860.0,10875394.0))
+  
+      def plot {
     //Then plot results in the order of apparition in the paper
     plotCTExample
-    plotScenarios()
+    plotScenarios(2100)
     plotMarginalCostCurve()
     plotThetaPaths(250)
     plotEcoVariables(dyn_1, bau, 250)
     tableScenario(dyn_1)
     plotQfResults(dyn_1)
-    plotThetaResults
+    plotThetaResults(false)
     plotEcoVariables(dyn_3, bau, 98)
     // Cf comparison for ex3 - BAU and SD 
     val res_bau = dyn_3.simulate_int(calib, bau, 98, false, theta_var_ref(dyn_3))
@@ -95,7 +107,7 @@ object ResultsPaper_PER {
   }
 
   def plotScenarios(tf: Int = 2150) {
-    val t = (0 until (2150 - calib.year)).toList
+    val t = (0 until (tf - calib.year)).toList
 
     plotXY(List((t.map(_.toDouble + calib.year), t.map(i => MegaTonOilEquivalent(bau.ye_t(i)).to(Exajoules)), "BAU"), (t.map(_.toDouble + calib.year), t.map(i => MegaTonOilEquivalent(np.ye_t(i)).to(Exajoules)), "NP"),
       (t.map(_.toDouble + calib.year), t.map(i => MegaTonOilEquivalent(sd.ye_t(i)).to(Exajoules)), "SD")), yLabel = "Ye [EJ/year]", title = "ye_scenarios", legend = true, int_x_axis = true)
@@ -103,57 +115,74 @@ object ResultsPaper_PER {
     plotXY(List((t.map(_.toDouble + calib.year), t.map(bau.qf_t(_) / bau.qf.x0), "BAU"),
       (t.map(_.toDouble + calib.year), t.map(np.qf_t(_) / bau.qf.x0), "NP"),
       (t.map(_.toDouble + calib.year), t.map(sd.qf_t(_) / bau.qf.x0), "SD")), yLabel = "qf/qf0", title = "qf_scenarios", legend = true, int_x_axis = true)
-
   }
 
-  def plotMarginalCostCurve(file: String = "potential_reduced") {
-
+  class TechnologyCost(file: String) {
     val lines = getLines(file, "\t")
-
     val ye = lines.map(i => MegaTonOilEquivalent(i(0).toDouble).to(Exajoules))
     val xe = lines.map(i => MegaTonOilEquivalent(i(1).toDouble).to(Exajoules))
     val ke = lines.map(i => MegaTonOilEquivalent(i(2).toDouble).to(Exajoules))
+    // Repartition / technology [%]
+    val onshore_wind =  (ye, lines.map(i => i(4).toDouble*100),"Onshore Wind")
+    val offshore_wind = (ye, lines.map(i => i(5).toDouble*100),"Offshore Wind")
+    val pv = (ye,lines.map(i => i(6).toDouble*100),"PV")
+    val csp =  (ye,lines.map(i => i(7).toDouble*100),"CSP")
+    
+    // Iterator which starts from 0 or 1
+    val i_0 = (0 until ye.size).toList
+    val i_1 = (1 until ye.size).toList
+    val ye_1 = i_1.map(i => ye(i))
 
-    val is = (1 until ye.size).toList
-    val ye_i = is.map(i => ye(i))
+    val cout_tot = i_0.map(i => (xe(i) + ke(i) / 25.0) / ye(i))
+    val cout_xe = i_0.map(i => xe(i) / ye(i))
+    val cout_ke = i_0.map(i => (ke(i) / 25.0) / ye(i))
 
-    val cout_i = is.map(i => (xe(i) + ke(i) / 25.0) / ye(i))
-    val delta_xe = is.map(i => (xe(i) - xe(i - 1)) / (ye(i) - ye(i - 1)))
-    val delta_ke = is.map(i => (ke(i) - ke(i - 1)) / (ye(i) - ye(i - 1)))
+    val delta_xe = i_1.map(i => (xe(i) - xe(i - 1)) / (ye(i) - ye(i - 1)))
+    val delta_ke = i_1.map(i => (ke(i) - ke(i - 1)) / (ye(i) - ye(i - 1)))
 
-    val cout_margi = (1 until cout_i.size).toList.map(i => ((xe(i) + ke(i) / 25) - (xe(i - 1) + ke(i - 1) / 25)) / (ye(i) - ye(i - 1)))
+    val cout_marg = i_1.toList.map(i => ((xe(i) + ke(i) / 25) - (xe(i - 1) + ke(i - 1) / 25)) / (ye(i) - ye(i - 1)))
+    val cout_marg_xe = i_1.toList.map(i => (xe(i) - xe(i - 1)) / (ye(i) - ye(i - 1)))
+    val cout_marg_ke = i_1.toList.map(i => (ke(i) - ke(i - 1)) / 25.0 / (ye(i) - ye(i - 1)))
+  }
+  
+  def plotMarginalCostCurve(file: String = "potential_reduced_avg", plotTechParams: Boolean = false) {
+    val tot = new TechnologyCost(file)
+    val onshore_wind = new TechnologyCost("potential_reducedonshore_wind")
+    val offshore_wind = new TechnologyCost("potential_reducedoffshore_wind")
+    val pv = new TechnologyCost("potential_reducedpv")
+    val csp = new TechnologyCost("potential_reducedcsp")
 
-    val cout_xe = is.map(i => xe(i) / ye(i))
-    val cout_ke = is.map(i => (ke(i) / 25.0) / ye(i))
-    val cout_marg_xe = (1 until cout_xe.size).toList.map(i => (xe(i) - xe(i - 1)) / (ye(i) - ye(i - 1)))
-    val cout_marg_ke = (1 until cout_xe.size).toList.map(i => (ke(i) - ke(i - 1)) / 25.0 / (ye(i) - ye(i - 1)))
-    val ye_marge = (1 until cout_xe.size).toList.map(i => ye(i))
-
-    plotXY(List((ye_i, cout_i, "Total"), (ye_i, cout_ke, "deKe/Ye"), (ye_i, cout_xe, "Xe/Ye")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "EJ invested/EJ produced", legend = true, title = "cost")
+    plotXY(List((tot.ye, tot.cout_tot, "Total"), (tot.ye, tot.cout_ke, "deKe/Ye"), (tot.ye, tot.cout_xe, "Xe/Ye")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "EJ invested/EJ produced", legend = true, title = "cost")
     //  plotXY(List((ye_i, cout_xe, "Xe/Ye")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "Xe EJ/EJ produced", title = "xe_pot")
     //  plotXY(List((ye_i, cout_ke, "deKe/Ye")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "deKe EJ/EJ produced", title = "ke_pot")
     // plotXY(List((ye_i, cout_i, "(Xe+deKe)/Ye")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "EJ invested/EJ produced", title = "cost_pot_tot")
 
-    plotXY(List((ye_marge, cout_margi, "Total"), (ye_marge, cout_marg_ke, "ddeKe/dYe"), (ye_marge, cout_marg_xe, "dXe/dYe")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "Marginal Cost [dEJ/dEJ]", legend = true, title = "marg_cost")
+    plotXY(List((tot.ye_1, tot.cout_marg, "Total"), (tot.ye_1, tot.cout_marg_ke, "ddeKe/dYe"), (tot.ye_1, tot.cout_marg_xe, "dXe/dYe")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "Marginal Cost [dEJ/dEJ]", legend = true, title = "marg_cost")
     // Detailed
     //   plotXY(List((ye_marge, cout_marg_xe, "dXe/dYe")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "dXe/dYe", title = "dXe_dYe")
     //   plotXY(List((ye_marge, cout_marg_ke, "ddeKe/dYe")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "ddeKe/dYe", title = "ddeKe_dYe")
     //   plotXY(List((ye_marge, cout_margi, "d(Xe+deKe)/Ye")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "Marginal Cost [dEJ/dEJ]", title = "marg_cost_pot_tot")
 
+    // Per technology
+    plotXY(List((tot.ye_1, tot.cout_marg, "Total"), (onshore_wind.ye_1, onshore_wind.cout_marg, "Onshore Wind"),
+      (offshore_wind.ye_1, offshore_wind.cout_marg, "Offshore Wind"), (pv.ye_1, pv.cout_marg, "PV"), (csp.ye_1, csp.cout_marg, "CSP")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "Marginal Cost [dEJ/dEJ]", legend = true, title = "marg_cost_per_tech")
     // Plot ve, qe et xe
+    if (plotTechParams) {
+      val (x_x, qe_x, xe_x, ve_x, deltae_x) = dyn_1.x_fun_ye(ye_0, calib.z)
+      plotXY(List((x_x, qe_x.map(_ * 100), "qe")), xLabel = "x", yLabel = "qe [%]", title = "qe_x")
+      plotXY(List((x_x, xe_x, "xe")), xLabel = "x", yLabel = "xe [kUS$ 2010/toe]", title = "xe_x")
+      plotXY(List((x_x, ve_x, "ve")), xLabel = "x", yLabel = "ve [kUS$ 2010/toe]", title = "ve_x")
+      plotXY(List((x_x, (0 until x_x.size).toList.map(i => deltae_x(i) * ve_x(i) + xe_x(i)), "we")), xLabel = "x", yLabel = "we [kUS$ 2010/toe]", title = "we_x")
 
-    val (x_x, qe_x, xe_x, ve_x, deltae_x) = dyn_1.x_fun_ye(ye_0, calib.z)
-    plotXY(List((x_x, qe_x.map(_ * 100), "qe")), xLabel = "x", yLabel = "qe [%]", title = "qe_x")
-    plotXY(List((x_x, xe_x, "xe")), xLabel = "x", yLabel = "xe [kUS$ 2010/toe]", title = "xe_x")
-    plotXY(List((x_x, ve_x, "ve")), xLabel = "x", yLabel = "ve [kUS$ 2010/toe]", title = "ve_x")
-    plotXY(List((x_x, (0 until x_x.size).toList.map(i => deltae_x(i) * ve_x(i) + xe_x(i)), "we")), xLabel = "x", yLabel = "we [kUS$ 2010/toe]", title = "we_x")
-
-    plotXY(List((x_x, (0 until x_x.size).toList.map(i => (1.0 / (qe_x(i) + calib.qf * (ve_x(i) * deltae_x(i) + xe_x(i))))), "EROI")), xLabel = "x",
-      yLabel = "EROI", title = "EROI_x")
-    val f = ve_x.size - 1
-    println("vef/ve0" + "\t" + ve_x(f) / calib.z.ve)
-    println("xe from " + "\t" + calib.xe + " to " + xe_x(f))
-    println("EROI from " + "\t" + calib.eroi + " to " + 1.0 / (qe_x(f) + calib.qf * (ve_x(f) * deltae_x(f) + xe_x(f))))
+      plotXY(List((x_x, (0 until x_x.size).toList.map(i => (1.0 / (qe_x(i) + calib.qf * (ve_x(i) * deltae_x(i) + xe_x(i))))), "EROI")), xLabel = "x",
+        yLabel = "EROI", title = "EROI_x")
+      val f = ve_x.size - 1
+      println("vef/ve0" + "\t" + ve_x(f) / calib.z.ve)
+      println("xe from " + "\t" + calib.xe + " to " + xe_x(f))
+      println("EROI from " + "\t" + calib.eroi + " to " + 1.0 / (qe_x(f) + calib.qf * (ve_x(f) * deltae_x(f) + xe_x(f))))
+    }
+    // Repartition 
+    plotXY(List(tot.onshore_wind,tot.offshore_wind,tot.pv,tot.csp),xLabel = "Final Energy Produced [EJ/year]", yLabel = "Share [%]", legend = true, title = "tech_share")
   }
   def plotEcoVariables(dyn: Dynamic_Params, scn: Scenario, ny: Int) {
     val name = "_" + dyn.name + "_" + scn.name
@@ -201,7 +230,10 @@ object ResultsPaper_PER {
       (y_double, indexes.map(i => res.model.C.toList(i) / res.model.pib(i) * 100), "C/PIB"),
       (y_double, indexes.map(i => res.model.Cf.toList(i) / res.model.pib(i) * 100), "Cf/PIB"),
       (y_double, indexes.map(i => res.model.pCe(i) / res.model.pib(i) * 100), "pCe/PIB")), int_x_axis = true, legend = true, yLabel = "% PIB", title = "c_pib" + name)
+   
 
+  //  val c = (0 until pop_projections._1.size).toList.map(i => res.model.C(res.years.indexOf(pop_projections._1(i)))/pop_projections._2(i))
+  //  plotXY(List((pop_projections._1.map(_.toDouble),c,"")), yLabel="Per capita consumption [US$2010/capita]", title="c_per_cap")
   }
 
   def tableScenario(dyn: Dynamic_Params) {
@@ -240,33 +272,44 @@ object ResultsPaper_PER {
     val x = res.x; val ts = res.ts; val tf = res.tf; val gk = res.gk; val y = res.y; val s = res.s; val mu = res.mu; val p = res.p
   }
 
-  def plotThetaResults {
+  def plotThetaResults(light: Boolean = true) {
     // val model_path = "../model_data/simulations/theta_"
-    val bau_ex1 = new ThetaResults(res_path + "theta_ex1_bau", "ex1 - BAU")
-    val np_ex1 = new ThetaResults(res_path + "theta_ex1_np", "ex1 - NP")
-    val sd_ex1 = new ThetaResults(res_path + "theta_ex1_sd", "ex1 - SD")
-    val bau_ex2 = new ThetaResults(res_path + "theta_ex2_bau", "ex2 - BAU")
-    val np_ex2 = new ThetaResults(res_path + "theta_ex2_np", "ex2 - NP")
-    val sd_ex2 = new ThetaResults(res_path + "theta_ex2_sd", "ex2 - SD")
-    val bau_ex3 = new ThetaResults(res_path + "theta_ex3_bau", "ex3 - BAU")
-    val np_ex3 = new ThetaResults(res_path + "theta_ex3_np", "ex3 - NP")
-    val sd_ex3 = new ThetaResults(res_path + "theta_ex3_sd", "ex3 - SD")
+    val bau_ex1 = new ThetaResults(res_path + "theta_ex1_bau", if(light) "BAU" else "ex1 - BAU")
+    val np_ex1 = new ThetaResults(res_path + "theta_ex1_np", if(light) "NP" else"ex1 - NP")
+    val sd_ex1 = new ThetaResults(res_path + "theta_ex1_sd", if(light) "SD" else"ex1 - SD")
+    val bau_ex2 = new ThetaResults(res_path + "theta_ex2_bau", if(light) "BAU" else"ex2 - BAU")
+    val np_ex2 = new ThetaResults(res_path + "theta_ex2_np", if(light) "NP" else "ex2 - NP")
+    val sd_ex2 = new ThetaResults(res_path + "theta_ex2_sd", if(light) "SD" else "ex2 - SD")
+    val bau_ex3 = new ThetaResults(res_path + "theta_ex3_bau", if(light) "BAU" else"ex3 - BAU")
+    val np_ex3 = new ThetaResults(res_path + "theta_ex3_np", if(light) "NP"else"ex3 - NP")
+    val sd_ex3 = new ThetaResults(res_path + "theta_ex3_sd", if(light) "SD"else"ex3 - SD")
     //Comparaison des différents scénarios
     def plotScenarios(scn: List[ThetaResults], name: String) {
       plotXY(scn.map(_.x), xLabel = "theta", yLabel = "x", legend = (scn.size > 1), title = "theta_x_" + name)
       plotXY(scn.map(_.ts), xLabel = "theta", yLabel = "Ts", legend = (scn.size > 1), title = "theta_ts_" + name)
       plotXY(scn.map(_.gk), xLabel = "theta", yLabel = "gK [%]", legend = (scn.size > 1), title = "theta_gk_" + name)
-      plotXY(scn.map(_.tf), xLabel = "theta", yLabel = "Tf", legend = (scn.size > 1), title = "theta_tf_" + name)
-      plotXY(scn.map(_.y), xLabel = "theta", yLabel = "Tf-Ts", legend = (scn.size > 1), title = "theta_y_" + name)
+      if (scn.map(_.tf._2).flatten.size > 0) {
+        plotXY(scn.map(_.tf), xLabel = "theta", yLabel = "Tf", legend = (scn.size > 1), title = "theta_tf_" + name)
+        plotXY(scn.map(_.y), xLabel = "theta", yLabel = "Tf-Ts", legend = (scn.size > 1), title = "theta_y_" + name)
+      }
       plotXY(scn.map(_.s), xLabel = "theta", yLabel = "s [%]", legend = (scn.size > 1), title = "theta_s_" + name)
       plotXY(scn.map(_.mu), xLabel = "theta", yLabel = "mu [%]", legend = (scn.size > 1), title = "theta_mu_" + name)
       plotXY(scn.map(_.p), xLabel = "theta", yLabel = "p/p0", legend = (scn.size > 1), title = "theta_p_" + name)
     }
-    plotScenarios(List(bau_ex1, np_ex1, sd_ex1), "ex1")
-    plotScenarios(List(bau_ex1), "ex1_bau")
-    plotScenarios(List(bau_ex1, bau_ex2), "ex1_ex2_bau")
-    plotScenarios(List(bau_ex2, np_ex2, sd_ex2), "ex2")
-    plotScenarios(List(bau_ex3, np_ex3, sd_ex3), "ex3")
+    // Light version only ex1 & ex3, bau & sd
+    if (light) {
+      plotScenarios(List(bau_ex1, sd_ex1), "ex1")
+      plotScenarios(List(bau_ex1), "ex1_bau")
+      plotScenarios(List(bau_ex3, sd_ex3), "ex3")
+      plotScenarios(List(bau_ex3), "ex3_bau")
+
+    } else {
+      plotScenarios(List(bau_ex1, np_ex1, sd_ex1), "ex1")
+      plotScenarios(List(bau_ex1), "ex1_bau")
+      plotScenarios(List(bau_ex1, bau_ex2), "ex1_ex2_bau")
+      plotScenarios(List(bau_ex2, np_ex2, sd_ex2), "ex2")
+      plotScenarios(List(bau_ex3, np_ex3, sd_ex3), "ex3")
+    }
   }
 
   // Rôle du PT !
@@ -330,22 +373,23 @@ object ResultsPaper_PER {
     val p = (xs, res.map(_(7)), name)
   }
 
-  def plotQfResults(dyn: Dynamic_Params) {
+  def plotQfResults(dyn: Dynamic_Params, light: Boolean = false) {
     //val model_path = "../model_data/simulations/qf_"
     val bau = new QfResults(res_path + "qf_" + dyn.name + "_bau", "BAU")
     val np = new QfResults(res_path + "qf_" + dyn.name + "_np", "NP")
     val sd = new QfResults(res_path + "qf_" + dyn.name + "_sd", "SD")
     // Plot xl vs qfl/qf0
-    plotXY(List(bau.x, np.x, sd.x), xLabel = "qfl/qf0", yLabel = "x", legend = true, title = "qfl_x_" + dyn.name)
-    plotXY(List(bau.gk, np.gk, sd.gk), xLabel = "qfl/qf0", yLabel = "gK [%]", legend = true, title = "qfl_gk_" + dyn.name)
+    val scn = if (light) List(bau, sd) else List(bau, np, sd)
+    plotXY(scn.map(_.x), xLabel = "qfl/qf0", yLabel = "x", legend = true, title = "qfl_x_" + dyn.name)
+    plotXY(scn.map(_.gk), xLabel = "qfl/qf0", yLabel = "gK [%]", legend = true, title = "qfl_gk_" + dyn.name)
 
     // Plot tf vs qfl/qf0
-    plotXY(List(bau.tf, np.tf, sd.tf), xLabel = "qfl/qf0", yLabel = "Tf", legend = true, title = "qfl_tf_" + dyn.name)
-    plotXY(List(bau.ts, np.ts, sd.ts), xLabel = "qfl/qf0", yLabel = "Ts", legend = true, title = "qfl_ts_" + dyn.name)
-    plotXY(List(bau.y, np.y, sd.y), xLabel = "qfl/qf0", yLabel = "Tf - Ts", legend = true, title = "qfl_y_" + dyn.name)
-    plotXY(List(bau.s, np.s, sd.s), xLabel = "qfl/qf0", yLabel = "s [%]", legend = true, title = "qfl_s_" + dyn.name)
-    plotXY(List(bau.mu, np.mu, sd.mu), xLabel = "qfl/qf0", yLabel = "mu [%]", legend = true, title = "qfl_mu_" + dyn.name)
-    plotXY(List(bau.p, np.p, sd.p), xLabel = "qfl/qf0", yLabel = "p/p0", legend = true, title = "qfl_p_" + dyn.name)
+    plotXY(scn.map(_.tf), xLabel = "qfl/qf0", yLabel = "Tf", legend = true, title = "qfl_tf_" + dyn.name)
+    plotXY(scn.map(_.ts), xLabel = "qfl/qf0", yLabel = "Ts", legend = true, title = "qfl_ts_" + dyn.name)
+    plotXY(scn.map(_.y), xLabel = "qfl/qf0", yLabel = "Tf - Ts", legend = true, title = "qfl_y_" + dyn.name)
+    plotXY(scn.map(_.s), xLabel = "qfl/qf0", yLabel = "s [%]", legend = true, title = "qfl_s_" + dyn.name)
+    plotXY(scn.map(_.mu), xLabel = "qfl/qf0", yLabel = "mu [%]", legend = true, title = "qfl_mu_" + dyn.name)
+    plotXY(scn.map(_.p), xLabel = "qfl/qf0", yLabel = "p/p0", legend = true, title = "qfl_p_" + dyn.name)
 
   }
 }

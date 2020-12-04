@@ -33,8 +33,12 @@ object GrowthModel {
   }
 
   def main(args: Array[String]): Unit = {
+    simulate_potential()
+    simulate_potential(List((OnshoreWindTechnology,None)),"onshore_wind")
+    simulate_potential(List((OffshoreWindTechnology,None)),"offshore_wind")
+    simulate_potential(List((PVMono,None)),"pv")
+    simulate_potential(List((CSPTowerStorage12h,None)),"csp")
     
-    // simulate_potential
     // simulateTransition(share, List((PVMono, 1.0,None)),file_name="pv_mono")
     //simulate_tech(OnshoreWindTechnology)
     //simulate_tech(OffshoreWindTechnology)
@@ -190,10 +194,11 @@ object GrowthModel {
     })
   }
 
-  def simulate_potential {
-    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("potential"))
-    val out_stream_simple = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced"))
-    val out_stream_simple_avg = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_avg"))
+  def simulate_potential(techs : List[(RenewableTechnology,Option[RenewableTechnology])]=
+    List((OnshoreWindTechnology,None),(OffshoreWindTechnology,None),(PVMono, Some(CSPTowerStorage12h)),(CSPTowerStorage12h, Some(PVMono))), name:String="") {
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("potential"+name))
+    val out_stream_simple = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced"+name))
+    val out_stream_simple_avg = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_avg"+name))
 
     val sites = all_sites
     def results(tech: RenewableTechnology, competingTech: Option[RenewableTechnology] = None) = {
@@ -206,7 +211,7 @@ object GrowthModel {
         ((tilde_xe + tilde_ke / 25.0) / ye, ye, tilde_xe, tilde_ke, 1.0 / 25.0, tech)
       })
     }
-    val res = results(OnshoreWindTechnology) ++ results(OffshoreWindTechnology) ++ results(PVMono, Some(CSPTowerStorage12h)) ++ results(CSPTowerStorage12h, Some(PVMono))
+    val res = techs.map(t => results(t._1,t._2)).flatten //results(OnshoreWindTechnology) ++ results(OffshoreWindTechnology) ++ results(PVMono, Some(CSPTowerStorage12h)) ++ results(CSPTowerStorage12h, Some(PVMono))
     val res_sorted = res.sortBy(_._1)
     val wind_on = res_sorted.map(i => if (i._6.name == "Wind-onshore") i._2.to(MegaTonOilEquivalent) else 0.0).scanLeft(0.0)(_ + _)
     val wind_off = res_sorted.map(i => if (i._6.name == "Wind-offshore") i._2.to(MegaTonOilEquivalent) else 0.0).scanLeft(0.0)(_ + _)
@@ -216,16 +221,16 @@ object GrowthModel {
     // How to calculate the cumulated "delta_e" : sum Ke_i delta_e_i / sum Ke_i
     val sum_delta_k = res_sorted.map(i => i._5 * i._4.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _)
     val sum_k = res_sorted.map(i => i._4.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _)
-    val delta_e = (0 until sum_k.size).toList.map(i => sum_delta_k(i) / sum_k(i))
+    val delta_e = (0 until sum_k.size).toList.map(i => if(sum_k(i) > 0) sum_delta_k(i) / sum_k(i) else 1/25.0)
 
     val res_sorted_cum = (res_sorted.map(_._2.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), res_sorted.map(_._3.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _),
       res_sorted.map(_._4.to(MegaTonOilEquivalent)).scanLeft(0.0)(_ + _), delta_e)
 
     val ye_cum = res_sorted_cum._1
-    val res_repartition_cum = ((0 until ye_cum.size).map(i => wind_on(i) / ye_cum(i)),
-      (0 until ye_cum.size).map(i => wind_off(i) / ye_cum(i)),
-      (0 until ye_cum.size).map(i => pv(i) / ye_cum(i)),
-      (0 until ye_cum.size).map(i => csp(i) / ye_cum(i)))
+    val res_repartition_cum = ((0 until ye_cum.size).map(i => if(ye_cum(i) > 0) wind_on(i) / ye_cum(i)  else 0),
+      (0 until ye_cum.size).map(i => if(ye_cum(i) > 0) wind_off(i) / ye_cum(i) else 0),
+      (0 until ye_cum.size).map(i => if(ye_cum(i) > 0)pv(i) / ye_cum(i) else 0),
+      (0 until ye_cum.size).map(i => if(ye_cum(i) > 0)csp(i) / ye_cum(i) else 0))
 
     (0 until res_sorted_cum._1.size).map(i => out_stream.print(res_sorted_cum._1(i) + "\t" + res_sorted_cum._2(i) + "\t" + res_sorted_cum._3(i) + "\t" + res_sorted_cum._4(i)
       + "\t" + res_repartition_cum._1(i) + "\t" + res_repartition_cum._2(i) + "\t" + res_repartition_cum._3(i) + "\t" + res_repartition_cum._4(i) + "\n"))
