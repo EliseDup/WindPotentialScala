@@ -61,6 +61,12 @@ class Scenario(val qf: ParamsScenario, val ye: ParamsScenario, val name: String 
   def ye_t(T: Int) = ye.old_x(T)
 }
 
+// xt = x0*(1+r)^t => r = (xt/x0)^(1/t) - 1
+class ParamsScenarioConstantRate(x0 : Double, xt : Double, t: Int) extends ParamsScenario(x0, xt, xt, t){
+  val r = math.pow(xt/x0,1.0/t)-1
+  override def old_x(T : Int) = x0*math.pow(1+r,T)
+}
+
 class ParamsScenario(val x0: Double, val xt: Double, val xf: Double, val t: Int) {
   val r1 = if (x0 == xt) 0.0
   else math.pow(xt / x0, 1.0 / t) - 1
@@ -76,6 +82,7 @@ class ParamsScenario(val x0: Double, val xt: Double, val xf: Double, val t: Int)
   }
   override def toString() = "x0 = " + x0 + " , xt = " + xt + " , xf = " + xf + "," + "rate " + r_old
 }
+
 
 class ParamsScenarioLogistic(x0: Double, xt: Double, xf: Double, t: Int) extends ParamsScenario(x0, xt, xf, t) {
   var new_r = r_old

@@ -220,7 +220,7 @@ object CSPParabolicStorage12h extends CSP {
   val transport_variable =Gigajoules(930204)
   val construction_variable = Gigajoules(11434969 + 4412439)
   
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(5415779), Gigajoules(13500041), Gigajoules(220157), Gigajoules(237600), Gigajoules(756412 + 1080164), Gigajoules(183720), 0.05 + 0.023, 30)
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(5415779), Gigajoules(13500041), Gigajoules(220157), Gigajoules(237600), Gigajoules(756412 + 1080164), Gigajoules(183720), 0.15,30)//0.05 + 0.023, 30)
   }
 
 object CSPTowerStorage12h extends CSP {
@@ -234,5 +234,5 @@ object CSPTowerStorage12h extends CSP {
   val transport_variable = Gigajoules(457262)
   val construction_variable = Gigajoules(7751182 + 3642818)
   
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(8053825), Gigajoules(9086794), Gigajoules(220157), Gigajoules(237600), Gigajoules(1196178 + 727130), Gigajoules(183720), 0.05 + 0.023, 30)
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(8053825), Gigajoules(9086794), Gigajoules(220157), Gigajoules(237600), Gigajoules(1196178 + 727130), Gigajoules(183720), 0.15,30) // 0.05 + 0.023, 30)
   }

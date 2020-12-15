@@ -23,7 +23,7 @@ object ResultsPaper {
     println("Residential" + "\t" + round(MegaTonOilEquivalent(2109.205).to(Exajoules),1))
     println("Transport" + "\t" + round(MegaTonOilEquivalent(2890.9).to(Exajoules),1))
     println("Fraction NEU" + "\t" + round((916.762 / 9937.703) * 100,1))
-    val calib = new calibration_results_CI()
+    val calib = new calibration_results_CI(year=2017)
     println("Ce" + "\t" + round(calib.ce.to(Exajoules),1))
     println("Ye" + "\t" + round(calib.ye.to(Exajoules),1))
     println("Ee" + "\t" + round(calib.ee.to(Exajoules),1))

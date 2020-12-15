@@ -17,30 +17,27 @@ object DynamicXi {
 
   //val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
   val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
-  
+
   val dyn_1 = new Dynamic_s_eta(calib.s, calib.eta)
   val dyn_2b = new Dynamic_s_gamma_b(calib.s, calib.gammab)
   val dyn_3 = new Dynamic_gk_eta(calib.gK, calib.eta)
 
   val ye_0 = calib.ye.to(calib.energy_units)
   val qf_0 = calib.qf; val qf_f = calib.qf * 0.5; val ye_f = 3 * ye_0
-  // Based on history : Ye +2% / year, qf - 0.7 % / year
+  // Based on history : Ye +1.16% / year, qf - 0.7 % / year
   val t_lim = 2040 - calib.year
-  val ye_40_bau = 13986.655116005899; // ye_0 * math.pow(1 + 0.0162, t_lim)
+  val ye_40_bau = ye_0 * 1.3 // math.pow(1 + 0.0116, t_lim)
 
-  val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, ye_40_bau, ye_f, t_lim), "BAU") // Old value : 
-  val np = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 12581, ye_f, t_lim), "NP")
-  val sd = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.45 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, ye_0, ye_0, t_lim), "SD")
-  // printScenario(bau, "BAU"); printScenario(np, "NP"); printScenario(sd, "SD")
+  val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, ye_40_bau, ye_f, t_lim), "BAU")
+  val bau_old = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 13986.655116005899, ye_f, t_lim), "BAU_old")
+  // val np = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 12581, ye_f, t_lim), "NP")
+  val sd = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85 * 0.45 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, ye_0, ye_0, t_lim), "SD")
 
   def printScenario(scn: Scenario, name: String) {
     println(name + "\t" + " ye " + scn.ye + ", qf " + scn.qf)
   }
 
   def main(args: Array[String]): Unit = {
-    // plotYeCurve
-    // thetaResults((0 to 100).toList.map(_/100.0), bau, dyn_3)
-
     /* */
     // dyn_1.simulate_int(calib, bau, 600, false, Some(1.0))
     //dyn_2b.simulate_int(calib, bau, 250, false, Some(1.0))
@@ -58,7 +55,7 @@ object DynamicXi {
 
   def plotScenarios(dyn: Dynamic_Params, ny: Int, name: String = "") {
     val res = List((dyn.simulate_int(calib, bau, ny, false), "BAU"),
-      (dyn.simulate_int(calib, np, ny, false), "NP"),
+      // (dyn.simulate_int(calib, np, ny, false), "NP"),
       (dyn.simulate_int(calib, sd, ny, false), "SD"))
 
     def years_pib(res: DynamicResults) = (1 until res.years.size).toList.map(res.years(_).toDouble)
@@ -129,7 +126,7 @@ object DynamicXi {
   def printTable(dyn: Dynamic_Params, ny: Int) {
     val res = List(
       ("BAU", dyn.simulate_int(calib, bau, nyears = ny, plot = false)),
-      ("NP", dyn.simulate_int(calib, np, nyears = ny, plot = false)),
+      //  ("NP", dyn.simulate_int(calib, np, nyears = ny, plot = false)),
       ("SD", dyn.simulate_int(calib, sd, nyears = ny, plot = false)))
     println("--Results--")
     println("\t" + "x" + "\t" + "gk" + "\t" + "gpib" + "\t" + "mu" + "\t" + "alpha")

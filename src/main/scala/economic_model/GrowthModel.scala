@@ -33,11 +33,11 @@ object GrowthModel {
   }
 
   def main(args: Array[String]): Unit = {
-    simulate_potential()
-    simulate_potential(List((OnshoreWindTechnology,None)),"onshore_wind")
-    simulate_potential(List((OffshoreWindTechnology,None)),"offshore_wind")
-    simulate_potential(List((PVMono,None)),"pv")
-    simulate_potential(List((CSPTowerStorage12h,None)),"csp")
+    simulate_potential(name="new")
+  //  simulate_potential(List((OnshoreWindTechnology,None)),"onshore_wind")
+  //  simulate_potential(List((OffshoreWindTechnology,None)),"offshore_wind")
+  //  simulate_potential(List((PVMono,None)),"pv")
+  //  simulate_potential(List((CSPTowerStorage12h,None)),"csp")
     
     // simulateTransition(share, List((PVMono, 1.0,None)),file_name="pv_mono")
     //simulate_tech(OnshoreWindTechnology)

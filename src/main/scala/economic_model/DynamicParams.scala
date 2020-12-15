@@ -130,23 +130,23 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
     val model = new ModelResults(calib, this)
     model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
 
-    //println("Initialize " + k.last + " " + theta_k + "(" + k_interval.last + ")")
-    val years = (1 until nyears).map(i => i + 2017).toList
+    // println("Initialize " + k.last + "\t" +k_interval.last + "\t" +  gK.last)
+    val years = (1 to nyears).map(i => i + calib.year).toList
     var end = false; var endYear: Option[Int] = None;
     var start = false; var startYear: Option[Int] = None;
     // println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + ye.last)
-
+    
     for (y <- years) {
       if (!end) {
         // vqy=qys+(qy-qys)*(1-.01).^(0:T-1)
-        qf += scenario.qf_t(y - 2017) // qf_fun(z0.qf, qf_max, qf_rate, y - 2017) //qf_max + (qf.last - qf_max) * (1 - qf_rate)
-        ye += scenario.ye_t(y - 2017) //qf_fun(ye0, ye_max, ye_rate, y - 2017)
+        val theta = thetas(y - 1 - calib.year)
+        qf += scenario.qf_t(y - calib.year) // qf_fun(z0.qf, qf_max, qf_rate, y - calib.year) //qf_max + (qf.last - qf_max) * (1 - qf_rate)
+        ye += scenario.ye_t(y - calib.year) //qf_fun(ye0, ye_max, ye_rate, y - calib.year)
 
         K += K.last * (1 + gK.last)
         k += K.last / ye.last
-
         // Mapping between x and the interval for k
-        val k_x_fun = k_x_ye(qf.last, z0, thetas(y - 2017), ye.last)
+        val k_x_fun = k_x_ye(qf.last, z0, theta, ye.last)
         val (x_x, qe_x, xe_x, ve_x, deltae_x) = x_fun_ye(ye.last, z0)
         val indexes_x = find_indexes(k.last, k_x_fun)
         val k1 = k_x_fun(indexes_x._1)._2.mean; val k2 = k_x_fun(indexes_x._2)._2.mean;
@@ -154,12 +154,12 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
         val newX = math.max(0, interpolation(k.last, (k1, x1), (k2, x2)))
         if (!start && newX > 0.0) {
           start = true
-          startYear = Some(y - 2017)
+          startYear = Some(y) // - calib.year)
         }
         // Transition is over, z and x are not changing anymore
         if (!end && k_x_fun.map(_._2.mean).forall(i => i <= k.last)) {
-          // println("Transition stops after " + (y - 2017) + " years" + "(ie in " + y + ")")
-          endYear = Some(y - 2017)
+          // println("Transition stops after " + (y - calib.year) + " years" + "(ie in " + y + ")")
+          endYear = Some(y) // - calib.year)
           end = true
           z += z.last
           x += 1 // x.last
@@ -173,7 +173,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
           z += Z_xi(ve, z0.vf, qe, qf.last, xe, z0.xf, deltae, z0.deltaf, mu * deltae + (1 - mu) * z0.deltaf)
         }
 
-        k_interval += k_int(z.last, thetas(y - 2017));
+        k_interval += k_int(z.last, theta);
         gK += gK_k(k.last, z.last);
         s += s_k(k.last, z.last)
 
@@ -187,12 +187,12 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
       }
     }
 
-    println(x.last + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
+    println(x.last + "\t" + qf.last/calib.qf + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
     val last = x.toList.size - 2
     //println("Values in Tf-1")
     //println(x.toList(last) + "\t" + k.toList(last) + "\t" + gK.toList(last) + "\t" + model.mu.toList(last) + "\t" + s.toList(last) + "\t" + model.p.toList(last)/calib.p)
 
-    val years_new = if (!end) years else (2017 until endYear.get + 2017).toList
+    val years_new = if (!end) years else (calib.year until endYear.get).toList
 
     if (plot) {
       plot_(years_new, x, "x_" + toString());

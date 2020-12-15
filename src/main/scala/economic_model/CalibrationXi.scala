@@ -22,7 +22,7 @@ class calibration_results_CI(
   val lines = getLines(data_folder + (if (is2018) "data_calibration_2018" else "data_calibration_xi_old"), "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100)) //, i(7).toDouble, i(8).toDouble, i(9).toDouble))
   val (year_data, pib_dollars, oeu, neu, e_neu, ce, s) = lines.find(_._1 == year).get
   val pib = pib_dollars / pib_units;
-  val pib_before = lines.find(_._1 == (year - 1)).get._2 / pib_units;
+  val pib_before = if(year ==1990) 38015493765413.9/pib_units else lines.find(_._1 == (year - 1)).get._2 / pib_units;
   val g = (pib - pib_before) / pib_before
   val frac_neu = neu / e_neu; val ye = e_neu - neu + oeu
   val ee = if (is2018) (1 - frac_neu) * MegaTonOilEquivalent(839.185) + MegaTonOilEquivalent(222.503) else (1-frac_neu) * oeu
