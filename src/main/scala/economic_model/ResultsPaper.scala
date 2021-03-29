@@ -14,6 +14,7 @@ object ResultsPaper {
   import GrowthModel._
 
   def main(args: Array[String]): Unit = {
+plotParametersHistory
 
     println("TFC" + "\t" + round(MegaTonOilEquivalent(9937.703).to(Exajoules),1))
     println("EIOU" + "\t" + round(MegaTonOilEquivalent(839.185).to(Exajoules),1))
@@ -23,7 +24,7 @@ object ResultsPaper {
     println("Residential" + "\t" + round(MegaTonOilEquivalent(2109.205).to(Exajoules),1))
     println("Transport" + "\t" + round(MegaTonOilEquivalent(2890.9).to(Exajoules),1))
     println("Fraction NEU" + "\t" + round((916.762 / 9937.703) * 100,1))
-    val calib = new calibration_results_CI(year=2017)
+    val calib = new calibration_results_CI(year=2018) //, is2018=true)
     println("Ce" + "\t" + round(calib.ce.to(Exajoules),1))
     println("Ye" + "\t" + round(calib.ye.to(Exajoules),1))
     println("Ee" + "\t" + round(calib.ee.to(Exajoules),1))
@@ -41,7 +42,7 @@ object ResultsPaper {
     println("net EROI" + "\t" + calib.eroi*calib.e/calib.ye)
     println("qf*we" + "\t" +calib.qf*calib.z.we)
     EROISocietalPaper
-    //plotParametersHistory
+    plotParametersHistory
   }
 
   def exercice {
@@ -201,7 +202,7 @@ object ResultsPaper {
     // plotParametersHistory
   }
   def sensitivityAnalysis {
-    val cal = new calibration_results_CI(energy_units = Gigajoules, pib_units = 1)
+    val cal = new calibration_results_CI(energy_units = Gigajoules, pib_units = 1) //, is2018=true)
 
     println(cal.yf + "\t" + cal.Xe + "\t" + cal.Xf + "\t" + cal.Cf + "\t" + cal.s * cal.pib)
     println("ETA min " + (cal.alpha * cal.ce) / ((1 - cal.s) * cal.e))

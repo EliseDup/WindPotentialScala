@@ -12,7 +12,7 @@ import java.io.PrintStream
 object SolarGrid {
 
   def _0_1deg = apply("../resources/data_solar/0_1deg", Degrees(0.1))
-  def _0_5deg = apply("../resources/data_solar/0_5deg", Degrees(0.5))
+  def _0_5deg = apply("runs_history/solar_2019/0_5deg", Degrees(0.5))
   def _0_5deg_total = apply("../resources/data_solar/0_5deg_total", Degrees(0.5))
 
   def apply(name: String, res: Angle) = {
@@ -112,6 +112,14 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
     if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0
     else {
       tech.eroi(if (tech.directOnly) dni else ghi)
+      //     val out_year = Hours(365 * 24) * potential(tech)
+      //     tech.ee.lifeTime * (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
+    }
+  }
+  def geer(tech: SolarTechnology): Double = {
+    if ((tech.directOnly && dni.value == 0) || ghi.value == 0 || suitableArea(tech).value == 0) 0.0
+    else {
+      tech.geer(if (tech.directOnly) dni else ghi)
       //     val out_year = Hours(365 * 24) * potential(tech)
       //     tech.ee.lifeTime * (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
     }

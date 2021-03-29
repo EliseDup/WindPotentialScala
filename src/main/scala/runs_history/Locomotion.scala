@@ -11,9 +11,27 @@ import solar_energy._
 object Locomotion {
   import Helper._
   import PlotHelper._
-
+  import SolarGrid._
   def main(args: Array[String]): Unit = {
-println( (Terawatts(1.47)*Hours(365*25)).to(Exajoules))
+
+    val grid = _0_5deg.cells
+    val techs = List(PVMono, PVPoly, CSPTowerStorage12h, CSPParabolicStorage12h, CSPParabolic)
+     
+    techs.map(t =>  {
+      val res = SolarPotential_03_2019.listGrossGEER(grid, t)
+      val out_stream = new PrintStream(new java.io.FileOutputStream(res._3+"_grossGEER"))
+      (0 until res._1.size).map(i => out_stream.print(res._1(i) + "\t" +res._2(i) + "\n"))
+      out_stream.close()
+    })
+     techs.map(t =>  {
+      val res = SolarPotential_03_2019.listGEER(grid, t)
+      val out_stream = new PrintStream(new java.io.FileOutputStream(res._3+"_netGEER"))
+      (0 until res._1.size).map(i => out_stream.print(res._1(i) + "\t" +res._2(i) + "\n"))
+      out_stream.close()
+    })
+  // plotPotentialByTechnology(grid.cells, techs, "potential_allTech")
+
+    //println( (Terawatts(1.47)*Hours(365*25)).to(Exajoules))
     /*   val grid = Grid()
 
     val tech = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, PVPoly, CSPTowerStorage12h)
@@ -21,10 +39,10 @@ println( (Terawatts(1.47)*Hours(365*25)).to(Exajoules))
     tech.map(t => printResults(grid.country("Spain"), t, t.name + "_Spain"))
     tech.map(t => printResults(grid.eu28, t, t.name + "_eu28"))
 */
-    RooftopPVPotential.printCF_Potential(Some(List("Spain")), List(PVMono,PVPoly), "Spain")
+    /*    RooftopPVPotential.printCF_Potential(Some(List("Spain")), List(PVMono,PVPoly), "Spain")
     RooftopPVPotential.printCF_Potential(Some(Grid().eu28countries), List(PVMono,PVPoly), "EU28")
     RooftopPVPotential.printCF_Potential(None, List(PVMono,PVPoly), "World")
-    
+*/
   }
 
   def printResults(grid: List[Cell], tech: RenewableTechnology, output_file: String = "") {

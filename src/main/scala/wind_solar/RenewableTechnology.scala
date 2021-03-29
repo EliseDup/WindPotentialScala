@@ -39,6 +39,16 @@ trait RenewableTechnology {
       out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
     }
   }
+  // EROI point of use : including distribution losses at the numerator and denominator
+  def eroi_pou(cell: Cell, eroi_min: Double, distr_losses : Double): Double = {
+    val wi = ratedPower(cell, eroi_min)
+    if (wi.value == 0) 0.0
+    else {
+      val out_year = potential(cell, eroi_min) * Hours(365 * 24)
+      out_year * (1 - distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year *distr_losses * lifeTime)
+    }
+  }
+  
   def geer(cell: Cell, eroi_min: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0

@@ -23,8 +23,13 @@ object SolarPotential_03_2019 {
   import SolarPower._
 
   def main(args: Array[String]): Unit = {
-    printResultsForPaper(5)
-    plotResultsForPaper
+
+    val grid = _0_5deg
+    val techs = List(PVMono, PVPoly, CSPTowerStorage12h, CSPParabolicStorage12h, CSPParabolic)
+    plotPotentialByTechnology(grid.cells, techs, "potential_allTech")
+
+    //  printResultsForPaper(5)
+    //  plotResultsForPaper
     //val grid = _0_5deg
     //(1 to 20).map(i => println(i / 2.0 + "\t" + potential(grid.cells, List(PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h), i / 2.0).to(Exajoules)))
     print("-End-")
@@ -119,9 +124,20 @@ object SolarPotential_03_2019 {
   def plotPotentialByTechnology(grid: List[SolarCell], techs: List[SolarTechnology], title: String) {
     plotXY(techs.map(t => listEROI(grid, t)), xLabel = "Net Potential [EJ/year]", yLabel = "EROI", legend = true, title = title)
   }
-
+ def listGrossEROI(g: List[SolarCell], tech: SolarTechnology) = {
+    val res = Helper.listValueVSCumulated(g.filter(g => g.grossYearlyProduction(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.grossYearlyProduction(tech)).to(Exajoules))))
+    (res._1, res._2, tech.name)
+  }
   def listEROI(g: List[SolarCell], tech: SolarTechnology) = {
     val res = Helper.listValueVSCumulated(g.filter(g => g.netYearlyProduction(tech).value > 0 && g.eroi(tech) >= 1).map(g => (g.eroi(tech), (g.netYearlyProduction(tech)).to(Exajoules))))
+    (res._1, res._2, tech.name)
+  }
+  def listGrossGEER(g: List[SolarCell], tech: SolarTechnology) = {
+    val res = Helper.listValueVSCumulated(g.filter(g => g.grossYearlyProduction(tech).value > 0 && g.geer(tech) >= 1).map(g => (g.geer(tech), (g.grossYearlyProduction(tech)).to(Exajoules))))
+    (res._1, res._2, tech.name)
+  }
+  def listGEER(g: List[SolarCell], tech: SolarTechnology) = {
+    val res = Helper.listValueVSCumulated(g.filter(g => g.netYearlyProduction(tech).value > 0 && g.geer(tech) >= 1).map(g => (g.geer(tech), (g.netYearlyProduction(tech)).to(Exajoules))))
     (res._1, res._2, tech.name)
   }
   def listEROI(g: List[SolarCell], tech: CSP, sm: Double) = {
@@ -188,7 +204,7 @@ object SolarPotential_03_2019 {
         val installed = c.installedCapacity(tech)
         val inputs = tech.embodiedEnergyArea(installed, SquareKilometers(1))
         val oe = tech.ee.om_output * output * tech.lifeTime
-        log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe.to(Petajoules)  + "\t" + c.suitableArea(tech).toSquareKilometers +
+        log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe.to(Petajoules) + "\t" + c.suitableArea(tech).toSquareKilometers +
           "\t" + !tech.directOnly + "\t")
       })
       // MAX
@@ -197,7 +213,7 @@ object SolarPotential_03_2019 {
       val installed = c.installedCapacity(tech)
       val inputs = tech.embodiedEnergyArea(installed, SquareKilometers(1))
       val oe = tech.ee.om_output * output * tech.lifeTime
-      log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe.to(Petajoules)  + "\t" + c.suitableArea(tech).toSquareKilometers +
+      log.print(c.eroi(tech) + "\t" + output.to(Petajoules) + "\t" + installed.toMegawatts + "\t" + inputs.to(Petajoules) + "\t" + oe.to(Petajoules) + "\t" + c.suitableArea(tech).toSquareKilometers +
         "\t" + !tech.directOnly + "\t")
 
       log.print("\n")

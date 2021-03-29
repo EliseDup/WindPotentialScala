@@ -16,11 +16,15 @@ object DynamicXi {
   import Helper._
 
   //val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
-  val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
+  val calib = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent)
+  // 25.24983528	2014; 25.14540248	2015; 24.60340247	2016; 25.11652131	2017; 25.12194625	2018
+  val s_mean = 25.04742156 / 100 // Moyenne sur les 5 dernières années
+  // 2014	6.67312E+13	0.022310922; 2015	6.82385E+13	0.022588086; 2016	6.95244E+13	0.018844587; 2017	7.13437E+13	0.026167084; 2018	7.3014E+13	0.023412906
+  val gK_mean = 0.022664717 // Moyenne sur les 5 dernières années
 
-  val dyn_1 = new Dynamic_s_eta(calib.s, calib.eta)
-  val dyn_2b = new Dynamic_s_gamma_b(calib.s, calib.gammab)
-  val dyn_3 = new Dynamic_gk_eta(calib.gK, calib.eta)
+  val dyn_1 = new Dynamic_s_eta(s_mean, calib.eta)
+  val dyn_2b = new Dynamic_s_gamma_b(s_mean, calib.gammab)
+  val dyn_3 = new Dynamic_gk_eta(gK_mean, calib.eta)
 
   val ye_0 = calib.ye.to(calib.energy_units)
   val qf_0 = calib.qf; val qf_f = calib.qf * 0.5; val ye_f = 3 * ye_0
@@ -29,7 +33,7 @@ object DynamicXi {
   val ye_40_bau = ye_0 * 1.3 // math.pow(1 + 0.0116, t_lim)
 
   val bau = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, ye_40_bau, ye_f, t_lim), "BAU")
-  val bau_old = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 13986.655116005899, ye_f, t_lim), "BAU_old")
+  val bau_old = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 13986.655116005899, ye_f, t_lim), "BAU")
   // val np = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.58 * 0.85 / 0.64, qf_f, t_lim), new ParamsScenarioLogistic(ye_0, 12581, ye_f, t_lim), "NP")
   val sd = new Scenario(new ParamsScenario(qf_0, qf_0 * 0.85 * 0.45 / 0.64, qf_f, t_lim), new ParamsScenario(ye_0, ye_0, ye_0, t_lim), "SD")
 
@@ -38,19 +42,7 @@ object DynamicXi {
   }
 
   def main(args: Array[String]): Unit = {
-    /* */
-    // dyn_1.simulate_int(calib, bau, 600, false, Some(1.0))
-    //dyn_2b.simulate_int(calib, bau, 250, false, Some(1.0))
-    //dyn_3.simulate_int(calib, bau, 50, false, false)
-    //dyn_3.simulate_int(calib, bau, 91, false, false)
-    //  dyn_2b.simulate_int(calib, bau, 10,false)
-    //  dyn_3.simulate_int(calib, bau, 10,false)
 
-    //dyn_1.simulate_int(calib, bau, 600, true)
-    //qf_detailed_results(100, bau)
-    //qf_detailed_results(100, sustainable_dev)
-    //qf_detailed_results(100, new_policies)
-    // plotDetailedResults(List(("res_BAU1", "BAU"), ("res_New Policies1", "NP"), ("res_Sustainable Dev1", "SD")))
   }
 
   def plotScenarios(dyn: Dynamic_Params, ny: Int, name: String = "") {

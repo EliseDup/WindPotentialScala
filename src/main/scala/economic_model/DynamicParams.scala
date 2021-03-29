@@ -113,8 +113,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
     val k_interval = scala.collection.mutable.ArrayBuffer.empty[Interval];
     val gK, s, K, k, x, qf, ye = scala.collection.mutable.ArrayBuffer.empty[Double];
     val z = scala.collection.mutable.ArrayBuffer.empty[Z_xi];
-    x += 0.0; qf += z0.qf; s += calib.s;
-
+    x += 0.0; qf += z0.qf; 
     val ye0 = calib.ye.to(calib.energy_units)
     ye += ye0
 
@@ -126,6 +125,8 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
     val delta = mu * z0.deltae + (1 - mu) * z0.deltaf
     z += new Z_xi(z0.ve, z0.vf, z0.qe, z0.qf, z0.xe, z0.xf, z0.deltae, z0.deltaf, delta)
     gK += gK_k(k.last, z.last);
+    s += s_k(k.last, calib.z) //calib.s;
+    
     // Variables de résultats -> à mettre à jour chaque année
     val model = new ModelResults(calib, this)
     model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
@@ -181,22 +182,22 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
         // Calculated model parameters
         // !! We need the new delta before calculating gK
         model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
-        //println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last+ "\t" + model.mu.last+ "\t" +ye.last + "\t" +qf.last)
+        //println(s.last + "\t" + x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last+ "\t" + model.mu.last+ "\t" +ye.last + "\t" +qf.last)
         //println(y + "\t" + ye.last + "\t" + qf.last + "\t" + x.last + "\t" + k.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
 
       }
     }
 
-    println(x.last + "\t" + qf.last/calib.qf + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
+      println(x.last + "\t" + qf.last/calib.qf + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
     val last = x.toList.size - 2
     //println("Values in Tf-1")
-    //println(x.toList(last) + "\t" + k.toList(last) + "\t" + gK.toList(last) + "\t" + model.mu.toList(last) + "\t" + s.toList(last) + "\t" + model.p.toList(last)/calib.p)
+   //println(x.toList(last) + "\t" + k.toList(last) + "\t" + gK.toList(last) + "\t" + model.mu.toList(last) + "\t" + s.toList(last) + "\t" + model.p.toList(last)/calib.p)
 
     val years_new = if (!end) years else (calib.year until endYear.get).toList
 
     if (plot) {
       plot_(years_new, x, "x_" + toString());
-       plot_(years_new, gK, "gK_" + toString());
+       plotXY(List((years_new.map(_.toDouble), gK.toList, "gK_" + toString()),(years_new.map(_.toDouble), model.g_pib, "g_" + toString())), legend=true);
       // plot_(years_new, s, "s_" + toString());
       /*plotXY(List((years_new.map(_.toDouble), model.VAe.toList, "VAe"), (years_new.map(_.toDouble), model.VANe.toList, "VANe"),
         (years_new.map(_.toDouble), model.VAf.toList, "VAf"), (years_new.map(_.toDouble), model.VANf.toList, "VANf"),

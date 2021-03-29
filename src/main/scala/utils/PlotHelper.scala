@@ -23,6 +23,7 @@ import java.awt.image.BufferedImage
 import java.awt.geom._
 import java.awt.BasicStroke
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.io.FileOutputStream
 import com.sun.image.codec.jpeg.JPEGCodec
 import org.jfree.util.ShapeUtilities
@@ -32,6 +33,7 @@ import com.itextpdf.text.pdf.PdfWriter
 import com.itextpdf.awt.DefaultFontMapper
 import com.itextpdf.text.pdf.codec.Base64.OutputStream
 import java.awt.geom.Ellipse2D;
+import java.util.Locale
 
 object PlotHelper {
 
@@ -104,25 +106,30 @@ object PlotHelper {
     val min = xys.map(_._2).flatten.min
 
     // Add point instead of a straight line, serie #3 in the example of ResultsPaper_PER.plotCTExample
-  /*  val r = new XYLineAndShapeRenderer();
+    /*   val r = new XYLineAndShapeRenderer();
     r.setSeriesShape(0, new Ellipse2D.Double(-2, -2, 4, 4));
     r.setSeriesShapesVisible(0, true);
     r.setBaseShapesFilled(true);
     plot.setRenderer(0, r);
-    * /
-    */
-    
+ */
+
     // If years !!
     if (int_x_axis) {
       val format = new DecimalFormat("####");
       plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(format)
     }
-    if(min >= 2017){
-         val format = new DecimalFormat("####");
+    if (min >= 2017) {
+      val format = new DecimalFormat("####");
       plot.getRangeAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(format)
-      plot.getRangeAxis().setRange(min,max)
+      plot.getRangeAxis().setRange(min, max)
     }
-    // plot.getRangeAxis().setRange(1,xys.map(_._2).flatten.max)
+
+    val dec_format = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.US));
+    val int_format = new DecimalFormat("####");
+   //	plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(int_format)
+   // plot.getRangeAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(int_format)
+
+    //plot.getRangeAxis().setRange(xys.map(_._2).flatten.min,xys.map(_._2).flatten.max)
     //plot.getDomainAxis().setRange(2017, xys.map(_._1).flatten.max)
     if (drawPlot)
       createFrame(chart, name = title, save = save, tick = tick)
@@ -232,7 +239,7 @@ object PlotHelper {
     frame.pack()
     frame.setVisible(true)
   }
-  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf: Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean =false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf: Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
     applyChartTheme(chart, tick)
 
@@ -248,7 +255,7 @@ object PlotHelper {
           r.setSeriesPaint(i, Color.BLACK)
           r.setSeriesStroke(i, dashed(i))
         }
-            }
+      }
       r.setBaseShapesVisible(false);
       r.setBaseShapesFilled(true);
       r.setDrawSeriesLineAsPath(true);

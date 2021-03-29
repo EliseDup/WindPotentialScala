@@ -12,7 +12,7 @@ case class Z_xi(ve: Double, vf: Double, qe: Double, qf: Double, xe: Double, xf: 
 
 class calibration_results_CI(
     val alpha: Double = 0.06, val eta: Double = 4.0 / 100, val zf: Double = 0.5,
-    val year: Int = 2017, val Tf: Int = 20, val Te: Int = 25, val mu: Double = 280.0 / 4280,
+    val year: Int = 2018, val Tf: Int = 20, val Te: Int = 25, val mu: Double = 280.0 / 4280,
     val energy_units: EnergyUnit = MegaTonOilEquivalent, val pib_units: Int = 1E9.toInt,
     val pop_units: Int = 1E6.toInt, val is2018: Boolean = false) {
   

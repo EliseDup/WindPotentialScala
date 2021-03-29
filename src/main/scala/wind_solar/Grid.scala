@@ -11,12 +11,12 @@ import solar_energy._
 import wind_energy._
 import wind_energy.WindTechnology
 import PlotHelper._
+
 object Grid {
 
   def apply(name: String) = new Grid(name, Degrees(0.75), (2 until 40).map(_ * 0.5).toList)
   def apply(): Grid = apply("runs_history/wind_solar_2019/wind_solar_0_75")
   def eu(): Grid = apply("runs_history/wind_solar_2019/eu28_wind_solar_0_75")
-
   def main(args: Array[String]): Unit = {
     val grid = Grid()
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono)
@@ -33,11 +33,9 @@ object Grid {
       prod_total += res._1; self_cons_total += res._2; energy_inputs_total += res._3;
       (prod_total, prod_total / energy_inputs_total, self_cons_total / prod_total)
     })
-
     plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(_._2), "")), xLabel = "Total Production [EJ/year]", yLabel = "EROI")
     plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(_._3 * 100), "")), xLabel = "Total Production [EJ/year]", yLabel = "Self Consumption [%]")
     plotXY(List((eroi_qe.map(_._1.to(Exajoules)), eroi_qe.map(e => ve(e._2, e._3)), "")), xLabel = "Total Production [EJ/year]", yLabel = "ve")
-
   }
   def production_selfcons_ee(c: Cell, techs: List[RenewableTechnology]): (Energy, Energy, Energy) = {
     val prod = techs.map(t => t.potential(c, 1) * Hours(365 * 24)).foldLeft(WattHours(0))(_ + _)
@@ -52,6 +50,8 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   import Helper._
   import PlotHelper._
 
+  val python_folder = "../" //../WindPotentialPython/"
+
   val cells: List[Cell] = Helper.getLines(name).map(Cell(_, gridSize, eroi_min))
 
   def country(c: String) = cells.filter(_.isCountry(c))
@@ -63,6 +63,8 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   // List eroi vs cumulated potential for a given renewable technology
   def eroi_potential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double) = listValueVSCumulated(cells.filter(c => tech.eroi(c, eroi_min) >= eroi_min).map(c => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))))
   def eroi_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1))))
+  def eroi_pou_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double, distr_losses : Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi_pou(c, eroi_min, distr_losses), (tech.potential(c, eroi_min) * (1-distr_losses) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1))))
+  def geer_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.geer(c, eroi_min), (tech.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1))))
 
   def eroi_netpotential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): (List[Double], List[Double]) = eroi_netpotential(cells, List(tech), eroi_min)
   def eroi_netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi(c, eroi_min), tech.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1))))
@@ -71,9 +73,12 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   // List eroi vs cumulated net potential for the technology maximising the EROI
   def netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), t.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1)._2).sum
 
-    def potential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): Double = potential(cells, List(tech), eroi_min)
+  def potential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): Double = potential(cells, List(tech), eroi_min)
+  def potential_pou(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double, distr_losses: Double): Double = potential_pou(cells, List(tech), eroi_min, distr_losses)
+  
   // List eroi vs cumulated net potential for the technology maximising the EROI
-  def potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), (t.potential(c, eroi_min)*Hours(365*24)).to(Exajoules))).maxBy(_._1)._2).sum
+  def potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), (t.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1)._2).sum
+  def potential_pou(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double, distr_losses: Double): Double = cells.map(c => techs.map(t => (t.eroi_pou(c, eroi_min,distr_losses), (t.potential(c, eroi_min) * (1-distr_losses)* Hours(365 * 24)).to(Exajoules))).maxBy(_._1)._2).sum
 
   def installedCapacity(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): Double = installedCapacity(cells, List(tech), eroi_min)
   def installedCapacity(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), t.ratedPower(c, eroi_min).to(Gigawatts))).maxBy(_._1)._2).sum
@@ -81,8 +86,14 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   // List eroi vs cumulated net potential for the sum of the technologies (for technologies that can be combined, i.e. solar and wind)
   def sum_netpotential(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double): Double =
     cells.map(c => techs.map(tech => tech.map(t => (t.eroi(c, eroi_min), t.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1)._2).sum).sum
-def sum_potential(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double): Double =
-    cells.map(c => techs.map(tech => tech.map(t => (t.eroi(c, eroi_min), (t.potential(c, eroi_min)*Hours(365*24)).to(Exajoules))).maxBy(_._1)._2).sum).sum
+  def sum_potential(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double): Double =
+    cells.map(c => techs.map(tech => tech.map(t => (t.eroi(c, eroi_min), (t.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1)._2).sum).sum
+
+  def sum_potential_geer(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double): Double =
+    cells.map(c => techs.map(tech => tech.map(t => (t.geer(c, eroi_min), (t.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1)._2).sum).sum
+
+  def sum_potential_pou(cells: List[Cell], techs: List[List[RenewableTechnology]], eroi_min: Double, distr_losses: Double): Double =
+    cells.map(c => techs.map(tech => tech.map(t => (t.eroi_pou(c, eroi_min, distr_losses), (t.potential(c, eroi_min) * (1 - distr_losses) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1)._2).sum).sum
 
   def plot_eroi_netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double) {
     val list = techs.map(t => {
@@ -115,7 +126,7 @@ def sum_potential(cells: List[Cell], techs: List[List[RenewableTechnology]], ero
   def writePotential(tech: RenewableTechnology, eroi_min: List[Double], inclusion: List[Cell] = List()) { eroi_min.map(e => writePotential(tech, e, inclusion)) }
   def writePotential(tech: RenewableTechnology, eroi_min: Double, inclusion: List[Cell]) {
     println("Write potential " + tech.name + " " + eroi_min)
-    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("../WindPotentialPython/wind_solar_grid/" + tech.name + "_" + eroi_min.toInt))
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(python_folder + "wind_solar_grid/" + tech.name + "_" + eroi_min.toInt))
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees +
       "\t" +
       (if ((inclusion.isEmpty || inclusion.contains(c)) && tech.suitabilityFactor(c) > 0 && tech.netYearlyProduction(c, eroi_min).value > 0)
@@ -131,7 +142,7 @@ def sum_potential(cells: List[Cell], techs: List[List[RenewableTechnology]], ero
   }
   def writeWindPotential(eroi_min: Double, inclusion: List[Cell]) {
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology)
-    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("../WindPotentialPython/wind_solar_grid/wind_" + eroi_min.toInt))
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(python_folder + "wind_solar_grid/wind_" + eroi_min.toInt))
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees + "\t" +
       (if (c.isCountry(eu28countries) && OnshoreWindTechnology.suitabilityFactor(c) > 0 && OnshoreWindTechnology.netYearlyProduction(c, eroi_min).value > 0) {
         OnshoreWindTechnology.eroi(c, eroi_min) + "\t" + OnshoreWindTechnology.potential(c, eroi_min).to(Megawatts) / (OnshoreWindTechnology.suitabilityFactor(c) * c.area.toSquareKilometers) + "\t" +
@@ -162,23 +173,27 @@ def sum_potential(cells: List[Cell], techs: List[List[RenewableTechnology]], ero
     // 4 : Wind + PV
     // 5 : Wind + CSP
     def indexTechnology(c: Cell, e: Double): String = {
+
       val res =
         (if (OnshoreWindTechnology.netYearlyProduction(c, e).value > 0 || OffshoreWindTechnology.netYearlyProduction(c, e).value > 0) 1 else 0) +
           (if (PVMono.netYearlyProduction(c, e).value > 0 && PVMono.eroi(c, e) > CSPTowerStorage12h.eroi(c, e)) 10 else 0) +
-          (if (CSPTowerStorage12h.netYearlyProduction(c, e).value > 0 && PVMono.eroi(c, e) < CSPTowerStorage12h.eroi(c, e)) 100 else 0)
+          (if (CSPTowerStorage12h.netYearlyProduction(c, e).value > 0 && CSPTowerStorage12h.eroi(c, e) > PVMono.eroi(c, e)) 100 else 0)
       indexToString(res)
     }
+    // 1 -> 2.0 = Wind Only
+    // 10 -> 4.0 = Solar PV Only
+    // 100 -> 6.0 = CSP Only
+    // 11 ->  8.0 = Wind & PV
+    // 101 -> 10.0 = Wind & CSP
     def indexToString(res: Int): String = {
       if (res == 1) "2.0" else if (res == 10) "4.0" else if (res == 100) "6.0" else if (res == 11) "8.0" else if (res == 101) "10.0" else "0.0"
     }
-
-    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("../WindPotentialPython/wind_solar_grid/technology" + "_" + eroi_min.toInt))
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream(python_folder + "wind_solar_grid/technology" + "_" + eroi_min.toInt))
     cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees +
       "\t" +
       (if ((inclusion.isEmpty || inclusion.contains(c))) indexTechnology(c, eroi_min) else "0.0")
       + "\n"))
     out_stream.close()
-
   }
 
   def printArea(list: List[Cell], factor: Double = 1 / 1E3, sep: String = "\t", header: Boolean = true) {

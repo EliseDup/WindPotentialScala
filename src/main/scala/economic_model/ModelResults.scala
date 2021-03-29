@@ -1,10 +1,11 @@
 package economic_model
 
 import utils.MegaTonOilEquivalent
+import utils.Exajoules
 
 case class DynamicResults(val years: List[Int], val x: List[Double], val k: List[Double], val gK: List[Double], val s: List[Double], val ye: List[Double], val z: List[Z_xi], val theta: List[Double], val start_year: Option[Int], val end_year: Option[Int],
     val model: ModelResults) { //val mu: List[Double], val p_ratio: List[Double], val ce_ratio: List[Double], val cf_ratio: List[Double]) {
-  
+
   val last = x.size - 2
   override def toString() = x(last) + "\t" + k(last) + "\t" + gK(last) + "\t" + s(last) + "\t" + theta + "\t" + end_year + "\t" + model.mu(last) // + "\t" + p_ratio(last) + "\t" + ce_ratio(last) + "\t" + cf_ratio(last)
   val is = (0 until years.size).toList
@@ -18,6 +19,16 @@ case class DynamicResults(val years: List[Int], val x: List[Double], val k: List
     (1 - (z(i).xf + z(i).deltaf * z(i).vf) - model.p(i) * z(i).qf) * xi
   })
   val v = is.map(i => model.K.toList(i) / model.pib.toList(i))
+  def g_v = (1 until v.toList.size).toList.map(i => (v(i) - v(i - 1)) / v(i - 1))
+
+  val ye_EJ = is.map(i => MegaTonOilEquivalent(ye(i)).to(Exajoules))
+  val yer_EJ = is.map(i => ye_EJ(i) * x(i))
+  val yenr_EJ = is.map(i => ye_EJ(i) * (1 - x(i)))
+  val Ef_EJ = is.map(i => MegaTonOilEquivalent(Ef(i)).to(Exajoules))
+  val Ee_EJ = is.map(i => MegaTonOilEquivalent(Ee(i)).to(Exajoules))
+  val Ce_EJ = is.map(i => MegaTonOilEquivalent(model.Ce.toList(i)).to(Exajoules))
+  val YT = is.map(i => model.Yf.toList(i) + model.p.toList(i)*ye(i))
+  
 }
 
 class ModelResults(calib: calibration_results_CI, params: Dynamic_Params) {
@@ -62,9 +73,9 @@ class Scenario(val qf: ParamsScenario, val ye: ParamsScenario, val name: String 
 }
 
 // xt = x0*(1+r)^t => r = (xt/x0)^(1/t) - 1
-class ParamsScenarioConstantRate(x0 : Double, xt : Double, t: Int) extends ParamsScenario(x0, xt, xt, t){
-  val r = math.pow(xt/x0,1.0/t)-1
-  override def old_x(T : Int) = x0*math.pow(1+r,T)
+class ParamsScenarioConstantRate(x0: Double, xt: Double, t: Int) extends ParamsScenario(x0, xt, xt, t) {
+  val r = math.pow(xt / x0, 1.0 / t) - 1
+  override def old_x(T: Int) = x0 * math.pow(1 + r, T)
 }
 
 class ParamsScenario(val x0: Double, val xt: Double, val xf: Double, val t: Int) {
@@ -82,7 +93,6 @@ class ParamsScenario(val x0: Double, val xt: Double, val xf: Double, val t: Int)
   }
   override def toString() = "x0 = " + x0 + " , xt = " + xt + " , xf = " + xf + "," + "rate " + r_old
 }
-
 
 class ParamsScenarioLogistic(x0: Double, xt: Double, xf: Double, t: Int) extends ParamsScenario(x0, xt, xf, t) {
   var new_r = r_old

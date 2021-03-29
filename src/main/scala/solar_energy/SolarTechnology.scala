@@ -44,7 +44,15 @@ trait SolarTechnology extends RenewableTechnology {
       out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + operation_variable * out_year / (1 - operation_variable) * lifeTime)
     }
   }
-
+  override def geer(cell: Cell, eroi_min: Double): Double = {
+    val wi = ratedPower(cell, eroi_min)
+    if (wi.value == 0) 0.0
+    else {
+      val out_year = potential(cell) * Hours(365 * 24)
+      out_year * lifeTime / embodiedEnergy(cell, eroi_min)
+    }
+  }
+  
   def ratedPower(cell: Cell, eroi_min: Double): Power = {
     reflectiveArea(cell) * designPointIrradiance * designEfficiency / max_eroi_sm(solar(cell))
   }
@@ -60,6 +68,11 @@ trait SolarTechnology extends RenewableTechnology {
     val energyPerYear = yearlyProduction(solar, panelArea(ratedPower, solar))
     energyPerYear / (1 - operation_variable) * ee.lifeTime / (embodiedEnergyArea(ratedPower, panelArea(ratedPower, solar)) + energyPerYear / (1 - operation_variable) * operation_variable * ee.lifeTime)
   }
+  def geer(solar: Irradiance) = {
+    val ratedPower = Gigawatts(1)
+    val energyPerYear = yearlyProduction(solar, panelArea(ratedPower, solar))
+    energyPerYear * ee.lifeTime / embodiedEnergyArea(ratedPower, panelArea(ratedPower, solar))
+  }
   def capacityFactor(solar: Irradiance) : Double = (solar.toWattsPerSquareMeter*lifeTimeEfficiency(solar)) / ratedPower(SquareMeters(1), solar).toWatts 
   def potential(solar: Irradiance, panelArea: Area): Power = panelArea * solar * lifeTimeEfficiency(solar)
   def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = potential(solar, panelArea) * Hours(365 * 24)
@@ -68,8 +81,6 @@ trait SolarTechnology extends RenewableTechnology {
   def panelArea(ratedPower: Power, solar: Irradiance): Area = {
     ratedPower / (designPointIrradiance * designEfficiency) * max_eroi_sm(solar)
   }
-
-  
 }
 
 trait PV extends SolarTechnology {
@@ -220,7 +231,7 @@ object CSPParabolicStorage12h extends CSP {
   val transport_variable =Gigajoules(930204)
   val construction_variable = Gigajoules(11434969 + 4412439)
   
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(5415779), Gigajoules(13500041), Gigajoules(220157), Gigajoules(237600), Gigajoules(756412 + 1080164), Gigajoules(183720), 0.15,30)//0.05 + 0.023, 30)
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(5415779), Gigajoules(13500041), Gigajoules(220157), Gigajoules(237600), Gigajoules(756412 + 1080164), Gigajoules(183720), 0.05 + 0.023, 30)//0.15,30)
   }
 
 object CSPTowerStorage12h extends CSP {
@@ -234,5 +245,5 @@ object CSPTowerStorage12h extends CSP {
   val transport_variable = Gigajoules(457262)
   val construction_variable = Gigajoules(7751182 + 3642818)
   
-  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(8053825), Gigajoules(9086794), Gigajoules(220157), Gigajoules(237600), Gigajoules(1196178 + 727130), Gigajoules(183720), 0.15,30) // 0.05 + 0.023, 30)
+  val ee = new EmbodiedEnergy(Gigawatts(1), Gigajoules(8053825), Gigajoules(9086794), Gigajoules(220157), Gigajoules(237600), Gigajoules(1196178 + 727130), Gigajoules(183720), 0.05 + 0.023, 30) // 0.15,30)
   }
