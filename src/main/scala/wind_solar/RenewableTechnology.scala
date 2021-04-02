@@ -45,7 +45,7 @@ trait RenewableTechnology {
     if (wi.value == 0) 0.0
     else {
       val out_year = potential(cell, eroi_min) * Hours(365 * 24)
-      out_year * (1 - distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year *distr_losses * lifeTime)
+      out_year * (1 - distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year * distr_losses * lifeTime)
     }
   }
   

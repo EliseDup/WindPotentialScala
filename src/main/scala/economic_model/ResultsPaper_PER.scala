@@ -31,23 +31,29 @@ object ResultsPaper_PER {
   val e_sub_unicode= "e" // "\u2090"
   
   def main(args: Array[String]): Unit = {
-  dyn_1.simulate_int(calib, bau, 200, true, theta_var_ref(dyn_1,200))
+
+    //  plotMarginalCostCurve()
+
+   println(calib.eroi + "\t" + calib.eroi_std + "\t" + calib.eroi_pou  + "\t" + calib.qe +"\t" +calib.qe_prod + "\t" + calib.ye.to(Exajoules) + "\t"  + calib.ee.to(Exajoules)+ "\t"  + calib.ef.to(Exajoules) )
+ 
+   // dyn_1.simulate_int(calib, bau, 200, true, theta_var_ref(dyn_1,200))
+  // plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
  
   }
     def resPaper{
-  //  computeThetaResults(2050, dyn_1)
-   // computeThetaResults(2100, dyn_1)
+   computeThetaResults(2050, dyn_1)
+    computeThetaResults(2100, dyn_1)
     computeThetaResults(600+calib.year, dyn_1) 
   }
     
   def plotPaper{
-    plotCTExample
-    plotMarginalCostCurve()
+  //  plotCTExample
+  //  plotMarginalCostCurve()
         // Theta variations for ex1
       plotScenarios_theta(2100,dyn_1)
        plotScenarios_theta(600+calib.year,dyn_1)
     // Plot for ex3 with gk = 3%
-   plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
+   // plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
  
    //  plotScenarios_theta(calib.year+600,dyn_1)
      // Res for ex3; theta = 0 and theta = 1
@@ -74,7 +80,7 @@ object ResultsPaper_PER {
    tableScenario(dyn_3,0)
     tableScenario(dyn_3,1)
     plotThetaResults(false)
-     plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
+   //  plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
    
     // Cf comparison for ex3 - BAU and SD 
    // val res_bau = dyn_3.simulate_int(calib, bau, 98, false, theta_var_ref(dyn_3))
@@ -175,13 +181,14 @@ object ResultsPaper_PER {
   class TechnologyCost(file: String, qf : Double, delta_e : Double = 1/25.0) {
     val lines = getLines(file, "\t")
     val ye = lines.map(i => MegaTonOilEquivalent(i(0).toDouble).to(Exajoules))
-    val xe = lines.map(i => MegaTonOilEquivalent(i(1).toDouble).to(Exajoules))
-    val ke = lines.map(i => MegaTonOilEquivalent(i(2).toDouble).to(Exajoules))
+    val ee = lines.map(i => MegaTonOilEquivalent(i(1).toDouble).to(Exajoules))
+    val xe = lines.map(i => MegaTonOilEquivalent(i(2).toDouble).to(Exajoules))
+    val ke = lines.map(i => MegaTonOilEquivalent(i(3).toDouble).to(Exajoules))
     // Repartition / technology [%]
-    val onshore_wind =  (ye, lines.map(i => i(4).toDouble*100),"Onshore Wind")
-    val offshore_wind = (ye, lines.map(i => i(5).toDouble*100),"Offshore Wind")
-    val pv = (ye,lines.map(i => i(6).toDouble*100),"PV")
-    val csp =  (ye,lines.map(i => i(7).toDouble*100),"CSP")
+    val onshore_wind =  (ye, lines.map(i => i(5).toDouble*100),"Onshore Wind")
+    val offshore_wind = (ye, lines.map(i => i(6).toDouble*100),"Offshore Wind")
+    val pv = (ye,lines.map(i => i(7).toDouble*100),"PV")
+    val csp =  (ye,lines.map(i => i(8).toDouble*100),"CSP")
     
     // Iterator which starts from 0 or 1
     val i_0 = (0 until ye.size).toList
@@ -206,13 +213,15 @@ object ResultsPaper_PER {
     
     val ver = i_0.map(i => (ke(i)/(qf*ye(i))))
     val xer = i_0.map(i => (xe(i)/(qf*ye(i))))
+    val qer = i_0.map(i => (ee(i)/ye(i)))
     
   }
   
-  def plotMarginalCostCurve(file: String = "potential_reduced", plotPerTech: Boolean = true) {
+  def plotMarginalCostCurve(file: String = "potential_reduced_pounew", plotPerTech: Boolean = true) {
     val tot = new TechnologyCost(file, calib.qf)
    plotXY(List((tot.ye,tot.ver,"v_re")),  xLabel = "Y"+re_sub_unicode+" [EJ/y]", yLabel = "v"+re_sub_unicode+" [US$ 2010/(GJ/y)]", title="vre")
    plotXY(List((tot.ye,tot.xer,"x_re")),  xLabel = "Y"+re_sub_unicode+" [EJ/y]", yLabel = "x"+re_sub_unicode+" [US$ 2010/GJ]", title="xre")
+    plotXY(List((tot.ye,tot.qer,"q_re")),  xLabel = "Y"+re_sub_unicode+" [EJ/y]", yLabel = "q"+re_sub_unicode+" [GJ/GJ]", title="qre")
         
      // Plot ve, qe et xe
       val (x_x, qe_x, xe_x, ve_x, deltae_x) = dyn_1.x_fun_ye(ye_0, calib.z)
@@ -225,7 +234,7 @@ object ResultsPaper_PER {
       println("vef/ve0" + "\t" + ve_x(f) / calib.z.ve)
       println("xe from " + "\t" + calib.xe + " to " + xe_x(f))
       println("EROI from " + "\t" + calib.eroi + " to " + 1.0 / (qe_x(f) + calib.qf * (ve_x(f) * deltae_x(f) + xe_x(f))))
-  
+  /*
     // Per technology
      if (plotPerTech) {
         plotXY(List((tot.ye, tot.cout_tot, "Total"), (tot.ye, tot.cout_ke, "deKe/Ye"), (tot.ye, tot.cout_xe, "Xe/Ye")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "EJ invested/EJ produced", legend = true, title = "cost")
@@ -245,9 +254,9 @@ object ResultsPaper_PER {
       plotXY(List((tot.ye_1, tot.e_invested_tot, "")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "Energy Invested [EJ/year]", title = "total_Ein")
       plotXY(List((tot.ye_1, tot.xe_tot, "")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "Xe [EJ/year]", title = "total_Xe")
       plotXY(List((tot.ye_1, tot.ke_tot, "")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "deKe [EJ/year]", title = "total_deKe")
-
+*/
      
-    val onshore_wind = new TechnologyCost("potential_reducedonshore_wind", calib.qf)
+  /*  val onshore_wind = new TechnologyCost("potential_reducedonshore_wind", calib.qf)
     val offshore_wind = new TechnologyCost("potential_reducedoffshore_wind", calib.qf)
     val pv = new TechnologyCost("potential_reducedpv", calib.qf)
     val csp = new TechnologyCost("potential_reducedcsp", calib.qf)
@@ -255,8 +264,8 @@ object ResultsPaper_PER {
       (offshore_wind.ye_1, offshore_wind.cout_marg, "Offshore Wind"), (pv.ye_1, pv.cout_marg, "PV"), (csp.ye_1, csp.cout_marg, "CSP")), xLabel = "Final Energy Produced [EJ/year]", yLabel = "Marginal Cost [dEJ/dEJ]", legend = true, title = "marg_cost_per_tech")
      // Repartition 
     plotXY(List(tot.onshore_wind,tot.offshore_wind,tot.pv,tot.csp),xLabel = "Final Energy Produced [EJ/year]", yLabel = "Share [%]", legend = true, title = "tech_share")
-
-     }
+*/
+     
       }
   def plotEcoVariables(dyn: Dynamic_Params, scn: Scenario, ny: Int, theta : Double){
     val name = "_" + dyn.name + "_" + scn.name

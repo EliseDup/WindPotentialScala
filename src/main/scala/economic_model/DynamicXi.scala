@@ -16,7 +16,7 @@ object DynamicXi {
   import Helper._
 
   //val calib = new calibration_results_CI(year = 2017, energy_units = MegaTonOilEquivalent)
-  val calib = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent)
+  val calib = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent, include_dist_losses=true)
   // 25.24983528	2014; 25.14540248	2015; 24.60340247	2016; 25.11652131	2017; 25.12194625	2018
   val s_mean = 25.04742156 / 100 // Moyenne sur les 5 dernières années
   // 2014	6.67312E+13	0.022310922; 2015	6.82385E+13	0.022588086; 2016	6.95244E+13	0.018844587; 2017	7.13437E+13	0.026167084; 2018	7.3014E+13	0.023412906

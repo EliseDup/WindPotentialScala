@@ -85,7 +85,7 @@ object Dynamic {
     gk += calib.gk; qf += calib.qf
     val years = (1 to 50).map(i => i + 2017).toList
     for (y <- years) {
-      x += x.last*1.11
+      x += x.last * 1.11
       qf += qf.last * (1 - qf_rate)
       K += K.last * (1 + gk.last)
       val K_Ye_fun = K_Ye(x.last, qf.last)
@@ -97,9 +97,9 @@ object Dynamic {
       k += K.last / Ye.last
 
       gk += 1 / z0.vf * (1 + n) * s / (1 + s * n) * (1 - ve.last / k.last) - calib.delta
-      
+
       println(Ye.last + "\t" + index_ye)
-      
+
     }
 
     plotXY(List((years.map(_.toDouble), Ye.toList, "")), yLabel = "ye", title = "ye")
@@ -107,7 +107,7 @@ object Dynamic {
     plotXY(List((years.map(_.toDouble), ve.toList, "")), yLabel = "ve", title = "ve")
     plotXY(List((years.map(_.toDouble), K.toList, "")), yLabel = "K", title = "K")
     plotXY(List((years.map(_.toDouble), k.toList, "")), yLabel = "k", title = "k")
- plotXY(List((years.map(_.toDouble), x.toList, "")), yLabel = "x", title = "x")
+    plotXY(List((years.map(_.toDouble), x.toList, "")), yLabel = "x", title = "x")
 
   }
   def _k(z: Z, s: Double, n: Double) = {

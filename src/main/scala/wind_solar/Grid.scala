@@ -65,7 +65,11 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   def eroi_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1))))
   def eroi_pou_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double, distr_losses : Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi_pou(c, eroi_min, distr_losses), (tech.potential(c, eroi_min) * (1-distr_losses) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1))))
   def geer_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.geer(c, eroi_min), (tech.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1))))
-
+  
+  def eroi_pou_sum_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double, distr_losses : Double) = {
+    listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi_pou(c, eroi_min, distr_losses), (tech.potential(c, eroi_min) * (1-distr_losses) * Hours(365 * 24)).to(Exajoules))))).flatten)
+  }
+  
   def eroi_netpotential(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): (List[Double], List[Double]) = eroi_netpotential(cells, List(tech), eroi_min)
   def eroi_netpotential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): (List[Double], List[Double]) = listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi(c, eroi_min), tech.netYearlyProduction(c, eroi_min).to(Exajoules))).maxBy(_._1))))
 
@@ -79,7 +83,7 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   // List eroi vs cumulated net potential for the technology maximising the EROI
   def potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), (t.potential(c, eroi_min) * Hours(365 * 24)).to(Exajoules))).maxBy(_._1)._2).sum
   def potential_pou(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double, distr_losses: Double): Double = cells.map(c => techs.map(t => (t.eroi_pou(c, eroi_min,distr_losses), (t.potential(c, eroi_min) * (1-distr_losses)* Hours(365 * 24)).to(Exajoules))).maxBy(_._1)._2).sum
-
+  
   def installedCapacity(cells: List[Cell], tech: RenewableTechnology, eroi_min: Double): Double = installedCapacity(cells, List(tech), eroi_min)
   def installedCapacity(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double): Double = cells.map(c => techs.map(t => (t.eroi(c, eroi_min), t.ratedPower(c, eroi_min).to(Gigawatts))).maxBy(_._1)._2).sum
 

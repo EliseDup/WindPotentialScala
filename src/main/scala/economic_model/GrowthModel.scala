@@ -26,7 +26,7 @@ object GrowthModel {
   val n = 3000
   val share = (0 to n).map(_ / n.toDouble * 3).toList // n.toDouble).toList
   
-  val distr_losses = 9.5/100
+  val distr_losses = 9.5/100/(1+9.5/100)
   
   val all_sites = {
     val s = System.currentTimeMillis()
@@ -210,11 +210,11 @@ object GrowthModel {
       val sites_for_tech = if (competingTech.isDefined) sites.filter(s => tech.eroi(s, 1) > competingTech.get.eroi(s, 1)) else sites
       val sites_sorted = sites_for_tech.filter(s => tech.suitabilityFactor(s) > 0).sortBy(tech.eroi(_, 1.0)).reverse
       sites_sorted.map(s => {
-        val ye = tech.potential(s, 1.0) * Hours(365 * 24) / (1 - tech.operation_variable)
-        val ee = tech.potential(s, 1.0) * Hours(365 * 24)*tech.operation_variable / (1 - tech.operation_variable)
+        val ye = tech.potential(s, 1.0) * Hours(365 * 24)
+        val ee =  Joules(0) // tech.potential(s, 1.0) * Hours(365 * 24)*tech.operation_variable / (1 - tech.operation_variable)
         val tilde_xe = tech.energyInputsOMYearly(s, 1.0)
         val tilde_ke = tech.directEnergyInputsInstallation(s, 1.0) + tech.indirectEnergyInputsInstallation(s, 1.0) + tech.energyInputsDecomissioning(s, 1.0)
-        ((ee+tilde_xe + tilde_ke / 25.0) / ye, ye, ee, tilde_xe, tilde_ke, 1.0 / 25.0, tech)
+        ((ee+ tilde_xe + tilde_ke / 25.0) / ye, ye, ee, tilde_xe, tilde_ke, 1.0 / 25.0, tech)
       })
     }
     val res = techs.map(t => results(t._1,t._2)).flatten //results(OnshoreWindTechnology) ++ results(OffshoreWindTechnology) ++ results(PVMono, Some(CSPTowerStorage12h)) ++ results(CSPTowerStorage12h, Some(PVMono))
@@ -245,7 +245,7 @@ object GrowthModel {
     val n = res_sorted_cum._1.size / k
 
     (0 until n).map(i => out_stream_simple.print(res_sorted_cum._1(i * k) + "\t" + res_sorted_cum._2(i * k) + "\t" + res_sorted_cum._3(i * k) + "\t" + res_sorted_cum._4(i * k)
-      + "\t" + res_repartition_cum._1(i * k) + "\t" + res_repartition_cum._2(i * k) + "\t" + res_repartition_cum._3(i * k) + "\t" + res_repartition_cum._4(i * k) + "\n"))
+     +"\t" + delta_e + "\t" + res_repartition_cum._1(i * k) + "\t" + res_repartition_cum._2(i * k) + "\t" + res_repartition_cum._3(i * k) + "\t" + res_repartition_cum._4(i * k) + "\n"))
     (0 until n).map(i => {
       val mean_1 = (i * k until (i + 1) * k).map(res_sorted_cum._1(_)).sum / k
       val mean_2 = (i * k until (i + 1) * k).map(res_sorted_cum._2(_)).sum / k
@@ -262,7 +262,9 @@ object GrowthModel {
   }
   
   def simulate_potential_pou(techs : List[(RenewableTechnology,Option[RenewableTechnology])]=
-    List((OnshoreWindTechnology,None),(OffshoreWindTechnology,None),(PVMono, Some(CSPTowerStorage12h)),(CSPTowerStorage12h, Some(PVMono))), name:String="") {
+    // List((OnshoreWindTechnology,None),(OffshoreWindTechnology,None),(PVMono, Some(CSPTowerStorage12h)),(CSPTowerStorage12h, Some(PVMono))), 
+    List((OnshoreWindTechnology,None),(OffshoreWindTechnology,None),(PVMono,None)), 
+    name:String="") {
     
     val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("potential_pou"+name))
     val out_stream_simple = new java.io.PrintStream(new java.io.FileOutputStream("potential_reduced_pou"+name))
@@ -274,10 +276,10 @@ object GrowthModel {
       val sites_for_tech = if (competingTech.isDefined) sites.filter(s => tech.eroi_pou(s, 1, distr_losses) > competingTech.get.eroi_pou(s, 1, distr_losses)) else sites
       val sites_sorted = sites_for_tech.filter(s => tech.suitabilityFactor(s) > 0).sortBy(tech.eroi_pou(_, 1.0, distr_losses)).reverse
       sites_sorted.map(s => {
-        val ye = tech.potential(s, 1.0) * Hours(365 * 24) * (1-distr_losses)
+        val ye = tech.potential(s, 1.0) * Hours(365 * 24) // * (1-distr_losses)
         val tilde_xe = tech.energyInputsOMYearly(s, 1.0)
         val tilde_ke = tech.directEnergyInputsInstallation(s, 1.0) + tech.indirectEnergyInputsInstallation(s, 1.0) + tech.energyInputsDecomissioning(s, 1.0)
-        val ee = tech.potential(s, 1.0) * Hours(365 * 24)  * distr_losses
+        val ee = tech.potential(s, 1.0) * Hours(365 * 24)  * distr_losses // /(1+distr_losses)
         ((ee + tilde_xe + tilde_ke / 25.0) / ye, ye, ee, tilde_xe, tilde_ke, 1.0 / 25.0, tech)
       })
     }

@@ -188,7 +188,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
       }
     }
 
-      println(x.last + "\t" + qf.last/calib.qf + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
+    //  println(x.last + "\t" + qf.last/calib.qf + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
     val last = x.toList.size - 2
     //println("Values in Tf-1")
    //println(x.toList(last) + "\t" + k.toList(last) + "\t" + gK.toList(last) + "\t" + model.mu.toList(last) + "\t" + s.toList(last) + "\t" + model.p.toList(last)/calib.p)
@@ -208,27 +208,31 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
   }
 
   def ye_fun(ye: Double) = {
-    val l = getLines("potential_reduced", "\t")
+    val l = getLines("potential_reduced_pounew", "\t")
     val index = find_index_list(ye, l.map(_(0).toDouble))
-    val tildeK1 = l(index)(2).toDouble; val tildeK2 = l(index + 1)(2).toDouble;
-    val tildeX1 = l(index)(1).toDouble; val tildeX2 = l(index + 1)(1).toDouble;
+    val Ee1 = l(index)(1).toDouble; val Ee2 = l(index + 1)(1).toDouble;
+    val tildeX1 = l(index)(2).toDouble; val tildeX2 = l(index + 1)(2).toDouble;
+    val tildeK1 = l(index)(3).toDouble; val tildeK2 = l(index + 1)(3).toDouble;
     val Ye1 = l(index)(0).toDouble; val Ye2 = l(index + 1)(0).toDouble;
     val newTildeK = tildeK1 + (ye - Ye1) * (tildeK2 - tildeK1) / (Ye2 - Ye1)
     val newTildeX = tildeX1 + (ye - Ye1) * (tildeX2 - tildeX1) / (Ye2 - Ye1)
+    val newEe = Ee1 + (ye - Ye1) * (Ee2 - Ee1) / (Ye2 - Ye1)
+    
     val lines = l.filter(i => (i(0).toDouble <= ye))
 
     (lines.map(i => (i(0).toDouble)) ++ List(ye),
-      lines.map(i => (i(1).toDouble)) ++ List(newTildeX),
-      lines.map(i => (i(2).toDouble)) ++ List(newTildeK),
-      lines.map(i => (i(3).toDouble)) ++ List(1 / 25.0))
+         lines.map(i => (i(1).toDouble)) ++ List(newEe),
+        lines.map(i => (i(2).toDouble)) ++ List(newTildeX),
+      lines.map(i => (i(3).toDouble)) ++ List(newTildeK),
+      lines.map(i => (i(4).toDouble)) ++ List(1 / 25.0))
   }
 
   def x_fun_ye(ye: Double, z0: Z_xi) = {
-    val (ye_re, tilde_xe, tilde_ke, delta_e) = ye_fun(ye)
+    val (ye_re, ee, tilde_xe, tilde_ke, delta_e) = ye_fun(ye)
     val res = (0 until ye_re.size).toList.map(i => {
       val x = ye_re(i) / ye
       val ve = if (x == 0) z0.ve else x * tilde_ke(i) / (z0.qf * ye_re(i)) + (1 - x) * z0.ve
-      val qe = if (x == 0) z0.qe else (1 - x) * z0.qe
+      val qe = if (x == 0) z0.qe else x* ee(i)/ye_re(i) + (1 - x) * z0.qe
       val xe = if (x == 0) z0.xe else x * tilde_xe(i) / (z0.qf * ye_re(i)) + (1 - x) * z0.xe
       val de = if (x == 0) z0.deltae else x * delta_e(i) + (1 - x) * z0.deltae
       (x, qe, xe, ve, de)

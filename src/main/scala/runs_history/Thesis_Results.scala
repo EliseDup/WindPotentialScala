@@ -12,17 +12,18 @@ import wind_solar._
 import wind_energy._
 import solar_energy._
 
-object ECOS2019 {
+object Thesis_Results {
   import PlotHelper._
   import Helper._
   def main(args: Array[String]): Unit = {
     var t = System.currentTimeMillis()
-    val grid = Grid.eu()
+     val grid = Grid.eu()
     val cells = grid.eu28
-    println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
-    //plotGrossResults(grid,cells)
+   println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
+    val distr_losses = 9.5/100/(1+9.5/100)
+    plotGrossResults_pou(grid,cells,distr_losses)
 
-    ECOSPaperResults
+    //ECOSPaperResults
     //val eroi = List(7.5,8.5,9.5).map(_.toDouble)
     //grid.writeTechnology(eroi.map(_.toDouble), cells)
   }
@@ -146,17 +147,25 @@ object ECOS2019 {
       val res = grid.eroi_pou_potential(cells, List(PVMono, PVPoly), 1, distr_losses)
       (res._1, res._2, "Solar")
     }
-    // val total = grid.sum_potential_pou(cells, List(List(OnshoreWindTechnology), List(OffshoreWindTechnology), List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)), 1, distr_losses)
+   val total = {
+     val res = grid.eroi_pou_sum_potential(cells, List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono), 1, distr_losses)
+     (res._1, res._2, "Total")
+   }
     //plotXY(List(windPotential, solarPot, total), legend = true, yLabel = "EROIpou", xLabel = "Potential [EJ/year]", title = "wind_solar_tot_GrossPotentialpou")
 
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
-    //   val onshorepotential = (eroi_min.map(e => grid.potential_pou(cells, OnshoreWindTechnology, e, distr_losses)), eroi_min, OnshoreWindTechnology.name)
-    //   val offshorepotential = (eroi_min.map(e => grid.potential_pou(cells, OffshoreWindTechnology, e, distr_losses)), eroi_min, OffshoreWindTechnology.name)
+    val listWind = List(OnshoreWindTechnology, OffshoreWindTechnology).map(t => {
+      val res = grid.eroi_pou_potential(cells, List(t), 1, distr_losses)
+      (res._1,res._2,t.name)
+    })
     val listSolar = List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h).map(t => solarGrossPotential_pou(List(t), grid, cells, t.name, distr_losses))
 
     // plotXY(List(windPotential, onshorepotential, offshorepotential), legend = true, yLabel = "EROIpou", xLabel = "Potential [EJ/year]", title = "windGrossPotentialpou")
-    plotXY(listSolar, legend = true, yLabel = "EROIpou", xLabel = "Potential [EJ/year]", title = "solarGrossPotentialpou")
-    plotXY(List(windPotential, solarPot), legend = true, yLabel = "EROIpou", xLabel = "Potential [EJ/year]", title = "wind_solarGrossPotentialpou")
+    plotXY(listSolar, legend = true, yLabel = "EROIpou", xLabel = "Electricity distributed [EJ/year]", title = "solarEROIpou")
+    plotXY(listWind, legend = true, yLabel = "EROIpou", xLabel = "Electricity distributed [EJ/year]", title = "windEROIpou")
+    plotXY(List(total), yLabel = "EROIpou", xLabel = "Electricity distributed [EJ/year]", title = "totalpou")
+    
+    plotXY(List(windPotential, solarPot), legend = true, yLabel = "EROIpou", xLabel = "Electricity distributed [EJ/year]", title = "wind_solarEROIpou")
     // plotXY(List(total), yLabel = "EROIpou", xLabel = "Potential [EJ/year]", title = "totalGrossPotentialpou")
   }
 }

@@ -14,20 +14,28 @@ class calibration_results_CI(
     val alpha: Double = 0.06, val eta: Double = 4.0 / 100, val zf: Double = 0.5,
     val year: Int = 2018, val Tf: Int = 20, val Te: Int = 25, val mu: Double = 280.0 / 4280,
     val energy_units: EnergyUnit = MegaTonOilEquivalent, val pib_units: Int = 1E9.toInt,
-    val pop_units: Int = 1E6.toInt, val is2018: Boolean = false) {
+    val pop_units: Int = 1E6.toInt, val include_dist_losses: Boolean = true) {
   
   import Helper._
   // Observed data
   val data_folder = "../model_data/"
-  val lines = getLines(data_folder + (if (is2018) "data_calibration_2018" else "data_calibration_xi_old"), "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100)) //, i(7).toDouble, i(8).toDouble, i(9).toDouble))
-  val (year_data, pib_dollars, oeu, neu, e_neu, ce, s) = lines.find(_._1 == year).get
+  val lines = //getLines(data_folder + (if (include_dist_losses) "data_calibration_2018" else "data_calibration_xi_old"), "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100)) //, i(7).toDouble, i(8).toDouble, i(9).toDouble))
+   getLines(data_folder + "data_calibration_new", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100,MegaTonOilEquivalent(i(10).toDouble))) //, i(7).toDouble, i(8).toDouble, i(9).toDouble))
+
+  val (year_data, pib_dollars, oeu, neu, e_neu, ce, s, e_dist) = lines.find(_._1 == year).get
   val pib = pib_dollars / pib_units;
   val pib_before = if(year ==1990) 38015493765413.9/pib_units else lines.find(_._1 == (year - 1)).get._2 / pib_units;
   val g = (pib - pib_before) / pib_before
-  val frac_neu = neu / e_neu; val ye = e_neu - neu + oeu
-  val ee = if (is2018) (1 - frac_neu) * MegaTonOilEquivalent(839.185) + MegaTonOilEquivalent(222.503) else (1-frac_neu) * oeu
+  val ee_dist = if(include_dist_losses) e_dist else Joules(0)
+  val frac_neu = neu / e_neu;
+  val ee_prod = (1-frac_neu)*oeu
+  val ee = ee_dist + ee_prod
+  val ye = e_neu - neu + oeu + ee_dist
+  //val ee = if (include_dist_losses) (1 - frac_neu) * MegaTonOilEquivalent(839.185) + MegaTonOilEquivalent(222.503) else (1-frac_neu) * oeu
+  
   val qe = ee / ye; val ef = ye - ee - ce; val e = ye - ee
-
+  val qe_prod = ee_prod / ye;
+  
   val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
   val delta = mu * delta_e + (1 - mu) * delta_f
 
@@ -62,7 +70,9 @@ class calibration_results_CI(
   // val cf = yf - s * pib
 
   val eroi = 1 / (qe + (xe + delta_e * ve) * qf)
-
+  val eroi_std =  1 / (qe_prod + (xe + delta_e * ve) * qf)
+    val eroi_pou =  (1-qe) / (qe + (xe + delta_e * ve) * qf)
+    
   val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f, delta)
 
   // val ner = (1 - z.qe)*(1 - (xf + z.deltaf * z.vf)) - z.qf*(z.deltae * z.ve + xe)
