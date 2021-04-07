@@ -66,8 +66,8 @@ object DynamicXi {
     val delta_list = res.map(i => (years_pib(i._1), i._1.z.map(_.delta * 100), i._2))
     plotXY(delta_list, legend = true, yLabel = "delta [%]", title = "delta_" + name)
 
-    val eroi_list = res.map(i => (years_pib(i._1), i._1.model.eroi.toList, i._2))
-    plotXY(eroi_list, legend = true, yLabel = "EROI", title = "eroi_" + name)
+    val eroi_list = res.map(i => (years_pib(i._1), i._1.model.eroi_pou.toList, i._2))
+    plotXY(eroi_list, legend = true, yLabel = "EROI pou", title = "eroi_" + name)
     val ner_list = res.map(i => (years_pib(i._1), i._1.model.ner.toList.map(_ * 100), i._2))
     plotXY(ner_list, legend = true, yLabel = "NER [%]", title = "ner_" + name)
 

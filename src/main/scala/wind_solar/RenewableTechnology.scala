@@ -17,7 +17,7 @@ trait RenewableTechnology {
 
   // Operational electricity should be directly removed from potential as it never gets out of the facility ..
   def potential(cell: Cell, eroi_min: Double): Power;
-
+  
   val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
   def suitabilityFactor(cell: Cell): Double = {
     if (excludedCountries.contains(cell.country) || cell.country.contains("Is.") || cell.country.contains("Islands")) 0.0
@@ -31,6 +31,7 @@ trait RenewableTechnology {
     else Joules(0)
 
   // In EROI calculation we take into account operation variable in the numerator and denominator !
+  // It corresponds to EROI standard.
   def eroi(cell: Cell, eroi_min: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0
@@ -48,7 +49,15 @@ trait RenewableTechnology {
       out_year * (1 - distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year * distr_losses * lifeTime)
     }
   }
-  
+    def eroi_pou_internal(cell: Cell, eroi_min: Double, distr_losses : Double): Double = {
+    val wi = ratedPower(cell, eroi_min)
+    if (wi.value == 0) 0.0
+    else {
+      val out_year = potential(cell, eroi_min) * Hours(365 * 24)
+      out_year * (1 - distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year * ((1 - operation_variable) * operation_variable + distr_losses) * lifeTime)
+    }
+  }
+    
   def geer(cell: Cell, eroi_min: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0

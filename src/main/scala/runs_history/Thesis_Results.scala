@@ -17,17 +17,40 @@ object Thesis_Results {
   import Helper._
   def main(args: Array[String]): Unit = {
     var t = System.currentTimeMillis()
-     val grid = Grid.eu()
+    val grid = Grid.eu()
     val cells = grid.eu28
-   println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
-    val distr_losses = 9.5/100/(1+9.5/100)
-    plotGrossResults_pou(grid,cells,distr_losses)
+    println("Grid loaded in " + (System.currentTimeMillis() - t) / 1000.0 + " seconds")
+    val distr_losses = 9.5 / 100 / (1 + 9.5 / 100)
+
+    // plotGrossResults_pou(grid, cells, distr_losses)
+
+    plotXY(List(solarGrossPotential(List(CSPTowerStorage12h), grid, cells, "csp_std"),
+      solarGrossPotential_pou(List(CSPTowerStorage12h), grid, cells, "csp_pou", distr_losses),
+      solarGrossPotential_geer(List(CSPTowerStorage12h), grid, cells, "csp_geer")), legend = true)
+
+    plotXY(List(solarGrossPotential(List(PVMono), grid, cells, "csp_std"),
+      solarGrossPotential_pou(List(PVMono), grid, cells, "csp_pou", distr_losses)))
 
     //ECOSPaperResults
     //val eroi = List(7.5,8.5,9.5).map(_.toDouble)
     //grid.writeTechnology(eroi.map(_.toDouble), cells)
   }
 
+  def plotDistLosses {
+    val lines = getLines("../model_data/data_distribution_losses", "\t").map(i => (i(0).toInt, MegaTonOilEquivalent(i(1).toDouble), MegaTonOilEquivalent(i(2).toDouble)))
+    val year = lines.map(_._1)
+    val elec_cons = lines.map(_._2)
+    val elec_losses = lines.map(_._3)
+    val ratio = (0 until elec_cons.size).toList.map(i => (elec_losses(i) / elec_cons(i)) * 100)
+
+    plotXY(List((year.map(_.toDouble), ratio, ""), (year.map(_.toDouble), year.map(i => ratio.sum / ratio.size), "a")), yLabel = "Losses / Electricity Consumption [%]", int_x_axis = true)
+
+    val sub_list = (0 until 10).map(i => year.size - 10 + i).toList
+    val sub_y = sub_list.map(i => year(i).toDouble)
+    val sub_ratio = sub_list.map(i => ratio(i).toDouble)
+    plotXY(List((sub_y, sub_ratio, ""), (sub_y, sub_list.map(i => sub_ratio.sum / sub_ratio.size), "a")), yLabel = "Losses / Electricity Consumption [%]", int_x_axis = true)
+
+  }
   // Results for the paper of ECOS 2019 conference - 15/02/19
   def ECOSPaperResults {
     var t = System.currentTimeMillis()
@@ -61,6 +84,11 @@ object Thesis_Results {
   }
   def solarGrossPotential_pou(techs: List[SolarTechnology], grid: Grid, cells: List[Cell], name: String, distr_losses: Double) = {
     val res = grid.eroi_pou_potential(cells, techs, 1, distr_losses)
+    (res._1, res._2, name)
+  }
+
+  def solarGrossPotential_geer(techs: List[SolarTechnology], grid: Grid, cells: List[Cell], name: String) = {
+    val res = grid.geer_potential(cells, techs, 1)
     (res._1, res._2, name)
   }
   def printPotentialTable(grid: Grid, cells: List[Cell], eroi: List[Double]) {
@@ -147,16 +175,16 @@ object Thesis_Results {
       val res = grid.eroi_pou_potential(cells, List(PVMono, PVPoly), 1, distr_losses)
       (res._1, res._2, "Solar")
     }
-   val total = {
-     val res = grid.eroi_pou_sum_potential(cells, List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono), 1, distr_losses)
-     (res._1, res._2, "Total")
-   }
+    val total = {
+      val res = grid.eroi_pou_sum_potential(cells, List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono), 1, distr_losses)
+      (res._1, res._2, "Total")
+    }
     //plotXY(List(windPotential, solarPot, total), legend = true, yLabel = "EROIpou", xLabel = "Potential [EJ/year]", title = "wind_solar_tot_GrossPotentialpou")
 
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
     val listWind = List(OnshoreWindTechnology, OffshoreWindTechnology).map(t => {
       val res = grid.eroi_pou_potential(cells, List(t), 1, distr_losses)
-      (res._1,res._2,t.name)
+      (res._1, res._2, t.name)
     })
     val listSolar = List(PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h).map(t => solarGrossPotential_pou(List(t), grid, cells, t.name, distr_losses))
 
@@ -164,7 +192,7 @@ object Thesis_Results {
     plotXY(listSolar, legend = true, yLabel = "EROIpou", xLabel = "Electricity distributed [EJ/year]", title = "solarEROIpou")
     plotXY(listWind, legend = true, yLabel = "EROIpou", xLabel = "Electricity distributed [EJ/year]", title = "windEROIpou")
     plotXY(List(total), yLabel = "EROIpou", xLabel = "Electricity distributed [EJ/year]", title = "totalpou")
-    
+
     plotXY(List(windPotential, solarPot), legend = true, yLabel = "EROIpou", xLabel = "Electricity distributed [EJ/year]", title = "wind_solarEROIpou")
     // plotXY(List(total), yLabel = "EROIpou", xLabel = "Potential [EJ/year]", title = "totalGrossPotentialpou")
   }

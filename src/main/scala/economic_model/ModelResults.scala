@@ -32,7 +32,7 @@ case class DynamicResults(val years: List[Int], val x: List[Double], val k: List
 }
 
 class ModelResults(calib: calibration_results_CI, params: Dynamic_Params) {
-  val C, Ce, Df, Cf, K, Ke, Kf, Yf, pib, I, mu, p, eta, gamma, alpha, VAe, VAf, VANe, VANf, eroi, ner, Xe, Xf, X = scala.collection.mutable.ArrayBuffer.empty[Double];
+  val C, Ce, Df, Cf, K, Ke, Kf, Yf, pib, I, mu, p, eta, gamma, alpha, VAe, VAf, VANe, VANf, eroi_pou, ner, Xe, Xf, X = scala.collection.mutable.ArrayBuffer.empty[Double];
 
   /*C += calib.C; Ce += calib.ce(calib.i); Cf += calib.Cf; Df += (calib.yf - calib.Xe - calib.Xf); Ke += calib.Ke; Kf += calib.Kf; Yf += calib.yf; pib += calib.pib;
   mu += calib.mu; p += calib.p; eta += calib.eta; gamma += calib.gammab; Xe += calib.Xe; Xf += calib.Xf;
@@ -56,14 +56,14 @@ class ModelResults(calib: calibration_results_CI, params: Dynamic_Params) {
     VAe += (p.last * (1 - z.qe) - z.xe) * ye; VANe += VAe.last - z.deltae * Ke.last
     VAf += (1 - z.xf - p.last * z.qf) * Yf.last; VANf += VAf.last - z.deltaf * Kf.last
     alpha += VAe.last / pib.last
-    eroi += eroi_z(z)
+    eroi_pou += eroi_pou_z(z)
     ner += ner_z(z)
   }
 
   def g_pib = (1 until pib.toList.size).toList.map(i => (pib(i) - pib(i - 1)) / pib(i - 1))
   def pCe = (0 until p.toList.size).toList.map(i => p.toList(i) * Ce.toList(i))
 
-  def eroi_z(z: Z_xi) = 1.0 / (z.qe + (z.deltae * z.ve + z.xe) * z.qf)
+  def eroi_pou_z(z: Z_xi) = (1.0-z.qe) / (z.qe + (z.deltae * z.ve + z.xe) * z.qf)
   def ner_z(z: Z_xi) = 1.0 - (z.qe + z.qf * (z.xe + z.deltae * z.ve) + (1.0 - z.qe) * (z.xf + z.deltaf * z.vf))
 }
 

@@ -44,6 +44,15 @@ trait SolarTechnology extends RenewableTechnology {
       out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + operation_variable * out_year / (1 - operation_variable) * lifeTime)
     }
   }
+    override def eroi_pou(cell: Cell, eroi_min: Double, distr_losses : Double): Double = {
+    val wi = ratedPower(cell, eroi_min)
+    if (wi.value == 0) 0.0
+    else {
+      val out_year = potential(cell) * Hours(365 * 24)
+      out_year *(1-distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + distr_losses * out_year * lifeTime)
+    }
+  }
+    
   override def geer(cell: Cell, eroi_min: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0
@@ -169,10 +178,19 @@ trait CSP extends SolarTechnology {
     else {
       val power = Gigawatts(1)
       val yearProd = yearlyProduction(solar, panelArea(power, sm), sm)
-      yearProd * (1 - operation_variable) * ee.lifeTime / (embodiedEnergyArea(power, panelArea(power, sm)) + yearProd * (1 - operation_variable) * ee.lifeTime * operation_variable)
+      // yearProd * (1 - operation_variable) * ee.lifeTime / (embodiedEnergyArea(power, panelArea(power, sm)) + yearProd * (1 - operation_variable) * ee.lifeTime * operation_variable)
+      yearProd / (1 - operation_variable) * ee.lifeTime / (embodiedEnergyArea(power, panelArea(power, sm)) + yearProd / (1 - operation_variable) * ee.lifeTime * operation_variable)
+   
     }
   }
-  
+    def eroi_pou(solar: Irradiance, sm: Double, distr_losses : Double): Double = {
+    if (solar.value == 0) 0.0
+    else {
+      val power = Gigawatts(1)
+      val yearProd = yearlyProduction(solar, panelArea(power, sm), sm)
+      yearProd * (1 - distr_losses) * ee.lifeTime / (embodiedEnergyArea(power, panelArea(power, sm)) + yearProd * distr_losses * ee.lifeTime)
+    }
+  }
   def potential(solar: Irradiance, panelArea: Area, sm: Double): Power = {
     List(panelArea * solar * lifeTimeEfficiency(solar, sm) * (1 - operation_variable), ratedPower(panelArea, sm)).minBy(_.value)
   }
@@ -188,9 +206,15 @@ trait CSP extends SolarTechnology {
     if (suitabilityFactor(cell) == 0) 0.0
     else eroi(cell.dni, max_eroi_sm(cell.dni))
   }
+override def eroi_pou(cell: Cell, eroi_min: Double, distr_losses : Double): Double = {
+    if (suitabilityFactor(cell) == 0) 0.0
+    else eroi_pou(cell.dni, max_eroi_sm(cell.dni), distr_losses)
+  }
 
   override def eroi(solar: Irradiance): Double = eroi(solar, max_eroi_sm(solar))
+ 
   override def potential(solar: Irradiance, panelArea: Area): Power = potential(solar, panelArea, max_eroi_sm(solar))
+   
   override def yearlyProduction(solar: Irradiance, panelArea: Area): Energy = yearlyProduction(solar, panelArea, max_eroi_sm(solar))
   def capacityFactor(solar: Irradiance, panelArea: Area, sm: Double): Double = if (solar.value != 0 && panelArea.value != 0) potential(solar, panelArea, sm) / ratedPower(panelArea, sm) else 0.0
 

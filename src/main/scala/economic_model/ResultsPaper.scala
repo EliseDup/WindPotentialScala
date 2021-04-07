@@ -14,35 +14,39 @@ object ResultsPaper {
   import GrowthModel._
 
   def main(args: Array[String]): Unit = {
-plotParametersHistory
+    // plotParametersHistory
 
-    println("TFC" + "\t" + round(MegaTonOilEquivalent(9937.703).to(Exajoules),1))
-    println("EIOU" + "\t" + round(MegaTonOilEquivalent(839.185).to(Exajoules),1))
-    println("Losses" + "\t" + round(MegaTonOilEquivalent(222.503).to(Exajoules),1))
-    println("NEU" + "\t" + round(MegaTonOilEquivalent(916.762).to(Exajoules),1))
-    println("Ce" + "\t" + round(MegaTonOilEquivalent(3441.9099).to(Exajoules),1))
-    println("Residential" + "\t" + round(MegaTonOilEquivalent(2109.205).to(Exajoules),1))
-    println("Transport" + "\t" + round(MegaTonOilEquivalent(2890.9).to(Exajoules),1))
-    println("Fraction NEU" + "\t" + round((916.762 / 9937.703) * 100,1))
-    val calib = new calibration_results_CI(year=2018) //, is2018=true)
-    println("Ce" + "\t" + round(calib.ce.to(Exajoules),1))
-    println("Ye" + "\t" + round(calib.ye.to(Exajoules),1))
-    println("Ee" + "\t" + round(calib.ee.to(Exajoules),1))
-    println("E" + "\t" + round(calib.e.to(Exajoules),1))
-    println("Ef" + "\t" + round(calib.ef.to(Exajoules),1))
-    println("qe" + "\t" + round(calib.qe*100,1))
-    println("ratio Ce/E" + "\t" + round( (calib.ce / calib.e)*100,1))
-    println("ratio Ce/Ye" + "\t" + round( (calib.ce / calib.ye)*100,1))
-    println("ratio E/Ye" + "\t" + calib.e/calib.ye)
+    println("TFC" + "\t" + round(MegaTonOilEquivalent(9937.703).to(Exajoules), 1))
+    println("EIOU" + "\t" + round(MegaTonOilEquivalent(839.185).to(Exajoules), 1))
+    println("Losses" + "\t" + round(MegaTonOilEquivalent(222.503).to(Exajoules), 1))
+    println("NEU" + "\t" + round(MegaTonOilEquivalent(916.762).to(Exajoules), 1))
+    println("Ce" + "\t" + round(MegaTonOilEquivalent(3441.9099).to(Exajoules), 1))
+    println("Residential" + "\t" + round(MegaTonOilEquivalent(2109.205).to(Exajoules), 1))
+    println("Transport" + "\t" + round(MegaTonOilEquivalent(2890.9).to(Exajoules), 1))
+    println("Fraction NEU" + "\t" + round((916.762 / 9937.703) * 100, 1))
+    val calib = new calibration_results_CI(year = 2018) //, is2018=true)
+    println("Ce" + "\t" + round(calib.ce.to(Exajoules), 1))
+    println("Ye" + "\t" + round(calib.ye.to(Exajoules), 1))
+    println("Ee" + "\t" + round(calib.ee.to(Exajoules), 1))
+    println("E" + "\t" + round(calib.e.to(Exajoules), 1))
+    println("Ef" + "\t" + round(calib.ef.to(Exajoules), 1))
+    println("qe" + "\t" + round(calib.qe * 100, 1))
+    println("qe_prod" + "\t" + round(calib.qe_prod * 100, 1))
     
+    println("ratio Ce/E" + "\t" + round((calib.ce / calib.e) * 100, 1))
+    println("ratio Ce/Ye" + "\t" + round((calib.ce / calib.ye) * 100, 1))
+    println("ratio E/Ye" + "\t" + calib.e / calib.ye)
+
     println("Repartition Yf " + "\t" + "\t" + (calib.Xe + calib.Xf) / calib.yf + "\t" + calib.Xe / (calib.yf) + "\t" + calib.Cf / calib.yf + "\t" + calib.I / calib.yf)
-    
+
+     println("EROI std" + "\t" + calib.eroi_std)
+      println("EROI pou " + "\t" + calib.eroi_pou)
     println("EROI " + "\t" + calib.eroi)
-    println("EROI without losses " + "\t" + ((calib.ye-MegaTonOilEquivalent(222.503)).to(calib.energy_units)/(calib.qf*(calib.Xe/calib.pib_units+calib.z.deltae*calib.Ke/calib.pib_units)+MegaTonOilEquivalent(839.185).to(calib.energy_units)*(1-0.092))))
-    println("net EROI" + "\t" + calib.eroi*calib.e/calib.ye)
-    println("qf*we" + "\t" +calib.qf*calib.z.we)
+    println("EROI without losses " + "\t" + ((calib.ye - MegaTonOilEquivalent(222.503)).to(calib.energy_units) / (calib.qf * (calib.Xe / calib.pib_units + calib.z.deltae * calib.Ke / calib.pib_units) + MegaTonOilEquivalent(839.185).to(calib.energy_units) * (1 - 0.092))))
+    println("net EROI" + "\t" + calib.eroi * calib.e / calib.ye)
+    println("qf*we" + "\t" + calib.qf * calib.z.we)
     EROISocietalPaper
-    plotParametersHistory
+    
   }
 
   def exercice {
@@ -210,7 +214,7 @@ plotParametersHistory
     println("Ee :" + 100 * cal.eroi * cal.qe + ", Xe " + 100 * cal.eroi * cal.xe * cal.qf + ", Ke " + 100 * cal.eroi * cal.qf * cal.delta_e * cal.ve)
 
     println("---------- Tableau 2 ----------")
-    println(round(cal.vf) + " & " + round(cal.qf, 4) + " & " + round(cal.xf) + " & " + round(cal.ve, 2) + " & " + round(cal.qe) + " & " + +round(cal.xe, 2) + " & " + round(cal.v) + " & " + round(cal.eroi) + " & " + round(cal.ner))
+    println(round(cal.vf) + " & " + round(cal.qf, 4) + " & " + round(cal.xf) + " & " + round(cal.ve, 2) + " & " + round(cal.qe) + " & " + +round(cal.xe, 2) + " & " + round(cal.v) + " & " + round(cal.eroi_std)+ " & " + round(cal.eroi_pou) + " & " + round(cal.ner))
     println("---------- Tableau 3 ----------")
     println("$P_1$" + " & " + round(cal.p1 * 100) + "\\" + "\\")
     println("CIK SE" + " & " + round((1 / cal.eroi) * 100) + "\\" + "\\")
@@ -245,7 +249,7 @@ plotParametersHistory
 
     // combinedPlots(year_double, List((qe.map(_ * 100), "qe [%]"), (qf, "qf"), (ve, "ve"), (vf, "vf"), (v, "v")))
     //(0 until eroi.size).map(i => println(alphas(i) + "\t" + etas(i) + "\t" + zfs(i) + "\t" + p(i) + "\t" + eroi(i) + "\t" + ner(i) + "\t" + xe(i)))
-   
+
     res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))
     plotXY(List((year_double, perte2.map(_ * 100), "CIK SE+SF"), (year_double, perte1.map(_ * 100), "CIK SE"), (year_double, (0 until perte2.size).toList.map(i => (perte2(i) * 100 - perte1(i) * 100)), "CIK SF")), yLabel = "Pertes [%]", legend = true, title = "pertes")
 

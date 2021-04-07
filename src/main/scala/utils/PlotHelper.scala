@@ -125,10 +125,10 @@ object PlotHelper {
     }
 
     val dec_format = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.US));
+    val dec_format_long = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.US));
     val int_format = new DecimalFormat("####");
-   //	plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(int_format)
-   // plot.getRangeAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(int_format)
-
+  	//plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(int_format)
+    plot.getRangeAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(dec_format)
     //plot.getRangeAxis().setRange(xys.map(_._2).flatten.min,xys.map(_._2).flatten.max)
     //plot.getDomainAxis().setRange(2017, xys.map(_._1).flatten.max)
     if (drawPlot)
@@ -239,7 +239,7 @@ object PlotHelper {
     frame.pack()
     frame.setVisible(true)
   }
-  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf: Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean = false, tick: (Boolean, Double, Double) = (false, 1, 1)) {
+  def createFrame(chart: JFreeChart, name: String = "", save: Boolean = true, pdf: Boolean = false, shape: Boolean = false, xy: Boolean = true, bw: Boolean = true, tick: (Boolean, Double, Double) = (false, 1, 1)) {
 
     applyChartTheme(chart, tick)
 
