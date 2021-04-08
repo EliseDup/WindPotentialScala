@@ -107,13 +107,17 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
   def p_int(z: Z_xi) = Interval(A(z), B(z))
 
   def simulate_int(calib: calibration_results_CI, scenario: Scenario, nyears: Int = 100, plot: Boolean = true, theta: Option[List[Double]] = None): DynamicResults = {
+    val z_nre = calib.z_nre
+    //  val (qe_nre,xe_nre,ve_nre) = calibrateNREsubsector(calib.ye.to(MegaTonOilEquivalent), 0.02)
+    // val z_nre = Z_xi(ve_nre, calib.vf, qe_nre, calib.qf, xe_nre, calib.xf, calib.delta_e, calib.delta_f, calib.delta)
+
     // Les variables qui sont résultats de la simulation sont ici, toutes les autres variables calculées sont dans ModelResults.
     val z0 = calib.z;
     val thetas = theta.getOrElse((0 until nyears).toList.map(i => (calib.k - k_bounds(z0)._1) / (k_bounds(z0)._2 - k_bounds(z0)._1)))
     val k_interval = scala.collection.mutable.ArrayBuffer.empty[Interval];
     val gK, s, K, k, x, qf, ye = scala.collection.mutable.ArrayBuffer.empty[Double];
     val z = scala.collection.mutable.ArrayBuffer.empty[Z_xi];
-    x += 0.0; qf += z0.qf; 
+    x += 0.02; qf += z0.qf;
     val ye0 = calib.ye.to(calib.energy_units)
     ye += ye0
 
@@ -126,7 +130,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
     z += new Z_xi(z0.ve, z0.vf, z0.qe, z0.qf, z0.xe, z0.xf, z0.deltae, z0.deltaf, delta)
     gK += gK_k(k.last, z.last);
     s += s_k(k.last, calib.z) //calib.s;
-    
+
     // Variables de résultats -> à mettre à jour chaque année
     val model = new ModelResults(calib, this)
     model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
@@ -136,7 +140,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
     var end = false; var endYear: Option[Int] = None;
     var start = false; var startYear: Option[Int] = None;
     // println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + ye.last)
-    
+
     for (y <- years) {
       if (!end) {
         // vqy=qys+(qy-qys)*(1-.01).^(0:T-1)
@@ -147,8 +151,8 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
         K += K.last * (1 + gK.last)
         k += K.last / ye.last
         // Mapping between x and the interval for k
-        val k_x_fun = k_x_ye(qf.last, z0, theta, ye.last)
-        val (x_x, qe_x, xe_x, ve_x, deltae_x) = x_fun_ye(ye.last, z0)
+        val k_x_fun = k_x_ye(qf.last, z_nre, theta, ye.last)
+        val (x_x, qe_x, xe_x, ve_x, deltae_x) = x_fun_ye(ye.last, z_nre)
         val indexes_x = find_indexes(k.last, k_x_fun)
         val k1 = k_x_fun(indexes_x._1)._2.mean; val k2 = k_x_fun(indexes_x._2)._2.mean;
         val x1 = k_x_fun(indexes_x._1)._1; val x2 = k_x_fun(indexes_x._2)._1
@@ -182,22 +186,22 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
         // Calculated model parameters
         // !! We need the new delta before calculating gK
         model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
-        //println(s.last + "\t" + x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last+ "\t" + model.mu.last+ "\t" +ye.last + "\t" +qf.last)
+        //println(y + "\t" + ye.last*(1-x.last) + "\t" + s.last + "\t" + x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last+ "\t" + model.mu.last+ "\t" +ye.last + "\t" +qf.last)
         //println(y + "\t" + ye.last + "\t" + qf.last + "\t" + x.last + "\t" + k.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
 
       }
     }
 
-    //  println(x.last + "\t" + qf.last/calib.qf + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last/calib.p)
+    // println((2018 + nyears) + "\t" + x.last + "\t" + qf.last / calib.qf + "\t" + k.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + s.last + "\t" + model.p.last / calib.p)
     val last = x.toList.size - 2
     //println("Values in Tf-1")
-   //println(x.toList(last) + "\t" + k.toList(last) + "\t" + gK.toList(last) + "\t" + model.mu.toList(last) + "\t" + s.toList(last) + "\t" + model.p.toList(last)/calib.p)
+    //println(x.toList(last) + "\t" + k.toList(last) + "\t" + gK.toList(last) + "\t" + model.mu.toList(last) + "\t" + s.toList(last) + "\t" + model.p.toList(last)/calib.p)
 
     val years_new = if (!end) years else (calib.year until endYear.get).toList
 
     if (plot) {
       plot_(years_new, x, "x_" + toString());
-       plotXY(List((years_new.map(_.toDouble), gK.toList, "gK_" + toString()),(years_new.map(_.toDouble), model.g_pib, "g_" + toString())), legend=true);
+      plotXY(List((years_new.map(_.toDouble), gK.toList, "gK_" + toString()), (years_new.map(_.toDouble), model.g_pib, "g_" + toString())), legend = true);
       // plot_(years_new, s, "s_" + toString());
       /*plotXY(List((years_new.map(_.toDouble), model.VAe.toList, "VAe"), (years_new.map(_.toDouble), model.VANe.toList, "VANe"),
         (years_new.map(_.toDouble), model.VAf.toList, "VAf"), (years_new.map(_.toDouble), model.VANf.toList, "VANf"),
@@ -217,34 +221,57 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
     val newTildeK = tildeK1 + (ye - Ye1) * (tildeK2 - tildeK1) / (Ye2 - Ye1)
     val newTildeX = tildeX1 + (ye - Ye1) * (tildeX2 - tildeX1) / (Ye2 - Ye1)
     val newEe = Ee1 + (ye - Ye1) * (Ee2 - Ee1) / (Ye2 - Ye1)
-    
+
     val lines = l.filter(i => (i(0).toDouble <= ye))
 
     (lines.map(i => (i(0).toDouble)) ++ List(ye),
-         lines.map(i => (i(1).toDouble)) ++ List(newEe),
-        lines.map(i => (i(2).toDouble)) ++ List(newTildeX),
+      lines.map(i => (i(1).toDouble)) ++ List(newEe),
+      lines.map(i => (i(2).toDouble)) ++ List(newTildeX),
       lines.map(i => (i(3).toDouble)) ++ List(newTildeK),
       lines.map(i => (i(4).toDouble)) ++ List(1 / 25.0))
   }
 
-  def x_fun_ye(ye: Double, z0: Z_xi) = {
+  def calibrateNREsubsector(ye: Double, re_share: Double = 0.02) = {
+    val (ye_re, ee, tilde_xe, tilde_ke, delta_e) = ye_fun(ye)
+    val index = find_index_list(ye * re_share, ye_re)
+    val ye_re_1 = ye_re(index); val ye_re_2 = ye_re(index + 1)
+    println(ye_re_1 + " < " + ye * re_share + " < " + ye_re_2)
+    println(tilde_xe(index) + "\t" + tilde_xe(index + 1))
+    println(tilde_ke(index) + "\t" + tilde_ke(index + 1))
+
+    val qre = interpolation(ye * re_share, (ye_re_1, ee(index) / ye_re_1), (ye_re_2, ee(index + 1) / ye_re_2))
+    val xre = interpolation(ye * re_share, (ye_re_1, tilde_xe(index) / (calib.qf * ye_re_1)), (ye_re_2, tilde_xe(index + 1) / (calib.qf * ye_re_2)))
+    val vre = interpolation(ye * re_share, (ye_re_1, tilde_ke(index) / (calib.qf * ye_re_1)), (ye_re_2, tilde_ke(index + 1) / (calib.qf * ye_re_2)))
+
+    println(qre + "\t" + xre + "\t" + vre)
+
+    val qnre = (calib.qe - re_share * qre) / (1 - re_share)
+    val xnre = (calib.xe - re_share * xre) / (1 - re_share)
+    val vnre = (calib.ve - re_share * vre) / (1 - re_share)
+
+    println(qnre + "\t" + xnre + "\t" + vnre)
+    println(calib.qe + "\t" + calib.xe + "\t" + calib.ve)
+    (qnre, xnre, vnre)
+  }
+
+  def x_fun_ye(ye: Double, znre: Z_xi) = {
     val (ye_re, ee, tilde_xe, tilde_ke, delta_e) = ye_fun(ye)
     val res = (0 until ye_re.size).toList.map(i => {
       val x = ye_re(i) / ye
-      val ve = if (x == 0) z0.ve else x * tilde_ke(i) / (z0.qf * ye_re(i)) + (1 - x) * z0.ve
-      val qe = if (x == 0) z0.qe else x* ee(i)/ye_re(i) + (1 - x) * z0.qe
-      val xe = if (x == 0) z0.xe else x * tilde_xe(i) / (z0.qf * ye_re(i)) + (1 - x) * z0.xe
-      val de = if (x == 0) z0.deltae else x * delta_e(i) + (1 - x) * z0.deltae
+      val ve = if (x == 0) znre.ve else x * tilde_ke(i) / (znre.qf * ye_re(i)) + (1 - x) * znre.ve
+      val qe = if (x == 0) znre.qe else x * ee(i) / ye_re(i) + (1 - x) * znre.qe
+      val xe = if (x == 0) znre.xe else x * tilde_xe(i) / (znre.qf * ye_re(i)) + (1 - x) * znre.xe
+      val de = if (x == 0) znre.deltae else x * delta_e(i) + (1 - x) * znre.deltae
       (x, qe, xe, ve, de)
     })
     (res.map(_._1), res.map(_._2), res.map(_._3), res.map(_._4), res.map(_._5))
   }
 
-  def k_x_ye(qf: Double, z0: Z_xi, beta: Double = 0.5, ye: Double): List[(Double, Interval)] = {
-    val (x_x, qe_x, xe_x, ve_x, deltae_x) = x_fun_ye(ye, z0)
+  def k_x_ye(qf: Double, znre: Z_xi, beta: Double = 0.5, ye: Double): List[(Double, Interval)] = {
+    val (x_x, qe_x, xe_x, ve_x, deltae_x) = x_fun_ye(ye, znre)
     (0 until x_x.size).toList.map(i => {
       // We should never use delta in the following calculations !!
-      val z = new Z_xi(ve_x(i), z0.vf, qe_x(i), qf, xe_x(i), z0.xf, deltae_x(i), z0.deltaf, Double.NaN)
+      val z = new Z_xi(ve_x(i), znre.vf, qe_x(i), qf, xe_x(i), znre.xf, deltae_x(i), znre.deltaf, Double.NaN)
       (x_x(i), k_int(z, beta))
     })
   }

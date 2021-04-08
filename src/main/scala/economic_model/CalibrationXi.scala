@@ -72,8 +72,8 @@ class calibration_results_CI(
   val eroi = 1 / (qe + (xe + delta_e * ve) * qf)
   val eroi_std =  1 / (qe_prod + (xe + delta_e * ve) * qf)
     val eroi_pou =  (1-qe) / (qe + (xe + delta_e * ve) * qf)
-    
-  val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f, delta)
+         val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f, delta)
+
 
   // val ner = (1 - z.qe)*(1 - (xf + z.deltaf * z.vf)) - z.qf*(z.deltae * z.ve + xe)
   val ner = 1 - (z.qe + z.qf * (z.xe + z.deltae * z.ve) + (1 - z.qe) * (z.xf + z.deltaf * z.vf)) //( //(1 - (z.xf + z.deltaf * z.vf)) * (1 - z.qe) - z.qf * (z.xe + z.deltae * z.ve)
@@ -87,6 +87,13 @@ class calibration_results_CI(
   val perte2 = p1
   val perte3 = p1 + p2
 
+  // Ugly fix => the calculation of the technical params of the NRE subsector is made thanks to DynamicParams.calibrateNREsubsector, but it takes to much time to execute ..
+ val conversion_factor = (1E9/pib_units) / (MegaTonOilEquivalent(1).to(energy_units))
+  val ve_nre = 1.1157774507789537 * conversion_factor
+  val xe_nre = 0.139104932484038 * conversion_factor
+  val qe_nre = 0.09784230004741697
+  val z_nre = Z_xi(ve_nre, vf, qe_nre, qf, xe_nre, xf, delta_e, delta_f, delta)
+    
   def printCalib {
     println("Ye" + "\t" + ye.to(energy_units) + "\n" + "Ee" + "\t" + ee.to(energy_units) + "\n" + "Ef" + "\t" + ef.to(energy_units))
     println("pib" + "\t" + pib + "\n" + "pibm" + "\t" + pib_before + "\n" + "s" + "\t" + s + "\n" + "mu" + "\t" + mu)

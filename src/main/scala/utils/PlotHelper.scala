@@ -42,7 +42,7 @@ object PlotHelper {
     plotXY(List((x, x.map(Math.pow(_, 3)), "x^3"), (x, x.map(Math.pow(_, 4)), "x^4"), (x, x.map(Math.pow(_, 2)), "x^2"), (x, x.map(_ * 3), "3x"), (x, x.map(_ * 2), "2x"), (x, x, "x")), legend = true)
   }
   val colors = List(Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.PINK)
-  val dashed = List(stroke(Array(1.0f, 0.0f)), stroke(Array(6.0f, 3.0f)),
+  val dashed = List(stroke(Array(1.0f, 0.0f)),  stroke(Array(6.0f, 3.0f)),
     stroke(Array(1.0f, 3.0f)), stroke(Array(6.0f, 3.0f, 1.0f, 3.0f)),
     stroke(Array(2.0f, 2.0f)), stroke(Array(6.0f, 2.0f, 2.0f)))
 
@@ -106,7 +106,7 @@ object PlotHelper {
     val min = xys.map(_._2).flatten.min
 
     // Add point instead of a straight line, serie #3 in the example of ResultsPaper_PER.plotCTExample
-    /*   val r = new XYLineAndShapeRenderer();
+   /*   val r = new XYLineAndShapeRenderer();
     r.setSeriesShape(0, new Ellipse2D.Double(-2, -2, 4, 4));
     r.setSeriesShapesVisible(0, true);
     r.setBaseShapesFilled(true);
@@ -127,8 +127,8 @@ object PlotHelper {
     val dec_format = new DecimalFormat("0.0", new DecimalFormatSymbols(Locale.US));
     val dec_format_long = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.US));
     val int_format = new DecimalFormat("####");
-  	//plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(int_format)
-    plot.getRangeAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(dec_format)
+ //   plot.getDomainAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(dec_format_long)
+ //  plot.getRangeAxis().asInstanceOf[NumberAxis].setNumberFormatOverride(dec_format_long)
     //plot.getRangeAxis().setRange(xys.map(_._2).flatten.min,xys.map(_._2).flatten.max)
     //plot.getDomainAxis().setRange(2017, xys.map(_._1).flatten.max)
     if (drawPlot)

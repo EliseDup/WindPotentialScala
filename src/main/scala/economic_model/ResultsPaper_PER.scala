@@ -15,8 +15,7 @@ object ResultsPaper_PER {
 
   val scenarios = List(bau_old,sd) // np, sd)
   val exercices = List(dyn_1, dyn_3) // dyn_2b, dyn_3)
-  // val calib = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent, is2018 = true)
-  val calib = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent) //, pib_units = 1) //,  is2018 = true)
+  val calib = new calibration_results_CI(year = 2018, energy_units = MegaTonOilEquivalent) // , pib_units = 1) 
  val ex3_2070 = new Dynamic_gk_eta(0.03,calib.eta)
 
   val res_path = "../model_data/simulations_2018/simulations_" //2100/" // simulations_test/"
@@ -31,20 +30,43 @@ object ResultsPaper_PER {
   val e_sub_unicode= "e" // "\u2090"
   
   def main(args: Array[String]): Unit = {
-    println(calib_theta(dyn_1) + "\t" + calib_theta(dyn_3))
-    plotScenarios(dyn_1, 2100)
-   // plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
+    
+     plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
+ 
+      //  plotScenarios_theta(calib.year+600,dyn_1)
+     // Res for ex3; theta = 0 and theta = 1
+   
   }
     def resPaper{
    computeThetaResults(2050, dyn_1)
     computeThetaResults(2100, dyn_1)
     computeThetaResults(600+calib.year, dyn_1) 
         // Ex3, SD ; gk required for Tf = 2070
-   computeGkMinimum(sd, 2070)
+  // computeGkMinimum(sd, 2070)
     // Ex3, BAU ; gk required for Tf = 2070
-   computeGkMinimum(bau_old, 2070)
+  // computeGkMinimum(bau_old, 2070)
   }
     
+ 
+  def plotPaper{
+  plotCTExample
+   plotMarginalCostCurve()
+        // Theta variations for ex1
+    plotScenarios_theta(2100,dyn_1)
+      plotScenarios_theta(600+calib.year,dyn_1)
+    // Plot for ex3 with gk = 3%
+    plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
+ 
+   //  plotScenarios_theta(calib.year+600,dyn_1)
+     // Res for ex3; theta = 0 and theta = 1
+     val res = scenarios.map(scn => List(0.0,1.0).map(theta => List(2050,2100,600+calib.year).map(y => dyn_3.simulate_int(calib, scn, y-calib.year, false, Some(list_th(theta, y-calib.year)))))).flatten.flatten
+     print("varkappa [%]"); res.map(r => print(" & " + round(100*r.x.last,1))); println()
+    print("s [%]"); res.map(r => print(" & " + round(r.s(r.last)*100,1))); println()
+     print("Ts"); res.map(r => print(" & " + r.start_year.getOrElse(0))); println()
+    print("Tf"); res.map(r => print(" & " + r.end_year.getOrElse(0))); println()
+
+  }
+
     def plotScenarios(ex : Dynamic_Params, Tf : Int) {
        val ny = Tf-2018
  val th =  Some(list_th(calib_theta(ex),ny))
@@ -54,6 +76,8 @@ object ResultsPaper_PER {
     val y_bau = res_bau.years.map(_.toDouble); val y_sd = res_sd.years.map(_.toDouble)
     plotXY(List( (y_bau, res_bau.x.toList, "BAU"),(y_sd, res_sd.x.toList, "SD")), legend=true, yLabel = kappa_unicode, title = "x_t",int_x_axis=true)
     plotXY(List( (y_bau, res_bau.gK.toList.map(_*100), "BAU"),(y_sd, res_sd.gK.toList.map(_*100), "SD")), legend=true, yLabel = "gK [%]", title ="gk_t",int_x_axis=true)
+     plotXY(List( (y_bau, res_bau.model.g_pib.map(_*100), "BAU"),(y_sd, res_sd.model.g_pib.map(_*100), "SD")), legend=true, yLabel = "g [%]", title ="g_t",int_x_axis=true)
+   
     plotXY(List( (y_bau, res_bau.k.toList, "BAU"),(y_sd, res_sd.k.toList, "SD")), legend=true, yLabel = "k(=K/Ye)", title ="k_t",int_x_axis=true)
     plotXY(List( (y_bau, res_bau.model.eroi_pou.toList, "BAU"),(y_sd, res_sd.model.eroi_pou.toList, "SD")), legend=true, yLabel = "EROI pou", title ="eroi_t",int_x_axis=true)
     plotXY(List( (y_bau, res_bau.model.ner.toList.map(_*100), "BAU"),(y_sd, res_sd.model.ner.toList.map(_*100), "SD")), legend=true, yLabel = "NER [%]", title ="ner_t",int_x_axis=true)
@@ -71,25 +95,7 @@ object ResultsPaper_PER {
  plotXY(List((y_sd, res_sd.model.K.toList.map(_ / 1E5), "K"),(y_sd, res_sd.model.Ke.toList.map(_ / 1E5), "Ke"),(y_sd, res_sd.model.Kf.toList.map(_ / 1E5), "Kf")), yLabel="1E5 GUS $ 2010", legend=true, title="K_sd",int_x_axis = true)
  
     }
-  def plotPaper{
-  plotCTExample
-    plotMarginalCostCurve()
-        // Theta variations for ex1
-    plotScenarios_theta(2100,dyn_1)
-      plotScenarios_theta(600+calib.year,dyn_1)
-    // Plot for ex3 with gk = 3%
-    plotEcoVariables(ex3_2070, sd, 2070-calib.year, calib_theta(ex3_2070))
- 
-   //  plotScenarios_theta(calib.year+600,dyn_1)
-     // Res for ex3; theta = 0 and theta = 1
-     val res = scenarios.map(scn => List(0.0,1.0).map(theta => List(2050,2100,600+calib.year).map(y => dyn_3.simulate_int(calib, scn, y-calib.year, false, Some(list_th(theta, y-calib.year)))))).flatten.flatten
-     print("varkappa [%]"); res.map(r => print(" & " + round(100*r.x.last,1))); println()
-    print("s [%]"); res.map(r => print(" & " + round(r.s(r.last)*100,1))); println()
-     print("Ts"); res.map(r => print(" & " + r.start_year.getOrElse(0))); println()
-    print("Tf"); res.map(r => print(" & " + r.end_year.getOrElse(0))); println()
-
-  }
-   
+    
   val pop_projections =(List(2020,2025,	2030,	2035,	2040,	2045,	2050,	2055,	2060,	2065,	2070,	2075,	2080,	2085,	2090,	2095,	2100),
       List(7794799.0,8184437.0,8548487.0,8887524.0,9198847.0,9481803.0,9735034.0,9958099.0,10151470.0,10317879.0,10459240.0,	10577288.0,	10673904.0,	10750662.0,	10809892.0,	10851860.0,10875394.0))
   
@@ -97,7 +103,7 @@ object ResultsPaper_PER {
     //Then plot results in the order of apparition in the paper
     plotCTExample
     plotScenarios(2100)
-    plotMarginalCostCurve()
+//    plotMarginalCostCurve()
     // plotThetaPaths(250)
    tableScenario(dyn_3,0)
     tableScenario(dyn_3,1)
@@ -165,7 +171,7 @@ object ResultsPaper_PER {
   def plotCTExample {
     val scn_constant = new Scenario(new ParamsScenario(qf_0, qf_0, qf_0, 1), new ParamsScenario(ye_0, ye_0, ye_0, 1))
     // Enveloppe k_up(x) et k_inf(x)
-    val k_env = dyn_1.k_x_ye(qf_0, calib.z, 0.5, ye_0)
+    val k_env = dyn_1.k_x_ye(qf_0, calib.z_nre, 0.5, ye_0)
     val res = dyn_1.simulate_int(calib, scn_constant, 20, false, Some(list_th(0.5, 20)))
     val index = (0 until res.x.size / 2).map(_ * 2).toList
 
@@ -188,7 +194,8 @@ object ResultsPaper_PER {
 
   def plotScenarios(tf: Int = 2100) {
     // Historical data
-     import CalibrationXi._
+    import CalibrationXi._
+    
     val t_past = cals.map(_.year).map(_.toDouble)
     val ye_past =  cals.map(_.ye.to(Exajoules))
     val qf_past = cals.map(i => TonOilEquivalent(i.qf).to(Gigajoules))
@@ -196,8 +203,7 @@ object ResultsPaper_PER {
     val t = (0 until (tf - calib.year)).toList
     
     plotXY(scenarios.map(scn => (t_past ++ t.map(_.toDouble + calib.year), ye_past++ t.map(i => MegaTonOilEquivalent(scn.ye_t(i)).to(Exajoules)), scn.name)), yLabel = "Ye [EJ/year]", title = "ye_scenarios", legend = true, int_x_axis = true)
-    
-     plotXY(scenarios.map(scn => (t.map(_.toDouble + calib.year), t.map(scn.qf_t(_) / bau.qf.x0), scn.name)), yLabel = "qf/qf0", title = "qf_qf0_scenarios", legend = true, int_x_axis = true)
+    plotXY(scenarios.map(scn => (t.map(_.toDouble + calib.year), t.map(scn.qf_t(_) / bau.qf.x0), scn.name)), yLabel = "qf/qf0", title = "qf_qf0_scenarios", legend = true, int_x_axis = true)
     plotXY(scenarios.map(scn => (t_past ++ t.map(_.toDouble + calib.year), qf_past ++ t.map(i => TonOilEquivalent(scn.qf_t(i)).to(Gigajoules)), scn.name)), yLabel = "qf [MJ/US$ 2010]", title = "qf_scenarios", legend = true, int_x_axis = true) 
   }
 
@@ -240,23 +246,23 @@ object ResultsPaper_PER {
     
   }
   
-  def plotMarginalCostCurve(file: String = "potential_reduced_pounew", plotPerTech: Boolean = true) {
+  def plotMarginalCostCurve(file: String = "potential_reduced_pounew", plotPerTech: Boolean = true, z_nre : Z_xi = calib.z_nre) {
     val tot = new TechnologyCost(file, calib.qf)
    plotXY(List((tot.ye,tot.ver,"v_re")),  xLabel = "Y"+re_sub_unicode+" [EJ/y]", yLabel = "v"+re_sub_unicode+" [US$ 2010/(GJ/y)]", title="vre")
    plotXY(List((tot.ye,tot.xer,"x_re")),  xLabel = "Y"+re_sub_unicode+" [EJ/y]", yLabel = "x"+re_sub_unicode+" [US$ 2010/GJ]", title="xre")
     plotXY(List((tot.ye,tot.qer,"q_re")),  xLabel = "Y"+re_sub_unicode+" [EJ/y]", yLabel = "q"+re_sub_unicode+" [GJ/GJ]", title="qre")
         
      // Plot ve, qe et xe
-      val (x_x, qe_x, xe_x, ve_x, deltae_x) = dyn_1.x_fun_ye(ye_0, calib.z)
+      val (x_x, qe_x, xe_x, ve_x, deltae_x) = dyn_1.x_fun_ye(ye_0, z_nre)
       plotXY(List((x_x, qe_x.map(_ * 100), "qe")), xLabel = kappa_unicode, yLabel = "q"+e_sub_unicode+" [%]", title = "qe_x")
       plotXY(List((x_x, xe_x, "xe")), xLabel = kappa_unicode, yLabel = "x"+e_sub_unicode+" [US$ 2010/GJ]", title = "xe_x")
       plotXY(List((x_x, ve_x, "ve")), xLabel = kappa_unicode, yLabel = "v"+e_sub_unicode+" [US$ 2010/(GJ/y)]", title = "ve_x")
       //plotXY(List((x_x, (0 until x_x.size).toList.map(i => deltae_x(i) * ve_x(i) + xe_x(i)), "we")), xLabel = "x", yLabel = "we [US$2010/GJ]", title = "we_x")
       //plotXY(List((x_x, (0 until x_x.size).toList.map(i => (1.0 / (qe_x(i) + calib.qf * (ve_x(i) * deltae_x(i) + xe_x(i))))), "EROI")), xLabel = "x", yLabel = "EROI", title = "EROI_x")
       val f = ve_x.size - 1
-      println("vef/ve0" + "\t" + ve_x(f) / calib.z.ve)
-      println("xe from " + "\t" + calib.xe + " to " + xe_x(f))
-      println("EROI from " + "\t" + calib.eroi + " to " + 1.0 / (qe_x(f) + calib.qf * (ve_x(f) * deltae_x(f) + xe_x(f))))
+      println("vef/ve0" + "\t" + ve_x(f) / z_nre.ve)
+      println("xef/xe0" + "\t" + xe_x(f)/ z_nre.xe)
+      println("EROI from " + "\t" + calib.eroi_pou + " to " + (1.0-qe_x(f)) / (qe_x(f) + calib.qf * (ve_x(f) * deltae_x(f) + xe_x(f))))
   /*
     // Per technology
      if (plotPerTech) {
@@ -563,8 +569,8 @@ object ResultsPaper_PER {
   
   def computeGkMinimum(scn: Scenario, Tf : Int) {
   //val out = new java.io.PrintStream(new java.io.FileOutputStream(res_path +Tf.toInt +"/" + "gk_min_10_" + scn.name))
-  // val theta = (0 to 5).toList.map(_*2/10.0)
-  val theta = List(calib_theta(dyn_3))
+   val theta = (0 to 5).toList.map(_*2/10.0)
+  //val theta = List(calib_theta(dyn_3))
   var lastGk = calib.gK
   theta.map(th =>{
     var end = false
