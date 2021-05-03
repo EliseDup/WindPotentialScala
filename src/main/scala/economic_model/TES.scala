@@ -43,7 +43,7 @@ class TES(year: Int, v3: Boolean) {
 
   def file_name(year: Int, v3: Boolean) = {
     val extension = if (v3) "2016_" else "2018_"
-    "/Users/Elise/Desktop/IOTs_OECD/ICIO" + extension + year.toString + ".CSV"
+    "/Users/Elise/Desktop/IOTs/ICIO" + extension + year.toString + ".CSV"
   }
   val tes = getLines(file_name(year, v3), ",")
   val col_index = tes(0).toList.zipWithIndex

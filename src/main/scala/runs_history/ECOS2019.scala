@@ -42,7 +42,7 @@ object ECOS2019 {
 
     List(4, 6, 9, 12).map(e => grid.writeWindPotential(e, cells))
     val techs = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono, PVPoly, CSPParabolic, CSPParabolicStorage12h, CSPTowerStorage12h)
-    techs.map(t => grid.writePotential(t, 1, cells))
+    techs.map(t => grid.writePotential(t, List(1.0), cells))
     techs.map(t => grid.writePotential(t, List(4, 6, 9, 12).map(_.toDouble), cells))
 
     grid.writeTechnology(List(4, 6, 9, 12).map(_.toDouble), cells)

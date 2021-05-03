@@ -17,7 +17,7 @@ trait RenewableTechnology {
 
   // Operational electricity should be directly removed from potential as it never gets out of the facility ..
   def potential(cell: Cell, eroi_min: Double): Power;
-  
+
   val excludedCountries = List("NA", "Antarctica", "Greenland", "French Southern & Antarctic Lands")
   def suitabilityFactor(cell: Cell): Double = {
     if (excludedCountries.contains(cell.country) || cell.country.contains("Is.") || cell.country.contains("Islands")) 0.0
@@ -37,27 +37,44 @@ trait RenewableTechnology {
     if (wi.value == 0) 0.0
     else {
       val out_year = potential(cell, eroi_min) * Hours(365 * 24)
-      out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year / (1 - operation_variable) * operation_variable * lifeTime)
+      out_year / (1 - operation_variable) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year * operation_variable / (1 - operation_variable) * lifeTime)
+    }
+  }
+  
+    def eroi_dynamic(cell: Cell, eroi_min: Double, improvment : Double): Double = {
+    val wi = ratedPower(cell, eroi_min)
+    if (wi.value == 0) 0.0
+    else {
+      val out_year = potential(cell, eroi_min) * Hours(365 * 24)
+      out_year / (1 - operation_variable) * lifeTime / (improvment*embodiedEnergy(cell, eroi_min) + out_year * operation_variable / (1 - operation_variable) * lifeTime)
     }
   }
   // EROI point of use : including distribution losses at the numerator and denominator
-  def eroi_pou(cell: Cell, eroi_min: Double, distr_losses : Double): Double = {
+  def eroi_pou_external(cell: Cell, eroi_min: Double, distr_losses: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0
     else {
-      val out_year = potential(cell, eroi_min) * Hours(365 * 24)
+      val out_year = potential(cell, eroi_min) * Hours(365 * 24) // = Production * (1-operation variable)
       out_year * (1 - distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year * distr_losses * lifeTime)
     }
   }
-    def eroi_pou_internal(cell: Cell, eroi_min: Double, distr_losses : Double): Double = {
-    val wi = ratedPower(cell, eroi_min)
-    if (wi.value == 0) 0.0
-    else {
-      val out_year = potential(cell, eroi_min) * Hours(365 * 24)
-      out_year * (1 - distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year * ((1 - operation_variable) * operation_variable + distr_losses) * lifeTime)
-    }
+  def eroi_pou(cell: Cell, eroi_min: Double, distr_losses: Double): Double = {
+ val wi = ratedPower(cell, eroi_min)
+      if (wi.value == 0) 0.0
+      else {
+        val out_year = potential(cell, eroi_min) * Hours(365 * 24)
+        out_year * (1 - distr_losses) * lifeTime / (embodiedEnergy(cell, eroi_min) + out_year * (operation_variable / (1 - operation_variable) + distr_losses) * lifeTime)
+      }
   }
-    
+  def eroi_pou_dynamic(cell: Cell, eroi_min: Double, distr_losses: Double, improvment : Double): Double = {
+ val wi = ratedPower(cell, eroi_min)
+      if (wi.value == 0) 0.0
+      else {
+        val out_year = potential(cell, eroi_min) * Hours(365 * 24)
+        out_year * (1 - distr_losses) * lifeTime / (improvment * embodiedEnergy(cell, eroi_min) + out_year * (operation_variable / (1 - operation_variable) + distr_losses) * lifeTime)
+      }
+  }
+
   def geer(cell: Cell, eroi_min: Double): Double = {
     val wi = ratedPower(cell, eroi_min)
     if (wi.value == 0) 0.0
@@ -70,7 +87,7 @@ trait RenewableTechnology {
   // = p*(Y_e - E_e) - r K_e - w L_e
   // p, r, w being respectively the prices of energy, capital, and wage
   // le = L_e / Y_e (# working hours / kWh), qf = E_f / Y_f (# kWh / units of PIB)
-  def profit(cell: Cell, p: Double, r: Double, w: Double, qf: Double, le: Double, e_units : EnergyUnit) = {
+  def profit(cell: Cell, p: Double, r: Double, w: Double, qf: Double, le: Double, e_units: EnergyUnit) = {
     val y_e = potential(cell, 1.0) * Hours(365 * 24)
     val cap = ratedPower(cell, 1.0)
     val e_e = ee.energyInputsOMYearly(cap)

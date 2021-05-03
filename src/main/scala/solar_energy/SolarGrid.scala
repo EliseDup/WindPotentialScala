@@ -59,6 +59,28 @@ class SolarGrid(val cells: List[SolarCell]) {
     out_stream.close()
 
   }
+  def writeTechnology(eroi_min: Double, inclusion: List[SolarCell], pv : SolarTechnology, csp : SolarTechnology) {
+    println("Write Technology " + eroi_min)
+    // 1 : PV
+    // 2 : CSP
+    def indexTechnology(c: SolarCell, e: Double): Double = {
+      val res =
+        (if(c.potential(pv).value > 0){
+          if(c.potential(csp).value > 0){
+          if(c.eroi(pv) > c.eroi(csp)) 1 else 2
+        } else if(c.eroi(pv) > e) 1 else 0 
+        }
+        else if(c.potential(csp).value > 0 && c.eroi(csp) > e) 2.0
+        else 0.0)
+        res
+    }
+    val out_stream = new java.io.PrintStream(new java.io.FileOutputStream("pv_csp" + "_" + eroi_min.toInt))
+    cells.map(c => out_stream.print(c.center.latitude.toDegrees + "\t" + c.center.longitude.toDegrees +
+      "\t" +
+      (if ((inclusion.isEmpty || inclusion.contains(c))) indexTechnology(c, eroi_min) else "0.0")
+      + "\n"))
+    out_stream.close()
+  }
 }
 
 class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance, val dni: Irradiance,
@@ -97,6 +119,12 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
     val gross = tech.potential(dni, aperture, sm) * Hours(365 * 24) // grossYearlyProduction(tech)
     gross - tech.embodiedEnergyArea(power, aperture) / tech.ee.lifeTime
   }
+      def grossYearlyProduction(tech: CSP, sm : Double): Energy = {
+    val aperture = panelArea(tech)
+    val power = tech.ratedPower(aperture, sm)
+    tech.potential(dni, aperture, sm) * Hours(365 * 24) // grossYearlyProduction(tech)
+    // gross - tech.embodiedEnergyArea(power, aperture) / tech.ee.lifeTime
+  }
   // Technology that maximizes the EROI
   def bestTechnology(techs: List[SolarTechnology]): SolarTechnology = techs(techs.zipWithIndex.map(i => (eroi(i._1), i._2)).maxBy(_._1)._2)
 
@@ -124,6 +152,8 @@ class SolarCell(val center: GeoPoint, val resolution: Angle, val ghi: Irradiance
       //     tech.ee.lifeTime * (out_year / tech.ee.embodiedEnergy(installedCapacity(tech), out_year))
     }
   }
+  
+ 
 
 }
 

@@ -134,13 +134,12 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
     // Variables de résultats -> à mettre à jour chaque année
     val model = new ModelResults(calib, this)
     model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
-
+        
     // println("Initialize " + k.last + "\t" +k_interval.last + "\t" +  gK.last)
     val years = (1 to nyears).map(i => i + calib.year).toList
     var end = false; var endYear: Option[Int] = None;
     var start = false; var startYear: Option[Int] = None;
-    // println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + ye.last)
-
+    // println(x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last + "\t" + model.mu.last + "\t" + ye.last)     
     for (y <- years) {
       if (!end) {
         // vqy=qys+(qy-qys)*(1-.01).^(0:T-1)
@@ -186,6 +185,7 @@ abstract class Dynamic_Params(val param1: Double, val param2: Double, val name: 
         // Calculated model parameters
         // !! We need the new delta before calculating gK
         model.update(k.last, K.last, z.last, s.last, ye.last, gK.last)
+        //println(y + "\t" + k.last + "\t" + x.last + "\t" +  gK.last)
         //println(y + "\t" + ye.last*(1-x.last) + "\t" + s.last + "\t" + x.last + "\t" + k.last + "\t" + K.last + "\t" + gK.last+ "\t" + model.mu.last+ "\t" +ye.last + "\t" +qf.last)
         //println(y + "\t" + ye.last + "\t" + qf.last + "\t" + x.last + "\t" + k.last + "\t" + mean(k_interval.last, max) + "\t" + gk.last + "\t" + s.last + "\t" + eroi.last + "\t" + beta_k + "\t" + model.mu.last + "\t" + model.eta.last + "\t" + model.gamma.last + "\t" + model.p.last / calib.p + "\t" + "\t" + model.Ce.last / calib.ce(calib.i) + "\t" + model.Cf.last / calib.Cf)
 

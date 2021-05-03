@@ -14,9 +14,9 @@ object ResultsPaper {
   import GrowthModel._
 
   def main(args: Array[String]): Unit = {
-    // plotParametersHistory
+    plotParametersHistory
 
-    println("TFC" + "\t" + round(MegaTonOilEquivalent(9937.703).to(Exajoules), 1))
+ /*   println("TFC" + "\t" + round(MegaTonOilEquivalent(9937.703).to(Exajoules), 1))
     println("EIOU" + "\t" + round(MegaTonOilEquivalent(839.185).to(Exajoules), 1))
     println("Losses" + "\t" + round(MegaTonOilEquivalent(222.503).to(Exajoules), 1))
     println("NEU" + "\t" + round(MegaTonOilEquivalent(916.762).to(Exajoules), 1))
@@ -45,7 +45,7 @@ object ResultsPaper {
     println("EROI without losses " + "\t" + ((calib.ye - MegaTonOilEquivalent(222.503)).to(calib.energy_units) / (calib.qf * (calib.Xe / calib.pib_units + calib.z.deltae * calib.Ke / calib.pib_units) + MegaTonOilEquivalent(839.185).to(calib.energy_units) * (1 - 0.092))))
     println("net EROI" + "\t" + calib.eroi * calib.e / calib.ye)
     println("qf*we" + "\t" + calib.qf * calib.z.we)
-    EROISocietalPaper
+    EROISocietalPaper*/
     
   }
 
@@ -242,15 +242,15 @@ object ResultsPaper {
     // val res = List((qe.map(_ * 100), "qe [%]"), (qf, "qf"), (ve, "ve"), (vf, "vf"), (xe, "xe"), (xf, "xf"), (eroi, "EROI"), (ner.map(_ * 100), "NER [%]"),
     //   (v, "v"), (p, "p"))
 
-    val res = List((alphas, "alpha"), (etas, "eta"), (zfs, "zf"), (qf, "qf"), (ve, "ve"), (vf, "vf"), (xe, "xe"), (xf, "xf"), (eroi, "EROI"), (ner.map(_ * 100), "NER [%]"))
+    val res = List((alphas, "alpha"),(alphas, "alpha"), (etas, "eta"), (zfs, "zf"), (ve, "ve"), (vf, "vf"), (xe, "xe"), (xf, "xf"), (eroi_pou, "EROIpou"), (ner.map(_ * 100), "NER [%]"),(v, "v"))
     (0 until qf.size).map(i => println(qf(i)))
     println("mean qf growth rate = " + (growth_rates(qf).sum / (growth_rates(qf).size)))
     println("mean xf growth rate = " + (growth_rates(xf).sum / (growth_rates(xf).size)))
 
     // combinedPlots(year_double, List((qe.map(_ * 100), "qe [%]"), (qf, "qf"), (ve, "ve"), (vf, "vf"), (v, "v")))
     //(0 until eroi.size).map(i => println(alphas(i) + "\t" + etas(i) + "\t" + zfs(i) + "\t" + p(i) + "\t" + eroi(i) + "\t" + ner(i) + "\t" + xe(i)))
-
-    res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2))
+    plotXY(List((year_double,qf,"")), yLabel = "qf [MJ/US$2010]", title="qf", int_x_axis=true)
+    res.map(r => plotXY(List((year_double, r._1, "")), yLabel = r._2, title = r._2, int_x_axis=true))
     plotXY(List((year_double, perte2.map(_ * 100), "CIK SE+SF"), (year_double, perte1.map(_ * 100), "CIK SE"), (year_double, (0 until perte2.size).toList.map(i => (perte2(i) * 100 - perte1(i) * 100)), "CIK SF")), yLabel = "Pertes [%]", legend = true, title = "pertes")
 
   }

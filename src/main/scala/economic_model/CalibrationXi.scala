@@ -14,36 +14,38 @@ class calibration_results_CI(
     val alpha: Double = 0.06, val eta: Double = 4.0 / 100, val zf: Double = 0.5,
     val year: Int = 2018, val Tf: Int = 20, val Te: Int = 25, val mu: Double = 280.0 / 4280,
     val energy_units: EnergyUnit = MegaTonOilEquivalent, val pib_units: Int = 1E9.toInt,
-    val pop_units: Int = 1E6.toInt, val include_dist_losses: Boolean = true) {
-  
+    val pop_units: Int = 1E6.toInt, val include_dist_losses: Boolean = true, val K_est : Option[Double] = None) {
+
   import Helper._
   // Observed data
   val data_folder = "../model_data/"
   val lines = //getLines(data_folder + (if (include_dist_losses) "data_calibration_2018" else "data_calibration_xi_old"), "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100)) //, i(7).toDouble, i(8).toDouble, i(9).toDouble))
-   getLines(data_folder + "data_calibration_new", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100,MegaTonOilEquivalent(i(10).toDouble))) //, i(7).toDouble, i(8).toDouble, i(9).toDouble))
+    getLines(data_folder + "data_calibration_new", "\t").map(i => (i(0).toInt, i(1).toDouble, MegaTonOilEquivalent(i(2).toDouble), MegaTonOilEquivalent(i(3).toDouble), MegaTonOilEquivalent(i(4).toDouble), MegaTonOilEquivalent(i(5).toDouble), i(6).toDouble / 100, MegaTonOilEquivalent(i(10).toDouble))) //, i(7).toDouble, i(8).toDouble, i(9).toDouble))
 
   val (year_data, pib_dollars, oeu, neu, e_neu, ce, s, e_dist) = lines.find(_._1 == year).get
   val pib = pib_dollars / pib_units;
-  val pib_before = if(year ==1990) 38015493765413.9/pib_units else lines.find(_._1 == (year - 1)).get._2 / pib_units;
+  val pib_before = if (year == 1990) 38015493765413.9 / pib_units else lines.find(_._1 == (year - 1)).get._2 / pib_units;
   val g = (pib - pib_before) / pib_before
-  val ee_dist = if(include_dist_losses) e_dist else Joules(0)
+  val ee_dist = if (include_dist_losses) e_dist else Joules(0)
   val frac_neu = neu / e_neu;
-  val ee_prod = (1-frac_neu)*oeu
+  val ee_prod = (1 - frac_neu) * oeu
   val ee = ee_dist + ee_prod
   val ye = e_neu - neu + oeu + ee_dist
   //val ee = if (include_dist_losses) (1 - frac_neu) * MegaTonOilEquivalent(839.185) + MegaTonOilEquivalent(222.503) else (1-frac_neu) * oeu
-  
+
   val qe = ee / ye; val ef = ye - ee - ce; val e = ye - ee
   val qe_prod = ee_prod / ye;
-  
+
   val delta_f = 1.0 / Tf; val delta_e = 1.0 / Te;
   val delta = mu * delta_e + (1 - mu) * delta_f
 
   val va_e = alpha * pib; val va_f = (1 - alpha) * pib
   val gK = g // + gv
   // Calculated data for year i
-  val v = s / (gK + delta)
-  val K = v * pib; val Ke = mu * K; val Kf = (1 - mu) * K
+  // v = s /(gK + delta)
+  val K = if(K_est.isDefined) (K_est.get / pib_units) else (s / (gK + delta) * pib); 
+  val v = K / pib
+  val Ke = mu * K; val Kf = (1 - mu) * K
   val I = s * pib; val C = (1 - s) * pib
   val p_min = va_e / e.to(energy_units)
   val eta_min = p_min * ce.to(energy_units) / C
@@ -70,10 +72,9 @@ class calibration_results_CI(
   // val cf = yf - s * pib
 
   val eroi = 1 / (qe + (xe + delta_e * ve) * qf)
-  val eroi_std =  1 / (qe_prod + (xe + delta_e * ve) * qf)
-    val eroi_pou =  (1-qe) / (qe + (xe + delta_e * ve) * qf)
-         val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f, delta)
-
+  val eroi_std = 1 / (qe_prod + (xe + delta_e * ve) * qf)
+  val eroi_pou = (1 - qe) / (qe + (xe + delta_e * ve) * qf)
+  val z = Z_xi(ve, vf, qe, qf, xe, xf, delta_e, delta_f, delta)
 
   // val ner = (1 - z.qe)*(1 - (xf + z.deltaf * z.vf)) - z.qf*(z.deltae * z.ve + xe)
   val ner = 1 - (z.qe + z.qf * (z.xe + z.deltae * z.ve) + (1 - z.qe) * (z.xf + z.deltaf * z.vf)) //( //(1 - (z.xf + z.deltaf * z.vf)) * (1 - z.qe) - z.qf * (z.xe + z.deltae * z.ve)
@@ -88,12 +89,12 @@ class calibration_results_CI(
   val perte3 = p1 + p2
 
   // Ugly fix => the calculation of the technical params of the NRE subsector is made thanks to DynamicParams.calibrateNREsubsector, but it takes to much time to execute ..
- val conversion_factor = (1E9/pib_units) / (MegaTonOilEquivalent(1).to(energy_units))
+  val conversion_factor = (1E9 / pib_units) / (MegaTonOilEquivalent(1).to(energy_units))
   val ve_nre = 1.1157774507789537 * conversion_factor
   val xe_nre = 0.139104932484038 * conversion_factor
   val qe_nre = 0.09784230004741697
   val z_nre = Z_xi(ve_nre, vf, qe_nre, qf, xe_nre, xf, delta_e, delta_f, delta)
-    
+
   def printCalib {
     println("Ye" + "\t" + ye.to(energy_units) + "\n" + "Ee" + "\t" + ee.to(energy_units) + "\n" + "Ef" + "\t" + ef.to(energy_units))
     println("pib" + "\t" + pib + "\n" + "pibm" + "\t" + pib_before + "\n" + "s" + "\t" + s + "\n" + "mu" + "\t" + mu)
@@ -116,10 +117,22 @@ object CalibrationXi {
   def eta(year: Int) = a_eta * year + b_eta*/
 
   def index_year(year: Int) = data.year.zipWithIndex.find(i => i._1 == year).get._2
-
-  val cals = data.year.map(y => new calibration_results_CI(year = y, alpha = data.alpha(index_year(y)), eta = data.eta(index_year(y)), zf = data.zf(index_year(y))))
-  val (qe, qf, ve, vf, xe, xf, v, eroi, ner, p, perte1, perte2, alphas, etas, zfs) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf), cals.map(_.xe), cals.map(_.xf), cals.map(_.v), cals.map(_.eroi), cals.map(_.ner), cals.map(_.p),
-    cals.map(_.perte1), cals.map(_.perte2), cals.map(_.alpha), cals.map(_.eta), cals.map(_.zf))
+ // Starting from the estimate of K in 2018, calculate K for previous year.
+  // K(t+1) = K(t) * (1-delta) + I(t) => K(t) = (K(t+1) - s(t) GDP(t))/(1-delta)
+  val cal_2018 = new calibration_results_CI(year=2018)
+  var k_next = cal_2018.K*cal_2018.pib_units
+  val Kest = year_double.reverse.map(y => (y.toInt,{
+    if(y ==2018) k_next 
+    else {
+      println(y + "\t" + data.s(index_year(y.toInt)) + "\t" + data.pib(index_year(y.toInt)))
+      k_next = (k_next - data.s(index_year(y.toInt))*data.pib(index_year(y.toInt)))/(1-1/20.0)
+      k_next
+    }
+  }))
+  Kest.map(i => println(i._1 + "\t" + i._2))
+  val cals = data.year.map(y => new calibration_results_CI(year = y, alpha = data.alpha(index_year(y)), eta = data.eta(index_year(y)), zf = data.zf(index_year(y)), energy_units = Megajoules, pib_units = 1, K_est = Some(Kest.find(_._1.equals(y)).get._2)))
+  val (qe, qf, ve, vf, xe, xf, v, eroi, ner, p, perte1, perte2, alphas, etas, zfs, eroi_pou) = (cals.map(_.qe), cals.map(_.qf), cals.map(_.ve), cals.map(_.vf), cals.map(_.xe), cals.map(_.xf), cals.map(_.v), cals.map(_.eroi), cals.map(_.ner), cals.map(_.p),
+    cals.map(_.perte1), cals.map(_.perte2), cals.map(_.alpha), cals.map(_.eta), cals.map(_.zf), cals.map(_.eroi_pou))
   def growth_rates(ind: List[Double]) = {
     (1 until ind.size).toList.map(i => (1.0 - ind(i) / ind(i - 1)))
   }
@@ -171,9 +184,9 @@ object CalibrationDataXi {
   val ee = if (is2018) ind.map(i => (1 - frac_neu(i)) * MegaTonOilEquivalent(839.185) + MegaTonOilEquivalent(222.503)) else ind.map(i => (1 - frac_neu(i)) * oeu(i)) //  // ! To change to use data from 2018 !!
   val ye = ind.map(i => e_neu(i) - neu(i) + oeu(i))
   val s = data.map(_._7);
-  val eta = data.map(_._8);
-  val alpha = data.map(_._9);
-  val zf = data.map(_._10);
+  val eta = (0 until n).map(i =>  0.06) // data.map(_._8);
+  val alpha = (0 until n).map(i =>  0.04) //data.map(_._9);
+  val zf = (0 until n).map(i =>  0.5) //data.map(_._10);
   val qe = ind.map(i => ee(i) / ye(i))
   val ef = ind.map(i => ye(i) - ee(i) - ce(i))
   val e = ind.map(i => ye(i) - ee(i))

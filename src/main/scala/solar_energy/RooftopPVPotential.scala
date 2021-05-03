@@ -34,7 +34,7 @@ object RooftopPVPotential {
   val eu28 = resources.filter(i => eu28countries.contains(i._1))
 
   def main(args: Array[String]): Unit = {
-printResults(eu28)
+
   }
 
   def printResults(res : List[(String, Irradiance, Area, Area, Double, Double)]) {
@@ -57,12 +57,28 @@ printResults(eu28)
     println(pvPolyRes._1.max)
     println(pvPolyCom._1.max)
 
-    plotXY(List((pvMonoTot._1, pvMonoTot._2, "Total"), (pvMonoRes._1, pvMonoRes._2, "Residential"), (pvMonoCom._1, pvMonoCom._2, "Commercial")), legend = true, xLabel = "Potential [EJ/year]", yLabel = "EROI", title = "rooftop_potential_mono")
-    plotXY(List((pvPolyTot._1, pvPolyTot._2, "Total"), (pvPolyRes._1, pvPolyRes._2, "Residential"), (pvPolyCom._1, pvPolyCom._2, "Commercial")), legend = true, xLabel = "Potential [EJ/year]", yLabel = "EROI", title = "rooftop_potential_poly")
+   // plotXY(List((pvMonoTot._1, pvMonoTot._2, "Total"), (pvMonoRes._1, pvMonoRes._2, "Residential"), (pvMonoCom._1, pvMonoCom._2, "Commercial")), legend = true, xLabel = "Electricity Produced [EJ/year]", yLabel = "EROI", title = "rooftop_potential_mono")
+   // plotXY(List((pvPolyTot._1, pvPolyTot._2, "Total"), (pvPolyRes._1, pvPolyRes._2, "Residential"), (pvPolyCom._1, pvPolyCom._2, "Commercial")), legend = true, xLabel = "Electricity Produced [EJ/year]", yLabel = "EROI", title = "rooftop_potential_poly")
+  
+    plotXY(List( (pvMonoRes._1, pvMonoRes._2, "Residential"), (pvMonoCom._1, pvMonoCom._2, "Commercial")), legend = true, xLabel = "Electricity Produced [EJ/year]", yLabel = "EROI std", title = "rooftop_potential_mono")
+    plotXY(List( (pvPolyRes._1, pvPolyRes._2, "Residential"), (pvPolyCom._1, pvPolyCom._2, "Commercial")), legend = true, xLabel = "Electricity Produced [EJ/year]", yLabel = "EROI std", title = "rooftop_potential_poly")
 
-    List(2, 4, 6, 8, 10, 12).map(e =>
+    List(1, 2, 4, 6, 8, 10, 12).map(e =>
       println(e + "\t" + res.filter(i => PVMono.eroi(i._2) >= e).map(i => potential(i._4 * i._6 + i._3 * i._5, i._2, PVMono).to(Exajoules)).sum
         + "\t" + res.filter(i => PVPoly.eroi(i._2) >= e).map(i => potential(i._4 * i._6 + i._3 * i._5, i._2, PVPoly).to(Exajoules)).sum))
+  }
+  
+  def printEDelivered(res : List[(String, Irradiance, Area, Area, Double, Double)], distr_losses : Double)  {
+     List(1, 2, 4, 6, 8, 10, 12).map(e =>
+      println(e + "\t" + res.filter(i => PVMono.eroi_pou(i._2,distr_losses) >= e).map(i => potential(i._4 * i._6 + i._3 * i._5, i._2, PVMono).to(Exajoules)*(1-distr_losses)).sum
+        + "\t" + res.filter(i => PVPoly.eroi_pou(i._2,distr_losses) >= e).map(i => potential(i._4 * i._6 + i._3 * i._5, i._2, PVPoly).to(Exajoules)*(1-distr_losses)).sum))
+
+  }
+    def printEProduced(res : List[(String, Irradiance, Area, Area, Double, Double)])  {
+     List(1, 2, 4, 6, 8, 10, 12).map(e =>
+      println(e + "\t" + res.filter(i => PVMono.eroi(i._2) >= e).map(i => potential(i._4 * i._6 + i._3 * i._5, i._2, PVMono).to(Exajoules)).sum
+        + "\t" + res.filter(i => PVPoly.eroi(i._2) >= e).map(i => potential(i._4 * i._6 + i._3 * i._5, i._2, PVPoly).to(Exajoules)).sum))
+
   }
   def cf_potential(countries: Option[List[String]], tech: List[PV], power_units: PowerUnit = Gigawatts) = {
     val cells = if (countries.isDefined) countries.get.map(c => resources.filter(_._1.equals(c))).flatten
