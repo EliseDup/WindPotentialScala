@@ -30,10 +30,11 @@ object ResultsPaper_PER {
   val e_sub_unicode= "e" // "\u2090"
   
   def main(args: Array[String]): Unit = {
-    println(calib.K)
+   plotMarginalCostCurve()
+   // plotScenarios(dyn_1,2100)
  // plotEcoVariables(ex3_2070, sd, 2100-calib.year, calib_theta(ex3_2070))
  
-        plotScenarios_theta(600+calib.year,dyn_1)
+  //      plotScenarios_theta(600+calib.year,dyn_1)
    
     
   }
@@ -94,6 +95,10 @@ object ResultsPaper_PER {
     plotXY(List((y_bau, res_bau.model.K.toList.map(_ / 1E5), "K"),(y_bau, res_bau.model.Ke.toList.map(_ / 1E5), "Ke"),(y_bau, res_bau.model.Kf.toList.map(_ / 1E5), "Kf")), yLabel="1E5 GUS $ 2010", legend=true, title="K_bau",int_x_axis = true)
  plotXY(List((y_sd, res_sd.model.K.toList.map(_ / 1E5), "K"),(y_sd, res_sd.model.Ke.toList.map(_ / 1E5), "Ke"),(y_sd, res_sd.model.Kf.toList.map(_ / 1E5), "Kf")), yLabel="1E5 GUS $ 2010", legend=true, title="K_sd",int_x_axis = true)
  
+ //L1 , L2 , L1+L2
+  plotXY(List((y_bau, res_bau.P1.map(_*100), "L1"),(y_bau, res_bau.P2.map(_*100), "L2"),(y_bau, (0 until res_bau.P1.toList.size).toList.map(i => (res_bau.P1.toList(i) +res_bau.P2.toList(i))*100), "L1+L2")), yLabel="Leakages [%]", int_x_axis = true, legend= true, title = "ner_bau")// + name)
+ plotXY(List((y_sd, res_sd.P1.map(_*100), "L1"),(y_sd, res_sd.P2.map(_*100), "L2"),(y_sd, (0 until res_sd.P1.toList.size).toList.map(i => (res_sd.P1.toList(i) +res_sd.P2.toList(i))*100), "L1+L2")), yLabel="Leakages [%]", int_x_axis = true, legend= true, title = "ner_sd")// + name)
+
     }
     
   val pop_projections =(List(2020,2025,	2030,	2035,	2040,	2045,	2050,	2055,	2060,	2065,	2070,	2075,	2080,	2085,	2090,	2095,	2100),
@@ -262,7 +267,8 @@ object ResultsPaper_PER {
       val f = ve_x.size - 1
       println("vef/ve0" + "\t" + ve_x(f) / z_nre.ve)
       println("xef/xe0" + "\t" + xe_x(f)/ z_nre.xe)
-      println("EROI from " + "\t" + calib.eroi_pou + " to " + (1.0-qe_x(f)) / (qe_x(f) + calib.qf * (ve_x(f) * deltae_x(f) + xe_x(f))))
+      println("EROI from " + "\t" + calib.eroi_pou + " to " + (1.0-qe_x(f)) / (qe_x(f) + calib.qf/2 * (ve_x(f) * deltae_x(f) + xe_x(f))))
+      println(qe_x(f) + "\t" + calib.qf + "\t" + ve_x(f) + "\t" + xe_x(f))
   /*
     // Per technology
      if (plotPerTech) {
@@ -313,11 +319,12 @@ object ResultsPaper_PER {
     plotXY(List((y_double, res.model.Yf.toList.map(_ / 1E5), "Yf"), (y_double, res.model.X.toList.map(_ / 1E5), "X"), (y_double, res.model.Cf.toList.map(_ / 1E5), "Cf"), (y_double, res.model.I.toList.map(_ / 1E5), "I")), yLabel = "1E5 GUS $ 2010", int_x_axis = true, legend = true, title = "Yf")// + name)
 
     plotXY(List((y_double, res.model.p.toList.map(i => i / calib.p), "p/p0")), yLabel = "p/p\u0030",  int_x_axis = true, title = "p_p0")// + name)
-     plotXY(List((y_double, res.model.eroi_pou.toList, "eroi")), yLabel = "EROI pou", int_x_axis = true, title = "eroi")
-    plotXY(List((y_double, res.model.alpha.toList.map(_ * 100), alpha_unicode), (y_double, res.alphan.map(_ * 100), alphan_unicode)), yLabel = "%", legend = true, title = "alpha", int_x_axis = true)
+     plotXY(List((y_double, res.model.eroi_pou.toList, "eroi")), yLabel = "EROI", int_x_axis = true, title = "eroi")
+   println("EROI from "+ res.model.eroi_pou.toList.max + "\t"  + "to " + res.model.eroi_pou.toList.min)
+     plotXY(List((y_double, res.model.alpha.toList.map(_ * 100), alpha_unicode), (y_double, res.alphan.map(_ * 100), alphan_unicode)), yLabel = "%", legend = true, title = "alpha", int_x_axis = true)
      plotXY(List((y_double, res.v, "v")), yLabel = "v", int_x_axis = true, title = "v")// + name)
   // NER
- //   plotXY(List((y_double, res.P1.map(i => 100-i * 100), "NER")), yLabel="NER [%]", int_x_axis = true, title = "ner")// + name)
+  plotXY(List((y_double, res.P1.map(_*100), "L1"),(y_double, res.P2.map(_*100), "L2"),(y_double, (0 until res.P1.toList.size).toList.map(i => (res.P1.toList(i) +res.P2.toList(i))*100), "L1+L2")), yLabel="Leakages [%]", int_x_axis = true, legend= true, title = "ner")// + name)
 
      plotXY(List((y_double, indexes.map(i => res.pin(i) / res.model.pib(i) * 100), "NDP/GDP"), (y_double, indexes.map(i => res.model.pib(i) / res.YT(i) * 100), "GDP/Yt")), yLabel = "%", int_x_axis = true, legend = true, title = "ndp_gdp_rel")// + name)
   

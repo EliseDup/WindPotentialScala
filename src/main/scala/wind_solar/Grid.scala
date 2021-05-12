@@ -80,6 +80,9 @@ class Grid(val name: String, val gridSize: Angle, val eroi_min: List[Double]) {
   def eroi_pou_external_sum_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double, distr_losses : Double) = {
     listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi_pou_external(c, eroi_min, distr_losses), (tech.potential(c, eroi_min) * (1-distr_losses) * Hours(365 * 24)).to(Exajoules))))).flatten)
   }
+   def eroi_pou_external_dynamic_sum_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double, distr_losses : Double,improvment : Double) = {
+    listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi_pou_external_dynamic(c, eroi_min,distr_losses,improvment), (tech.potential(c, eroi_min)*(1-distr_losses) * Hours(365 * 24)).to(Exajoules))))).flatten)
+  }
   def eroi_std_sum_potential(cells: List[Cell], techs: List[RenewableTechnology], eroi_min: Double) = {
     listValueVSCumulated(cells.map(c => (techs.map(tech => (tech.eroi(c, eroi_min), (tech.potential(c, eroi_min)/(1-tech.operation_variable) * Hours(365 * 24)).to(Exajoules))))).flatten)
   }

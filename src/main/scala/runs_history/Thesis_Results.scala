@@ -26,25 +26,23 @@ object Thesis_Results {
   val all_tech = List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono)
 
   def main(args: Array[String]): Unit = {
-    
-    val eu = Grid.eu()
+   plotDistLosses
+   val eu = Grid.eu()
     val grid = Grid()
     val cells_red = grid.cells.filter(c => (OnshoreWindTechnology.suitabilityFactor(c) + OffshoreWindTechnology.suitabilityFactor(c) + PVMono.suitabilityFactor(c)) > 0)
     val eu_red = eu.eu28.filter(c => (OnshoreWindTechnology.suitabilityFactor(c) + OffshoreWindTechnology.suitabilityFactor(c) + PVMono.suitabilityFactor(c)) > 0)
+ 
     
-    List(OnshoreWindTechnology, OffshoreWindTechnology, PVMono,PVPoly).map(t => {
-      println("EROI std "+ "\t" +t.name + "\t" + eroi_std_e_produced(List(t), eu, eu_red,"")._2.max)
-      println("EROI pou "+ "\t"+ t.name + "\t" + eroi_pou_e_delivered(List(t), eu, eu_red,distr_losses,"")._2.max)
-      
-    })
-    
-    
-  /*  eroiStdCurves(grid, cells_red)
+  /*   eroiStdCurves(grid, cells_red)
     eroiPouCurves(grid, cells_red)
-    
-    eroiStdCurvesDynamic(grid, cells_red, List(1.0, 0.8, 0.5))
-    eroiPouCurvesDynamic(grid, cells_red, List(1.0, 0.8, 0.5))
-*/
+   *     
+    */
+   // eroiStdCurvesDynamic(grid, cells_red, List(1.0, 0.8, 0.5))
+    eroiPouExtCurvesDynamic(grid, cells_red, List(1.0, 0.8, 0.5))
+
+   // eroiStdCurvesDynamic(eu, eu_red, List(1.0, 0.8, 0.5),"_eu")
+    eroiPouExtCurvesDynamic(eu, eu_red, List(1.0, 0.8, 0.5),"_eu")
+
     /* printPotentialTable(grid, eu_red, List(1, 2, 4, 6, 8, 10, 12).map(_.toDouble))
     printPotentialPouTable(grid, eu_red, List(1, 2, 4, 6, 8, 10, 12).map(_.toDouble))
 
@@ -69,7 +67,7 @@ object Thesis_Results {
 
     //eu.writeWindPotential(1.0, eu.eu28,"_eu")
     //    eu.writePotential(PVMono, 1.0,eu.eu28,"_eu")
-    // eroiCurve
+    // eroiCurve */ 
   }
 
   def eroiCurves {
@@ -128,6 +126,7 @@ object Thesis_Results {
   }
   def eroiStdCurvesDynamic(grid: Grid, cells: List[Cell], improvment: List[Double], region_name: String = "") {
     val eroi_improvment = improvment.map(i => eroi_std_e_produced_dynamic(all_tech, grid, cells, i, (100 - 100 * i).toInt + "%"))
+    eroi_improvment.map(i => println("Max eroi " + "\t" + i._2.max + "\t" + i._3))
     plotXY(eroi_improvment, legend = true, xLabel = "Electricity Produced [EJ/y]", yLabel = "EROI std", title = "eroi_std_total_dyn" + region_name)
   }
 
@@ -148,7 +147,15 @@ object Thesis_Results {
   }
   def eroiPouCurvesDynamic(grid: Grid, cells: List[Cell], improvment: List[Double], region_name: String = "") {
     val eroi_improvment = improvment.map(i => eroi_pou_e_delivered_dynamic(all_tech, grid, cells, i, (100 - 100 * i).toInt + "%"))
+    eroi_improvment.map(i => println("Max eroi " + "\t" + i._2.max + "\t" + i._3))
+   
     plotXY(eroi_improvment, legend = true, xLabel = "Electricity Delivered [EJ/y]", yLabel = "EROI pou", title = "eroi_pou_total_dyn" + region_name)
+  }
+  def eroiPouExtCurvesDynamic(grid: Grid, cells: List[Cell], improvment: List[Double], region_name: String = "") {
+    val eroi_improvment = improvment.map(i => eroi_pou_ext_e_delivered_dynamic(all_tech, grid, cells, i, (100 - 100 * i).toInt + "%"))
+    eroi_improvment.map(i => println("Max eroi " + "\t" + i._2.max + "\t" + i._3))
+   
+    plotXY(eroi_improvment, legend = true, xLabel = "Electricity Delivered [EJ/y]", yLabel = "EROI pou, external", title = "eroi_pou_ext_total_dyn" + region_name)
   }
   def eroiPouExtCurves(grid: Grid, cells: List[Cell], region_name: String = "") {
     val eroi_pou_ext_wind = eroi_pou_ext_e_delivered(wind_tech, grid, cells, distr_losses, "Wind")
@@ -210,6 +217,8 @@ object Thesis_Results {
     val elec_cons = lines.map(_._2)
     val elec_losses = lines.map(_._3)
     val ratio = (0 until elec_cons.size).toList.map(i => (elec_losses(i) / elec_cons(i)) * 100)
+    plotXY(List((year.map(_.toDouble), ratio, "")), yLabel = "Losses / Electricity Consumption [%]", int_x_axis = true, title = "distr_losses")
+    
     plotXY(List((year.map(_.toDouble), ratio, ""), (year.map(_.toDouble), year.map(i => ratio.sum / ratio.size), "a")), yLabel = "Losses / Electricity Consumption [%]", int_x_axis = true)
     val sub_list = (0 until 10).map(i => year.size - 10 + i).toList
     val sub_y = sub_list.map(i => year(i).toDouble)
@@ -250,6 +259,10 @@ object Thesis_Results {
     val res = grid.eroi_pou_dynamic_sum_potential(cells, techs, 1, distr_losses, improvment)
     (res._1, res._2, name)
   }
+    def eroi_pou_ext_e_delivered_dynamic(techs: List[RenewableTechnology], grid: Grid, cells: List[Cell], improvment: Double, name: String) = {
+    val res = grid.eroi_pou_external_dynamic_sum_potential(cells, techs, 1, distr_losses, improvment)
+    (res._1, res._2, name)
+  }
   def solar_eroi_pou_ext_edelivered(techs: List[SolarTechnology], grid: Grid, cells: List[Cell], distr_losses: Double, name: String) = {
     val res = grid.eroi_pou_ext_potential(cells, techs, 1, distr_losses)
     (res._1, res._2, name)
@@ -279,6 +292,14 @@ object Thesis_Results {
 
   }
 
+  def windCF(country : List[String], v : Double){
+   val grid = WindPotential_12_2017.results
+    country.map(s => {
+    val c = grid.country(s).filter(_.EEZ).filter(_.onshore).filter(_.wind100m.mean.toMetersPerSecond >= v)
+    
+   val mean_cf =  Helper.mean(c.map(i => (i, CapacityFactorCalculation.cubic(i.wind100m, 11)*0.9*0.97)))
+    println(s + "\t" + mean_cf)})
+  }
   def cspCorrectedCF(tech: CSP, factor: Double) {
     val grid = SolarGrid._0_5deg
 
